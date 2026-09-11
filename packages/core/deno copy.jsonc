@@ -1,0 +1,29 @@
+{
+    "name": "@loco/webtorrent",
+  "version": "0.1.3-mtq0ufmu",
+  "exports": "./src/mod.ts",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "lib": ["dom", "dom.iterable", "dom.asynciterable", "deno.ns", "deno.unstable", "DOM", "webworker"],
+    "strict": true
+  },
+  "imports": {
+    "preact": "https://esm.sh/preact@10.29.7",
+    "preact/": "https://esm.sh/preact@10.29.7/",
+    "preact/jsx-runtime": "https://esm.sh/preact@10.29.7/jsx-runtime",
+    "@preact/signals": "https://esm.sh/@preact/signals@1.3.1?deps=preact@10.29.7",
+    "@std/assert": "jsr:@std/assert",
+    "@std/fs": "jsr:@std/fs",
+    "@std/path": "jsr:@std/path",
+    "@std/http": "jsr:@std/http"
+  },
+  "tasks": {
+    "test": "deno test -A tests/",
+    "check": "deno check src/**/*.ts example/**/*.ts example/**/*.tsx tests/**/*.ts",
+    "tests": "deno task check && deno task test",
+    "serve": "deno run -A ./example/server.ts",
+    "server": "deno run -A --watch ./example/server.ts",
+    "trackers": "deno run -A ./example/test_trackers.ts",
+  }
+}
