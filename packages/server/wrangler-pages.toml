@@ -1,0 +1,10 @@
+#:schema node_modules/wrangler/config-schema.json
+
+# wrangler.toml (FRONTEND - Cloudflare Pages)
+
+name = "browsertorrent"
+compatibility_date = "2026-08-16"
+
+# Configuração nativa para o diretório estático do Pages
+pages_build_output_dir = "build/dist"
+

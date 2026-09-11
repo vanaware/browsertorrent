@@ -9,3 +9,22 @@
 # https://docs.deno.com/runtime/reference/cli/coverage/
 coverage/
 *.lcov
+
+# Build artifacts
+dist/
+build/
+target/
+release/
+out/
+
+# Environment
+.env
+.env.local
+.env.*
+
+# Node on Deno
+node_modules/
+vendor/
+
+# Wrangler
+.wrangler/
