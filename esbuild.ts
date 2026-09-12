@@ -1,6 +1,6 @@
 /// <reference lib="deno.ns" />
-import * as esbuild from 'esbuild';
-import { denoPlugin, } from '@deno/esbuild-plugin';
+import * as esbuild from "esbuild";
+import { denoPlugin, } from "@deno/esbuild-plugin";
 import {
   buildEsbuildOptions,
   copyStaticFiles,
@@ -9,17 +9,20 @@ import {
   listAssetsForCache,
   parseArgs,
   processTarget,
-} from '@browsertorrent/utils/build';
-import type { GlobalTargetConfig, } from '@browsertorrent/utils/interfaces';
+} from "@browsertorrent/utils/build";
+import type { GlobalTargetConfig, } from "@browsertorrent/utils/interfaces";
 
-const DENO_JSONC_PATH = 'deno.jsonc';
+const DENO_JSONC_PATH = "deno.jsonc";
 
 // ============================================================================
 // 🔌 WRAPPER ESBUILD COM PLUGIN DENO
 // ============================================================================
 // deno-lint-ignore no-explicit-any
 const buildWithDenoPlugin = (options: any,): Promise<any> => {
-  options.plugins = [...(options.plugins || []), denoPlugin({ 'configPath': DENO_JSONC_PATH, },),];
+  options.plugins = [
+    ...(options.plugins || []),
+    denoPlugin({ "configPath": DENO_JSONC_PATH, },),
+  ];
   return esbuild.build(options,);
 };
 
@@ -30,27 +33,27 @@ const CONFIG: GlobalTargetConfig = {
   // ------------------------------------------------------------------
   // 🎯 ALVOS DE BUILD (rodam por padrão)
   // ------------------------------------------------------------------
-  ui: {
-    mode: 'build',
+  example: {
+    mode: "build",
     default: true,
-    srcdir: 'packages/ui/src',
-    distdir: 'packages/server/build/dist',
-    publicdir: 'packages/ui/public',
+    srcdir: "packages/example/src",
+    distdir: "packages/server/build/dist",
+    publicdir: "packages/example/public",
     indexHtml: true,
-    clean: ['.',],
-    entryPoints: ['app.tsx',],
-    platform: 'browser',
-    format: 'esm',
+    clean: [".",],
+    entryPoints: ["main.tsx",],
+    platform: "browser",
+    format: "esm",
     bundle: true,
     minify: false,
-    sourcemap: 'linked',
-    conditions: ['browser',],
-    drop: ['debugger',],
-    jsx: 'automatic',
-    jsxImportSource: 'preact',
+    sourcemap: "linked",
+    conditions: ["browser",],
+    drop: ["debugger",],
+    jsx: "automatic",
+    jsxImportSource: "preact",
     metafile: true,
     write: true,
-    legalComments: 'none',
+    legalComments: "none",
     keepNames: true,
     splitting: false,
     banner: {
@@ -58,22 +61,22 @@ const CONFIG: GlobalTargetConfig = {
     },
   },
   workerdb: {
-    mode: 'build',
+    mode: "build",
     default: true,
-    srcdir: 'packages/worker-db/src',
-    distdir: 'packages/server/build/dist',
-    clean: ['worker-db.js', 'worker-db.js.map',],
-    entryPoints: ['worker.ts',],
-    platform: 'browser',
-    format: 'esm',
+    srcdir: "packages/worker-db/src",
+    distdir: "packages/server/build/dist",
+    clean: ["worker-db.js", "worker-db.js.map",],
+    entryPoints: ["worker.ts",],
+    platform: "browser",
+    format: "esm",
     bundle: true,
     minify: false,
-    sourcemap: 'linked',
-    drop: ['debugger',],
-    conditions: ['worker',],
+    sourcemap: "linked",
+    drop: ["debugger",],
+    conditions: ["worker",],
     metafile: true,
     write: true,
-    legalComments: 'none',
+    legalComments: "none",
     keepNames: true,
     splitting: false,
     banner: {
@@ -81,22 +84,22 @@ const CONFIG: GlobalTargetConfig = {
     },
   },
   sw: {
-    mode: 'build',
+    mode: "build",
     default: true,
-    srcdir: 'packages/service-worker/src',
-    distdir: 'packages/server/build/dist',
-    clean: ['service-worker.js', 'service-worker.js.map',],
-    entryPoints: ['service-worker.ts',],
-    platform: 'browser',
-    format: 'esm',
+    srcdir: "packages/service-worker/src",
+    distdir: "packages/server/build/dist",
+    clean: ["sw.js", "sw.js.map",],
+    entryPoints: ["sw.ts",],
+    platform: "browser",
+    format: "esm",
     bundle: true,
     minify: false,
-    sourcemap: 'linked',
-    drop: ['debugger',],
-    conditions: ['worker',],
+    sourcemap: "linked",
+    drop: ["debugger",],
+    conditions: ["worker",],
     metafile: true,
     write: true,
-    legalComments: 'none',
+    legalComments: "none",
     keepNames: true,
     splitting: false,
     banner: {
@@ -106,26 +109,26 @@ const CONFIG: GlobalTargetConfig = {
   // ------------------------------------------------------------------
   // 👀 ALVOS WATCH (modo de desenvolvimento contínuo)
   // ------------------------------------------------------------------
-  'watch': {
-    mode: 'watch',
+  "watch": {
+    mode: "watch",
     default: false,
-    srcdir: 'packages/ui/src',
-    distdir: 'packages/server/build/dist',
-    publicdir: 'packages/ui/public',
+    srcdir: "packages/example/src",
+    distdir: "packages/server/build/dist",
+    publicdir: "packages/example/public",
     indexHtml: true,
-    entryPoints: ['app.tsx',],
-    platform: 'browser',
-    format: 'esm',
+    entryPoints: ["main.tsx",],
+    platform: "browser",
+    format: "esm",
     bundle: true,
     minify: false,
-    sourcemap: 'inline',
-    conditions: ['browser',],
-    jsx: 'automatic',
-    jsxImportSource: 'preact',
+    sourcemap: "inline",
+    conditions: ["browser",],
+    jsx: "automatic",
+    jsxImportSource: "preact",
     write: true,
-    legalComments: 'none',
+    legalComments: "none",
     // 🔥 CORREÇÃO: outfile agora é RELATIVO ao distdir
-    outfile: 'app.js',
+    outfile: "app.js",
     banner: {
       js: `/* BrowserTorrent v__APP_VERSION__ */\n`,
     },
@@ -137,16 +140,21 @@ const CONFIG: GlobalTargetConfig = {
 // ============================================================================
 async function build() {
   const start = performance.now();
-  const { targets, globalNoVersion, watchTarget, } = parseArgs(Deno.args, CONFIG,);
+  const { targets, globalNoVersion, watchTarget, } = parseArgs(
+    Deno.args,
+    CONFIG,
+  );
 
   console.log(
-    '\n🚀 Iniciando Orquestrador de Build BrowserTorrent (esbuild nativo + @deno/esbuild-plugin)',
+    "\n🚀 Iniciando Orquestrador de Build BrowserTorrent (esbuild nativo + @deno/esbuild-plugin)",
   );
   if (watchTarget) {
     console.log(`👀 Modo Watch ativo: ${watchTarget}`,);
   } else {
     console.log(
-      `📋 Alvos de build (ordem segura do CONFIG): ${targets.join(', ',) || '(nenhum)'}`,
+      `📋 Alvos de build (ordem segura do CONFIG): ${
+        targets.join(", ",) || "(nenhum)"
+      }`,
     );
   }
   console.log(`🔒 Noversion: ${globalNoVersion}\n`,);
@@ -166,7 +174,9 @@ async function build() {
     for (const targetName of targets) {
       const targetConfig = CONFIG[targetName];
       if (!targetConfig) {
-        console.warn(`⚠️ Alvo '${targetName}' não encontrado no CONFIG. Pulando.`,);
+        console.warn(
+          `⚠️ Alvo '${targetName}' não encontrado no CONFIG. Pulando.`,
+        );
         continue;
       }
 
@@ -179,11 +189,11 @@ async function build() {
       );
     }
 
-    console.log(`\n${'='.repeat(60,)}`,);
+    console.log(`\n${"=".repeat(60,)}`,);
     console.log(`🎉 ORQUESTRAÇÃO CONCLUÍDA COM SUCESSO!`,);
-    console.log(`${'='.repeat(60,)}`,);
+    console.log(`${"=".repeat(60,)}`,);
   } catch (error) {
-    console.error('\n🛑 Pipeline de build falhou:', error,);
+    console.error("\n🛑 Pipeline de build falhou:", error,);
     Deno.exit(1,);
   } finally {
     const elapsed = (performance.now() - start).toFixed(0,);
@@ -194,28 +204,35 @@ async function build() {
 async function startWatchMode(watchTargetName: string, currentVer: string,) {
   const config = CONFIG[watchTargetName];
   if (!config) {
-    throw new Error(`❌ Alvo watch '${watchTargetName}' não encontrado no CONFIG`,);
+    throw new Error(
+      `❌ Alvo watch '${watchTargetName}' não encontrado no CONFIG`,
+    );
   }
 
   console.log(`\n👀 Iniciando Watch Mode: ${watchTargetName}\n`,);
 
   await copyStaticFiles(config, currentVer,);
 
-  const esbuildOptions = await buildEsbuildOptions(watchTargetName, config, currentVer,);
+  const esbuildOptions = await buildEsbuildOptions(
+    watchTargetName,
+    config,
+    currentVer,
+  );
 
   esbuildOptions.plugins = [...(esbuildOptions.plugins || []), denoPlugin(),];
 
   const ctx = await esbuild.context(esbuildOptions,);
   await ctx.watch();
 
-  console.log('\n✅ Watch mode ativo!',);
+  console.log("\n✅ Watch mode ativo!",);
   console.log(`📁 Monitorando: ${config.srcdir}/`,);
 
   // 🔥 CORREÇÃO: Mostra o outfile resolvido (relativo ao distdir)
-  const resolvedOutfile = esbuildOptions.outfile || (config.distdir ? `${config.distdir}/` : 'N/A');
+  const resolvedOutfile = esbuildOptions.outfile ||
+    (config.distdir ? `${config.distdir}/` : "N/A");
   console.log(`📦 Output: ${resolvedOutfile}`,);
   console.log(`📌 Versão: v${currentVer}`,);
-  console.log('\n💡 Pressione Ctrl+C para parar.\n',);
+  console.log("\n💡 Pressione Ctrl+C para parar.\n",);
 
   await new Promise(() => {},);
 }
