@@ -32,5 +32,10 @@
     "auth": {
       "selectedType": "openai"
     }
+  },
+  "providerMetadata": {
+    "openrouter": {
+      "ignoredVersion": "b535a56063f3c09af610b3f4341d2c09a87af03d330317c7ba650c290630147f"
+    }
   }
 }

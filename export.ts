@@ -32,6 +32,7 @@ import { APP_VERSION, EXTENSOES_PADRAO, } from "@browsertorrent/utils/config";
  */
 export type ModoExportacao =
   | "ui"
+  | "core"
   | "docs"
   | "decisoes"
   | "fases"
@@ -61,6 +62,21 @@ export const CONFIGURACOES: Record<ModoExportacao, ExportConfig> = {
     incluiVersao: true,
     instrucaoCustomizada:
       "O texto abaixo contém os arquivos de CÓDIGO FONTE principais da aplicação exemplo (UI).",
+    default: true, // ✅ Roda por padrão
+  },
+  core: {
+    arquivoSaida: "snapshots/core.md",
+    extensoesPermitidas: EXTENSOES_PADRAO,
+    pastaBase: "packages/core",
+    subpastasPermitidas: ["src", "tests", "docs",],
+    arquivosRaizPermitidos: [
+      "deno.json",
+      "deno.jsonc",
+      "readme.md",
+    ],
+    incluiVersao: true,
+    instrucaoCustomizada:
+      "O texto abaixo contém o desenvolvimento principal de @browsertorrent/core",
     default: true, // ✅ Roda por padrão
   },
   docs: {
