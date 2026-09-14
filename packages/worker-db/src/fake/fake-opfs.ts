@@ -7,7 +7,6 @@ export class FakeOPFSFileHandle {
   ) {}
 
   async createWritable() {
-    const self = this;
     let content: Uint8Array = new Uint8Array();
     return {
       async write(data: Uint8Array | string | Blob | ArrayBuffer,) {
@@ -21,8 +20,8 @@ export class FakeOPFSFileHandle {
           content = new TextEncoder().encode(String(data,),);
         }
       },
-      async close() {
-        self.storage.set(self.fullPath, content,);
+      close: () => {
+        this.storage.set(this.fullPath, content,);
       },
     };
   }

@@ -167,7 +167,6 @@ async function sha1sumAligned(files: OPFSFileEntry[], pieceSize: number): Promis
   };
 
   const reader = new OPFSMultiFileReader(pieceFiles.map((pf) => pf.file!).filter(Boolean) as OPFSFileEntry[]);
-  let readerIndex = 0;
 
   for (const pieceFile of pieceFiles) {
     if (pieceFile.padding) {

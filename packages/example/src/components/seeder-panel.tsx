@@ -92,7 +92,7 @@ export function SeederPanel({ disabled }: Props) {
       {selectedFile.value && !isSeeding && (
         <div class="secondary-text small-text">
           <i class="material-symbols small">file_present</i>
-          {" "}{formatSize(selectedFile.value.size)}
+           {formatSize(selectedFile.value.size)}
         </div>
       )}
 
@@ -100,7 +100,7 @@ export function SeederPanel({ disabled }: Props) {
       {isSeeding && (
         <div class="green-text small-text">
           <i class="material-symbols small">check_circle</i>
-          {" "}{torrent?.name}
+           {torrent?.name}
         </div>
       )}
 

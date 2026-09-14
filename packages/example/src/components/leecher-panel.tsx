@@ -66,7 +66,7 @@ export function LeecherPanel({ disabled }: Props) {
       {isLeeching && torrent && (
         <div class="blue-text small-text">
           <i class="material-symbols small">download</i>
-          {" "}{torrent.name ?? "Baixando..."}
+           {torrent.name ?? "Baixando..."}
         </div>
       )}
 

@@ -17,7 +17,7 @@ export class Piece {
   /** Whether the piece hash has been verified (optional, set by consumer). */
   hash?: Uint8Array;
 
-  constructor(index: number, length: number, offset: number) {
+  constructor(index: number, length: number, offset: number,) {
     this.index = index;
     this.length = length;
     this.offset = offset;
@@ -29,7 +29,7 @@ export class Piece {
    * tracks the actual state).
    */
   get downloaded(): boolean {
-    return !!this.hash;
+    return this.hash !== undefined;
   }
 
   /**
@@ -43,6 +43,8 @@ export class Piece {
    * Returns a human-readable description of this piece.
    */
   toString(): string {
-    return `Piece(index=${this.index}, length=${this.length}, offset=${this.offset}, ${this.missing ? "missing" : "downloaded"})`;
+    return `Piece(index=${this.index}, length=${this.length}, offset=${this.offset}, ${
+      this.missing ? "missing" : "downloaded"
+    })`;
   }
 }

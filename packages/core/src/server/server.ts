@@ -535,7 +535,7 @@ export async function readNextChunk(
   // by a direct chunk-store read.
   const it = (file as any)[Symbol.asyncIterator]() as AsyncIterableIterator<Uint8Array>;
   let skipped = 0;
-  let remainingToRead = Math.min(length, file.length - offset);
+  const remainingToRead = Math.min(length, file.length - offset);
 
   if (offset === 0) {
     const { value, done } = await it.next();
