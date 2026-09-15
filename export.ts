@@ -83,7 +83,7 @@ export const CONFIGURACOES: Record<ModoExportacao, ExportConfig> = {
     arquivoSaida: "snapshots/docs.md",
     extensoesPermitidas: [".md", ".txt",],
     pastaBase: "./",
-    subpastasPermitidas: ["docs/browsertorrent",], // incluir esta sub pasta "./docs/browsertorrent", deixar assim
+    subpastasPermitidas: ["docs",], // incluir esta sub pasta "./docs/browsertorrent", deixar assim
     arquivosRaizPermitidos: [
       "readme.md",
       "readme",
@@ -162,6 +162,7 @@ export const CONFIGURACOES: Record<ModoExportacao, ExportConfig> = {
       "deno.json",
       "deno.jsonc",
       "readme.md",
+      "deploy.sh",
     ],
     incluiVersao: false,
     instrucaoCustomizada:

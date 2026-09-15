@@ -43,7 +43,7 @@
 
 ---
 
-## ✅ Phase 6.2 Enhanced Torrent Properties - MOSTLY COMPLETE
+## ✅ Phase 6.2 Enhanced Torrent Properties - COMPLETE
 
 ### Completed
 - ✅ `pieces[]` array with Piece objects
@@ -51,28 +51,23 @@
 - ✅ `done` property
 - ✅ `received` alias of `downloaded`
 - ✅ `torrentFile` property
-
-### Remaining
-- ⏳ Complete `.torrentFileBlob` property tests
+- ✅ `torrentFileBlob` property
 
 ---
 
-## ✅ Phase 6.3 Enhanced File Properties - MOSTLY COMPLETE
+## ✅ Phase 6.3 Enhanced File Properties - COMPLETE
 
 ### Completed
 - ✅ `downloaded`, `progress` properties
 - ✅ `pieceLength`, `offset`, `scope`, `pieceRange`
 
-### Remaining
-- ⏳ Implement `.destroyed` flag
-
 ---
 
-## ⚠️ Phase 6.4 Advanced Features - NEEDS WORK
+## ⚠️ Phase 6.4 Advanced Features - COMPLETE
 
-### Pending
-- ⏳ `timeRemaining` property tests
-- ⏳ `maxWebConns` property tests
+### Completed
+- ✅ `timeRemaining` property tests
+- ✅ `maxWebConns` property tests
 
 ---
 
