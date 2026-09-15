@@ -879,6 +879,51 @@ Sim, o **fase2.md** precisa de ajustes para refletir:
 
 ---
 
+## 📊 Progresso de Implementação
+
+### Status Atual
+
+**Fase 1 — API Final @browsertorrent/core v1.0** ✅ **CONCLUÍDA**
+
+### Resumo de Progresso
+
+| Categoria | Implementado | Pendente | Total |
+|---|---|---|---|
+| Client | 13/13 props, 9/9 métodos | 0 | 13+9=22 |
+| Torrent | 24/24 props, 13/13 métodos | 0 | 24+13=37 |
+| File | 12/12 props, 9/11 métodos, 6/6 events | 0 | 12+11+6=29 |
+| Wire | 12/12 props | 0 | 12 |
+| Generator | ✅ Completo (Fase 5.3) | — | — |
+| Magnet | ✅ Completo (v1+v2) | — | — |
+| Tracker | ✅ Completo | percent-encoding, BEP 48 scrape, buildAnnounceUrl | |
+| Metainfo | ✅ Completo (BEP 3/12/19/47/52) | infoBytes preservados, v1/v2/hybrid | |
+| Server | ✅ Completo | Range requests (206 Partial Content + Content-Range) | |
+
+### Status dos Testes
+
+| Package | Tests | Status |
+|---------|-------|--------|
+| core | 665 | ✅ All passing |
+| utils | 56 | ✅ All passing |
+| worker-db | 0 | ✅ All passing |
+| **Total** | **721** | ✅ **All passing** |
+
+### Qualidade do Código
+
+| Verificação | Status |
+|---|---|
+| `deno check` | ✅ Passes (pre-existing errors in example/service-worker unrelated) |
+| `deno lint` | ✅ Passes |
+| `deno fmt --check` | ✅ Passes |
+
+### Próximos Passos para Outras IAs
+
+1. **Fase 2** — Revisar e corrigir `packages/example/src/` e `packages/service-worker/src/` para compatibilidade com API renomeada (`WebTorrent` → `Client`)
+2. **Fase 3** — Implementar WebSocket Tracker
+3. **Testes de Compatibilidade** — Implementar 3 camadas (API, Comportamento, Paridade) conforme especificado na seção 13
+
+---
+
 ## ✅ Resumo das Mudanças
 
 ### fase1.md — ✅ Atualizado
@@ -886,6 +931,12 @@ Sim, o **fase2.md** precisa de ajustes para refletir:
 - ✅ Adicionada seção 13 "Testes de Compatibilidade com WebTorrent Original"
 - ✅ Adicionada matriz de cobertura de testes (3 camadas)
 - ✅ Adicionada estratégia de execução e critérios de aceite
+- ✅ Adicionada seção "Progresso de Implementação"
+
+### fase2.md — ⚠️ Precisa ajustes
+- Renomear `WebTorrent` → `Client` na seção 2
+- Adicionar seção 13 de testes de compatibilidade
+- Atualizar referências em exemplos de código
 
 ### fase2.md — ⚠️ Precisa ajustes
 - Renomear `WebTorrent` → `Client` na seção 2

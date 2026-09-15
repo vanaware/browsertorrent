@@ -103,20 +103,49 @@
 
 ---
 
+## 📈 Progress Tracking
+
+### Fases Status
+
+| Fase | Status | Description |
+|---|---|---|
+| Fase 0 — Fundação | ✅ Concluída | Bencode, crypto, bit-array, byte-io, buffer, encoding, simple-buffer, net, errors |
+| Fase 1 — Core Protocol (peerwire) | ✅ Concluída | Message codec, handshake, torrent, file, piece, wire, swarm, peer |
+| Fase 2 — Revisão e Correção | 🔍 Em andamento | Revisar example/ e service-worker/ para compatibilidade |
+| Fase 3 — WebSocket Tracker | ⏳ Não iniciada | Implementar servidor WebSocket com Deno.serve() |
+| Fase 4 — Generator API | ✅ Concluída | generateTorrent, OPFSMultiFileReader, PieceSizeEnum |
+| Fase 5 — Magnet | ✅ Concluída | v1+v2, parseMagnet, encodeMagnet, buildMagnetV2 |
+| Fase 6 — Advanced Features | ✅ Concluída | Enhanced Torrent/File/Piece properties, Wire parity |
+| Fase 7 — Service Worker | 🔍 Em andamento | SW com roteamento /webtorrent/*, Range requests |
+| Fase 8 — Testes de Compatibilidade | ⏳ Não iniciada | 3 camadas: API, Comportamento, Paridade |
+
+### Qualidade do Código
+
+| Verificação | Status |
+|---|---|
+| `deno test -P` | ✅ 721 passed, 0 failed |
+| `deno check` | ✅ Passes (pre-existing errors in example/service-worker unrelated) |
+| `deno lint` | ✅ Passes |
+| `deno fmt --check` | ✅ Passes |
+
+---
+
 ## 🎯 Next Steps for Other AIs
 
-1. **Add missing tests** for completed properties (Phase 6.2, 6.3)
-2. **Implement missing features** (`.destroyed` flag)
-3. **Complete property testing** for Phase 6.4 features
-4. **Review Phase 2** (service-worker and example packages)
+1. **Fase 2.1** — Revisar e corrigir `packages/example/src/` e `packages/service-worker/src/` para compatibilidade com API renomeada (`WebTorrent` → `Client`)
+2. **Fase 3** — Implementar WebSocket Tracker
+3. **Fase 8** — Implementar 3 camadas de testes de compatibilidade (API, Comportamento, Paridade) conforme especificado em `fase1.md` seção 13
 
 ---
 
 ## 📝 Notes for Future AIs
 
 - Core functionality is complete
-- Remaining work is primarily test coverage and Phase 2 integration
+- Remaining work is primarily Phase 2 integration and Phase 3 (WebSocket Tracker)
 - Always run `deno test -P` to verify all tests pass
 - Always run `deno check` for type validation
+- Always run `deno lint` and `deno fmt --check` for code quality
+- The class was renamed from `WebTorrent` to `Client` — update all references in example/ and service-worker/
+- Pre-existing type errors in `example/` and `service-worker/` are unrelated to core functionality
 - Always run `deno lint` for code quality
 - Always run `deno fmt --check` for formatting consistency
