@@ -14,9 +14,9 @@ export interface ExtensionEvents {
  */
 export abstract class Extension extends TypedEventTarget<ExtensionEvents> {
   public abstract readonly name: string;
-  protected wire: any;
+  protected wire: Wire;
 
-  constructor(wire: any) {
+  constructor(wire: Wire) {
     super();
     this.wire = wire;
   }
@@ -24,7 +24,7 @@ export abstract class Extension extends TypedEventTarget<ExtensionEvents> {
   /**
    * Chamado quando o handshake estendido é recebido do peer.
    */
-  abstract onExtendedHandshake(handshake: any): void;
+  abstract onExtendedHandshake(handshake: Record<string, unknown>): void;
 
   /**
    * Chamado quando uma mensagem estendida para esta extensão é recebida.

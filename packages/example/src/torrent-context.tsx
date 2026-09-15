@@ -113,9 +113,9 @@ export async function seedFile(file: File): Promise<void> {
     dbg("  torrent.magnetURI:", torrent.magnetURI);
     dbg("  torrent.files.length:", torrent.files?.length);
     dbg("  torrent.announce:", torrent.announce);
-    const store = (torrent as any).store;
+    const store = (torrent as unknown as { store: unknown }).store;
     dbg("  torrent.store:", store ? "available" : "NULL", "type:", store?.constructor?.name);
-    dbg("  torrent.pieceLength:", (torrent as any).pieceLength);
+    dbg("  torrent.pieceLength:", (torrent as unknown as { pieceLength: number }).pieceLength);
 
     torrentSignal.value = torrent;
     modeSignal.value = "seeding";
@@ -130,7 +130,7 @@ export async function seedFile(file: File): Promise<void> {
     torrent.on("metadata", () => {
       dbg("EVENT: metadata ready, infoHash:", torrent.infoHash);
       dbg("  torrent.name:", torrent.name);
-      dbg("  torrent.files:", torrent.files?.map((f) => f.name));
+      dbg("  torrent.files:", torrent.files?.map((f: { name: string }) => f.name));
     });
 
     torrent.on("ready", () => {
@@ -148,16 +148,16 @@ export async function seedFile(file: File): Promise<void> {
 
     torrent.on("wire", (e: CustomEvent<{ wire: Wire; addr: string }>) => {
       dbg("EVENT: wire/peer CONNECTED from:", e.detail.addr);
-      const swarm = (torrent as any).swarm;
+      const swarm = (torrent as unknown as { swarm: { peers: Map<string, { wire: Wire }> } }).swarm;
       const wires = [...(swarm?.peers.values() ?? [])]
-        .map((p: any) => p.wire)
+        .map((p) => p.wire)
         .filter((w: Wire | null): w is Wire => w !== null);
       dbg("  total peers:", wires.length);
       peersSignal.value = wires;
       e.detail.wire.on("close", () => {
         dbg("EVENT: wire/peer disconnected from:", e.detail.addr);
         const updated = [...(swarm?.peers.values() ?? [])]
-          .map((p: any) => p.wire)
+          .map((p: unknown) => (p as { wire: Wire }).wire)
           .filter((w: Wire | null): w is Wire => w !== null);
       peersSignal.value = updated;
       });
@@ -173,7 +173,7 @@ export async function seedFile(file: File): Promise<void> {
 
     // Log swarm state periodically for debugging
     const swarmInterval = setInterval(() => {
-      const swarm = (torrent as any).swarm;
+      const swarm = (torrent as unknown as { swarm: unknown }).swarm;
       if (swarm) {
         const peers = swarm.peers ? [...swarm.peers.keys()] : [];
         dbg("SWARM STATUS: peers:", peers.length, "infoHash:", torrent.infoHash);
@@ -189,13 +189,13 @@ export async function seedFile(file: File): Promise<void> {
     dbg("  Swarm listening — waiting for peers to connect...");
 
     // Log tracker connection attempts via client events
-    (wt as any).on("trackerAnnounce", (_e: Event, tracker: string) => {
+    (wt as unknown as { on: (event: string, listener: (...args: unknown[]) => void) => void }).on("trackerAnnounce", (_e: Event, tracker: string) => {
       dbg("EVENT: client trackerAnnounce to:", tracker);
     });
-    (wt as any).on("trackerWarning", (_e: Event, tracker: string) => {
+    (wt as unknown as { on: (event: string, listener: (...args: unknown[]) => void) => void }).on("trackerWarning", (_e: Event, tracker: string) => {
       dbg("EVENT: client trackerWarning from:", tracker);
     });
-    (wt as any).on("trackerError", (e: Event) => {
+    (wt as unknown as { on: (event: string, listener: (...args: unknown[]) => void) => void }).on("trackerError", (e: Event) => {
       const ce = e as CustomEvent<Error>;
       dbg("EVENT: client trackerError:", ce.detail?.message ?? String(e));
     });
@@ -250,7 +250,7 @@ export async function addTorrent(torrentId: string): Promise<void> {
     torrent.on("metadata", () => {
       dbg("EVENT: metadata ready, infoHash:", torrent.infoHash);
       dbg("  torrent.name:", torrent.name);
-      dbg("  torrent.files:", torrent.files?.map((f) => f.name));
+      dbg("  torrent.files:", torrent.files?.map((f: { name: string }) => f.name));
     });
 
     torrent.on("ready", () => {
@@ -268,16 +268,16 @@ export async function addTorrent(torrentId: string): Promise<void> {
 
     torrent.on("wire", (e: CustomEvent<{ wire: Wire; addr: string }>) => {
       dbg("EVENT: wire/peer connected from:", e.detail.addr);
-      const swarm = (torrent as any).swarm;
+      const swarm = (torrent as unknown as { swarm: { peers: Map<string, { wire: Wire }> } }).swarm;
       const wires = [...(swarm?.peers.values() ?? [])]
-        .map((p: any) => p.wire)
+        .map((p) => p.wire)
         .filter((w: Wire | null): w is Wire => w !== null);
       dbg("  total peers:", wires.length);
       peersSignal.value = wires;
       e.detail.wire.on("close", () => {
         dbg("EVENT: wire/peer disconnected from:", e.detail.addr);
         const updated = [...(swarm?.peers.values() ?? [])]
-          .map((p: any) => p.wire)
+          .map((p: unknown) => (p as { wire: Wire }).wire)
           .filter((w: Wire | null): w is Wire => w !== null);
       peersSignal.value = updated;
       });
@@ -302,7 +302,7 @@ export async function addTorrent(torrentId: string): Promise<void> {
 
     // Log swarm state periodically for debugging
     const swarmInterval = setInterval(() => {
-      const swarm = (torrent as any).swarm;
+      const swarm = (torrent as unknown as { swarm: unknown }).swarm;
       if (swarm) {
         const peers = swarm.peers ? [...swarm.peers.keys()] : [];
         dbg("SWARM STATUS: peers:", peers.length, "infoHash:", torrent.infoHash);
@@ -314,13 +314,13 @@ export async function addTorrent(torrentId: string): Promise<void> {
     }, 5000);
 
     // Log tracker connection attempts via client events
-    (wt as any).on("trackerAnnounce", (_e: Event, tracker: string) => {
+    (wt as unknown as { on: (event: string, listener: (...args: unknown[]) => void) => void }).on("trackerAnnounce", (_e: Event, tracker: string) => {
       dbg("EVENT: client trackerAnnounce to:", tracker);
     });
-    (wt as any).on("trackerWarning", (_e: Event, tracker: string) => {
+    (wt as unknown as { on: (event: string, listener: (...args: unknown[]) => void) => void }).on("trackerWarning", (_e: Event, tracker: string) => {
       dbg("EVENT: client trackerWarning from:", tracker);
     });
-    (wt as any).on("trackerError", (e: Event) => {
+    (wt as unknown as { on: (event: string, listener: (...args: unknown[]) => void) => void }).on("trackerError", (e: Event) => {
       const ce = e as CustomEvent<Error>;
       dbg("EVENT: client trackerError:", ce.detail?.message ?? String(e));
     });

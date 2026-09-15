@@ -52,7 +52,7 @@ export async function walkOPFSDir(
     // BFS for stable ordering — `values()` yields in insertion order.
     // We collect into an array first to avoid losing `for-await` context.
     const queue: Array<FileSystemHandle> = [];
-    for await (const entry of (dir as any).values()) {
+    for await (const entry of (dir as unknown as { values: () => AsyncIterable<FileSystemHandle> }).values()) {
       queue.push(entry);
     }
     for (const entry of queue) {

@@ -45,7 +45,7 @@ type EventMap = {
 type EventCallback<T,> = (payload: T,) => void;
 
 class EventBusImpl {
-  private listeners = new Map<keyof EventMap, Set<EventCallback<any>>>();
+  private listeners = new Map<keyof EventMap, Set<EventCallback<unknown>>>();
 
   /**
    * Assina um evento interno.
@@ -60,11 +60,11 @@ class EventBusImpl {
     }
 
     const callbacks = this.listeners.get(event,)!;
-    callbacks.add(callback,);
+    callbacks.add(callback as unknown as EventCallback<unknown>,);
 
     // Retorna função de unsubscribe
     return () => {
-      callbacks.delete(callback,);
+      callbacks.delete(callback as unknown as EventCallback<unknown>,);
       if (callbacks.size === 0) {
         this.listeners.delete(event,);
       }

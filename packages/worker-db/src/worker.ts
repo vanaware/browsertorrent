@@ -72,17 +72,17 @@ self.onmessage = async (e: MessageEvent,) => {
         break;
       }
       case 'QUERY': {
-        const fn = new Function('items', 'ctx', `return (${args.fnStr})(items, ctx);`,) as (items: { _id: string; }[], ctx?: any) => { _id: string; }[];
+        const fn = new Function('items', 'ctx', `return (${args.fnStr})(items, ctx);`,) as (items: { _id: string; }[], ctx?: unknown) => { _id: string; }[];
         result = await internalAPI.query(fn, args.context, dbOpts,);
         break;
       }
       case 'GET_SOME': {
-        const fn = new Function('items', 'ctx', `return (${args.fnStr})(items, ctx);`,) as (items: { _id: string; }[], ctx?: any) => { _id: string; }[];
+        const fn = new Function('items', 'ctx', `return (${args.fnStr})(items, ctx);`,) as (items: { _id: string; }[], ctx?: unknown) => { _id: string; }[];
         result = await internalAPI.getSome(fn, args.context, dbOpts,);
         break;
       }
       case 'DEL_SOME': {
-        const fn = new Function('items', 'ctx', `return (${args.fnStr})(items, ctx);`,) as (items: { _id: string; }[], ctx?: any) => { _id: string; }[];
+        const fn = new Function('items', 'ctx', `return (${args.fnStr})(items, ctx);`,) as (items: { _id: string; }[], ctx?: unknown) => { _id: string; }[];
         result = await internalAPI.delSome(fn, args.context, dbOpts,);
         break;
       }
@@ -91,12 +91,12 @@ self.onmessage = async (e: MessageEvent,) => {
           'items',
           'ctx',
           `return (${args.selectFnStr})(items, ctx);`,
-        ) as (items: { _id: string; }[], ctx?: any) => { _id: string; }[];
+        ) as (items: { _id: string; }[], ctx?: unknown) => { _id: string; }[];
         const updateFn = new Function(
           'item',
           'ctx',
           `return (${args.updateFnStr})(item, ctx);`,
-        ) as (item: { _id: string; }, ctx?: any) => { _id: string; };
+        ) as (item: { _id: string; }, ctx?: unknown) => { _id: string; };
         result = await internalAPI.setSome(selectFn, updateFn, args.context, dbOpts,);
         break;
       }

@@ -48,7 +48,7 @@ async function establishSWConnection() {
   sw.postMessage({ type: "PORT" }, [port1]);
 
   // Porta que fica na página (recebe requests do SW)
-  port2.onmessage = async (e: MessageEvent) => {
+  port2.onmessage = (e: MessageEvent) => {
     const msg = e.data;
     if (msg?.type !== "webtorrent-request") return;
 
@@ -117,14 +117,14 @@ async function establishSWConnection() {
       let fileStream: ReadableStream<Uint8Array> | null = null;
       let fileIterator: ReadableStreamDefaultReader<Uint8Array> | null = null;
 
-      function ensureStream() {
+      const ensureStream = () => {
         if (!fileStream) {
           console.log("[main] ensureStream: creating ReadableStream, start:", rangeStart, "end:", rangeEnd);
           fileStream = file.createReadStream({ start: rangeStart, end: rangeEnd });
           fileIterator = fileStream.getReader();
           console.log("[main] ensureStream: stream created, file.length:", file.length);
         }
-      }
+      };
 
       // ── Instalar handler no chunkPort ANTES de enviar metadata ─────
       let closed = false;
@@ -196,7 +196,7 @@ async function establishSWConnection() {
 }
 
 async function readNextChunk(
-  file: any,
+  file: { createReadStream: (opts: { start: number; end: number }) => ReadableStream<Uint8Array> },
   start: number,
   end: number,
 ): Promise<Uint8Array> {

@@ -21,26 +21,30 @@ class FakeChunkStore {
     this.data.set(0, buf);
   }
 
-  async get(index: number): Promise<Uint8Array> {
+  get(index: number): Promise<Uint8Array> {
     const stored = this.data.get(index);
-    if (stored) return stored;
+    if (stored) return Promise.resolve(stored);
     const start = index * this.chunkLength;
     const size = Math.min(this.chunkLength, 2048 - start);
-    if (start >= 2048 || size <= 0) return new Uint8Array(0);
+    if (start >= 2048 || size <= 0) return Promise.resolve(new Uint8Array(0));
     const buf = new Uint8Array(size);
     for (let i = 0; i < size; i++) {
       buf[i] = (start + i) % 256;
     }
-    return buf;
+    return Promise.resolve(buf);
   }
 
-  async put(index: number, buf: Uint8Array): Promise<void> {
+  put(index: number, buf: Uint8Array): Promise<void> {
     this.data.set(index, buf);
+    return Promise.resolve();
   }
 
-  async close(): Promise<void> {}
-  async destroy(): Promise<void> {
+  close(): Promise<void> {
+    return Promise.resolve();
+  }
+  destroy(): Promise<void> {
     this.data.clear();
+    return Promise.resolve();
   }
 }
 
@@ -147,7 +151,7 @@ Deno.test("file: createReadStream returns a ReadableStream", () => {
   assertEquals(typeof stream[Symbol.asyncIterator], "function");
 });
 
-Deno.test("file: createReadStream emits 'stream' event", async () => {
+Deno.test("file: createReadStream emits 'stream' event", () => {
   const store = new FakeChunkStore(512, 2048);
   const file = new File({ store, length: 200, offset: 0, pieceLength: 512 });
 
@@ -547,7 +551,7 @@ Deno.test("file: progress returns 0 for zero-length file", () => {
 // PHASE 6: download / upload events forwarded from torrent
 // ============================================================================
 
-Deno.test("file: emits download event when torrent receives matching piece", async () => {
+Deno.test("file: emits download event when torrent receives matching piece", () => {
   const store = new FakeChunkStore();
   const file = new File({ store, length: 512, offset: 0, pieceLength: 512 });
 
@@ -559,14 +563,14 @@ Deno.test("file: emits download event when torrent receives matching piece", asy
   const mockTorrent = {
     pieces: mockBitfield,
     emit: () => {},
-  } as any;
+  } as unknown as { pieces: { _data: Uint8Array; get(i: number): boolean }; emit: () => void };
 
   // Attach torrent reference via private property
-  (file as any)._torrent = mockTorrent;
+  (file as unknown as { _torrent: unknown })._torrent = mockTorrent;
 
   let downloadBytes = 0;
-  file.addEventListener("download", (e: any) => {
-    downloadBytes += e.detail.bytes;
+  file.addEventListener("download", (e: unknown) => {
+    downloadBytes += (e as CustomEvent).detail.bytes;
   });
 
   // Simulate the torrent forwarding a download event for piece 0 (owned by this file)
@@ -575,16 +579,16 @@ Deno.test("file: emits download event when torrent receives matching piece", asy
   assertEquals(downloadBytes, 512);
 });
 
-Deno.test("file: emits upload event when torrent forwards upload for matching piece", async () => {
+Deno.test("file: emits upload event when torrent forwards upload for matching piece", () => {
   const store = new FakeChunkStore();
   const file = new File({ store, length: 512, offset: 0, pieceLength: 512 });
 
-  const mockTorrent = {} as any;
-  (file as any)._torrent = mockTorrent;
+  const mockTorrent = {} as unknown as Record<string, unknown>;
+  (file as unknown as { _torrent: unknown })._torrent = mockTorrent;
 
   let uploadBytes = 0;
-  file.addEventListener("upload", (e: any) => {
-    uploadBytes += e.detail.bytes;
+  file.addEventListener("upload", (e: unknown) => {
+    uploadBytes += (e as CustomEvent).detail.bytes;
   });
 
   file.emit("upload", new CustomEvent("upload", { detail: { bytes: 256 } }));
@@ -607,7 +611,7 @@ Deno.test("file: includes accepts a piece index number (upstream parity)", () =>
 Deno.test("file: includes accepts a Piece object (legacy)", () => {
   const store = new FakeChunkStore();
   const file = new File({ store, length: 1024, offset: 0, pieceLength: 512 });
-  const piece = { index: 0 } as any;
+  const piece = { index: 0, length: 0, offset: 0 } as unknown as Piece;
   assertEquals(file.includes(piece), true);
 });
 
@@ -630,8 +634,8 @@ Deno.test("file: select delegates to owning torrent", () => {
     select(start: number, end: number) {
       calledWith = [start, end];
     },
-  } as any;
-  (file as any)._torrent = mockTorrent;
+  } as unknown as { pieces: Bitfield; select(start: number, end: number): void };
+  (file as unknown as { _torrent: unknown })._torrent = mockTorrent;
 
   file.select();
   assertEquals(calledWith, [0, 1]);
@@ -649,8 +653,8 @@ Deno.test("file: deselect delegates to owning torrent", () => {
     deselect(start: number, end: number) {
       calledWith = [start, end];
     },
-  } as any;
-  (file as any)._torrent = mockTorrent;
+  } as unknown as { pieces: Bitfield; deselect(start: number, end: number): void };
+  (file as unknown as { _torrent: unknown })._torrent = mockTorrent;
 
   file.deselect();
   assertEquals(calledWith, [0, 1]);

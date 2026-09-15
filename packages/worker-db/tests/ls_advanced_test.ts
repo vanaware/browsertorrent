@@ -1,6 +1,21 @@
 import { assert, assertEquals, assertNotEquals, assertThrows, } from '@std/assert';
 import { ls, } from '../src/fake/fake-mod.ts';
 
+interface Fatura {
+  tag: string;
+  amount: number;
+  status: string;
+  code: string;
+}
+
+interface Funcionario {
+  _id: string;
+  name: string;
+  department: string;
+  level: number | string;
+  active: boolean;
+}
+
 Deno.test({
   name: 'LS Advanced - Execução de Métodos Modernos de Array JS (query, getSome)',
   fn() {
@@ -16,22 +31,22 @@ Deno.test({
     },);
 
     // Valida execução de funções avançadas síncronas de Array
-    const result = store.query((items: any[],) => {
+    const result = store.query((items: Fatura[],) => {
       return {
         count: items.length, // length
-        total: items.reduce((acc: number, i: any,) => acc + i.amount, 0,), // reduce
-        firstWork: items.find((i: any,) => i.tag === 'work'), // find
-        lastWork: items.findLast((i: any,) => i.tag === 'work'), // findLast
+        total: items.reduce((acc: number, i: Fatura,) => acc + i.amount, 0,), // reduce
+        firstWork: items.find((i: Fatura,) => i.tag === 'work'), // find
+        lastWork: items.findLast((i: Fatura,) => i.tag === 'work'), // findLast
         lastItem: items.at(-1,), // at
-        hasPending: items.some((i: any,) => i.status === 'pending'), // some
-        allPositive: items.every((i: any,) => i.amount > 0), // every
-        tagsHaveHome: items.map((i: any,) => i.tag).includes('home',), // map e includes
-        idxPersonal: items.findIndex((i: any,) => i.tag === 'personal'), // findIndex
-        lastIdxWork: items.findLastIndex((i: any,) => i.tag === 'work'), // findLastIndex
-        indexOfZ: items.map((i: any,) => i.code).indexOf('z',), // indexOf
-        paidItems: items.filter((i: any,) => i.status === 'paid'), // filter
+        hasPending: items.some((i: Fatura,) => i.status === 'pending'), // some
+        allPositive: items.every((i: Fatura,) => i.amount > 0), // every
+        tagsHaveHome: items.map((i: Fatura,) => i.tag).includes('home',), // map e includes
+        idxPersonal: items.findIndex((i: Fatura,) => i.tag === 'personal'), // findIndex
+        lastIdxWork: items.findLastIndex((i: Fatura,) => i.tag === 'work'), // findLastIndex
+        indexOfZ: items.map((i: Fatura,) => i.code).indexOf('z',), // indexOf
+        paidItems: items.filter((i: Fatura,) => i.status === 'paid'), // filter
         sliced: items.slice(1, 4,), // slice
-        sortedByAmount: items.toSorted((a: any, b: any,) => a.amount - b.amount), // toSorted
+        sortedByAmount: items.toSorted((a: Fatura, b: Fatura,) => a.amount - b.amount), // toSorted
         reversed: items.toReversed(), // toReversed
         spliced: items.toSpliced(0, 2,), // toSpliced
       };
@@ -39,9 +54,9 @@ Deno.test({
 
     assertEquals(result.count, 5,);
     assertEquals(result.total, 1230,);
-    assertEquals((result.firstWork as any).amount, 150,);
-    assertEquals((result.lastWork as any).amount, 200,);
-    assertEquals((result.lastItem as any).code, 'k',);
+    assertEquals((result.firstWork as Fatura).amount, 150,);
+    assertEquals((result.lastWork as Fatura).amount, 200,);
+    assertEquals((result.lastItem as Fatura).code, 'k',);
     assert(result.hasPending,);
     assert(result.allPositive,);
     assert(result.tagsHaveHome,);
@@ -50,8 +65,8 @@ Deno.test({
     assertEquals(result.indexOfZ, 2,);
     assertEquals(result.paidItems.length, 3,);
     assertEquals(result.sliced.length, 3,);
-    assertEquals((result.sortedByAmount[0] as any).amount, 80,);
-    assertEquals((result.reversed[0] as any).code, 'k',);
+    assertEquals((result.sortedByAmount[0] as Fatura).amount, 80,);
+    assertEquals((result.reversed[0] as Fatura).code, 'k',);
     assertEquals(result.spliced.length, 3,);
 
     store.clear();
@@ -67,19 +82,19 @@ Deno.test({
 
     // AssertThrows captura as exceções síncronas disparadas pelo wrapper ls()
     assertThrows(
-      () => store.getSome(() => ({ obj: 'invalid', } as any)),
+      () => store.getSome(() => ({ obj: 'invalid', } as unknown as { _id: string }[])),
       Error,
       'A função em getSome deve retornar um Array.',
     );
 
     assertThrows(
-      () => store.delSome(() => false as any),
+      () => store.delSome(() => false as unknown as { _id: string }[]),
       Error,
       'A função em delSome deve retornar um Array.',
     );
 
     assertThrows(
-      () => store.setSome(() => 'string' as any, (i: any,) => i,),
+      () => store.setSome(() => 'string' as unknown as { _id: string }[], (i: unknown,) => i as unknown as { _id: string }),
       Error,
       'A função de seleção em setSome deve retornar um Array.',
     );
@@ -102,8 +117,8 @@ Deno.test({
 
     // Atualiza nome para UPPERCASE e converte 'level' (number) para string
     store.setSome(
-      (items: any[],) => items.filter((item: any,) => item.active === true),
-      (item: any,) => ({
+      (items: Funcionario[],) => items.filter((item: Funcionario,) => item.active === true),
+      (item: Funcionario,) => ({
         ...item,
         name: item.name.toUpperCase(),
         department: item.department.toUpperCase(),
@@ -111,18 +126,18 @@ Deno.test({
       }),
     );
 
-    const e10 = store.get<any>('e10',);
+    const e10 = store.get<Funcionario>('e10',);
     assertEquals(e10?.name, 'JOÃO SILVA',);
     assertEquals(e10?.department, 'TECNOLOGIA',);
     assertEquals(typeof e10?.level, 'string',);
     assertEquals(e10?.level, '2',);
 
-    const e30 = store.get<any>('e30',);
+    const e30 = store.get<Funcionario>('e30',);
     assertEquals(e30?.department, 'vendas',); // Permanece em lowercase pois active=false
     assertEquals(typeof e30?.level, 'number',); // Permanece tipo número
 
     // Exclui funcionários inativos via delSome
-    store.delSome((items: any[],) => items.filter((i: any,) => i.active === false));
+    store.delSome((items: Funcionario[],) => items.filter((i: Funcionario,) => i.active === false));
 
     // Checa deleção correta
     assertEquals(store.get('e30',), undefined,);
@@ -130,8 +145,8 @@ Deno.test({
     assertEquals(remainingKeys.length, 2,);
 
     // Assegura integridade dos que ficaram
-    const remaining = store.values<any>();
-    assertNotEquals(remaining[0].name, 'pedro alves',);
+    const remaining = store.values<Funcionario>();
+    assertNotEquals(remaining[0]!.name, 'pedro alves',);
 
     store.clear();
   },

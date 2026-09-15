@@ -75,7 +75,7 @@ export interface WireEvents {
   request: CustomEvent<{ index: number; offset: number; length: number }>;
   piece: CustomEvent<{ index: number; offset: number; block: Uint8Array }>;
   cancel: CustomEvent<{ index: number; offset: number; length: number }>;
-  extended: CustomEvent<{ id: number; payload: any }>;
+  extended: CustomEvent<{ id: number; payload: unknown }>;
   /** BEP 5 — DHT port */
   port: CustomEvent<{ port: number }>;
   /** BEP 6 — Fast: suggest piece */

@@ -26,8 +26,8 @@ export const CORE_VERSION = "0.0.0-placeholder";
 // ── WebRTC feature detection ──────────────────────────────────────────
 const _WEBRTC_SUPPORT: boolean = (() => {
   if (typeof globalThis === "undefined") return false;
-  return typeof (globalThis as any).RTCPeerConnection !== "undefined" ||
-    typeof (globalThis as any).webkitRTCPeerConnection !== "undefined";
+  return typeof (globalThis as unknown as { RTCPeerConnection: typeof RTCPeerConnection }).RTCPeerConnection !== "undefined" ||
+    typeof (globalThis as unknown as { webkitRTCPeerConnection: typeof RTCPeerConnection }).webkitRTCPeerConnection !== "undefined";
 })();
 
 export interface WebTorrentEvents {
@@ -297,10 +297,10 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
         torrent.infoHash,
       );
       registerTorrentFiles(torrent, files,);
-      (torrent as any)._registerFiles?.(files,);
+      (torrent as unknown as { _registerFiles?: (files: ParsedTorrentFile[]) => void })._registerFiles?.(files,);
     }
 
-    this.on("torrent", (e: any,) => {
+    this.on("torrent", (e: CustomEvent<{ torrent: Torrent }>,) => {
       const torrent: Torrent = e.detail.torrent;
       const files = this._makeFileObjects(torrent, scope,);
       console.log(
@@ -310,7 +310,7 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
         torrent.infoHash,
       );
       registerTorrentFiles(torrent, files,);
-      (torrent as any)._registerFiles?.(files,);
+      (torrent as unknown as { _registerFiles?: (files: ParsedTorrentFile[]) => void })._registerFiles?.(files,);
     },);
 
     return this.server;
@@ -319,7 +319,7 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
   private _makeFileObjects(torrent: Torrent, scope: string,): File[] {
     return torrent.files.map((pf, idx,) =>
       new File({
-        store: (torrent as any).store,
+        store: (torrent as unknown as { store: unknown }).store,
         length: pf.length,
         offset: pf.offset,
         pieceLength: torrent.pieceLength,
@@ -381,19 +381,19 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
 
     swarm.torrent = torrent;
 
-    swarm.on("metadata", async (e: any,) => {
+    swarm.on("metadata", async (e: CustomEvent<{ metadata: Uint8Array }>,) => {
       const metadataBuffer = e.detail.metadata;
       await torrent.setMetadata(metadataBuffer,);
     },);
 
-    swarm.on("error", (e: any,) => {
+    swarm.on("error", (e: CustomEvent<{ error: Error }>,) => {
       this.emit(
         "error",
         new CustomEvent("error", { detail: { error: e.detail.error, }, },),
       );
     },);
 
-    swarm.on("noPeers", (e: any,) => {
+    swarm.on("noPeers", (e: CustomEvent<{ source: string }>,) => {
       torrent.emit(
         "noPeers",
         new CustomEvent("noPeers", { detail: e.detail, },),
@@ -415,11 +415,11 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
     if (this.server) {
       const files = this._makeFileObjects(torrent, this.server.scope,);
       registerTorrentFiles(torrent, files,);
-      (torrent as any)._registerFiles?.(files,);
+      (torrent as unknown as { _registerFiles?: (files: ParsedTorrentFile[]) => void })._registerFiles?.(files,);
     } else {
       // Registra os files mesmo sem server (para events download/upload nos Files).
       const files = this._makeFileObjects(torrent, "/",);
-      (torrent as any)._registerFiles?.(files,);
+      (torrent as unknown as { _registerFiles?: (files: ParsedTorrentFile[]) => void })._registerFiles?.(files,);
     }
 
     this.emit(
@@ -463,10 +463,10 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
     const chunks: Uint8Array[] = [];
     let totalLen = 0;
     const writer = {
-      write: async (p: Uint8Array,): Promise<number> => {
+      write: (p: Uint8Array,): Promise<number> => {
         chunks.push(p,);
         totalLen += p.length;
-        return p.length;
+        return Promise.resolve(p.length);
       },
     };
 
@@ -500,15 +500,15 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
 
     // O nome é usado como display-name se ainda não tiver.
     if (name && (!torrent.name || torrent.name === "Unknown")) {
-      (torrent as any).name = name;
+      (torrent as unknown as { name: string }).name = name;
     }
     if (length && torrent.length === 0) {
-      (torrent as any).length = length;
+      (torrent as unknown as { length: number }).length = length;
     }
 
     // 4. Popula o OPFSChunkStore com os dados do arquivo original (para streaming)
     // Sem isso, o streaming falha com "Chunk N not found"
-    const store = (torrent as any).store;
+    const store = (torrent as unknown as { store: unknown }).store;
     console.log(
       "[seed] store available:",
       !!store,
@@ -708,7 +708,6 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
   ): Promise<{ name: string; size: number; data: Uint8Array }> {
     let data: Uint8Array;
     let name: string;
-    const size: number;
 
     if (item instanceof FileSystemFileHandle) {
       const file = await item.getFile();
@@ -741,7 +740,7 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
       throw new TypeError("Unsupported seed input",);
     }
 
-    size = data.length;
+    const size = data.length;
     return { name, size, data, };
   }
 
@@ -806,7 +805,7 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
     if (callback) callback();
   }
 
-  private async _createChunkStore(parsed: ParsedTorrent,): Promise<any> {
+  private async _createChunkStore(parsed: ParsedTorrent,): Promise<ChunkStore> {
     const useOPFS = this.opts.useOPFS !== false;
 
     if (useOPFS && globalThis.navigator?.storage?.getDirectory) {

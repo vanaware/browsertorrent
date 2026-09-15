@@ -34,7 +34,7 @@ export function ViewerPanel() {
     // Conecta stream ao <video> via client._makeFileObjects() (File wrapper com streamTo)
     const client = clientSignal.value;
     if (client && videoRef.current) {
-      const files = (client as any)._makeFileObjects(torrent, "/");
+      const files = (client as unknown as { _makeFileObjects: (torrent: unknown, scope: string) => unknown[] })._makeFileObjects(torrent, "/");
       files[0]?.streamTo(videoRef.current);
     }
   }, [torrent?.infoHash, serverSignal.value]);
@@ -85,6 +85,7 @@ export function ViewerPanel() {
 
       {!isLeeching && (
         <button
+          type="button"
           class={loading.value ? "loading" : ""}
           disabled={!input.value || loading.value}
           onClick={handleWatch}

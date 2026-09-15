@@ -201,7 +201,7 @@ describe('buildEsbuildOptions', () => {
       const { dir, cleanup, } = await withFileStructure({ 'src/main.tsx': '', },);
       try {
         const config = makeConfig(dir,);
-        const mockListFn = async () => ['./app.js', './index.html',];
+        const mockListFn = () => Promise.resolve(['./app.js', './index.html',]);
         const options = await buildEsbuildOptions('sw', config, '1.0.0', mockListFn,);
         const assets = JSON.parse(options.define.__GENERATED_ASSETS__,);
         assertEquals(assets, ['./app.js', './index.html',],);
@@ -213,7 +213,7 @@ describe('buildEsbuildOptions', () => {
       const { dir, cleanup, } = await withFileStructure({ 'src/main.tsx': '', },);
       try {
         const config = makeConfig(dir,);
-        const mockListFn = async () => ['./app.js',];
+        const mockListFn = () => Promise.resolve(['./app.js',]);
         const options = await buildEsbuildOptions('ui', config, '1.0.0', mockListFn,);
         assertEquals(options.define.__GENERATED_ASSETS__, undefined,);
       } finally {

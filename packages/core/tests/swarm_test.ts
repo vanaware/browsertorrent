@@ -6,8 +6,8 @@ import { Swarm } from "../src/network/swarm.ts";
 class MockRTCPeerConnection {
   public localDescription: RTCSessionDescriptionInit | null = null;
   public remoteDescription: RTCSessionDescriptionInit | null = null;
-  public onicecandidate: ((event: any) => void) | null = null;
-  public ondatachannel: ((event: any) => void) | null = null;
+  public onicecandidate: ((event: unknown) => void) | null = null;
+  public ondatachannel: ((event: unknown) => void) | null = null;
   public onconnectionstatechange: (() => void) | null = null;
   public connectionState: RTCPeerConnectionState = "new";
   
@@ -15,19 +15,19 @@ class MockRTCPeerConnection {
 
   constructor() {}
 
-  async createOffer() {
+  createOffer() {
     return { type: "offer" as const, sdp: "mock-sdp-offer" };
   }
 
-  async createAnswer() {
+  createAnswer() {
     return { type: "answer" as const, sdp: "mock-sdp-answer" };
   }
 
-  async setLocalDescription(desc: RTCSessionDescriptionInit) {
+  setLocalDescription(desc: RTCSessionDescriptionInit) {
     this.localDescription = desc;
   }
 
-  async setRemoteDescription(desc: RTCSessionDescriptionInit) {
+  setRemoteDescription(desc: RTCSessionDescriptionInit) {
     this.remoteDescription = desc;
   }
 

@@ -5,13 +5,13 @@ import 'fake-indexeddb/auto';
 
 import { FakeOPFSDirectory, } from './fake-opfs.ts';
 
-const _self = self as any;
+const _self = self as unknown as { navigator?: { storage?: { getDirectory?: () => Promise<FakeOPFSDirectory> } } };
 
 // 2. Injeta OPFS Fake no escopo do Worker
 if (!_self.navigator) _self.navigator = {};
 if (!_self.navigator.storage) _self.navigator.storage = {};
 if (!_self.navigator.storage.getDirectory) {
-  _self.navigator.storage.getDirectory = async () => new FakeOPFSDirectory();
+  _self.navigator.storage.getDirectory = () => Promise.resolve(new FakeOPFSDirectory());
 }
 
 // 3. Agora que o ambiente do Worker está perfeitamente simulado,

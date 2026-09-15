@@ -1,0 +1,6 @@
+{
+  "name": "BrowserTorrent",
+  "description": "A pure browser-based BitTorrent client implementation using WebRTC for peer-to-peer file sharing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

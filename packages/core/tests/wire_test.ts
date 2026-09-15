@@ -346,7 +346,7 @@ Deno.test("wire: transitions to Closed on destroy", async () => {
   assertEquals(wireA.isDestroyed, true);
 });
 
-Deno.test("wire: emits close event on destroy", async () => {
+Deno.test("wire: emits close event on destroy", () => {
   const wire = new Wire({
     send: () => {},
     onMessage: () => {},
@@ -360,7 +360,7 @@ Deno.test("wire: emits close event on destroy", async () => {
 
 // ── expectedPeerId validation ─────────────────────────────────────────────
 
-Deno.test("wire: rejects handshake with unexpected peerId", async () => {
+Deno.test("wire: rejects handshake with unexpected peerId", () => {
   let handler: ((data: Uint8Array) => void) | null = null;
   const transport: Transport = {
     send: () => {},
@@ -471,7 +471,7 @@ Deno.test("wire: allows Fast messages when both sides negotiate", async () => {
 
 // ── Message size limits ──────────────────────────────────────────────────
 
-Deno.test("wire: rejects messages exceeding maxMessageLength", async () => {
+Deno.test("wire: rejects messages exceeding maxMessageLength", () => {
   let handler: ((data: Uint8Array) => void) | null = null;
   const transport: Transport = {
     send: () => {},
@@ -604,7 +604,7 @@ Deno.test("wire: sendKeepAlive via setKeepAlive", async () => {
   wireA.setKeepAlive(false);
 });
 
-Deno.test("wire: receives keepAlive messages", async () => {
+Deno.test("wire: receives keepAlive messages", () => {
   let handler: ((data: Uint8Array) => void) | null = null;
   const transport: Transport = {
     send: () => {},
@@ -803,7 +803,7 @@ Deno.test("wire: dispatches new BEP 52 events when negotiated", async () => {
 
   // Test hashRequest event
   let hashRequestReceived = false;
-  wireB.on("hashRequest", (e: CustomEvent<any>) => {
+  wireB.on("hashRequest", (e: CustomEvent<{ piecesRoot: Uint8Array; baseLayer: number; index: number; length: number; proofLayers: number }>) => {
     const detail = e.detail;
     assertEquals(detail.piecesRoot.length, 32);
     assertEquals(detail.baseLayer, 0);
@@ -821,7 +821,7 @@ Deno.test("wire: dispatches new BEP 52 events when negotiated", async () => {
 
   // Test hashes event
   let hashesReceived = false;
-  wireA.on("hashes", (e: CustomEvent<any>) => {
+  wireA.on("hashes", (e: CustomEvent<{ piecesRoot: Uint8Array; baseLayer: number; index: number; length: number; proofLayers: number; hashes: Uint8Array }>) => {
     const detail = e.detail;
     assertEquals(detail.piecesRoot.length, 32);
     assertEquals(detail.baseLayer, 1);
@@ -840,7 +840,7 @@ Deno.test("wire: dispatches new BEP 52 events when negotiated", async () => {
 
   // Test hashReject event
   let hashRejectReceived = false;
-  wireB.on("hashReject", (e: CustomEvent<any>) => {
+  wireB.on("hashReject", (e: CustomEvent<{ piecesRoot: Uint8Array; baseLayer: number; index: number; length: number; proofLayers: number }>) => {
     const detail = e.detail;
     assertEquals(detail.piecesRoot.length, 32);
     assertEquals(detail.baseLayer, 2);
@@ -885,8 +885,8 @@ Deno.test("wire: uploadSpeed and downloadSpeed are writable for testing", () => 
     close: () => {},
   });
   // Internal fields are accessible via the instance
-  (wire as any)._uploadSpeed = 12345;
-  (wire as any)._downloadSpeed = 67890;
+  (wire as unknown as { _uploadSpeed: number })._uploadSpeed = 12345;
+  (wire as unknown as { _downloadSpeed: number })._downloadSpeed = 67890;
   assertEquals(wire.uploadSpeed, 12345);
   assertEquals(wire.downloadSpeed, 67890);
 });

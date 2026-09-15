@@ -69,7 +69,7 @@ export class UtPexExtension extends Extension {
   private _extensionId: number | null = null;
 
   /** Create a bounded PEX codec and notification endpoint. */
-  constructor(wire: any, options: UtPexOptions = {}) {
+  constructor(wire: Wire, options: UtPexOptions = {}) {
     super(wire);
     this.minSendIntervalMs = options.minSendIntervalMs ?? 60_000;
     this.maxPeersPerMessage = options.maxPeersPerMessage ?? 100;
@@ -87,7 +87,7 @@ export class UtPexExtension extends Extension {
    * Called when the extended handshake is received.
    * Registers this extension if the peer supports ut_pex.
    */
-  public onExtendedHandshake(handshake: any): void {
+  public onExtendedHandshake(handshake: Record<string, unknown>): void {
     if (handshake.m && typeof handshake.m[UT_PEX_NAME] === "number") {
       this._extensionId = handshake.m[UT_PEX_NAME];
       this.emit("info", new CustomEvent("info", {
@@ -128,7 +128,7 @@ export class UtPexExtension extends Extension {
    * Send a bounded update without dialing or modifying any swarm state.
    * BEP 11 limits production senders to one update per minute.
    */
-  public async send(update: PexUpdate): Promise<void> {
+  public send(update: PexUpdate): Promise<void> {
     if (this._extensionId === null) {
       throw new Error("ut_pex is not registered (no extension ID from extended handshake)");
     }
@@ -144,6 +144,7 @@ export class UtPexExtension extends Extension {
     const payload = encodePexUpdate(update);
     this.wire.extended(this._extensionId, payload);
     this._lastSentAt = now;
+    return Promise.resolve();
   }
 }
 

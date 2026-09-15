@@ -1,4 +1,4 @@
-// TODO IA: no novo worker-db, função ls(), "id" deverá ser "_id" para debug @djones
+// TODO(@djones): no novo worker-db, função ls(), "id" deverá ser "_id" para debug
 export interface DebugLogPayload {
   id: string;
   timestamp: string;

@@ -8,7 +8,7 @@ import type { Wire } from "../core/wire.ts";
 
 export interface SwarmEvents {
   peer: CustomEvent<{ peer: Peer; source: string }>;
-  wire: CustomEvent<{ wire: any; addr: string }>;
+  wire: CustomEvent<{ wire: Wire; addr: string }>;
   error: CustomEvent<{ error: Error }>;
   warning: CustomEvent<{ error: Error }>;
   trackerAnnounce: Event;
@@ -47,7 +47,7 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
   private metadata?: Uint8Array;
 
   /** Torrent dono deste swarm. Definido externamente (ver WebTorrent.add). */
-  public torrent: any | null = null;
+  public torrent: unknown | null = null;
 
   public destroyed = false;
   private paused = false;
@@ -144,8 +144,8 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
   throttleDownload(rate: number): void {
     this._downloadLimit = Math.max(0, rate);
     for (const peer of this.peers.values()) {
-      if (peer.wire && !(peer.wire as any).isDestroyed) {
-        (peer.wire as any).throttleDownload?.(this._downloadLimit);
+      if (peer.wire && !(peer.wire as unknown as { isDestroyed?: boolean }).isDestroyed) {
+        (peer.wire as unknown as { throttleDownload?: (rate: number) => void }).throttleDownload?.(this._downloadLimit);
       }
     }
   }
@@ -157,8 +157,8 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
   throttleUpload(rate: number): void {
     this._uploadLimit = Math.max(0, rate);
     for (const peer of this.peers.values()) {
-      if (peer.wire && !(peer.wire as any).isDestroyed) {
-        (peer.wire as any).throttleUpload?.(this._uploadLimit);
+      if (peer.wire && !(peer.wire as unknown as { isDestroyed?: boolean }).isDestroyed) {
+        (peer.wire as unknown as { throttleUpload?: (rate: number) => void }).throttleUpload?.(this._uploadLimit);
       }
     }
   }
@@ -265,14 +265,14 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
         }
 
         // Registra listener para quando o metadata for recebido
-        utMetadata.on("metadata", (metadataEvent: any) => {
+        utMetadata.on("metadata", (metadataEvent: CustomEvent<{ metadata: Uint8Array }>) => {
           const metadata = metadataEvent.detail?.metadata || metadataEvent;
           this.emit("metadata", new CustomEvent("metadata", {
             detail: { metadata, peer }
           }));
         });
 
-        utMetadata.on("warning", (warningEvent: any) => {
+        utMetadata.on("warning", (warningEvent: CustomEvent<{ error: Error }>) => {
           const error = warningEvent.detail?.error || warningEvent;
           this.emit("warning", new CustomEvent("warning", { detail: { error } }));
           this.torrent?.emit?.("warning", new CustomEvent("warning", { detail: { error } }));

@@ -119,7 +119,7 @@ export interface ServiceWorkerControllerLike {
    * `navigator.serviceWorker.addEventListener('message', ...)` handler
    * that filters by the `MessageEvent.source.id`.
    */
-  waitForMessage(sourceId: string): Promise<any>;
+  waitForMessage(sourceId: string): Promise<unknown>;
 }
 
 /**
@@ -134,7 +134,7 @@ export function createServiceWorkerTransport(
   const PORT_TIMEOUT_MS = 5000;
   const pending = new Map<string, (data: StreamResponseMetadata) => void>();
 
-  const onMessage = (event: any) => {
+  const onMessage = (event: unknown) => {
     if (!event.data || typeof event.data !== "object") return;
     if (event.data.type === "webtorrent-response" && typeof event.data.sourceId === "string") {
       const resolver = pending.get(event.data.sourceId);
@@ -268,12 +268,12 @@ export class WebTorrentServer {
    *   the method exists so future revisions can opt into a stricter
    *   round-trip without changing the public API.
    */
-  async sendReadyAck(): Promise<boolean> {
-    if (this.isDestroyed) return false;
+  sendReadyAck(): Promise<boolean> {
+    if (this.isDestroyed) return Promise.resolve(false);
     const ack: WebTorrentAckMessage = { type: "WEBTORRENT_ACK" };
     this.transport.postMessage(ack);
     this.isReady = true;
-    return true;
+    return Promise.resolve(true);
   }
 
   /**
@@ -292,17 +292,17 @@ export class WebTorrentServer {
    *   URL is unknown the method returns a `404`; when the SW is not
    *   ready it returns a `503`.
    */
-  async handleRequest(
+  handleRequest(
     message: StreamRequestMessage,
     port: MessagePort,
   ): Promise<Response> {
     if (this.isDestroyed) {
-      return new Response("Server destroyed", { status: 503 });
+      return Promise.resolve(new Response("Server destroyed", { status: 503 }));
     }
 
     const parsed = parseStreamURL(message.url, message.scope || this.scope);
     if (!parsed) {
-      return new Response("Not Found", { status: 404 });
+      return Promise.resolve(new Response("Not Found", { status: 404 }));
     }
 
     const entry: StreamEntry | undefined = streamManager.get(
@@ -310,7 +310,7 @@ export class WebTorrentServer {
       parsed.fileIndex,
     );
     if (!entry) {
-      return new Response("File not registered", { status: 404 });
+      return Promise.resolve(new Response("File not registered", { status: 404 }));
     }
 
     const range = parseRangeHeader(message.headers["range"], entry.file.length);
@@ -335,11 +335,11 @@ export class WebTorrentServer {
       rangeStart: range?.start,
       rangeEnd: range ? range.end + 1 : undefined,
     });
-    return new Response(stream, {
+    return Promise.resolve(new Response(stream, {
       status,
       statusText,
       headers,
-    });
+    }));
   }
 
   /**
@@ -533,7 +533,7 @@ export async function readNextChunk(
   // scan until we hit the requested offset.  Once the real
   // implementation lands (Phase 4.1) this function will be replaced
   // by a direct chunk-store read.
-  const it = (file as any)[Symbol.asyncIterator]() as AsyncIterableIterator<Uint8Array>;
+  const it = (file as unknown as { [Symbol.asyncIterator]: () => AsyncIterator<Uint8Array> })[Symbol.asyncIterator]() as AsyncIterableIterator<Uint8Array>;
   let skipped = 0;
   const remainingToRead = Math.min(length, file.length - offset);
 
@@ -643,7 +643,7 @@ export function createServer(opts: CreateServerOptions = {}): WebTorrentServer {
     transport = opts.transport;
     scope = opts.scope || "/";
   } else if (opts.controller) {
-    scope = opts.scope || (opts.controller as any).scope || "/";
+    scope = opts.scope || (opts.controller as unknown as { scope?: string }).scope || "/";
     transport = createServiceWorkerTransport(opts.controller, scope);
   } else {
     scope = opts.scope || "/";

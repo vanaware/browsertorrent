@@ -53,12 +53,16 @@ export class OPFSChunkStore implements ChunkStore {
   get(index: number, opts: { offset?: number; length?: number }, cb: (err: Error | null, buf?: Uint8Array) => void): void;
   
   // ── Implementation (SEM a palavra-chave 'async') ──
-  get(index: number, optsOrCb?: any, cb?: any): Promise<Uint8Array> | void {
+  get(
+      index: number,
+      optsOrCb?: { offset?: number; length?: number } | ((err: Error | null, buf?: Uint8Array) => void),
+      cb?: (err: Error | null, buf?: Uint8Array) => void,
+    ): Promise<Uint8Array> | void {
     if (this.fallbackStore) {
       if (typeof optsOrCb === "function") {
         return this.fallbackStore.get(index, optsOrCb);
       }
-      return this.fallbackStore.get(index, optsOrCb as any, cb as any);
+      return this.fallbackStore.get(index, optsOrCb, cb);
     }
 
     const opts = typeof optsOrCb === "object" ? optsOrCb : undefined;
@@ -100,17 +104,17 @@ export class OPFSChunkStore implements ChunkStore {
       }
       
       return buf;
-    } catch (err: any) {
-      if (err.name === "NotFoundError") {
+    } catch (err: unknown) {
+      if (err && typeof err === "object" && "name" in err && err.name === "NotFoundError") {
         const error = new Error(`Chunk ${index} not found`);
-        (error as any).notFound = true;
+        (error as unknown as { notFound?: boolean }).notFound = true;
         throw error;
       }
       throw err;
     }
   }
 
-  async put(index: number, buf: Uint8Array, cb?: (err: Error | null) => void): Promise<void> {
+  put(index: number, buf: Uint8Array, cb?: (err: Error | null) => void): Promise<void> {
     const promise = this._putAsync(index, buf);
     if (cb) {
       promise.then(() => cb(null)).catch((err) => cb(err));
@@ -121,20 +125,20 @@ export class OPFSChunkStore implements ChunkStore {
   private async _putAsync(index: number, buf: Uint8Array): Promise<void> {
     if (this.closed) throw new Error("Storage is closed");
     if (!this.rootDir) throw new Error("OPFS root directory not available");
-    
+
     const isLastChunk = index === this.lastChunkIndex;
     const expectedLength = isLastChunk ? this.lastChunkLength : this.chunkLength;
-    
+
     if (buf.length !== expectedLength) {
       throw new Error(`Invalid chunk length: expected ${expectedLength}, got ${buf.length}`);
     }
-    
+
     const fileName = `${index}.chunk`;
-    
+
     try {
       const fileHandle = await this.rootDir.getFileHandle(fileName, { create: true });
       const writable = await fileHandle.createWritable();
-      
+
       // Cast explícito para satisfazer o Deno
       const arrayBuffer = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer;
       await writable.write(arrayBuffer);
@@ -144,7 +148,7 @@ export class OPFSChunkStore implements ChunkStore {
     }
   }
 
-  async close(cb?: (err: Error | null) => void): Promise<void> {
+  close(cb?: (err: Error | null) => void): Promise<void> {
     const promise = this._closeAsync();
     if (cb) {
       promise.then(() => cb(null)).catch((err) => cb(err));
@@ -152,13 +156,14 @@ export class OPFSChunkStore implements ChunkStore {
     return promise;
   }
 
-  private async _closeAsync(): Promise<void> {
+  private _closeAsync(): Promise<void> {
     if (this.closed) throw new Error("Storage is already closed");
     this.closed = true;
     this.rootDir = null;
+    return Promise.resolve();
   }
 
-  async destroy(cb?: (err: Error | null) => void): Promise<void> {
+  destroy(cb?: (err: Error | null) => void): Promise<void> {
     const promise = this._destroyAsync();
     if (cb) {
       promise.then(() => cb(null)).catch((err) => cb(err));
@@ -171,9 +176,9 @@ export class OPFSChunkStore implements ChunkStore {
       this.closed = true;
       return;
     }
-    
+
     try {
-      for await (const entry of (this.rootDir as any).values()) {
+      for await (const entry of (this.rootDir as unknown as { values: () => AsyncIterable<FileSystemHandle> }).values()) {
         if (entry.kind === "file") {
           await this.rootDir.removeEntry(entry.name);
         }
@@ -181,7 +186,7 @@ export class OPFSChunkStore implements ChunkStore {
     } catch (err) {
       console.warn("[OPFSChunkStore] Error during destroy:", err);
     }
-    
+
     this.closed = true;
     this.rootDir = null;
   }

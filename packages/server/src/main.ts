@@ -1,16 +1,16 @@
 /// <reference lib="deno.ns" />
 
-import { serveDir } from "@std/http/file-server";
+import { serveDir, } from "@std/http/file-server";
 
-const port = Number(Deno.env.get("PORT") ?? 8000);
+const port = Number(Deno.env.get("PORT",) ?? 3000,);
 
-Deno.serve({ port }, async (req) => {
+Deno.serve({ port, }, async (req,) => {
   try {
     const staticResponse = await serveDir(req, {
       fsRoot: "./build/dist",
       showDirListing: false,
       quiet: true,
-    });
+    },);
 
     return staticResponse;
   } catch (err) {
@@ -21,7 +21,7 @@ Deno.serve({ port }, async (req) => {
 
     return new Response("Internal Server Error", {
       status: 500,
-      headers: { "content-type": "text/plain; charset=utf-8" },
-    });
+      headers: { "content-type": "text/plain; charset=utf-8", },
+    },);
   }
-});
+},);

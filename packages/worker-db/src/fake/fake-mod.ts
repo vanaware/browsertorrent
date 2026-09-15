@@ -4,13 +4,13 @@ import 'fake-indexeddb/auto';
 import { FakeOPFSDirectory, } from './fake-opfs.ts';
 import { FakeLocalStorage, } from './fake-local-storage.ts';
 
-const _global = globalThis as any;
+const _global = globalThis as unknown as { localStorage?: FakeLocalStorage; navigator?: { storage?: { getDirectory?: () => Promise<FakeOPFSDirectory> } } };
 
 // 2. Injeta OPFS Fake (Main Thread)
 if (!_global.navigator) _global.navigator = {};
 if (!_global.navigator.storage) _global.navigator.storage = {};
 if (!_global.navigator.storage.getDirectory) {
-  _global.navigator.storage.getDirectory = async () => new FakeOPFSDirectory();
+  _global.navigator.storage.getDirectory = () => Promise.resolve(new FakeOPFSDirectory());
 }
 
 // 3. Injeta LocalStorage Fake (Main Thread)

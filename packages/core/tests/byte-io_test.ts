@@ -19,12 +19,12 @@ import {
 function sliceReader(source: Uint8Array, chunkSize = source.length): ByteReader {
   let offset = 0;
   return {
-    async read(p: Uint8Array): Promise<number | null> {
-      if (offset >= source.length) return null;
+    read(p: Uint8Array): Promise<number | null> {
+      if (offset >= source.length) return Promise.resolve(null);
       const n = Math.min(p.length, chunkSize, source.length - offset);
       p.set(source.subarray(offset, offset + n));
       offset += n;
-      return n;
+      return Promise.resolve(n);
     },
   };
 }
@@ -34,11 +34,11 @@ function collectingWriter(chunkSize = Infinity): ByteWriter & { bytes: Uint8Arra
   const chunks: Uint8Array[] = [];
   let total = 0;
   return {
-    async write(p: Uint8Array): Promise<number> {
+    write(p: Uint8Array): Promise<number> {
       const n = Math.min(p.length, chunkSize);
       chunks.push(p.slice(0, n));
       total += n;
-      return n;
+      return Promise.resolve(n);
     },
     get bytes(): Uint8Array {
       const result = new Uint8Array(total);
@@ -85,12 +85,12 @@ Deno.test("readExactly — throws UnexpectedEofError on short read", async () =>
   // Reader yields 2 bytes total then EOF
   let remaining = 2;
   const reader: ByteReader = {
-    async read(p: Uint8Array): Promise<number | null> {
-      if (remaining <= 0) return null;
+    read(p: Uint8Array): Promise<number | null> {
+      if (remaining <= 0) return Promise.resolve(null);
       const n = Math.min(p.length, remaining);
       for (let i = 0; i < n; i++) p[i]! = 0xaa;
       remaining -= n;
-      return n;
+      return Promise.resolve(n);
     },
   };
   const target = new Uint8Array(5);
@@ -104,8 +104,8 @@ Deno.test("readExactly — throws UnexpectedEofError on short read", async () =>
 
 Deno.test("readExactly — allowCleanEof returns false on immediate EOF", async () => {
   const reader: ByteReader = {
-    async read(_p: Uint8Array): Promise<number | null> {
-      return null;
+    read(_p: Uint8Array): Promise<number | null> {
+      return Promise.resolve(null);
     },
   };
   const target = new Uint8Array(4);
@@ -116,13 +116,13 @@ Deno.test("readExactly — allowCleanEof returns false on immediate EOF", async 
 Deno.test("readExactly — allowCleanEof still throws on partial EOF", async () => {
   let callCount = 0;
   const reader: ByteReader = {
-    async read(p: Uint8Array): Promise<number | null> {
+    read(p: Uint8Array): Promise<number | null> {
       callCount++;
       if (callCount === 1) {
         p[0]! = 0xff;
-        return 1;
+        return Promise.resolve(1);
       }
-      return null;
+      return Promise.resolve(null);
     },
   };
   const target = new Uint8Array(3);
@@ -134,8 +134,8 @@ Deno.test("readExactly — allowCleanEof still throws on partial EOF", async () 
 
 Deno.test("readExactly — throws InvalidByteCountError on zero read", async () => {
   const reader: ByteReader = {
-    async read(_p: Uint8Array): Promise<number | null> {
-      return 0;
+    read(_p: Uint8Array): Promise<number | null> {
+      return Promise.resolve(0);
     },
   };
   const target = new Uint8Array(4);
@@ -171,8 +171,8 @@ Deno.test("writeAll — empty data is a no-op", async () => {
 
 Deno.test("writeAll — throws InvalidByteCountError on zero write", async () => {
   const writer: ByteWriter = {
-    async write(_p: Uint8Array): Promise<number> {
-      return 0;
+    write(_p: Uint8Array): Promise<number> {
+      return Promise.resolve(0);
     },
   };
   const err = await assertRejects(

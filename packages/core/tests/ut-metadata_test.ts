@@ -5,7 +5,7 @@ import { UtMetadata } from "../src/extensions/ut-metadata.ts";
 import { encode } from "../src/utils/bencode.ts";
 
 class MockWire {
-  public extendedHandshake: any = { metadata_size: 100 };
+  public extendedHandshake: Record<string, unknown> = { metadata_size: 100 };
   public extendedCalls: { type: string; payload: Uint8Array }[] = [];
 
   extended(type: string, payload: Uint8Array) {

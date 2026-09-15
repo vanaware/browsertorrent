@@ -69,6 +69,7 @@ export function SeederPanel({ disabled }: Props) {
       {/* Botão selecionar mídia */}
       {!isSeeding && (
         <button
+          type="button"
           class={selectedFile.value ? "tertiary" : ""}
           disabled={disabled}
           onClick={() => {
@@ -107,6 +108,7 @@ export function SeederPanel({ disabled }: Props) {
       {/* Botão Seed */}
       {!isSeeding && (
         <button
+          type="button"
           class={loading.value ? "loading" : ""}
           disabled={disabled || !selectedFile.value || loading.value}
           onClick={handleSeed}
@@ -131,6 +133,7 @@ export function SeederPanel({ disabled }: Props) {
           />
           <label>Magnet URI</label>
           <button
+            type="button"
             class="transparent front"
             onClick={handleCopyMagnet}
             title="Copiar magnet"

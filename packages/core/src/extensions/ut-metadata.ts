@@ -33,7 +33,7 @@ export class UtMetadata extends Extension {
   private _requestedPieces: Map<number, PieceRequest> = new Map();
   private _timeoutMs: number;
 
-  constructor(wire: any, opts?: UtMetadataOptions) {
+  constructor(wire: Wire, opts?: UtMetadataOptions) {
     super(wire);
     this._bitfield = new Bitfield({ length: 0, grow: 1000 });
     this._timeoutMs = opts?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
@@ -42,11 +42,11 @@ export class UtMetadata extends Extension {
     }
   }
 
-  public onHandshake(_infoHash: string, _peerId: string, _extensions: any) {
+  public onHandshake(_infoHash: string, _peerId: string, _extensions: Record<string, unknown>) {
     // Opcional
   }
 
-  public onExtendedHandshake(handshake: any) {
+  public onExtendedHandshake(handshake: Record<string, unknown>) {
     if (handshake.m && typeof handshake.m.ut_metadata === "number") {
       if (typeof handshake.metadata_size !== "number" || handshake.metadata_size > MAX_METADATA_SIZE || handshake.metadata_size <= 0) {
         this.emit("warning", new CustomEvent("warning", { detail: { error: new Error("Peer gave invalid metadata size") } }));
@@ -174,7 +174,7 @@ export class UtMetadata extends Extension {
     
     const msg: BencodeDict = { msg_type: 1, piece };
     if (typeof totalSize === "number") {
-      (msg as any).total_size = totalSize;
+      (msg as unknown as { total_size?: number }).total_size = totalSize;
     }
     this._send(msg, buf);
   }

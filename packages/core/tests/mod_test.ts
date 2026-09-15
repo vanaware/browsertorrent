@@ -32,7 +32,7 @@ function minimalParsedTorrent(infoHash: string,): ParsedTorrent {
     length: 16,
     pieceLength: 16,
     pieces: [new Uint8Array(20,),],
-    info: {} as any,
+    info: {} as unknown as ParsedTorrent["info"],
     magnetURI: "",
   };
 }
@@ -278,7 +278,7 @@ Deno.test("webtorrent: seed() throws on unsupported input type", async () => {
   const client = new Client();
   // null hits no instanceof branch → throws TypeError("Unsupported seed input")
   await assertRejects(
-    () => client.seed(null as any,),
+    () => client.seed(null as unknown as Uint8Array,),
     TypeError,
     "Unsupported seed input",
   );
@@ -301,8 +301,8 @@ Deno.test("webtorrent: emits 'add' event when torrent is added", async () => {
   const torrent = await client.add(bytes,);
   // The 'add' event detail contains the real torrent
   assertEquals(addEvent !== null, true,);
-  assertEquals(typeof (addEvent as any).detail.torrent.infoHash, "string",);
-  assertEquals((addEvent as any).detail.torrent.infoHash, torrent.infoHash,);
+  assertEquals(typeof (addEvent as unknown as { detail: { torrent: { infoHash: string } } }).detail.torrent.infoHash, "string",);
+  assertEquals((addEvent as unknown as { detail: { torrent: { infoHash: string } } }).detail.torrent.infoHash, torrent.infoHash,);
   client.destroy();
 });
 
@@ -322,7 +322,7 @@ Deno.test("webtorrent: emits 'remove' event when torrent is removed", async () =
   await client.remove(realInfoHash,);
 
   assertEquals(removeEvent !== null, true,);
-  assertEquals((removeEvent as any).detail.infoHash, realInfoHash,);
+  assertEquals((removeEvent as unknown as { detail: { infoHash: string } }).detail.infoHash, realInfoHash,);
   client.destroy();
 });
 
@@ -350,11 +350,13 @@ Deno.test("webtorrent: 'add' and 'remove' fire on torrent lifecycle", async () =
   let addIH: string | null = null;
   let removeIH: string | null = null;
 
-  client.on("add", (e: any,) => {
-    addIH = e.detail.torrent.infoHash;
+  client.on("add", (e) => {
+    const ev = e as unknown as CustomEvent<{ torrent: { infoHash: string } }>;
+    addIH = ev.detail.torrent.infoHash;
   },);
-  client.on("remove", (e: any,) => {
-    removeIH = e.detail.infoHash;
+  client.on("remove", (e) => {
+    const ev = e as unknown as CustomEvent<{ infoHash: string }>;
+    removeIH = ev.detail.infoHash;
   },);
 
   const torrent = await client.add(bytes,);

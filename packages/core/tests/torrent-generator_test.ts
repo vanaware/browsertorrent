@@ -118,12 +118,12 @@ function buildMockDir(
 
   const iterable = {
     _entries: entries,
-    async next() {
+    next() {
       // We store index on the iterable itself so each call to next() can
       // advance independently of the AsyncIterator call.
-      const i = (this as any)._idx = ((this as any)._idx ?? 0);
+      const i = (this as unknown as { _idx?: number })._idx = ((this as unknown as { _idx?: number })._idx ?? 0);
       if (i >= entries.length) return { done: true, value: undefined };
-      (this as any)._idx = i + 1;
+      (this as unknown as { _idx?: number })._idx = i + 1;
       const e = entries[i]!;
       if (e.kind === "file") {
         return { done: false, value: e.handle ?? mockFileHandle(e.name, new Uint8Array(0)) };
@@ -363,7 +363,7 @@ Deno.test("OPFSMultiFileReader: chunks() yields until exhausted", async () => {
   reader.close();
 });
 
-Deno.test("OPFSMultiFileReader: close is idempotent", async () => {
+Deno.test("OPFSMultiFileReader: close is idempotent", () => {
   const entries = [{ name: "a", size: 0, bytes: new Uint8Array(0) }].map(
     (f) => ({ name: f.name, size: f.size, handle: mockFileHandle(f.name, f.bytes) }),
   );

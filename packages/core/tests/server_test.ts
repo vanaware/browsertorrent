@@ -163,8 +163,8 @@ Deno.test("WebTorrentServer.handleRequest: parses file index from URL", async ()
   await server.sendReadyAck();
 
   // Register two files for the same torrent
-  const mock1 = new MockFile("video.mp4", 1024) as any;
-  const mock2 = new MockFile("audio.m4a", 512) as any;
+  const mock1 = new MockFile("video.mp4", 1024) as unknown as File;
+  const mock2 = new MockFile("audio.m4a", 512) as unknown as File;
   const infoHash = "a".repeat(40);
 
   streamManager.register(infoHash, 0, mock1);
@@ -204,7 +204,7 @@ Deno.test("WebTorrentServer.handleRequest: returns 206 for Range request", async
   const server = createServer({ scope: "/" });
   await server.sendReadyAck();
 
-  const mock = new MockFile("video.mp4", 1024) as any;
+  const mock = new MockFile("video.mp4", 1024) as unknown as File;
   const infoHash = "a".repeat(40); // 40 hex chars (valid infoHash)
   streamManager.register(infoHash, 0, mock);
 
@@ -240,7 +240,7 @@ Deno.test("WebTorrentServer.handleRequest: returns 200 when no Range header", as
   const server = createServer({ scope: "/" });
   await server.sendReadyAck();
 
-  const mock = new MockFile("video.mp4", 1024) as any;
+  const mock = new MockFile("video.mp4", 1024) as unknown as File;
   const infoHash = "b".repeat(40); // valid hex
   streamManager.register(infoHash, 0, mock);
 
@@ -274,7 +274,7 @@ Deno.test("WebTorrentServer.handleRequest: suffix range returns 206 with correct
   const server = createServer({ scope: "/" });
   await server.sendReadyAck();
 
-  const mock = new MockFile("video.mp4", 1024) as any;
+  const mock = new MockFile("video.mp4", 1024) as unknown as File;
   const infoHash = "c".repeat(40); // valid hex
   streamManager.register(infoHash, 0, mock);
 
@@ -310,7 +310,7 @@ Deno.test("InProcessTransport: records postMessage", () => {
   transport.postMessage({ type: "foo" });
 
   assertEquals(transport.sent.length, 2);
-  assertEquals((transport.sent[0] as any).type, "WEBTORRENT_ACK");
+  assertEquals((transport.sent[0] as unknown as { type: string }).type, "WEBTORRENT_ACK");
 
   transport.close();
 });
@@ -351,7 +351,7 @@ Deno.test("InProcessTransport: sendPull sends signal on port", () => {
   const fakePort = {
     addEventListener(_: string, cb: (e: { data: boolean }) => void) {
       // store callback to trigger later
-      (fakePort as any)._cb = cb;
+      (fakePort as unknown as { _cb: (e: { data: boolean }) => void })._cb = cb;
     },
     start() {},
     close() {},

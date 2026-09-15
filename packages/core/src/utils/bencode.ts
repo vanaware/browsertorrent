@@ -305,6 +305,7 @@ function _decodeByteString(
   // Isso preserva campos como "pieces" como Uint8Array.
   try {
     const str = _td.decode(bytes);
+    // deno-lint-ignore no-control-regex
     if (!str.includes("\uFFFD") && !/[\x00-\x08\x0B\x0C\x0E-\x1F]/.test(str)) {
       return [str, end];
     }

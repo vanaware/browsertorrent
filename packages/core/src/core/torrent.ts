@@ -40,7 +40,7 @@ export interface TorrentOptions {
   store: ChunkStore;
   skipVerify?: boolean;
   /** Swarm externo; quando fornecido, o Torrent delega pause/resume/select/deselect a ele */
-  swarm?: any;
+  swarm?: Swarm;
 }
 
 // ============================================================================
@@ -76,7 +76,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
   private _paused: boolean = false;
 
   /** Swarm ao qual delegamos operações de rede */
-  private _swarm?: any;
+  private _swarm?: Swarm;
   /** Bitfield de peças selecionadas */
   private _selected: Bitfield;
   /** Bitfield de peças críticas */
@@ -537,8 +537,8 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
             piece.hash = this.expectedPieces[i];
           }
         }
-      } catch (err: any) {
-        if (!err.notFound) {
+      } catch (err: unknown) {
+        if (err && typeof err === "object" && "notFound" in err && !err.notFound) {
           console.warn(`[Torrent] Erro ao verificar peça ${i}:`, err,);
         }
       }

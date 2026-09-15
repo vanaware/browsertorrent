@@ -287,12 +287,12 @@ Deno.test("magnet: parse rejects oversized parameter", () => {
 
 Deno.test("magnet: parse option validation", () => {
   assertThrows(
-    () => parseMagnet("magnet:?xt=urn:btih:" + "a".repeat(40), { maxLength: 0 as any }),
+    () => parseMagnet("magnet:?xt=urn:btih:" + "a".repeat(40), { maxLength: 0 }),
     TypeError,
     "maxLength",
   );
   assertThrows(
-    () => parseMagnet("magnet:?xt=urn:btih:" + "a".repeat(40), { maxQueryParameters: -1 as any }),
+    () => parseMagnet("magnet:?xt=urn:btih:" + "a".repeat(40), { maxQueryParameters: -1 }),
     TypeError,
     "maxQueryParameters",
   );

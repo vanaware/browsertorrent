@@ -8,7 +8,7 @@ import {
   type ExtendedHandshake,
   type PeerWireExtensionContext,
 } from "../src/core/extension-host.ts";
-import { encode, decode } from "../src/utils/bencode.ts";
+import { encode, decode, type BencodeValue } from "../src/utils/bencode.ts";
 import { PeerWireError, ProtocolError } from "../src/utils/errors.ts";
 
 // ============================================================================
@@ -26,7 +26,7 @@ function createMockHost(options?: {
 } {
   const sent: Array<[number, Uint8Array]> = [];
   const host = new ExtensionHost({
-    send: async (id, payload) => { sent.push([id, payload]); },
+    send: (id, payload) => { sent.push([id, payload]); return Promise.resolve(); },
     client: options?.client,
     port: options?.port,
     maxPayloadLength: options?.maxPayloadLength,
@@ -53,8 +53,8 @@ class TestExtension implements PeerWireExtension {
     this.context = context;
   }
 
-  handshakeFields(): Map<string, any> {
-    const fields = new Map<string, any>();
+  handshakeFields(): ReadonlyMap<string, BencodeValue> {
+    const fields = new Map<string, BencodeValue>();
     fields.set("test_field", 42);
     return fields;
   }
@@ -156,7 +156,7 @@ Deno.test("ExtensionHost: constructor sets client/port/reqq fields", () => {
   assertEquals(sent.length, 1);
   const [id, payload] = sent[0]!;
   assertEquals(id, 0); // extended handshake ID = 0
-  const decoded = decode(payload, { useMap: true }) as Map<string, any>;
+  const decoded = decode(payload, { useMap: true }) as Map<string, BencodeValue>;
   assertEquals(decoded.get("v"), "Loco/1.0");
   assertEquals(decoded.get("p"), 6881);
 });
@@ -175,8 +175,8 @@ Deno.test("ExtensionHost: sendHandshake includes m mapping and extension fields"
   const [id, payload] = sent[0]!;
   assertEquals(id, 0);
 
-  const decoded = decode(payload, { useMap: true }) as Map<string, any>;
-  const m = decoded.get("m") as Map<string, any>;
+  const decoded = decode(payload, { useMap: true }) as Map<string, BencodeValue>;
+  const m = decoded.get("m") as Map<string, BencodeValue>;
   assertEquals(m.get("ut_test"), 1);
   assertEquals(decoded.get("test_field"), 42);
 });
@@ -238,7 +238,7 @@ Deno.test("ExtensionHost: handle() processes extended handshake (id=0)", async (
   host.use(ext);
 
   // Build a peer extended handshake
-  const handshakeDict = new Map<string, any>();
+  const handshakeDict = new Map<string, BencodeValue>();
   const m = new Map<string, number>();
   m.set("ut_test", 5);
   handshakeDict.set("m", m);
@@ -299,7 +299,7 @@ Deno.test("ExtensionHost: re-handshake is additive (zero disables)", async () =>
   const { host } = createMockHost();
 
   // First handshake: ut_test = 5, ut_other = 7
-  const hs1 = new Map<string, any>();
+  const hs1 = new Map<string, BencodeValue>();
   const m1 = new Map<string, number>();
   m1.set("ut_test", 5);
   m1.set("ut_other", 7);
@@ -309,7 +309,7 @@ Deno.test("ExtensionHost: re-handshake is additive (zero disables)", async () =>
   assertEquals(host.peerExtensions.get("ut_other"), 7);
 
   // Second handshake: ut_test = 0 (disable), ut_other stays
-  const hs2 = new Map<string, any>();
+  const hs2 = new Map<string, BencodeValue>();
   const m2 = new Map<string, number>();
   m2.set("ut_test", 0);
   hs2.set("m", m2);
@@ -324,7 +324,7 @@ Deno.test("ExtensionHost: re-handshake is additive (zero disables)", async () =>
 
 Deno.test("ExtensionHost: waitForPeerHandshake resolves immediately if already received", async () => {
   const { host } = createMockHost();
-  const hs = new Map<string, any>();
+  const hs = new Map<string, BencodeValue>();
   hs.set("m", new Map());
   await host.handle({ type: "extended", extensionId: 0, payload: encode(hs) });
 
@@ -343,7 +343,7 @@ Deno.test("ExtensionHost: waitForPeerHandshake waits for first handshake", async
   assertEquals(resolved, false);
 
   // Send handshake
-  const hs = new Map<string, any>();
+  const hs = new Map<string, BencodeValue>();
   const m = new Map<string, number>();
   m.set("ut_test", 3);
   hs.set("m", m);
@@ -387,7 +387,7 @@ Deno.test("ExtensionHost: close() clears handshake waiters", () => {
 // ============================================================================
 
 Deno.test("decodeExtendedHandshake: valid handshake", () => {
-  const dict = new Map<string, any>();
+  const dict = new Map<string, BencodeValue>();
   const m = new Map<string, number>();
   m.set("ut_metadata", 2);
   m.set("ut_pex", 3);
@@ -414,15 +414,15 @@ Deno.test("decodeExtendedHandshake: rejects non-dictionary payload", () => {
 });
 
 Deno.test("decodeExtendedHandshake: rejects non-Map m field", () => {
-  const dict = new Map<string, any>();
+  const dict = new Map<string, BencodeValue>();
   dict.set("m", "not_a_map");
   const payload = encode(dict);
   assertThrows(() => decodeExtendedHandshake(payload), ProtocolError);
 });
 
 Deno.test("decodeExtendedHandshake: rejects invalid mapping entry", () => {
-  const dict = new Map<string, any>();
-  const m = new Map<string, any>();
+  const dict = new Map<string, BencodeValue>();
+  const m = new Map<string, BencodeValue>();
   m.set("ut_test", -1); // negative ID
   dict.set("m", m);
   const payload = encode(dict);
@@ -430,7 +430,7 @@ Deno.test("decodeExtendedHandshake: rejects invalid mapping entry", () => {
 });
 
 Deno.test("decodeExtendedHandshake: yourip as Uint8Array", () => {
-  const dict = new Map<string, any>();
+  const dict = new Map<string, BencodeValue>();
   dict.set("m", new Map());
   dict.set("yourip", new Uint8Array([127, 0, 0, 1]));
   const payload = encode(dict);
@@ -439,7 +439,7 @@ Deno.test("decodeExtendedHandshake: yourip as Uint8Array", () => {
 });
 
 Deno.test("decodeExtendedHandshake: rejects invalid port", () => {
-  const dict = new Map<string, any>();
+  const dict = new Map<string, BencodeValue>();
   dict.set("m", new Map());
   dict.set("p", 70000); // > 0xffff
   const payload = encode(dict);

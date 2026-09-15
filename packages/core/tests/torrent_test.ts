@@ -95,10 +95,10 @@ Deno.test("torrent: receives valid piece, updates bitfield and emits events", as
   let downloadedBytes = 0;
   let verifiedIndex = -1;
 
-  torrent.on("download", (e: any,) => {
+  torrent.on("download", (e: CustomEvent<{ bytes: number }>,) => {
     downloadedBytes += e.detail.bytes;
   },);
-  torrent.on("verified", (e: any,) => {
+  torrent.on("verified", (e: CustomEvent<{ index: number }>,) => {
     verifiedIndex = e.detail.index;
   },);
 
@@ -200,7 +200,11 @@ Deno.test("torrent: integration - setMetadata dynamically updates torrent state 
   const infoBuffer = encode(infoDict,);
 
   let metadataEventEmitted = false;
-  torrent.on("metadata", (e: any,) => {
+  torrent.on("metadata", (e: CustomEvent<{
+    files: Array<{ name: string }>;
+    length: number;
+    name: string;
+  }>,) => {
     metadataEventEmitted = true;
     assertEquals(e.detail.name, "loco-update-v2.zip",);
     assertEquals(e.detail.length, 2048,);
@@ -740,7 +744,7 @@ Deno.test("torrent: timeRemaining returns a number when downloadSpeed > 0 and pr
   await new Promise<void>((resolve,) => torrent.on("ready", () => resolve(),));
 
   // Simulate a download speed by setting private field
-  (torrent as any)._downloadSpeed = 1024; // 1 KiB/s
+  (torrent as unknown as { _downloadSpeed: number })._downloadSpeed = 1024; // 1 KiB/s
   // 2048 bytes total, 0 downloaded → 2048 / 1024 = 2 seconds
   const remaining = torrent.timeRemaining;
   assertEquals(typeof remaining, "number",);
@@ -761,7 +765,7 @@ Deno.test("torrent: timeRemaining calculates correctly with partial progress", a
   await torrent.receivePiece(0, piece1,);
 
   // 1024 bytes downloaded out of 2048, speed = 512 bytes/s → 1024/512 = 2s
-  (torrent as any)._downloadSpeed = 512;
+  (torrent as unknown as { _downloadSpeed: number })._downloadSpeed = 512;
   const remaining = torrent.timeRemaining;
   assertEquals(typeof remaining, "number",);
   assertEquals(remaining, 2,);

@@ -468,6 +468,14 @@ export interface ScrapeResponse {
  * @param infoHashes - Array of 20-byte info hashes.
  * @param opts - Optional timeout.
  */
+function mapToDict(m: BencodeMap): BencodeDict {
+  const out: BencodeDict = {};
+  for (const [k, v] of m) {
+    if (typeof k === "string") out[k] = v;
+  }
+  return out;
+}
+
 export async function scrapeTracker(
   trackerUrl: string,
   infoHashes: Uint8Array[],
@@ -516,15 +524,6 @@ export async function scrapeTracker(
 
     const files: ScrapeResponse["files"] = {};
 
-    // Map<string,unknown> -> BencodeDict so dict helpers work
-    function mapToDict(m: BencodeMap): BencodeDict {
-      const out: BencodeDict = {};
-      for (const [k, v] of m) {
-        if (typeof k === "string") out[k] = v;
-      }
-      return out;
-    }
-
     for (const [key, value] of dict) {
       if (typeof key !== "string") continue;
       if (key === "flags") continue;
@@ -569,7 +568,7 @@ export class WsTracker implements Tracker {
     this.opts = opts;
   }
 
-  async announce(event?: TrackerAnnounceEvent): Promise<TrackerResponse> {
+  announce(event?: TrackerAnnounceEvent): Promise<TrackerResponse> {
     return new Promise((resolve, reject) => {
       try {
         this.ws = new WebSocket(this.url);

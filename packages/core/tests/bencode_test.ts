@@ -213,11 +213,11 @@ Deno.test("bencode: encode sorts Map keys by byte-raw order", () => {
 // ============================================================================
 
 Deno.test("bencode: encode rejects unsafe integer", () => {
-  assertThrows(() => encode(1.5 as any), BencodeEncodeError, "safe integer");
+  assertThrows(() => encode(1.5 as unknown as BencodeValue), BencodeEncodeError, "safe integer");
 });
 
 Deno.test("bencode: encode rejects unsupported types", () => {
-  assertThrows(() => encode(null as any), BencodeEncodeError, "unsupported");
+  assertThrows(() => encode(null as unknown as BencodeValue), BencodeEncodeError, "unsupported");
 });
 
 Deno.test("bencode: encode rejects cyclic data", () => {

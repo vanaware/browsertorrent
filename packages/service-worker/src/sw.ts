@@ -108,6 +108,11 @@ function handleStream(req: Request, url: URL): Promise<Response> {
 
     const dest = guessDestination(url.pathname);
 
+    let bodyController: ReadableStreamDefaultController<Uint8Array> | null = null;
+    let closed = false;
+    let pendingPullResolve: (() => void) | null = null;
+    let pendingPull: Promise<void> = Promise.resolve();
+
     // ── chunkPort1: receber chunks de main ─────────────────────────────
     chunkPort1.onmessage = (ev: MessageEvent) => {
       const chunk = ev.data;
@@ -186,10 +191,6 @@ function handleStream(req: Request, url: URL): Promise<Response> {
       // ── Streaming response ─────────────────────────────────────────
       console.log("[sw] STREAM response, building ReadableStream…");
       const headers = new Headers(metadata.headers ?? {});
-      let bodyController: ReadableStreamDefaultController<Uint8Array> | null = null;
-      let closed = false;
-      let pendingPullResolve: (() => void) | null = null;
-      let pendingPull: Promise<void> = Promise.resolve();
 
       function doPull(controller: ReadableStreamDefaultController<Uint8Array>) {
         if (closed || pendingPullResolve !== null) return;

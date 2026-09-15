@@ -4,6 +4,24 @@ import { assert, assertEquals, } from '@std/assert';
 import { db, ls, } from '../src/fake/fake-mod.ts';
 import { FakeOPFSDirectory, } from '../src/fake/fake-opfs.ts';
 
+interface LsItem {
+  data: string;
+}
+
+interface KeyVal {
+  theme: string;
+}
+
+interface BackupItem {
+  text: string;
+}
+
+interface LsBackupItem {
+  theme: string;
+  notifications: boolean;
+  alias?: string;
+}
+
 Deno.test({
   name: 'ISOLATION - LS: Garantir que instâncias com prefixos diferentes não colidam',
   sanitizeOps: false,
@@ -18,13 +36,13 @@ Deno.test({
     storeA.set('1', { data: 'from A', },);
     storeB.set('1', { data: 'from B', },);
 
-    assertEquals(storeA.get<any>('1',)?.data, 'from A',);
-    assertEquals(storeB.get<any>('1',)?.data, 'from B',);
+    assertEquals(storeA.get<LsItem>('1',)?.data, 'from A',);
+    assertEquals(storeB.get<LsItem>('1',)?.data, 'from B',);
 
     storeA.clear();
     assertEquals(storeA.keys().length, 0,);
     assertEquals(storeB.keys().length, 1,);
-    assertEquals(storeB.get<any>('1',)?.data, 'from B',);
+    assertEquals(storeB.get<LsItem>('1',)?.data, 'from B',);
   },
 },);
 
@@ -45,9 +63,9 @@ Deno.test({
     await dbApp1.set('config', { theme: 'dark', },);
     await dbApp2.set('config', { theme: 'light', },);
 
-    const app1Vals = await dbApp1.values<any>();
+    const app1Vals = await dbApp1.values<KeyVal>();
     assertEquals(app1Vals.length, 1,);
-    assertEquals(app1Vals[0].theme, 'dark',);
+    assertEquals(app1Vals[0]!.theme, 'dark',);
 
     const exportApp2 = await dbApp2.exportDB();
     assert(Object.keys(exportApp2,).includes('APP_2_config',),);
@@ -86,10 +104,10 @@ Deno.test({
 
     // Restore indicando a recordKey isolada
     await store.restoreFromOpfs(recordKey, 'meu_backup_db.json',);
-    const restored = await store.values<any>();
+    const restored = await store.values<BackupItem>();
     assertEquals(restored.length, 2,);
 
-    const k1 = await store.get<any>('k1',);
+    const k1 = await store.get<BackupItem>('k1',);
     assertEquals(k1?.text, 'Hello OPFS DB',);
 
     FakeOPFSDirectory.clear();
@@ -130,11 +148,11 @@ Deno.test({
     const restoredKeys = store.keys();
     assertEquals(restoredKeys.length, 2,);
 
-    const config = store.get<any>('config',);
+    const config = store.get<LsBackupItem>('config',);
     assertEquals(config?.theme, 'dark',);
     assertEquals(config?.notifications, true,);
 
-    const perfil = store.get<any>('perfil',);
+    const perfil = store.get<LsBackupItem>('perfil',);
     assertEquals(perfil?.alias, 'Satoshi',);
 
     FakeOPFSDirectory.clear();

@@ -15,6 +15,7 @@ export function DebugPanel() {
         <h5>Debug Log</h5>
         <span class="chip">{logs.length} msgs</span>
         <button
+          type="button"
           class="transparent"
           onClick={(e) => {
             e.stopPropagation();
@@ -24,7 +25,7 @@ export function DebugPanel() {
         >
           <i class="material-symbols small">delete</i>
         </button>
-        <button class="transparent">
+        <button type="button" class="transparent">
           <i class="material-symbols small">
             {expanded.value ? "expand_less" : "expand_more"}
           </i>

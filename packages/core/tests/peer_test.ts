@@ -10,8 +10,8 @@ import { Peer } from "../src/network/peer.ts";
 class MockRTCPeerConnection {
   public localDescription: RTCSessionDescriptionInit | null = null;
   public remoteDescription: RTCSessionDescriptionInit | null = null;
-  public onicecandidate: ((event: any) => void) | null = null;
-  public ondatachannel: ((event: any) => void) | null = null;
+  public onicecandidate: ((event: unknown) => void) | null = null;
+  public ondatachannel: ((event: unknown) => void) | null = null;
   public onconnectionstatechange: (() => void) | null = null;
   public oniceconnectionstatechange: (() => void) | null = null;
   public connectionState: RTCPeerConnectionState = "new";
@@ -24,19 +24,19 @@ class MockRTCPeerConnection {
     MockRTCPeerConnection.instances.push(this);
   }
 
-  async createOffer() {
+  createOffer() {
     return { type: "offer" as const, sdp: "mock-sdp-offer" };
   }
 
-  async createAnswer() {
+  createAnswer() {
     return { type: "answer" as const, sdp: "mock-sdp-answer" };
   }
 
-  async setLocalDescription(desc: RTCSessionDescriptionInit) {
+  setLocalDescription(desc: RTCSessionDescriptionInit) {
     this.localDescription = desc;
   }
 
-  async setRemoteDescription(desc: RTCSessionDescriptionInit) {
+  setRemoteDescription(desc: RTCSessionDescriptionInit) {
     this.remoteDescription = desc;
   }
 
@@ -118,13 +118,15 @@ Deno.test("peer: initiator creates offer and data channel", async () => {
   // 🔥 CORREÇÃO: Tipagem explícita como Error | null para evitar inferência 'never'
   let peerError: Error | null = null; 
   
-  peer.on("signal", (e: any) => {
+  peer.on("signal", (e: unknown) => {
     signalEmitted = true;
-    assertEquals((e.detail.data as RTCSessionDescriptionInit).type, "offer");
+    const detail = (e as unknown as { detail: { data: RTCSessionDescriptionInit } }).detail;
+    assertEquals(detail.data.type, "offer");
   });
   
-  peer.on("error", (e: any) => {
-    peerError = e.detail?.error || e;
+  peer.on("error", (e: unknown) => {
+    const err = e as unknown as { detail?: { error?: Error } };
+    peerError = err.detail?.error || (e as Error);
   });
 
   await new Promise((resolve) => setTimeout(resolve, 100));

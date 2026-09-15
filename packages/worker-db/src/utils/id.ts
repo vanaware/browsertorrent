@@ -33,27 +33,27 @@ export function gerarIdComPrefixo(prefix: string,): string {
 }
 
 // Injeta dinamicamente o '_id' sem o prefixo ao LER do banco/localStorage
-export function formatDbItem(key: IDBValidKey, val: any, prefix = '',): any {
-  if (!val || typeof val !== 'object' || Array.isArray(val,)) return val;
+export function formatDbItem<T>(key: IDBValidKey, val: unknown, prefix = '',): WithId<T> {
+  if (!val || typeof val !== 'object' || Array.isArray(val,)) return val as WithId<T>;
   const keyStr = String(key,);
   const _id = prefix && keyStr.startsWith(prefix,) ? keyStr.slice(prefix.length,) : keyStr;
-  return { _id, ...val, };
+  return { _id, ...(val as Record<string, unknown>), } as WithId<T>;
 }
 
 // Prepara a chave final e limpa o '_id' do objeto gravado
 export function prepareForSave(
   key: string | undefined | null,
-  val: any,
+  val: unknown,
   prefix = '',
-): { key: string; cleanVal: any } {
-  let rawId = val && typeof val === 'object' ? val._id : undefined;
+): { key: string; cleanVal: unknown } {
+  let rawId = val && typeof val === 'object' ? (val as Record<string, unknown>)._id as string | undefined : undefined;
 
   if (rawId === 'auto') {
     rawId = gerarId();
   }
 
   // Intercepta a chave informada como "auto" via parâmetro direto ou tupla do setMany
-  let processKey = key === 'auto' ? gerarId() : key;
+  const processKey = key === 'auto' ? gerarId() : key;
 
   let finalKey = processKey || '';
 

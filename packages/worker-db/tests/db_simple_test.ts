@@ -2,6 +2,16 @@ import { assert, assertEquals, assertNotEquals, } from '@std/assert';
 
 import { db, } from '../src/fake/fake-mod.ts';
 
+interface Cliente {
+  name: string;
+  level: number;
+}
+
+interface Produto {
+  name: string;
+  price: number;
+}
+
 Deno.test({
   name: "DB Simple - Tratamento de _id ('auto', '0990', com prefixo)",
   sanitizeOps: false,
@@ -14,7 +24,7 @@ Deno.test({
     // 1. _id: "auto"
     const keyAuto = await store.set({ _id: 'auto', name: 'Alice', level: 1, },);
     assert(keyAuto.startsWith('CLI_',),);
-    const itemAuto = await store.get<any>(keyAuto,);
+    const itemAuto = await store.get<Cliente>(keyAuto,);
     assert(itemAuto !== undefined,);
     assertNotEquals(itemAuto?._id, 'auto',);
     assertEquals(itemAuto?.name, 'Alice',);
@@ -22,14 +32,14 @@ Deno.test({
     // 2. _id: "0990"
     const key0990 = await store.set({ _id: '0990', name: 'Bob', level: 2, },);
     assertEquals(key0990, 'CLI_0990',);
-    const item0990 = await store.get<any>('0990',);
+    const item0990 = await store.get<Cliente>('0990',);
     assertEquals(item0990?._id, '0990',);
     assertEquals(item0990?.name, 'Bob',);
 
     // 3. _id: "CLI_0990" (com prefixo pré-existente)
     const keyPref = await store.set({ _id: 'CLI_0990', name: 'Bob Atualizado', level: 3, },);
     assertEquals(keyPref, 'CLI_0990',);
-    const itemPref = await store.get<any>('0990',);
+    const itemPref = await store.get<Cliente>('0990',);
     assertEquals(itemPref?.name, 'Bob Atualizado',);
   },
 },);
@@ -44,10 +54,10 @@ Deno.test({
     await store.clear();
 
     await store.set('p1', { name: 'Notebook', price: 3000, },);
-    const p1 = await store.get<any>('p1',);
+    const p1 = await store.get<Produto>('p1',);
     assertEquals(p1?.name, 'Notebook',);
 
-    const patched = await store.patch<any>('p1', { price: 3200, },);
+    const patched = await store.patch<Record<string, unknown>>('p1', { price: 3200, },);
     assertEquals(patched.price, 3200,);
 
     await store.setMany([
@@ -55,7 +65,7 @@ Deno.test({
       ['p3', { name: 'Teclado', price: 200, },],
     ],);
 
-    const items = await store.getMany<any>(['p1', 'p2', 'p3',],);
+    const items = await store.getMany<Produto>(['p1', 'p2', 'p3',],);
     assertEquals(items.length, 3,);
 
     const keys = await store.keys();
@@ -88,7 +98,7 @@ Deno.test({
     const exported = await store.exportDB();
     assertEquals(exported, mockData,);
 
-    const values = await store.values<any>();
+    const values = await store.values<Record<string, unknown>>();
     assertEquals(values.length, 2,);
   },
 },);

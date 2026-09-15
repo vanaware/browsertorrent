@@ -73,6 +73,7 @@ export function LeecherPanel({ disabled }: Props) {
       {/* Botão Download */}
       {!hasActiveTorrent && (
         <button
+          type="button"
           class={loading.value ? "loading" : ""}
           disabled={disabled || !magnetInput.value || loading.value}
           onClick={handleDownload}

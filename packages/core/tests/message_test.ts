@@ -76,7 +76,7 @@ Deno.test("message: bitfield round-trip", () => {
   const bf = new Uint8Array([0xff, 0x00, 0xab]);
   const msg = roundTrip({ type: "bitfield", bitfield: bf });
   assertEquals(msg.type, "bitfield");
-  assertEquals((msg as any).bitfield, bf);
+  assertEquals((msg as unknown as { bitfield: Uint8Array }).bitfield, bf);
 });
 
 Deno.test("message: request round-trip", () => {
@@ -88,7 +88,7 @@ Deno.test("message: piece round-trip", () => {
   const block = new Uint8Array([0xDE, 0xAD, 0xBE, 0xEF]);
   const msg = roundTrip({ type: "piece", pieceIndex: 5, begin: 0, block });
   assertEquals(msg.type, "piece");
-  const piece = msg as any;
+  const piece = msg as unknown as { pieceIndex: number; begin: number; block: Uint8Array };
   assertEquals(piece.pieceIndex, 5);
   assertEquals(piece.begin, 0);
   assertEquals(piece.block, block);
@@ -155,7 +155,7 @@ Deno.test("message: extended round-trip", () => {
   const payload = new Uint8Array([1, 2, 3, 4]);
   const msg = roundTrip({ type: "extended", extensionId: 1, payload });
   assertEquals(msg.type, "extended");
-  const ext = msg as any;
+  const ext = msg as unknown as { extensionId: number; payload: Uint8Array };
   assertEquals(ext.extensionId, 1);
   assertEquals(ext.payload, payload);
 });
@@ -164,7 +164,7 @@ Deno.test("message: extended handshake (id=0)", () => {
   const payload = new Uint8Array([0]); // minimal
   const msg = roundTrip({ type: "extended", extensionId: 0, payload });
   assertEquals(msg.type, "extended");
-  assertEquals((msg as any).extensionId, 0);
+  assertEquals((msg as unknown as { extensionId: number }).extensionId, 0);
 });
 
 Deno.test("message: extended rejects invalid extensionId", () => {
@@ -192,7 +192,7 @@ Deno.test("message: hashRequest round-trip", () => {
   };
   const msg = roundTrip({ type: "hashRequest", ...request });
   assertEquals(msg.type, "hashRequest");
-  const hr = msg as any;
+  const hr = msg as unknown as HashRequestFields & { type: "hashRequest" };
   assertEquals(hr.baseLayer, 2);
   assertEquals(hr.index, 0);
   assertEquals(hr.length, 4);
@@ -211,7 +211,7 @@ Deno.test("message: hashes round-trip", () => {
   const hashes = new Uint8Array(32).fill(0xEF);
   const msg = roundTrip({ type: "hashes", ...request, hashes });
   assertEquals(msg.type, "hashes");
-  const h = msg as any;
+  const h = msg as unknown as HashRequestFields & { type: "hashes"; hashes: Uint8Array };
   assertEquals(h.hashes, hashes);
   assertEquals(h.baseLayer, 1);
 });
@@ -226,11 +226,11 @@ Deno.test("message: hashReject round-trip", () => {
   };
   const msg = roundTrip({ type: "hashReject", ...request });
   assertEquals(msg.type, "hashReject");
-  assertEquals((msg as any).baseLayer, 3);
+  assertEquals((msg as unknown as HashRequestFields & { type: "hashReject" }).baseLayer, 3);
 });
 
 Deno.test("message: hashRequest validates piecesRoot length", () => {
-  const bad: any = {
+  const bad: HashRequestFields = {
     piecesRoot: new Uint8Array(16), // wrong length
     baseLayer: 2,
     index: 0,
@@ -244,7 +244,7 @@ Deno.test("message: hashRequest validates piecesRoot length", () => {
 });
 
 Deno.test("message: hashRequest validates length is power of 2", () => {
-  const bad: any = {
+  const bad: HashRequestFields = {
     piecesRoot: new Uint8Array(32),
     baseLayer: 2,
     index: 0,
@@ -279,7 +279,7 @@ Deno.test("message: unknown round-trip", () => {
   const payload = new Uint8Array([0xAA, 0xBB]);
   const msg = roundTrip({ type: "unknown", id: 42, payload });
   assertEquals(msg.type, "unknown");
-  const unk = msg as any;
+  const unk = msg as unknown as { id: number; payload: Uint8Array };
   assertEquals(unk.id, 42);
   assertEquals(unk.payload, payload);
 });

@@ -10,7 +10,7 @@
  * - Instâncias PeerTube
  */
 
-import { encodeBase64 } from "jsr:@std/encoding/base64";
+import { encodeBase64 } from "jsr:@std/encoding@^1.0.0/base64";
 
 /**
  * Lista expandida de trackers WebTorrent candidatos
@@ -37,7 +37,7 @@ function generateRandom20BytesBase64(): string {
  * @param timeoutMs Tempo máximo de espera em milissegundos (padrão: 3000ms)
  * @returns Promise<{success: boolean, timeMs: number, error?: string}>
  */
-async function testTracker(
+function testTracker(
   url: string,
   timeoutMs = 3000
 ): Promise<{ success: boolean; timeMs: number; error?: string }> {

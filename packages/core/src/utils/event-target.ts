@@ -5,7 +5,7 @@
  * Usa a API nativa `EventTarget` do browser, mas com tipagem estrita para eventos.
  */
 
-export type EventMap = Record<string, Event | CustomEvent | any>;
+export type EventMap = Record<string, Event | CustomEvent | unknown>;
 
 export class TypedEventTarget<Events extends EventMap> extends EventTarget {
   /**
@@ -45,13 +45,13 @@ export class TypedEventTarget<Events extends EventMap> extends EventTarget {
 
   /**
    * Emite um evento.
-   * 🔥 CORREÇÃO: Usamos `(detail as any) instanceof Event` para contornar 
+   * 🔥 CORREÇÃO: Usamos `(detail as unknown) instanceof Event` para contornar 
    * a restrição do TypeScript com tipos genéricos union (TS2358).
    */
   emit<K extends keyof Events>(type: K & string, detail?: Events[K]): boolean {
     const event =
-      (detail && (detail as any) instanceof Event)
-        ? (detail as any)
+      (detail && (detail as unknown as Event) instanceof Event)
+        ? (detail as unknown as Event)
         : new CustomEvent(type, { detail, cancelable: true });
     
     return this.dispatchEvent(event);

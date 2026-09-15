@@ -12,13 +12,13 @@ Deno.test({
     await store.clear();
 
     await store.set('status', { alive: true, phase: 'init', },);
-    let result = await store.get<any>('status',);
+    let result = await store.get<{ alive: boolean; phase: string }>('status',);
     assertEquals(result?.alive, true,);
 
     db.terminate();
 
     await store.set('status', { alive: true, phase: 'healed', },);
-    result = await store.get<any>('status',);
+    result = await store.get<{ alive: boolean; phase: string }>('status',);
     assertEquals(result?.phase, 'healed',);
 
     // O restart vai recriar o Worker utilizando o último caminho válido
@@ -29,8 +29,8 @@ Deno.test({
       // Lógica isolada para cenários não-falsos, caso necessário
     }
 
-    await store.patch<any>('status', { phase: 'restarted', },);
-    result = await store.get<any>('status',);
+    await store.patch<{ phase: string }>('status', { phase: 'restarted', },);
+    result = await store.get<{ alive: boolean; phase: string }>('status',);
     assertEquals(result?.phase, 'restarted', 'Worker recriado pelo restart() falhou',);
 
     db.terminate();

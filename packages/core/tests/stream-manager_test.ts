@@ -7,6 +7,7 @@ import {
   streamManager,
   StreamManager,
 } from "../src/server/stream-manager.ts";
+import type { File } from "../src/core/file.ts";
 
 // Mock File for testing
 class MockFile {
@@ -17,7 +18,7 @@ class MockFile {
 
 Deno.test("streamManager: register and get", () => {
   streamManager.clear();
-  const file = new MockFile("abc123", 0) as any;
+  const file = new MockFile("abc123", 0) as unknown as File;
   streamManager.register("abc123", 0, file);
 
   const entry = streamManager.get("abc123", 0);
@@ -29,7 +30,7 @@ Deno.test("streamManager: register and get", () => {
 
 Deno.test("streamManager: unregister", () => {
   streamManager.clear();
-  const file = new MockFile() as any;
+  const file = new MockFile() as unknown as File;
   streamManager.register("abc", 0, file);
   streamManager.register("abc", 1, file);
 
@@ -45,7 +46,7 @@ Deno.test("streamManager: unregister", () => {
 
 Deno.test("streamManager: unregisterTorrent removes all files", () => {
   streamManager.clear();
-  const file = new MockFile() as any;
+  const file = new MockFile() as unknown as File;
   streamManager.register("hash1", 0, file);
   streamManager.register("hash1", 1, file);
   streamManager.register("hash2", 0, file);
@@ -63,8 +64,8 @@ Deno.test("streamManager: unregisterTorrent removes all files", () => {
 
 Deno.test("streamManager: list returns all entries", () => {
   streamManager.clear();
-  const file1 = new MockFile() as any;
-  const file2 = new MockFile() as any;
+  const file1 = new MockFile() as unknown as File;
+  const file2 = new MockFile() as unknown as File;
   streamManager.register("h1", 0, file1);
   streamManager.register("h1", 1, file2);
 
@@ -76,7 +77,7 @@ Deno.test("streamManager: list returns all entries", () => {
 
 Deno.test("streamManager: clear removes everything", () => {
   streamManager.clear();
-  const file = new MockFile() as any;
+  const file = new MockFile() as unknown as File;
   for (let i = 0; i < 5; i++) {
     streamManager.register("h", i, file);
   }

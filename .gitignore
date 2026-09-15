@@ -21,6 +21,7 @@ out/
 .env
 .env.local
 .env.*
+!.env.example
 
 # Node on Deno
 node_modules/
