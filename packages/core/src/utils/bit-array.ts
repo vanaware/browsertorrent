@@ -16,7 +16,7 @@ export type BitOrder = "lsb0" | "msb0";
 export class BitArray {
   #data: Uint8Array;
 
-  private constructor(data: Uint8Array) {
+  private constructor(data: Uint8Array,) {
     this.#data = data;
   }
 
@@ -24,51 +24,57 @@ export class BitArray {
   // Factory methods
   // ========================================================================
 
-  static fromBinaryString(data: string): BitArray {
-    if (!BitArray.isBinaryString(data)) {
-      throw new TypeError("data must be a non-empty binary string");
+  static fromBinaryString(data: string,): BitArray {
+    if (!BitArray.isBinaryString(data,)) {
+      throw new TypeError("data must be a non-empty binary string",);
     }
-    const bytesLength = Math.ceil(data.length / 8);
-    const number = BigInt(`0b${data}`);
-    const bytes = new Uint8Array(bytesLength);
+    const bytesLength = Math.ceil(data.length / 8,);
+    const number = BigInt(`0b${data}`,);
+    const bytes = new Uint8Array(bytesLength,);
     for (let i = 0; i < bytes.length; i++) {
-      bytes[i] = Number((number >> BigInt(8 * (bytes.length - 1 - i))) & BigInt(0xff));
+      bytes[i] = Number(
+        (number >> BigInt(8 * (bytes.length - 1 - i),)) & BigInt(0xff,),
+      );
     }
-    return new BitArray(bytes);
+    return new BitArray(bytes,);
   }
 
   /**
    * Creates a BitArray from a byte array (copies the input).
    */
-  static fromUint8Array(data: Uint8Array): BitArray {
-    return new BitArray(data.slice());
+  static fromUint8Array(data: Uint8Array,): BitArray {
+    return new BitArray(data.slice(),);
   }
 
-  static fromInt(data: number, length = 0): BitArray {
-    if (!Number.isSafeInteger(data) || data < 0) {
-      throw new RangeError("data must be a non-negative safe integer");
+  static fromInt(data: number, length = 0,): BitArray {
+    if (!Number.isSafeInteger(data,) || data < 0) {
+      throw new RangeError("data must be a non-negative safe integer",);
     }
-    if (!Number.isSafeInteger(length) || length < 0) {
-      throw new RangeError("length must be a non-negative safe integer");
+    if (!Number.isSafeInteger(length,) || length < 0) {
+      throw new RangeError("length must be a non-negative safe integer",);
     }
-    const binaryString = data.toString(2);
-    const safeLength = Math.max(binaryString.length, length);
-    return BitArray.fromBinaryString(data.toString(2).padStart(safeLength, "0"));
+    const binaryString = data.toString(2,);
+    const safeLength = Math.max(binaryString.length, length,);
+    return BitArray.fromBinaryString(
+      data.toString(2,).padStart(safeLength, "0",),
+    );
   }
 
-  static fromBigInt(data: bigint, length = 0): BitArray {
+  static fromBigInt(data: bigint, length = 0,): BitArray {
     if (data < 0n) {
-      throw new RangeError("data must be non-negative");
+      throw new RangeError("data must be non-negative",);
     }
-    if (!Number.isSafeInteger(length) || length < 0) {
-      throw new RangeError("length must be a non-negative safe integer");
+    if (!Number.isSafeInteger(length,) || length < 0) {
+      throw new RangeError("length must be a non-negative safe integer",);
     }
-    const binaryString = data.toString(2);
-    const safeLength = Math.max(binaryString.length, length);
-    return BitArray.fromBinaryString(data.toString(2).padStart(safeLength, "0"));
+    const binaryString = data.toString(2,);
+    const safeLength = Math.max(binaryString.length, length,);
+    return BitArray.fromBinaryString(
+      data.toString(2,).padStart(safeLength, "0",),
+    );
   }
 
-  static isBinaryString(data: string): boolean {
+  static isBinaryString(data: string,): boolean {
     if (data.length === 0) return false;
     for (let i = 0; i < data.length; i++) {
       if (data[i] !== "0" && data[i] !== "1") return false;
@@ -93,16 +99,16 @@ export class BitArray {
   // getBit / setBit (explicit BitOrder)
   // ========================================================================
 
-  getBit(index: number, order: BitOrder = "lsb0"): boolean {
-    this.#assertBitIndex(index);
-    const byteIndex = Math.floor(index / 8);
+  getBit(index: number, order: BitOrder = "lsb0",): boolean {
+    this.#assertBitIndex(index,);
+    const byteIndex = Math.floor(index / 8,);
     const mask = order === "msb0" ? 0x80 >> (index % 8) : 1 << (index % 8);
     return (this.#data[byteIndex]! & mask) !== 0;
   }
 
-  setBit(index: number, value: boolean, order: BitOrder = "lsb0"): void {
-    this.#assertBitIndex(index);
-    const byteIndex = Math.floor(index / 8);
+  setBit(index: number, value: boolean, order: BitOrder = "lsb0",): void {
+    this.#assertBitIndex(index,);
+    const byteIndex = Math.floor(index / 8,);
     const mask = order === "msb0" ? 0x80 >> (index % 8) : 1 << (index % 8);
     if (value) {
       this.#data[byteIndex]! |= mask;
@@ -115,45 +121,49 @@ export class BitArray {
   // get / set (legacy zeroIndex API — maps to BitOrder)
   // ========================================================================
 
-  get(index: number, zeroIndex: "lowest" | "highest" = "lowest"): boolean {
-    if (!Number.isSafeInteger(index) || index < 0 || index >= this.length) {
-      throw new RangeError(`index must be a valid bit index, got ${index}`);
+  get(index: number, zeroIndex: "lowest" | "highest" = "lowest",): boolean {
+    if (!Number.isSafeInteger(index,) || index < 0 || index >= this.length) {
+      throw new RangeError(`index must be a valid bit index, got ${index}`,);
     }
     const order: BitOrder = zeroIndex === "lowest" ? "lsb0" : "msb0";
-    return this.getBit(index, order);
+    return this.getBit(index, order,);
   }
 
-  set(index: number, value: boolean, zeroIndex: "lowest" | "highest" = "lowest"): void {
-    if (!Number.isSafeInteger(index) || index < 0 || index >= this.length) {
-      throw new RangeError(`index must be a valid bit index, got ${index}`);
+  set(
+    index: number,
+    value: boolean,
+    zeroIndex: "lowest" | "highest" = "lowest",
+  ): void {
+    if (!Number.isSafeInteger(index,) || index < 0 || index >= this.length) {
+      throw new RangeError(`index must be a valid bit index, got ${index}`,);
     }
     const order: BitOrder = zeroIndex === "lowest" ? "lsb0" : "msb0";
-    this.setBit(index, value, order);
+    this.setBit(index, value, order,);
   }
 
   // ========================================================================
   // Operations
   // ========================================================================
 
-  xor(other: BitArray): BitArray {
+  xor(other: BitArray,): BitArray {
     if (this.length !== other.length) {
-      throw new RangeError("Bit arrays must have the same length for xor");
+      throw new RangeError("Bit arrays must have the same length for xor",);
     }
-    const data = new Uint8Array(this.#data.length);
+    const data = new Uint8Array(this.#data.length,);
     for (let i = 0; i < this.#data.length; i++) {
       data[i] = this.#data[i]! ^ other.#data[i]!;
     }
-    return new BitArray(data);
+    return new BitArray(data,);
   }
 
-  diff(other: BitArray): number[] {
+  diff(other: BitArray,): number[] {
     if (this.length !== other.length) {
-      throw new RangeError("bit arrays must have the same length for diff");
+      throw new RangeError("bit arrays must have the same length for diff",);
     }
     const diffIndex: number[] = [];
     for (let i = 0; i < this.length; i++) {
-      if (this.get(i) !== other.get(i)) {
-        diffIndex.push(i);
+      if (this.get(i,) !== other.get(i,)) {
+        diffIndex.push(i,);
       }
     }
     return diffIndex;
@@ -163,25 +173,25 @@ export class BitArray {
   // Comparisons
   // ========================================================================
 
-  equals(other: BitArray): boolean {
+  equals(other: BitArray,): boolean {
     if (this.length !== other.length) return false;
-    return this.#data.every((byte, index) => byte === other.#data[index]);
+    return this.#data.every((byte, index,) => byte === other.#data[index]);
   }
 
-  greaterThan(other: BitArray): boolean {
+  greaterThan(other: BitArray,): boolean {
     return this.toBigInt() > other.toBigInt();
   }
 
-  greaterThanOrEqual(other: BitArray): boolean {
-    return this.greaterThan(other) || this.equals(other);
+  greaterThanOrEqual(other: BitArray,): boolean {
+    return this.greaterThan(other,) || this.equals(other,);
   }
 
-  lessThan(other: BitArray): boolean {
+  lessThan(other: BitArray,): boolean {
     return this.toBigInt() < other.toBigInt();
   }
 
-  lessThanOrEqual(other: BitArray): boolean {
-    return this.lessThan(other) || this.equals(other);
+  lessThanOrEqual(other: BitArray,): boolean {
+    return this.lessThan(other,) || this.equals(other,);
   }
 
   // ========================================================================
@@ -189,15 +199,19 @@ export class BitArray {
   // ========================================================================
 
   toBigInt(): bigint {
-    return BigInt(`0b${this.toString()}`);
+    return BigInt(`0b${this.toString()}`,);
   }
 
   toString(): string {
-    return this.#data.reduce((prev, curr) => prev + curr.toString(2).padStart(8, "0"), "");
+    return this.#data.reduce(
+      (prev, curr,) => prev + curr.toString(2,).padStart(8, "0",),
+      "",
+    );
   }
 
   toHexString(): string {
-    return Array.from(this.#data, (b) => b.toString(16).padStart(2, "0")).join("");
+    return Array.from(this.#data, (b,) => b.toString(16,).padStart(2, "0",),)
+      .join("",);
   }
 
   toIntString(): string {
@@ -208,9 +222,9 @@ export class BitArray {
   // Private
   // ========================================================================
 
-  #assertBitIndex(index: number): void {
-    if (!Number.isSafeInteger(index) || index < 0 || index >= this.length) {
-      throw new RangeError(`index must be a valid bit index, got ${index}`);
+  #assertBitIndex(index: number,): void {
+    if (!Number.isSafeInteger(index,) || index < 0 || index >= this.length) {
+      throw new RangeError(`index must be a valid bit index, got ${index}`,);
     }
   }
 }

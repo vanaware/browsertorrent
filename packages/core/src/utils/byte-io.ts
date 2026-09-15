@@ -13,12 +13,12 @@
 
 /** A byte source compatible with the generic reader contract. */
 export interface ByteReader {
-  read(p: Uint8Array): Promise<number | null>;
+  read(p: Uint8Array,): Promise<number | null>;
 }
 
 /** A byte sink compatible with the generic writer contract. */
 export interface ByteWriter {
-  write(p: Uint8Array): Promise<number>;
+  write(p: Uint8Array,): Promise<number>;
 }
 
 // ---------------------------------------------------------------------------
@@ -36,7 +36,7 @@ export class InvalidByteCountError extends RangeError {
   /** The largest byte count that would have been valid. */
   readonly maximum: number;
 
-  constructor(operation: "read" | "write", count: number, maximum: number) {
+  constructor(operation: "read" | "write", count: number, maximum: number,) {
     super(
       `${operation} returned invalid byte count ${count}; expected an integer from 1 to ${maximum}`,
     );
@@ -55,8 +55,8 @@ export class UnexpectedEofError extends Error {
   /** Total number of bytes requested by the caller. */
   readonly expectedBytes: number;
 
-  constructor(bytesRead: number, expectedBytes: number) {
-    super(`unexpected EOF after ${bytesRead} of ${expectedBytes} bytes`);
+  constructor(bytesRead: number, expectedBytes: number,) {
+    super(`unexpected EOF after ${bytesRead} of ${expectedBytes} bytes`,);
     this.name = "UnexpectedEofError";
     this.bytesRead = bytesRead;
     this.expectedBytes = expectedBytes;
@@ -72,8 +72,8 @@ function assertCount(
   maximum: number,
   operation: "read" | "write",
 ): void {
-  if (!Number.isSafeInteger(count) || count <= 0 || count > maximum) {
-    throw new InvalidByteCountError(operation, count, maximum);
+  if (!Number.isSafeInteger(count,) || count <= 0 || count > maximum) {
+    throw new InvalidByteCountError(operation, count, maximum,);
   }
 }
 
@@ -112,12 +112,12 @@ export async function readExactly(
   let offset = 0;
   while (offset < target.length) {
     const remaining = target.length - offset;
-    const count = await reader.read(target.subarray(offset));
+    const count = await reader.read(target.subarray(offset,),);
     if (count === null) {
       if (offset === 0 && options.allowCleanEof === true) return false;
-      throw new UnexpectedEofError(offset, target.length);
+      throw new UnexpectedEofError(offset, target.length,);
     }
-    assertCount(count, remaining, "read");
+    assertCount(count, remaining, "read",);
     offset += count;
   }
   return true;
@@ -135,8 +135,8 @@ export async function writeAll(
   let offset = 0;
   while (offset < data.length) {
     const remaining = data.length - offset;
-    const count = await writer.write(data.subarray(offset));
-    assertCount(count, remaining, "write");
+    const count = await writer.write(data.subarray(offset,),);
+    assertCount(count, remaining, "write",);
     offset += count;
   }
 }

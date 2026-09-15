@@ -26,8 +26,12 @@ export const CORE_VERSION = "0.0.0-placeholder";
 // ── WebRTC feature detection ──────────────────────────────────────────
 const _WEBRTC_SUPPORT: boolean = (() => {
   if (typeof globalThis === "undefined") return false;
-  return typeof (globalThis as unknown as { RTCPeerConnection: typeof RTCPeerConnection }).RTCPeerConnection !== "undefined" ||
-    typeof (globalThis as unknown as { webkitRTCPeerConnection: typeof RTCPeerConnection }).webkitRTCPeerConnection !== "undefined";
+  return typeof (globalThis as unknown as {
+        RTCPeerConnection: typeof RTCPeerConnection;
+      }).RTCPeerConnection !== "undefined" ||
+    typeof (globalThis as unknown as {
+        webkitRTCPeerConnection: typeof RTCPeerConnection;
+      }).webkitRTCPeerConnection !== "undefined";
 })();
 
 export interface WebTorrentEvents {
@@ -297,7 +301,9 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
         torrent.infoHash,
       );
       registerTorrentFiles(torrent, files,);
-      (torrent as unknown as { _registerFiles?: (files: ParsedTorrentFile[]) => void })._registerFiles?.(files,);
+      (torrent as unknown as {
+        _registerFiles?: (files: ParsedTorrentFile[],) => void;
+      })._registerFiles?.(files,);
     }
 
     this.on("torrent", (e: CustomEvent<{ torrent: Torrent }>,) => {
@@ -310,7 +316,9 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
         torrent.infoHash,
       );
       registerTorrentFiles(torrent, files,);
-      (torrent as unknown as { _registerFiles?: (files: ParsedTorrentFile[]) => void })._registerFiles?.(files,);
+      (torrent as unknown as {
+        _registerFiles?: (files: ParsedTorrentFile[],) => void;
+      })._registerFiles?.(files,);
     },);
 
     return this.server;
@@ -415,11 +423,15 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
     if (this.server) {
       const files = this._makeFileObjects(torrent, this.server.scope,);
       registerTorrentFiles(torrent, files,);
-      (torrent as unknown as { _registerFiles?: (files: ParsedTorrentFile[]) => void })._registerFiles?.(files,);
+      (torrent as unknown as {
+        _registerFiles?: (files: ParsedTorrentFile[],) => void;
+      })._registerFiles?.(files,);
     } else {
       // Registra os files mesmo sem server (para events download/upload nos Files).
       const files = this._makeFileObjects(torrent, "/",);
-      (torrent as unknown as { _registerFiles?: (files: ParsedTorrentFile[]) => void })._registerFiles?.(files,);
+      (torrent as unknown as {
+        _registerFiles?: (files: ParsedTorrentFile[],) => void;
+      })._registerFiles?.(files,);
     }
 
     this.emit(
@@ -466,7 +478,7 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
       write: (p: Uint8Array,): Promise<number> => {
         chunks.push(p,);
         totalLen += p.length;
-        return Promise.resolve(p.length);
+        return Promise.resolve(p.length,);
       },
     };
 

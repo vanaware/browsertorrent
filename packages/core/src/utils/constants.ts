@@ -53,4 +53,4 @@ export const TRACKER_TIMEOUT = 15_000; // 15 segundos
 // ============================================================================
 
 export const PSTR = "BitTorrent protocol";
-export const PSTR_BUFFER = new TextEncoder().encode(PSTR);
+export const PSTR_BUFFER = new TextEncoder().encode(PSTR,);

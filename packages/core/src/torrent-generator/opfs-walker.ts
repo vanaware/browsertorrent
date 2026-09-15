@@ -9,7 +9,7 @@
  * `File` object obtained via `FileSystemFileHandle.getFile()`.
  */
 
-import type { OPFSFileEntry } from "./types.ts";
+import type { OPFSFileEntry, } from "./types.ts";
 
 /**
  * Returns the size of an OPFS file handle.
@@ -17,7 +17,9 @@ import type { OPFSFileEntry } from "./types.ts";
  * @param handle - OPFS file handle.
  * @returns Size in bytes.
  */
-export async function getOPFSFileSize(handle: FileSystemFileHandle): Promise<number> {
+export async function getOPFSFileSize(
+  handle: FileSystemFileHandle,
+): Promise<number> {
   const file = await handle.getFile();
   return file.size;
 }
@@ -52,35 +54,42 @@ export async function walkOPFSDir(
     // BFS for stable ordering — `values()` yields in insertion order.
     // We collect into an array first to avoid losing `for-await` context.
     const queue: Array<FileSystemHandle> = [];
-    for await (const entry of (dir as unknown as { values: () => AsyncIterable<FileSystemHandle> }).values()) {
-      queue.push(entry);
+    for await (
+      const entry
+        of (dir as unknown as { values: () => AsyncIterable<FileSystemHandle> })
+          .values()
+    ) {
+      queue.push(entry,);
     }
     for (const entry of queue) {
       if (entry.kind === "file") {
-        if (ignoreHiddenFile && entry.name.startsWith(".")) continue;
+        if (ignoreHiddenFile && entry.name.startsWith(".",)) continue;
         const fileHandle = entry as FileSystemFileHandle;
-        const size = await getOPFSFileSize(fileHandle);
+        const size = await getOPFSFileSize(fileHandle,);
         files.push({
-          name: [...prefix, entry.name].join("/"),
+          name: [...prefix, entry.name,].join("/",),
           size,
           handle: fileHandle,
-        });
+        },);
       } else if (entry.kind === "directory") {
-        if (ignoreHiddenFile && entry.name.startsWith(".")) continue;
-        await visit(entry as FileSystemDirectoryHandle, [...prefix, entry.name]);
+        if (ignoreHiddenFile && entry.name.startsWith(".",)) continue;
+        await visit(entry as FileSystemDirectoryHandle, [
+          ...prefix,
+          entry.name,
+        ],);
       }
     }
   }
 
-  await visit(root, []);
+  await visit(root, [],);
 
   // BEP-3 sort: shallowest first, then lexicographic.
-  files.sort((a, b) => {
-    const depthA = a.name.split("/").length;
-    const depthB = b.name.split("/").length;
+  files.sort((a, b,) => {
+    const depthA = a.name.split("/",).length;
+    const depthB = b.name.split("/",).length;
     if (depthA !== depthB) return depthA - depthB;
-    return a.name.localeCompare(b.name);
-  });
+    return a.name.localeCompare(b.name,);
+  },);
 
   return files;
 }

@@ -6,7 +6,7 @@
  * Browser-first: no Reader/Writer interfaces (those are Deno-only).
  */
 
-import { TorrentParseError } from "./errors.ts";
+import { TorrentParseError, } from "./errors.ts";
 
 /** Default maximum encoded torrent size accepted by the parser. */
 export const DEFAULT_MAX_METAINFO_SIZE = 16 * 1024 * 1024;
@@ -79,13 +79,16 @@ export type TorrentInfoCommon = {
 };
 
 /** Complete single-file or multi-file BEP-3 `info` dictionary. */
-export type TorrentV1Info = TorrentInfoCommon & {
-  /** Concatenated 20-byte SHA-1 hashes, one per piece. */
-  pieces: Uint8Array;
-} & (
-  | { length: number; files?: never }
-  | { files: TorrentFile[]; length?: never }
-);
+export type TorrentV1Info =
+  & TorrentInfoCommon
+  & {
+    /** Concatenated 20-byte SHA-1 hashes, one per piece. */
+    pieces: Uint8Array;
+  }
+  & (
+    | { length: number; files?: never }
+    | { files: TorrentFile[]; length?: never }
+  );
 
 /** BEP-52 info dictionary. Optional v1 fields make this a hybrid torrent. */
 export type TorrentV2Info = TorrentInfoCommon & {
@@ -122,18 +125,18 @@ export type Torrent = {
  * Rejects separators, NUL, and traversal components.
  * Adaptado de deno-torrent/metainfo/path.ts.
  */
-export function isSafePathComponent(component: unknown): component is string {
+export function isSafePathComponent(component: unknown,): component is string {
   return typeof component === "string" &&
     component.length > 0 &&
     component !== "." &&
     component !== ".." &&
-    !component.includes("/") &&
-    !component.includes("\\") &&
-    !component.includes("\0");
+    !component.includes("/",) &&
+    !component.includes("\\",) &&
+    !component.includes("\0",);
 }
 
 /** Compare strings deterministically (locale-independent). */
-export function compareStrings(left: string, right: string): number {
+export function compareStrings(left: string, right: string,): number {
   return left < right ? -1 : left > right ? 1 : 0;
 }
 
@@ -149,35 +152,36 @@ export function validateTorrentFilePaths(
 
   for (const file of files) {
     const path = file["path"] as string[];
-    const key = path.join("\0");
-    const padding =
-      typeof file["attr"] === "string" && file["attr"].includes("p");
-    const previous = entries.get(key);
+    const key = path.join("\0",);
+    const padding = typeof file["attr"] === "string" &&
+      file["attr"].includes("p",);
+    const previous = entries.get(key,);
     if (
       previous !== undefined &&
-      !(padding && previous.padding && previous.length === file["length"] as number)
+      !(padding && previous.padding &&
+        previous.length === file["length"] as number)
     ) {
       throw new TorrentParseError(
-        `Duplicate or conflicting file path: ${path.join("/")}`,
+        `Duplicate or conflicting file path: ${path.join("/",)}`,
       );
     }
-    if (directoryPrefixes.has(key)) {
+    if (directoryPrefixes.has(key,)) {
       throw new TorrentParseError(
-        `File path conflicts with a directory path: ${path.join("/")}`,
+        `File path conflicts with a directory path: ${path.join("/",)}`,
       );
     }
     for (let index = 1; index < path.length; index++) {
-      const prefix = path.slice(0, index).join("\0");
-      if (entries.has(prefix)) {
+      const prefix = path.slice(0, index,).join("\0",);
+      if (entries.has(prefix,)) {
         throw new TorrentParseError(
-          `File path is nested below another file: ${path.join("/")}`,
+          `File path is nested below another file: ${path.join("/",)}`,
         );
       }
-      directoryPrefixes.add(prefix);
+      directoryPrefixes.add(prefix,);
     }
     entries.set(key, {
       length: file["length"] as number,
       padding,
-    });
+    },);
   }
 }

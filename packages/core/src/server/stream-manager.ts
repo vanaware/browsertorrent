@@ -1,6 +1,6 @@
 // /loco/monorepo/webtorrent/src/server/stream-manager.ts
 
-import type { File } from "../core/file.ts";
+import type { File, } from "../core/file.ts";
 
 /**
  * Internal record stored in the {@link StreamManager} for each registered file.
@@ -46,17 +46,17 @@ export class StreamManager {
    * @param fileIndex - Zero-based file index inside the torrent.
    * @param file - The {@link File} instance to serve.
    */
-  register(infoHash: string, fileIndex: number, file: File): void {
-    const key = this._key(infoHash, fileIndex);
-    this.entries.set(key, { infoHash, fileIndex, file });
+  register(infoHash: string, fileIndex: number, file: File,): void {
+    const key = this._key(infoHash, fileIndex,);
+    this.entries.set(key, { infoHash, fileIndex, file, },);
   }
 
   /**
    * Removes a single file entry.  Safe to call when the entry does not
    * exist.
    */
-  unregister(infoHash: string, fileIndex: number): void {
-    this.entries.delete(this._key(infoHash, fileIndex));
+  unregister(infoHash: string, fileIndex: number,): void {
+    this.entries.delete(this._key(infoHash, fileIndex,),);
   }
 
   /**
@@ -64,10 +64,10 @@ export class StreamManager {
    * when a torrent is removed from the client so the SW cannot keep
    * streaming after the underlying data is gone.
    */
-  unregisterTorrent(infoHash: string): void {
+  unregisterTorrent(infoHash: string,): void {
     const prefix = `${infoHash}:`;
     for (const key of this.entries.keys()) {
-      if (key.startsWith(prefix)) this.entries.delete(key);
+      if (key.startsWith(prefix,)) this.entries.delete(key,);
     }
   }
 
@@ -75,8 +75,8 @@ export class StreamManager {
    * Returns the file entry for a `(infoHash, fileIndex)` or `undefined`
    * if no such file is registered.
    */
-  get(infoHash: string, fileIndex: number): StreamEntry | undefined {
-    return this.entries.get(this._key(infoHash, fileIndex));
+  get(infoHash: string, fileIndex: number,): StreamEntry | undefined {
+    return this.entries.get(this._key(infoHash, fileIndex,),);
   }
 
   /**
@@ -84,7 +84,7 @@ export class StreamManager {
    * diagnostics — not by the hot path of the streaming protocol.
    */
   list(): StreamEntry[] {
-    return Array.from(this.entries.values());
+    return Array.from(this.entries.values(),);
   }
 
   /**
@@ -104,7 +104,7 @@ export class StreamManager {
     this.entries.clear();
   }
 
-  private _key(infoHash: string, fileIndex: number): string {
+  private _key(infoHash: string, fileIndex: number,): string {
     return `${infoHash}:${fileIndex}`;
   }
 }
@@ -137,7 +137,7 @@ export function buildStreamURL(
   fileIndex: number,
   name: string,
 ): string {
-  const safeName = encodeURIComponent(name);
+  const safeName = encodeURIComponent(name,);
   return `${scope}webtorrent/${infoHash}/${fileIndex}/${safeName}`;
 }
 
@@ -153,20 +153,23 @@ export interface ParsedStreamURL {
   name: string;
 }
 
-export function parseStreamURL(url: string, scope: string): ParsedStreamURL | null {
+export function parseStreamURL(
+  url: string,
+  scope: string,
+): ParsedStreamURL | null {
   const prefix = `${scope}webtorrent/`;
-  if (!url.startsWith(prefix)) return null;
+  if (!url.startsWith(prefix,)) return null;
 
-  const rest = url.slice(prefix.length);
-  const parts = rest.split("/");
+  const rest = url.slice(prefix.length,);
+  const parts = rest.split("/",);
   if (parts.length < 3) return null;
 
   const infoHash = parts[0]!;
-  const fileIndex = Number.parseInt(parts[1]!, 10);
-  const name = decodeURIComponent(parts.slice(2).join("/"));
+  const fileIndex = Number.parseInt(parts[1]!, 10,);
+  const name = decodeURIComponent(parts.slice(2,).join("/",),);
 
-  if (!/^[0-9a-fA-F]{40}$/.test(infoHash)) return null;
-  if (!Number.isSafeInteger(fileIndex) || fileIndex < 0) return null;
+  if (!/^[0-9a-fA-F]{40}$/.test(infoHash,)) return null;
+  if (!Number.isSafeInteger(fileIndex,) || fileIndex < 0) return null;
 
-  return { infoHash: infoHash.toLowerCase(), fileIndex, name };
+  return { infoHash: infoHash.toLowerCase(), fileIndex, name, };
 }

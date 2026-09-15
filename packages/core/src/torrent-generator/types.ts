@@ -8,11 +8,11 @@
  * `FileSystemDirectoryHandle`).
  */
 
-import type { BencodeValue } from "../utils/bencode.ts";
+import type { BencodeValue, } from "../utils/bencode.ts";
 
 /** A simple sink for the bencoded `.torrent` file. */
 export interface Writer {
-  write(p: Uint8Array): Promise<number>;
+  write(p: Uint8Array,): Promise<number>;
 }
 
 /** Standard piece-size presets (BEP-3).  `SIZE_AUTO` defers to `calcPieceSize`. */
@@ -107,4 +107,4 @@ export interface Torrent {
 }
 
 /** Bencode re-export. */
-export type { BencodeValue };
+export type { BencodeValue, };

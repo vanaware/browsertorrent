@@ -11,10 +11,14 @@
  * Browser-first: accepts Uint8Array (no Deno Reader).
  */
 
-import { decode, encode } from "./bencode.ts";
-import { TorrentParseError } from "./errors.ts";
-import { parseMetainfo } from "./metainfo-parser.ts";
-import type { ParseTorrentOptions, Torrent, TorrentPieceLayer } from "./torrent-types.ts";
+import { decode, encode, } from "./bencode.ts";
+import { TorrentParseError, } from "./errors.ts";
+import { parseMetainfo, } from "./metainfo-parser.ts";
+import type {
+  ParseTorrentOptions,
+  Torrent,
+  TorrentPieceLayer,
+} from "./torrent-types.ts";
 
 // ── Types ───────────────────────────────────────────────────────────────
 
@@ -50,45 +54,47 @@ export interface WrapInfoOptions {
  * Validates the full bencode stream first (rejects duplicate keys, trailing
  * bytes, malformed integers), then byte-scans to locate the `info` value.
  */
-export function extractInfoBytes(metainfo: Uint8Array): Uint8Array {
+export function extractInfoBytes(metainfo: Uint8Array,): Uint8Array {
   try {
-    decode(metainfo, { maxBytes: metainfo.length });
+    decode(metainfo, { maxBytes: metainfo.length, },);
   } catch (error) {
-    throw new TorrentParseError("Invalid bencoded torrent data", { cause: error });
+    throw new TorrentParseError("Invalid bencoded torrent data", {
+      cause: error,
+    },);
   }
 
-  const cursor = { offset: 0 };
-  expect(metainfo, cursor, 0x64, "Torrent root must be a bencode dictionary");
+  const cursor = { offset: 0, };
+  expect(metainfo, cursor, 0x64, "Torrent root must be a bencode dictionary",);
   let result: Uint8Array | undefined;
 
-  while (peek(metainfo, cursor) !== 0x65) {
-    const key = readByteString(metainfo, cursor);
+  while (peek(metainfo, cursor,) !== 0x65) {
+    const key = readByteString(metainfo, cursor,);
     const valueStart = cursor.offset;
-    skipValue(metainfo, cursor, 1);
-    if (equalsAscii(key, "info")) {
+    skipValue(metainfo, cursor, 1,);
+    if (equalsAscii(key, "info",)) {
       if (metainfo[valueStart] !== 0x64) {
-        throw new TorrentParseError("Torrent info value must be a dictionary");
+        throw new TorrentParseError("Torrent info value must be a dictionary",);
       }
-      result = metainfo.slice(valueStart, cursor.offset);
+      result = metainfo.slice(valueStart, cursor.offset,);
     }
   }
   cursor.offset++;
 
   if (result === undefined) {
-    throw new TorrentParseError('Missing or invalid "info" dictionary');
+    throw new TorrentParseError('Missing or invalid "info" dictionary',);
   }
-  return new Uint8Array(result);
+  return new Uint8Array(result,);
 }
 
 /** Calculate the BEP-3 v1 info hash (SHA-1) for exact bencoded info bytes. */
 export async function calculateInfoHash(
   infoBytes: Uint8Array,
 ): Promise<Uint8Array> {
-  validateInfoBytes(infoBytes);
-  const buffer = new ArrayBuffer(infoBytes.byteLength);
-  new Uint8Array(buffer).set(infoBytes);
+  validateInfoBytes(infoBytes,);
+  const buffer = new ArrayBuffer(infoBytes.byteLength,);
+  new Uint8Array(buffer,).set(infoBytes,);
   return new Uint8Array(
-    await crypto.subtle.digest("SHA-1", buffer),
+    await crypto.subtle.digest("SHA-1", buffer,),
   );
 }
 
@@ -96,11 +102,11 @@ export async function calculateInfoHash(
 export async function calculateInfoHashV2(
   infoBytes: Uint8Array,
 ): Promise<Uint8Array> {
-  validateInfoBytes(infoBytes);
-  const buffer = new ArrayBuffer(infoBytes.byteLength);
-  new Uint8Array(buffer).set(infoBytes);
+  validateInfoBytes(infoBytes,);
+  const buffer = new ArrayBuffer(infoBytes.byteLength,);
+  new Uint8Array(buffer,).set(infoBytes,);
   return new Uint8Array(
-    await crypto.subtle.digest("SHA-256", buffer),
+    await crypto.subtle.digest("SHA-256", buffer,),
   );
 }
 
@@ -112,39 +118,40 @@ export function wrapInfoBytes(
   infoBytes: Uint8Array,
   options: WrapInfoOptions = {},
 ): Uint8Array {
-  validateInfoBytes(infoBytes);
+  validateInfoBytes(infoBytes,);
 
   const fields: Array<{ key: string; value: Uint8Array }> = [
-    { key: "info", value: infoBytes },
+    { key: "info", value: infoBytes, },
   ];
   if (options.announce !== undefined) {
-    fields.push({ key: "announce", value: encode(options.announce) });
+    fields.push({ key: "announce", value: encode(options.announce,), },);
   }
   if (options.announceList !== undefined) {
-    fields.push({ key: "announce-list", value: encode(options.announceList) });
+    fields.push({
+      key: "announce-list",
+      value: encode(options.announceList,),
+    },);
   }
   if (options.pieceLayers !== undefined) {
     const layers = new Map<Uint8Array, Uint8Array>();
     for (const layer of options.pieceLayers) {
-      layers.set(layer.piecesRoot, layer.hashes);
+      layers.set(layer.piecesRoot, layer.hashes,);
     }
-    fields.push({ key: "piece layers", value: encode(layers) });
+    fields.push({ key: "piece layers", value: encode(layers,), },);
   }
 
-  fields.sort((a, b) =>
-    a.key < b.key ? -1 : a.key > b.key ? 1 : 0,
-  );
+  fields.sort((a, b,) => a.key < b.key ? -1 : a.key > b.key ? 1 : 0);
 
-  const chunks = fields.flatMap((field) => [
-    encode(field.key),
+  const chunks = fields.flatMap((field,) => [
+    encode(field.key,),
     field.value,
   ]);
-  const length = 2 + chunks.reduce((sum, chunk) => sum + chunk.length, 0);
-  const output = new Uint8Array(length);
+  const length = 2 + chunks.reduce((sum, chunk,) => sum + chunk.length, 0,);
+  const output = new Uint8Array(length,);
   output[0] = 0x64; // 'd'
   let offset = 1;
   for (const chunk of chunks) {
-    output.set(chunk, offset);
+    output.set(chunk, offset,);
     offset += chunk.length;
   }
   output[offset] = 0x65; // 'e'
@@ -162,16 +169,17 @@ export async function parseTorrentWithIdentity(
   bytes: Uint8Array,
   options: ParseTorrentOptions = {},
 ): Promise<TorrentIdentity> {
-  const torrent = await parseMetainfo(bytes, options);
+  const torrent = await parseMetainfo(bytes, options,);
 
-  const infoBytes = extractInfoBytes(bytes);
+  const infoBytes = extractInfoBytes(bytes,);
   const info = torrent.info;
   const hasV2 = (info as Record<string, unknown>)["meta version"] === 2;
-  const hasV1 = !hasV2 || (info as Record<string, unknown>)["pieces"] !== undefined;
+  const hasV1 = !hasV2 ||
+    (info as Record<string, unknown>)["pieces"] !== undefined;
 
-  const infoHashV1 = hasV1 ? await calculateInfoHash(infoBytes) : undefined;
-  const infoHashV2 = hasV2 ? await calculateInfoHashV2(infoBytes) : undefined;
-  const infoHash = infoHashV1 ?? infoHashV2!.slice(0, 20);
+  const infoHashV1 = hasV1 ? await calculateInfoHash(infoBytes,) : undefined;
+  const infoHashV2 = hasV2 ? await calculateInfoHashV2(infoBytes,) : undefined;
+  const infoHash = infoHashV1 ?? infoHashV2!.slice(0, 20,);
   const version = hasV2 ? (hasV1 ? "hybrid" : "v2") : "v1";
 
   return {
@@ -180,31 +188,35 @@ export async function parseTorrentWithIdentity(
     infoHashV1,
     infoHashV2,
     infoHash,
-    infoHashHex: toHex(infoHash),
+    infoHashHex: toHex(infoHash,),
     version,
   };
 }
 
 /** Convert binary data to lowercase hexadecimal text. */
-export function toHex(bytes: Uint8Array): string {
+export function toHex(bytes: Uint8Array,): string {
   let hex = "";
   for (let i = 0; i < bytes.length; i++) {
-    hex += bytes[i]!.toString(16).padStart(2, "0");
+    hex += bytes[i]!.toString(16,).padStart(2, "0",);
   }
   return hex;
 }
 
 // ── Internal helpers ────────────────────────────────────────────────────
 
-function validateInfoBytes(infoBytes: Uint8Array): void {
+function validateInfoBytes(infoBytes: Uint8Array,): void {
   let decoded: unknown;
   try {
-    decoded = decode(infoBytes, { maxBytes: infoBytes.length, useMap: true });
+    decoded = decode(infoBytes, { maxBytes: infoBytes.length, useMap: true, },);
   } catch (error) {
-    throw new TorrentParseError("Invalid bencoded info dictionary", { cause: error });
+    throw new TorrentParseError("Invalid bencoded info dictionary", {
+      cause: error,
+    },);
   }
   if (!(decoded instanceof Map)) {
-    throw new TorrentParseError("Info bytes must contain one bencode dictionary");
+    throw new TorrentParseError(
+      "Info bytes must contain one bencode dictionary",
+    );
   }
 }
 
@@ -214,30 +226,30 @@ function skipValue(
   depth: number,
 ): void {
   if (depth > 256) {
-    throw new TorrentParseError("Torrent nesting is too deep");
+    throw new TorrentParseError("Torrent nesting is too deep",);
   }
-  const marker = peek(bytes, cursor);
+  const marker = peek(bytes, cursor,);
   if (marker >= 0x30 && marker <= 0x39) {
-    readByteString(bytes, cursor);
+    readByteString(bytes, cursor,);
     return;
   }
   if (marker === 0x69) {
     cursor.offset++;
-    while (peek(bytes, cursor) !== 0x65) cursor.offset++;
+    while (peek(bytes, cursor,) !== 0x65) cursor.offset++;
     cursor.offset++;
     return;
   }
   if (marker === 0x6c) {
     cursor.offset++;
-    while (peek(bytes, cursor) !== 0x65) skipValue(bytes, cursor, depth + 1);
+    while (peek(bytes, cursor,) !== 0x65) skipValue(bytes, cursor, depth + 1,);
     cursor.offset++;
     return;
   }
   if (marker === 0x64) {
     cursor.offset++;
-    while (peek(bytes, cursor) !== 0x65) {
-      readByteString(bytes, cursor);
-      skipValue(bytes, cursor, depth + 1);
+    while (peek(bytes, cursor,) !== 0x65) {
+      readByteString(bytes, cursor,);
+      skipValue(bytes, cursor, depth + 1,);
     }
     cursor.offset++;
     return;
@@ -252,26 +264,26 @@ function readByteString(
   cursor: { offset: number },
 ): Uint8Array {
   const start = cursor.offset;
-  while (peek(bytes, cursor) !== 0x3a) cursor.offset++;
+  while (peek(bytes, cursor,) !== 0x3a) cursor.offset++;
   const length = Number(
-    new TextDecoder().decode(bytes.subarray(start, cursor.offset)),
+    new TextDecoder().decode(bytes.subarray(start, cursor.offset,),),
   );
   cursor.offset++;
   if (
-    !Number.isSafeInteger(length) || length < 0 ||
+    !Number.isSafeInteger(length,) || length < 0 ||
     cursor.offset + length > bytes.length
   ) {
-    throw new TorrentParseError(`Invalid byte string length at byte ${start}`);
+    throw new TorrentParseError(`Invalid byte string length at byte ${start}`,);
   }
-  const value = bytes.subarray(cursor.offset, cursor.offset + length);
+  const value = bytes.subarray(cursor.offset, cursor.offset + length,);
   cursor.offset += length;
   return value;
 }
 
-function peek(bytes: Uint8Array, cursor: { offset: number }): number {
+function peek(bytes: Uint8Array, cursor: { offset: number },): number {
   const byte = bytes[cursor.offset];
   if (byte === undefined) {
-    throw new TorrentParseError("Unexpected end of torrent data");
+    throw new TorrentParseError("Unexpected end of torrent data",);
   }
   return byte;
 }
@@ -282,16 +294,16 @@ function expect(
   expected: number,
   message: string,
 ): void {
-  if (peek(bytes, cursor) !== expected) {
-    throw new TorrentParseError(message);
+  if (peek(bytes, cursor,) !== expected) {
+    throw new TorrentParseError(message,);
   }
   cursor.offset++;
 }
 
-function equalsAscii(bytes: Uint8Array, value: string): boolean {
+function equalsAscii(bytes: Uint8Array, value: string,): boolean {
   if (bytes.length !== value.length) return false;
   for (let i = 0; i < value.length; i++) {
-    if (bytes[i] !== value.charCodeAt(i)) return false;
+    if (bytes[i] !== value.charCodeAt(i,)) return false;
   }
   return true;
 }

@@ -3,10 +3,10 @@
  * Public surface of the OPFS-backed torrent generator.
  */
 
-export { decode, encode } from "../utils/bencode.ts";
-export { generateTorrent } from "./generator.ts";
-export { walkOPFSDir, getOPFSFileSize } from "./opfs-walker.ts";
-export { OPFSMultiFileReader } from "./opfs-reader.ts";
+export { decode, encode, } from "../utils/bencode.ts";
+export { generateTorrent, } from "./generator.ts";
+export { getOPFSFileSize, walkOPFSDir, } from "./opfs-walker.ts";
+export { OPFSMultiFileReader, } from "./opfs-reader.ts";
 export {
   buildPieceFiles,
   calcPieceSize,
@@ -15,7 +15,7 @@ export {
   isHiddenFile,
   sha1sum,
 } from "./util.ts";
-export { PieceSizeEnum } from "./types.ts";
+export { PieceSizeEnum, } from "./types.ts";
 export type {
   BencodeValue,
   GeneratorOptions,

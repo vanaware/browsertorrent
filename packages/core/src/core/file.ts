@@ -85,6 +85,7 @@ export interface FileOptions {
 }
 
 export interface FileEvents {
+  [key: string]: Event | CustomEvent;
   /** Emitido quando `createReadStream()` é chamado, com a stream resultante. */
   stream: CustomEvent<ReadableStream<Uint8Array>>;
   /** Emitido quando o iterator `Symbol.asyncIterator` é criado. */
@@ -188,7 +189,9 @@ export class File extends TypedEventTarget<FileEvents> {
     const torrent = this._torrent;
     if (!torrent) return 0;
     const { first, last, } = this.pieceRange;
-    const pieces = (torrent as unknown as Torrent).pieces as Piece[] | undefined;
+    const pieces = (torrent as unknown as Torrent).pieces as
+      | Piece[]
+      | undefined;
     if (!pieces || !Array.isArray(pieces,)) return 0;
     const pieceLength = this._pieceLength;
     let downloaded = 0;
@@ -308,6 +311,7 @@ export class File extends TypedEventTarget<FileEvents> {
     let cursor = absStart;
     let cancelled = false;
     let doneEmitted = false;
+    const self = this;
 
     const stream = new ReadableStream<Uint8Array>({
       async pull(controller,): Promise<void> {
@@ -318,16 +322,16 @@ export class File extends TypedEventTarget<FileEvents> {
         if (cursor >= absEnd) {
           if (!doneEmitted) {
             doneEmitted = true;
-            this.emit("done", new CustomEvent("done",),);
+            self.emit("done", new CustomEvent("done",),);
           }
           controller.close();
           return;
         }
 
         try {
-          const block = await this._readBlock(
+          const block = await self._readBlock(
             cursor,
-            Math.min(this._blockSize, absEnd - cursor,),
+            Math.min(self._blockSize, absEnd - cursor,),
           );
           if (cancelled) return;
           if (block.length === 0) {
@@ -338,7 +342,7 @@ export class File extends TypedEventTarget<FileEvents> {
           cursor += block.length;
         } catch (err) {
           const error = err instanceof Error ? err : new Error(String(err,),);
-          this.emit(
+          self.emit(
             "error",
             new CustomEvent("error", { detail: { error, }, },),
           );

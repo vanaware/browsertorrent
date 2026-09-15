@@ -20,8 +20,8 @@
  * Verifica se a porta é válida (1-65535).
  * Porta 0 é reservada pelo OS e não é usável como porta de destino.
  */
-export function isNetPort(port: number): boolean {
-  if (!Number.isInteger(port)) return false;
+export function isNetPort(port: number,): boolean {
+  if (!Number.isInteger(port,)) return false;
   return port >= 1 && port <= 65535;
 }
 
@@ -33,15 +33,15 @@ export function isNetPort(port: number): boolean {
  * Verifica se o string é um endereço IPv4 válido (dotted-decimal).
  * Cada octeto deve estar no range 0-255.
  */
-export function isIPv4String(ip: string): boolean {
+export function isIPv4String(ip: string,): boolean {
   return /^((25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)\.){3}(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)$/
-    .test(ip);
+    .test(ip,);
 }
 
 /**
  * Verifica se o Uint8Array representa um endereço IPv4 (exatamente 4 bytes).
  */
-export function isIPv4Bytes(ip: Uint8Array): boolean {
+export function isIPv4Bytes(ip: Uint8Array,): boolean {
   return ip.length === 4;
 }
 
@@ -54,59 +54,59 @@ export function isIPv4Bytes(ip: Uint8Array): boolean {
  * Aceita formatos: full (::1, fe80::1), com zona (%eth0), e com IPv4 embutido.
  * Não valida semântica exaustiva — cobre os formatos encontrados em peers/trackers.
  */
-export function isIPv6String(ip: string): boolean {
+export function isIPv6String(ip: string,): boolean {
   if (!ip || ip.length < 2) return false;
 
   // Remover zona (scope id), ex: fe80::1%eth0
-  const zoneIdx = ip.indexOf("%");
-  const addr = zoneIdx >= 0 ? ip.slice(0, zoneIdx) : ip;
+  const zoneIdx = ip.indexOf("%",);
+  const addr = zoneIdx >= 0 ? ip.slice(0, zoneIdx,) : ip;
 
   // Caso especial: "::"
   if (addr === "::") return true;
 
   // Caso: IPv4-mapped (::ffff:192.168.1.1) ou IPv4-embedded
-  const lastColon = addr.lastIndexOf(":");
+  const lastColon = addr.lastIndexOf(":",);
   if (lastColon >= 0) {
-    const afterLastColon = addr.slice(lastColon + 1);
+    const afterLastColon = addr.slice(lastColon + 1,);
     // Se o segmento após o último ':' contém '.', é IPv4 embutido
-    if (afterLastColon.includes(".")) {
-      if (!isIPv4String(afterLastColon)) return false;
+    if (afterLastColon.includes(".",)) {
+      if (!isIPv4String(afterLastColon,)) return false;
       // Validar a parte IPv6 antes do IPv4
       // Remove o ':' separador (não é parte dos hextets).
       // Se isso quebrou um "::" (ex: "::192.168.1.1" → ":"), restaura.
-      let v6Part = addr.slice(0, lastColon);
-      if (v6Part.endsWith(":") && !v6Part.endsWith("::")) {
+      let v6Part = addr.slice(0, lastColon,);
+      if (v6Part.endsWith(":",) && !v6Part.endsWith("::",)) {
         v6Part += ":";
       }
-      return isValidIpv6Hextets(v6Part, true);
+      return isValidIpv6Hextets(v6Part, true,);
     }
   }
 
-  return isValidIpv6Hextets(addr, false);
+  return isValidIpv6Hextets(addr, false,);
 }
 
 /**
  * Valida os hextets de um endereço IPv6.
  */
-function isValidIpv6Hextets(addr: string, hasEmbeddedIpv4: boolean): boolean {
+function isValidIpv6Hextets(addr: string, hasEmbeddedIpv4: boolean,): boolean {
   // Separar os lados do "::"
-  const doubleColonIdx = addr.indexOf("::");
+  const doubleColonIdx = addr.indexOf("::",);
   let leftPart: string;
   let rightPart: string;
 
   if (doubleColonIdx >= 0) {
     // Verificar se há mais de um "::"
-    if (addr.indexOf("::", doubleColonIdx + 1) >= 0) return false;
+    if (addr.indexOf("::", doubleColonIdx + 1,) >= 0) return false;
 
-    leftPart = addr.slice(0, doubleColonIdx);
-    rightPart = addr.slice(doubleColonIdx + 2);
+    leftPart = addr.slice(0, doubleColonIdx,);
+    rightPart = addr.slice(doubleColonIdx + 2,);
   } else {
     leftPart = addr;
     rightPart = "";
   }
 
-  const leftGroups = leftPart ? leftPart.split(":") : [];
-  const rightGroups = rightPart ? rightPart.split(":") : [];
+  const leftGroups = leftPart ? leftPart.split(":",) : [];
+  const rightGroups = rightPart ? rightPart.split(":",) : [];
   const totalGroups = leftGroups.length + rightGroups.length;
 
   // Sem "::", deve ter exatamente 8 grupos (ou 6 se IPv4 embutido)
@@ -120,11 +120,11 @@ function isValidIpv6Hextets(addr: string, hasEmbeddedIpv4: boolean): boolean {
   }
 
   // Validar cada grupo
-  const allGroups = [...leftGroups, ...rightGroups];
+  const allGroups = [...leftGroups, ...rightGroups,];
   for (const group of allGroups) {
     if (group === "") return false; // grupo vazio sem "::"
     if (group.length > 4) return false;
-    if (!/^[0-9a-fA-F]{1,4}$/.test(group)) return false;
+    if (!/^[0-9a-fA-F]{1,4}$/.test(group,)) return false;
   }
 
   return true;
@@ -134,13 +134,13 @@ function isValidIpv6Hextets(addr: string, hasEmbeddedIpv4: boolean): boolean {
 // HELPERS PRIVADOS: conversão IPv4 bytes ↔ string
 // ============================================================================
 
-function bytesToIPv4String(bytes: Uint8Array): string {
+function bytesToIPv4String(bytes: Uint8Array,): string {
   return `${bytes[0]!}.${bytes[1]!}.${bytes[2]!}.${bytes[3]!}`;
 }
 
-function ipv4StringToBytes(ip: string): Uint8Array | undefined {
-  if (!isIPv4String(ip)) return undefined;
-  return Uint8Array.from(ip.split(".").map((v) => parseInt(v, 10)));
+function ipv4StringToBytes(ip: string,): Uint8Array | undefined {
+  if (!isIPv4String(ip,)) return undefined;
+  return Uint8Array.from(ip.split(".",).map((v,) => parseInt(v, 10,)),);
 }
 
 // ============================================================================
@@ -160,7 +160,7 @@ export interface PeerEndpoint {
  * @returns Array de { ip, port }
  * @throws {RangeError} Se o comprimento de data não for múltiplo de 6
  */
-export function parseCompactIpv4Peers(data: Uint8Array): Array<PeerEndpoint> {
+export function parseCompactIpv4Peers(data: Uint8Array,): Array<PeerEndpoint> {
   if (data.length % 6 !== 0) {
     throw new RangeError(
       `compact IPv4 peer data length must be a multiple of 6, got ${data.length}`,
@@ -169,9 +169,9 @@ export function parseCompactIpv4Peers(data: Uint8Array): Array<PeerEndpoint> {
 
   const peers: Array<PeerEndpoint> = [];
   for (let offset = 0; offset < data.length; offset += 6) {
-    const ip = bytesToIPv4String(data.subarray(offset, offset + 4));
+    const ip = bytesToIPv4String(data.subarray(offset, offset + 4,),);
     const port = (data[offset + 4]! << 8) | data[offset + 5]!;
-    peers.push({ ip, port });
+    peers.push({ ip, port, },);
   }
   return peers;
 }
@@ -184,7 +184,7 @@ export function parseCompactIpv4Peers(data: Uint8Array): Array<PeerEndpoint> {
  * @returns Array de { ip, port }
  * @throws {RangeError} Se o comprimento de data não for múltiplo de 18
  */
-export function parseCompactIpv6Peers(data: Uint8Array): Array<PeerEndpoint> {
+export function parseCompactIpv6Peers(data: Uint8Array,): Array<PeerEndpoint> {
   if (data.length % 18 !== 0) {
     throw new RangeError(
       `compact IPv6 peer data length must be a multiple of 18, got ${data.length}`,
@@ -193,10 +193,10 @@ export function parseCompactIpv6Peers(data: Uint8Array): Array<PeerEndpoint> {
 
   const peers: Array<PeerEndpoint> = [];
   for (let offset = 0; offset < data.length; offset += 18) {
-    const ipBytes = data.subarray(offset, offset + 16);
-    const ip = bytesToIPv6String(ipBytes);
+    const ipBytes = data.subarray(offset, offset + 16,);
+    const ip = bytesToIPv6String(ipBytes,);
     const port = (data[offset + 16]! << 8) | data[offset + 17]!;
-    peers.push({ ip, port });
+    peers.push({ ip, port, },);
   }
   return peers;
 }
@@ -205,11 +205,11 @@ export function parseCompactIpv6Peers(data: Uint8Array): Array<PeerEndpoint> {
  * Converte 16 bytes em string IPv6 abreviado (RFC 5952 simplificado).
  * Compressa a sequência mais longa de grupos zero para "::".
  */
-function bytesToIPv6String(bytes: Uint8Array): string {
+function bytesToIPv6String(bytes: Uint8Array,): string {
   const groups: string[] = [];
   for (let i = 0; i < 16; i += 2) {
     const value = (bytes[i]! << 8) | bytes[i + 1]!;
-    groups.push(value.toString(16));
+    groups.push(value.toString(16,),);
   }
 
   // Encontrar a sequência mais longa de grupos "0"
@@ -234,15 +234,15 @@ function bytesToIPv6String(bytes: Uint8Array): string {
 
   // Comprimir a sequência mais longa
   if (bestLen >= 2) {
-    const left = groups.slice(0, bestStart).join(":");
-    const right = groups.slice(bestStart + bestLen).join(":");
+    const left = groups.slice(0, bestStart,).join(":",);
+    const right = groups.slice(bestStart + bestLen,).join(":",);
     if (left === "" && right === "") return "::";
     if (left === "") return `::${right}`;
     if (right === "") return `${left}::`;
     return `${left}::${right}`;
   }
 
-  return groups.join(":");
+  return groups.join(":",);
 }
 
 // ============================================================================
@@ -261,9 +261,9 @@ export function deduplicatePeers(
 
   for (const peer of peers) {
     const key = `${peer.ip}:${peer.port}`;
-    if (!seen.has(key)) {
-      seen.add(key);
-      result.push(peer);
+    if (!seen.has(key,)) {
+      seen.add(key,);
+      result.push(peer,);
     }
   }
 

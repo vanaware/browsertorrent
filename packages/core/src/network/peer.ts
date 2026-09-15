@@ -1,7 +1,7 @@
 // /loco/monorepo/webtorrent/src/network/peer.ts
 
-import { TypedEventTarget } from "../utils/event-target.ts";
-import { Wire, Transport } from "../core/wire.ts";
+import { TypedEventTarget, } from "../utils/event-target.ts";
+import { Transport, Wire, } from "../core/wire.ts";
 
 // ============================================================================
 // TIPOS E INTERFACES
@@ -9,7 +9,9 @@ import { Wire, Transport } from "../core/wire.ts";
 
 export interface PeerEvents {
   /** Emitido quando o Peer precisa enviar dados de sinalização (offer, answer, ICE) para o Tracker/SW */
-  signal: CustomEvent<{ data: RTCSessionDescriptionInit | RTCIceCandidateInit }>;
+  signal: CustomEvent<
+    { data: RTCSessionDescriptionInit | RTCIceCandidateInit }
+  >;
   /** Emitido quando a conexão WebRTC e o DataChannel estão abertos */
   connect: Event;
   /** Emitido quando o handshake do BitTorrent é concluído com sucesso */
@@ -46,20 +48,20 @@ export class Peer extends TypedEventTarget<PeerEvents> {
   public id: string = "unknown";
   public readonly type = "webrtc";
   public wire: Wire | null = null;
-  
+
   private pc: RTCPeerConnection | null = null;
   private channel: RTCDataChannel | null = null;
   private opts: PeerOptions;
-  
+
   public destroyed = false;
   public addr = "";
   private connected = false;
   private handshakeCompleted = false;
-  
+
   private connectTimeoutId: number | null = null;
   private handshakeTimeoutId: number | null = null;
 
-  constructor(opts: PeerOptions) {
+  constructor(opts: PeerOptions,) {
     super();
     this.opts = opts;
     this.id = "unknown";
@@ -68,12 +70,16 @@ export class Peer extends TypedEventTarget<PeerEvents> {
     // 🔥 CORREÇÃO: Fallback seguro para ambiente de teste ou browser
     const RTCPeerConnectionCtor = opts.wrtc || globalThis.RTCPeerConnection;
     if (!RTCPeerConnectionCtor) {
-      throw new Error("WebRTC not supported. Provide 'wrtc' option or run in a supported browser.");
+      throw new Error(
+        "WebRTC not supported. Provide 'wrtc' option or run in a supported browser.",
+      );
     }
 
-    this.pc = new RTCPeerConnectionCtor(opts.config || {
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-    });
+    this.pc = new RTCPeerConnectionCtor(
+      opts.config || {
+        iceServers: [{ urls: "stun:stun.l.google.com:19302", },],
+      },
+    );
 
     this._setupPeerConnection();
     this._startConnectTimeout();
@@ -100,24 +106,29 @@ export class Peer extends TypedEventTarget<PeerEvents> {
    * Processa dados de sinalização recebidos do Tracker ou Service Worker.
    * Pode ser uma offer, answer ou ICE candidate.
    */
-  public async signal(data: RTCSessionDescriptionInit | RTCIceCandidateInit): Promise<void> {
+  public async signal(
+    data: RTCSessionDescriptionInit | RTCIceCandidateInit,
+  ): Promise<void> {
     if (this.destroyed) return;
 
     try {
       if ("type" in data && (data.type === "offer" || data.type === "answer")) {
-        await this.pc!.setRemoteDescription(data);
-        
+        await this.pc!.setRemoteDescription(data,);
+
         // Se recebemos uma offer e não somos o iniciador, geramos uma answer
         if (data.type === "offer" && !this.opts.initiator) {
           const answer = await this.pc!.createAnswer();
-          await this.pc!.setLocalDescription(answer);
-          this.emit("signal", new CustomEvent("signal", { detail: { data: answer } }));
+          await this.pc!.setLocalDescription(answer,);
+          this.emit(
+            "signal",
+            new CustomEvent("signal", { detail: { data: answer, }, },),
+          );
         }
       } else if ("candidate" in data && data.candidate) {
-        await this.pc!.addIceCandidate(data);
+        await this.pc!.addIceCandidate(data,);
       }
     } catch (err) {
-      this._onError(err instanceof Error ? err : new Error(String(err)));
+      this._onError(err instanceof Error ? err : new Error(String(err,),),);
     }
   }
 
@@ -156,7 +167,7 @@ export class Peer extends TypedEventTarget<PeerEvents> {
 
     this.connected = false;
     this.handshakeCompleted = false;
-    this.emit("close");
+    this.emit("close",);
   }
 
   // ==========================================================================
@@ -164,23 +175,28 @@ export class Peer extends TypedEventTarget<PeerEvents> {
   // ==========================================================================
 
   private _setupPeerConnection(): void {
-    this.pc!.onicecandidate = (event) => {
+    this.pc!.onicecandidate = (event,) => {
       if (event.candidate) {
-        this.emit("signal", new CustomEvent("signal", { detail: { data: event.candidate.toJSON() } }));
+        this.emit(
+          "signal",
+          new CustomEvent("signal", {
+            detail: { data: event.candidate.toJSON(), },
+          },),
+        );
       }
     };
 
     this.pc!.onconnectionstatechange = () => {
       const state = this.pc!.connectionState;
       if (state === "failed" || state === "closed") {
-        this._onError(new Error(`WebRTC connection ${state}`));
+        this._onError(new Error(`WebRTC connection ${state}`,),);
       }
     };
 
     // Se não somos o iniciador, esperamos o outro peer criar o DataChannel
     if (!this.opts.initiator) {
-      this.pc!.ondatachannel = (event) => {
-        this._setupData(event.channel);
+      this.pc!.ondatachannel = (event,) => {
+        this._setupData(event.channel,);
       };
     }
   }
@@ -190,26 +206,29 @@ export class Peer extends TypedEventTarget<PeerEvents> {
     const channel = this.pc!.createDataChannel(channelName, {
       ordered: true, // BitTorrent exige ordem nas mensagens de controle
       negotiated: false,
-    });
-    this._setupData(channel);
+    },);
+    this._setupData(channel,);
 
     try {
       const offer = await this.pc!.createOffer();
-      await this.pc!.setLocalDescription(offer);
-      this.emit("signal", new CustomEvent("signal", { detail: { data: offer } }));
+      await this.pc!.setLocalDescription(offer,);
+      this.emit(
+        "signal",
+        new CustomEvent("signal", { detail: { data: offer, }, },),
+      );
     } catch (err) {
-      this._onError(err instanceof Error ? err : new Error(String(err)));
+      this._onError(err instanceof Error ? err : new Error(String(err,),),);
     }
   }
 
-  private _setupData(channel: RTCDataChannel): void {
+  private _setupData(channel: RTCDataChannel,): void {
     this.channel = channel;
     this.channel.binaryType = "arraybuffer";
 
     this.channel.onopen = () => {
       this._clearConnectTimeout();
       this.connected = true;
-      this.emit("connect");
+      this.emit("connect",);
       this._setupWire();
     };
 
@@ -220,7 +239,7 @@ export class Peer extends TypedEventTarget<PeerEvents> {
     };
 
     this.channel.onerror = () => {
-      this._onError(new Error("DataChannel error"));
+      this._onError(new Error("DataChannel error",),);
     };
   }
 
@@ -233,20 +252,23 @@ export class Peer extends TypedEventTarget<PeerEvents> {
 
     // Criamos um Transport que adapta o RTCDataChannel para a interface esperada pelo Wire
     const transport: Transport = {
-      send: (data: Uint8Array) => {
+      send: (data: Uint8Array,) => {
         if (this.channel && this.channel.readyState === "open") {
           // 🔥 CORREÇÃO: Extrair um ArrayBuffer estrito para satisfazer os tipos rigorosos do Deno
-          const arrayBuffer = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
-          this.channel.send(arrayBuffer as ArrayBuffer);
+          const arrayBuffer = data.buffer.slice(
+            data.byteOffset,
+            data.byteOffset + data.byteLength,
+          );
+          this.channel.send(arrayBuffer as ArrayBuffer,);
         }
       },
-      onMessage: (handler: (data: Uint8Array) => void) => {
+      onMessage: (handler: (data: Uint8Array,) => void,) => {
         if (this.channel) {
-          this.channel.onmessage = (event) => {
+          this.channel.onmessage = (event,) => {
             const buf = event.data instanceof ArrayBuffer
-              ? new Uint8Array(event.data)
-              : new Uint8Array(event.data);
-            handler(buf);
+              ? new Uint8Array(event.data,)
+              : new Uint8Array(event.data,);
+            handler(buf,);
           };
         }
       },
@@ -257,32 +279,40 @@ export class Peer extends TypedEventTarget<PeerEvents> {
       },
     };
 
-    this.wire = new Wire(transport);
+    this.wire = new Wire(transport,);
     // Expor o endereço do peer nos stats do Wire.
     if (this.opts.addr) {
-      const parts = this.opts.addr.split(":");
+      const parts = this.opts.addr.split(":",);
       this.wire.remoteAddress = parts[0] ?? "";
-      this.wire.remotePort = parseInt(parts[1] ?? "0", 10) || 0;
+      this.wire.remotePort = parseInt(parts[1] ?? "0", 10,) || 0;
     }
 
     // Listener do Handshake do BitTorrent
-    this.wire.on("handshake", (e: CustomEvent<{ peerId: Uint8Array; extensions: Uint8Array }>) => {
-      // Converte o peerId remoto (Uint8Array) para string hex para facilitar logs e UI
-      this.id = Array.from(e.detail.peerId).map((b: number) => b.toString(16).padStart(2, "0")).join("");
-      this._clearHandshakeTimeout();
-      this.handshakeCompleted = true;
-      this.emit("handshake", new CustomEvent("handshake", { detail: e.detail }));
-    });
+    this.wire.on(
+      "handshake",
+      (e: CustomEvent<{ peerId: Uint8Array; extensions: Uint8Array }>,) => {
+        // Converte o peerId remoto (Uint8Array) para string hex para facilitar logs e UI
+        this.id = Array.from(e.detail.peerId,).map((b: number,) =>
+          b.toString(16,).padStart(2, "0",)
+        ).join("",);
+        this._clearHandshakeTimeout();
+        this.handshakeCompleted = true;
+        this.emit(
+          "handshake",
+          new CustomEvent("handshake", { detail: e.detail, },),
+        );
+      },
+    );
 
     // Listener de erro do Wire
-    this.wire.on("error", (e: CustomEvent<{ error: Error }>) => {
-      this._onError(e.detail.error);
-    });
+    this.wire.on("error", (e: CustomEvent<{ error: Error }>,) => {
+      this._onError(e.detail.error,);
+    },);
 
     this._startHandshakeTimeout();
-    
+
     // Inicia o handshake do BitTorrent
-    this.wire.sendHandshake(this.opts.infoHash, this.opts.peerId);
+    this.wire.sendHandshake(this.opts.infoHash, this.opts.peerId,);
   }
 
   // ==========================================================================
@@ -292,14 +322,14 @@ export class Peer extends TypedEventTarget<PeerEvents> {
   private _startConnectTimeout(): void {
     this.connectTimeoutId = setTimeout(() => {
       if (!this.connected && !this.destroyed) {
-        this._onError(new Error("WebRTC connection timeout"));
+        this._onError(new Error("WebRTC connection timeout",),);
       }
-    }, 25000) as unknown as number;
+    }, 25000,) as unknown as number;
   }
 
   private _clearConnectTimeout(): void {
     if (this.connectTimeoutId !== null) {
-      clearTimeout(this.connectTimeoutId);
+      clearTimeout(this.connectTimeoutId,);
       this.connectTimeoutId = null;
     }
   }
@@ -307,14 +337,14 @@ export class Peer extends TypedEventTarget<PeerEvents> {
   private _startHandshakeTimeout(): void {
     this.handshakeTimeoutId = setTimeout(() => {
       if (!this.handshakeCompleted && !this.destroyed) {
-        this._onError(new Error("BitTorrent handshake timeout"));
+        this._onError(new Error("BitTorrent handshake timeout",),);
       }
-    }, 25000) as unknown as number;
+    }, 25000,) as unknown as number;
   }
 
   private _clearHandshakeTimeout(): void {
     if (this.handshakeTimeoutId !== null) {
-      clearTimeout(this.handshakeTimeoutId);
+      clearTimeout(this.handshakeTimeoutId,);
       this.handshakeTimeoutId = null;
     }
   }
@@ -324,9 +354,12 @@ export class Peer extends TypedEventTarget<PeerEvents> {
     this._clearHandshakeTimeout();
   }
 
-  private _onError(err: Error): void {
+  private _onError(err: Error,): void {
     if (this.destroyed) return;
-    this.emit("error", new CustomEvent("error", { detail: { error: err } }));
+    this.emit(
+      "error",
+      new CustomEvent("error", { detail: { error: err, }, },),
+    );
     this.destroy();
   }
 }

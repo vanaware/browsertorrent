@@ -1,12 +1,12 @@
 // /loco/monorepo/webtorrent/src/server/server.ts
 
-import type { File } from "../core/file.ts";
-import type { Torrent } from "../core/torrent.ts";
+import type { File, } from "../core/file.ts";
+import type { Torrent, } from "../core/torrent.ts";
 import {
   buildStreamURL,
   parseStreamURL,
-  streamManager,
   type StreamEntry,
+  streamManager,
 } from "./stream-manager.ts";
 
 /**
@@ -82,7 +82,7 @@ export interface Transport {
    * Posts a one-shot message to the SW (no response expected).  Used
    * for the `WEBTORRENT_ACK` handshake.
    */
-  postMessage(message: unknown): void;
+  postMessage(message: unknown,): void;
 
   /**
    * Posts a message to the SW that must be paired with a response
@@ -112,14 +112,16 @@ export interface Transport {
  */
 export interface ServiceWorkerControllerLike {
   scope: string;
-  active: { postMessage?: (data: unknown, transfer?: Transferable[]) => void } | null;
+  active:
+    | { postMessage?: (data: unknown, transfer?: Transferable[],) => void }
+    | null;
   /**
    * Returns a promise that resolves when a `message` event matches the
    * supplied `sourceId`.  In the real SW this is replaced by a
    * `navigator.serviceWorker.addEventListener('message', ...)` handler
    * that filters by the `MessageEvent.source.id`.
    */
-  waitForMessage(sourceId: string): Promise<unknown>;
+  waitForMessage(sourceId: string,): Promise<unknown>;
 }
 
 /**
@@ -132,52 +134,65 @@ export function createServiceWorkerTransport(
   scope: string,
 ): Transport {
   const PORT_TIMEOUT_MS = 5000;
-  const pending = new Map<string, (data: StreamResponseMetadata) => void>();
+  const pending = new Map<string, (data: StreamResponseMetadata,) => void>();
 
-  const onMessage = (event: unknown) => {
+  const onMessage = (event: unknown,) => {
     if (!event.data || typeof event.data !== "object") return;
-    if (event.data.type === "webtorrent-response" && typeof event.data.sourceId === "string") {
-      const resolver = pending.get(event.data.sourceId);
+    if (
+      event.data.type === "webtorrent-response" &&
+      typeof event.data.sourceId === "string"
+    ) {
+      const resolver = pending.get(event.data.sourceId,);
       if (resolver) {
-        pending.delete(event.data.sourceId);
-        resolver(event.data as StreamResponseMetadata);
+        pending.delete(event.data.sourceId,);
+        resolver(event.data as StreamResponseMetadata,);
       }
     }
   };
 
   if (typeof navigator !== "undefined" && navigator.serviceWorker) {
-    navigator.serviceWorker.addEventListener("message", onMessage as EventListener);
+    navigator.serviceWorker.addEventListener(
+      "message",
+      onMessage as EventListener,
+    );
   }
 
   return {
-    postMessage(message) {
-      controller.postMessage(message);
+    postMessage(message,) {
+      controller.postMessage(message,);
     },
 
-    requestStream(message, port) {
+    requestStream(message, port,) {
       const sourceId = crypto.randomUUID();
-      return new Promise<StreamResponseMetadata>((resolve) => {
+      return new Promise<StreamResponseMetadata>((resolve,) => {
         const timeout = setTimeout(() => {
-          if (pending.delete(sourceId)) {
-            resolve({ body: null, status: 503, statusText: "Service Unavailable" });
+          if (pending.delete(sourceId,)) {
+            resolve({
+              body: null,
+              status: 503,
+              statusText: "Service Unavailable",
+            },);
           }
-        }, PORT_TIMEOUT_MS);
+        }, PORT_TIMEOUT_MS,);
 
-        pending.set(sourceId, (data) => {
-          clearTimeout(timeout);
-          resolve(data);
-        });
+        pending.set(sourceId, (data,) => {
+          clearTimeout(timeout,);
+          resolve(data,);
+        },);
 
         controller.postMessage(
-          { ...message, sourceId, type: "webtorrent" },
-          [port],
+          { ...message, sourceId, type: "webtorrent", },
+          [port,],
         );
-      });
+      },);
     },
 
     close() {
       if (typeof navigator !== "undefined" && navigator.serviceWorker) {
-        navigator.serviceWorker.removeEventListener("message", onMessage as EventListener);
+        navigator.serviceWorker.removeEventListener(
+          "message",
+          onMessage as EventListener,
+        );
       }
       pending.clear();
     },
@@ -192,12 +207,12 @@ export function createServiceWorkerTransport(
  */
 export class InProcessTransport implements Transport {
   readonly sent: unknown[] = [];
-  private responseResolver?: (data: StreamResponseMetadata) => void;
+  private responseResolver?: (data: StreamResponseMetadata,) => void;
   /** @internal — exposed for tests. */
   public activePort?: MessagePort;
 
-  postMessage(message: unknown): void {
-    this.sent.push(message);
+  postMessage(message: unknown,): void {
+    this.sent.push(message,);
   }
 
   requestStream(
@@ -205,19 +220,19 @@ export class InProcessTransport implements Transport {
     port: MessagePort,
   ): Promise<StreamResponseMetadata> {
     this.activePort = port;
-    return new Promise<StreamResponseMetadata>((resolve) => {
+    return new Promise<StreamResponseMetadata>((resolve,) => {
       this.responseResolver = resolve;
-    });
+    },);
   }
 
   /** Test helper: deliver the metadata reply for the current request. */
-  deliverResponse(data: StreamResponseMetadata): void {
-    this.responseResolver?.(data);
+  deliverResponse(data: StreamResponseMetadata,): void {
+    this.responseResolver?.(data,);
   }
 
   /** Test helper: send a pull signal (`true` for more, `false` to end). */
-  sendPull(signal: PullSignal): void {
-    this.activePort?.postMessage(signal);
+  sendPull(signal: PullSignal,): void {
+    this.activePort?.postMessage(signal,);
   }
 
   close(): void {
@@ -249,9 +264,9 @@ export class WebTorrentServer {
   public isDestroyed: boolean = false;
 
   private readonly transport: Transport;
-  private readonly pendingAcks: Set<(ok: boolean) => void> = new Set();
+  private readonly pendingAcks: Set<(ok: boolean,) => void> = new Set();
 
-  constructor(opts: { transport: Transport; scope: string }) {
+  constructor(opts: { transport: Transport; scope: string },) {
     this.transport = opts.transport;
     this.scope = opts.scope;
   }
@@ -269,11 +284,11 @@ export class WebTorrentServer {
    *   round-trip without changing the public API.
    */
   sendReadyAck(): Promise<boolean> {
-    if (this.isDestroyed) return Promise.resolve(false);
-    const ack: WebTorrentAckMessage = { type: "WEBTORRENT_ACK" };
-    this.transport.postMessage(ack);
+    if (this.isDestroyed) return Promise.resolve(false,);
+    const ack: WebTorrentAckMessage = { type: "WEBTORRENT_ACK", };
+    this.transport.postMessage(ack,);
     this.isReady = true;
-    return Promise.resolve(true);
+    return Promise.resolve(true,);
   }
 
   /**
@@ -297,12 +312,14 @@ export class WebTorrentServer {
     port: MessagePort,
   ): Promise<Response> {
     if (this.isDestroyed) {
-      return Promise.resolve(new Response("Server destroyed", { status: 503 }));
+      return Promise.resolve(
+        new Response("Server destroyed", { status: 503, },),
+      );
     }
 
-    const parsed = parseStreamURL(message.url, message.scope || this.scope);
+    const parsed = parseStreamURL(message.url, message.scope || this.scope,);
     if (!parsed) {
-      return Promise.resolve(new Response("Not Found", { status: 404 }));
+      return Promise.resolve(new Response("Not Found", { status: 404, },),);
     }
 
     const entry: StreamEntry | undefined = streamManager.get(
@@ -310,14 +327,19 @@ export class WebTorrentServer {
       parsed.fileIndex,
     );
     if (!entry) {
-      return Promise.resolve(new Response("File not registered", { status: 404 }));
+      return Promise.resolve(
+        new Response("File not registered", { status: 404, },),
+      );
     }
 
-    const range = parseRangeHeader(message.headers["range"], entry.file.length);
+    const range = parseRangeHeader(
+      message.headers["range"],
+      entry.file.length,
+    );
     let status = 200;
     let statusText = "OK";
     const headers: Record<string, string> = {
-      "Content-Type": guessContentType(entry.file.name),
+      "Content-Type": guessContentType(entry.file.name,),
       "Accept-Ranges": "bytes",
       "Cache-Control": "no-store",
     };
@@ -325,21 +347,24 @@ export class WebTorrentServer {
     if (range) {
       status = 206;
       statusText = "Partial Content";
-      headers["Content-Range"] = `bytes ${range.start}-${range.end}/${entry.file.length}`;
-      headers["Content-Length"] = String(range.end - range.start + 1);
+      headers["Content-Range"] =
+        `bytes ${range.start}-${range.end}/${entry.file.length}`;
+      headers["Content-Length"] = String(range.end - range.start + 1,);
     } else {
-      headers["Content-Length"] = String(entry.file.length);
+      headers["Content-Length"] = String(entry.file.length,);
     }
 
     const stream = buildFileStream(entry, port, this.transport, {
       rangeStart: range?.start,
       rangeEnd: range ? range.end + 1 : undefined,
-    });
-    return Promise.resolve(new Response(stream, {
-      status,
-      statusText,
-      headers,
-    }));
+    },);
+    return Promise.resolve(
+      new Response(stream, {
+        status,
+        statusText,
+        headers,
+      },),
+    );
   }
 
   /**
@@ -351,7 +376,7 @@ export class WebTorrentServer {
     this.isDestroyed = true;
     this.isReady = false;
     this.transport.close();
-    for (const resolve of this.pendingAcks) resolve(false);
+    for (const resolve of this.pendingAcks) resolve(false,);
     this.pendingAcks.clear();
   }
 }
@@ -388,7 +413,7 @@ export function buildFileStream(
   let closed = false;
   let pendingResolve: (() => void) | null = null;
 
-  const onMessage = (event: MessageEvent<PullSignal | Uint8Array | null>) => {
+  const onMessage = (event: MessageEvent<PullSignal | Uint8Array | null>,) => {
     const data = event.data;
 
     if (data === false || data == null) {
@@ -408,65 +433,65 @@ export function buildFileStream(
     }
   };
 
-  port.addEventListener("message", onMessage as EventListener);
+  port.addEventListener("message", onMessage as EventListener,);
   port.start?.();
 
   return new ReadableStream<Uint8Array>({
-    async pull(controller) {
+    async pull(controller,) {
       try {
         if (closed) {
           controller.close();
-          port.removeEventListener("message", onMessage as EventListener);
+          port.removeEventListener("message", onMessage as EventListener,);
           return;
         }
 
         if (fileOffset >= endOffset) {
           controller.close();
-          port.postMessage(null);
-          port.removeEventListener("message", onMessage as EventListener);
+          port.postMessage(null,);
+          port.removeEventListener("message", onMessage as EventListener,);
           return;
         }
 
         // Wait for the next pull signal before emitting.  The transport
         // injects `true` whenever the SW is ready for the next chunk.
-        await new Promise<void>((resolve) => {
+        await new Promise<void>((resolve,) => {
           pendingResolve = resolve;
           if (closed) {
             pendingResolve = null;
             resolve();
           }
-        });
+        },);
 
         if (closed) {
           controller.close();
-          port.removeEventListener("message", onMessage as EventListener);
+          port.removeEventListener("message", onMessage as EventListener,);
           return;
         }
 
-        const chunk = await readNextChunk(file, fileOffset);
+        const chunk = await readNextChunk(file, fileOffset,);
         if (chunk.byteLength === 0) {
           controller.close();
-          port.postMessage(null);
-          port.removeEventListener("message", onMessage as EventListener);
+          port.postMessage(null,);
+          port.removeEventListener("message", onMessage as EventListener,);
           return;
         }
 
         fileOffset += chunk.byteLength;
-        controller.enqueue(chunk);
+        controller.enqueue(chunk,);
         // Send the chunk back through the port so the SW can forward it
-        port.postMessage(chunk);
+        port.postMessage(chunk,);
       } catch (err) {
-        controller.error(err);
-        port.removeEventListener("message", onMessage as EventListener);
+        controller.error(err,);
+        port.removeEventListener("message", onMessage as EventListener,);
       }
     },
 
     cancel() {
       closed = true;
-      port.postMessage(false);
-      port.removeEventListener("message", onMessage as EventListener);
+      port.postMessage(false,);
+      port.removeEventListener("message", onMessage as EventListener,);
     },
-  });
+  },);
 }
 
 /** Parsed byte-range result. */
@@ -488,25 +513,25 @@ export function parseRangeHeader(
   if (!header) return null;
 
   // "bytes=start-end" or "bytes=start-"
-  const match = header.match(/^bytes=(\d+)-(\d*)$/);
+  const match = header.match(/^bytes=(\d+)-(\d*)$/,);
   if (!match) return null;
 
-  const start = Number(match[1]);
+  const start = Number(match[1],);
   const endStr = match[2];
 
-  if (!Number.isFinite(start) || start < 0 || start >= fileLength) {
+  if (!Number.isFinite(start,) || start < 0 || start >= fileLength) {
     return null;
   }
 
   const end = endStr !== ""
-    ? Math.min(Number(endStr), fileLength - 1)
+    ? Math.min(Number(endStr,), fileLength - 1,)
     : fileLength - 1;
 
-  if (!Number.isFinite(end) || end < start || end >= fileLength) {
+  if (!Number.isFinite(end,) || end < start || end >= fileLength) {
     return null;
   }
 
-  return { start, end };
+  return { start, end, };
 }
 
 /**
@@ -533,47 +558,49 @@ export async function readNextChunk(
   // scan until we hit the requested offset.  Once the real
   // implementation lands (Phase 4.1) this function will be replaced
   // by a direct chunk-store read.
-  const it = (file as unknown as { [Symbol.asyncIterator]: () => AsyncIterator<Uint8Array> })[Symbol.asyncIterator]() as AsyncIterableIterator<Uint8Array>;
+  const it = (file as unknown as {
+    [Symbol.asyncIterator]: () => AsyncIterator<Uint8Array>;
+  })[Symbol.asyncIterator]() as AsyncIterableIterator<Uint8Array>;
   let skipped = 0;
-  const remainingToRead = Math.min(length, file.length - offset);
+  const remainingToRead = Math.min(length, file.length - offset,);
 
   if (offset === 0) {
-    const { value, done } = await it.next();
-    if (done || !value) return new Uint8Array(0);
-    return value.subarray(0, Math.min(value.length, remainingToRead));
+    const { value, done, } = await it.next();
+    if (done || !value) return new Uint8Array(0,);
+    return value.subarray(0, Math.min(value.length, remainingToRead,),);
   }
 
   while (skipped < offset) {
     const result = await it.next();
-    if (result.done || !result.value) return new Uint8Array(0);
+    if (result.done || !result.value) return new Uint8Array(0,);
     const value = result.value;
     skipped += value.length;
     if (skipped > offset) {
       const overflow = skipped - offset;
       const takeFromThis = value.length - overflow;
       if (takeFromThis >= remainingToRead) {
-        return value.subarray(value.length - remainingToRead, value.length);
+        return value.subarray(value.length - remainingToRead, value.length,);
       }
       // Not enough in a single chunk; concatenate
-      const first = value.subarray(value.length - takeFromThis, value.length);
-      const out = new Uint8Array(remainingToRead);
-      out.set(first, 0);
+      const first = value.subarray(value.length - takeFromThis, value.length,);
+      const out = new Uint8Array(remainingToRead,);
+      out.set(first, 0,);
       let written = first.length;
       while (written < remainingToRead) {
         const r = await it.next();
         if (r.done || !r.value) break;
-        const take = Math.min(r.value.length, remainingToRead - written);
-        out.set(r.value.subarray(0, take), written);
+        const take = Math.min(r.value.length, remainingToRead - written,);
+        out.set(r.value.subarray(0, take,), written,);
         written += take;
       }
-      return out.subarray(0, written);
+      return out.subarray(0, written,);
     }
   }
 
   // offset fell exactly on a chunk boundary
-  const { value, done } = await it.next();
-  if (done || !value) return new Uint8Array(0);
-  return value.subarray(0, Math.min(value.length, remainingToRead));
+  const { value, done, } = await it.next();
+  if (done || !value) return new Uint8Array(0,);
+  return value.subarray(0, Math.min(value.length, remainingToRead,),);
 }
 
 /**
@@ -581,34 +608,60 @@ export async function readNextChunk(
  * `application/octet-stream` when no extension matches so the browser
  * can still download the file.
  */
-export function guessContentType(name: string): string {
-  const idx = name.lastIndexOf(".");
+export function guessContentType(name: string,): string {
+  const idx = name.lastIndexOf(".",);
   if (idx < 0 || idx === name.length - 1) {
     return "application/octet-stream";
   }
-  const ext = name.slice(idx + 1).toLowerCase();
+  const ext = name.slice(idx + 1,).toLowerCase();
   switch (ext) {
-    case "mp4": case "m4v": return "video/mp4";
-    case "webm": return "video/webm";
-    case "ogg": case "ogv": return "video/ogg";
-    case "mp3": return "audio/mpeg";
-    case "wav": return "audio/wav";
-    case "flac": return "audio/flac";
-    case "m4a": case "aac": return "audio/aac";
-    case "oga": return "audio/ogg";
-    case "opus": return "audio/opus";
-    case "jpg": case "jpeg": return "image/jpeg";
-    case "png": return "image/png";
-    case "gif": return "image/gif";
-    case "webp": return "image/webp";
-    case "svg": return "image/svg+xml";
-    case "pdf": return "application/pdf";
-    case "txt": return "text/plain; charset=utf-8";
-    case "html": case "htm": return "text/html; charset=utf-8";
-    case "json": return "application/json; charset=utf-8";
-    case "srt": return "application/x-subrip";
-    case "vtt": return "text/vtt";
-    default: return "application/octet-stream";
+    case "mp4":
+    case "m4v":
+      return "video/mp4";
+    case "webm":
+      return "video/webm";
+    case "ogg":
+    case "ogv":
+      return "video/ogg";
+    case "mp3":
+      return "audio/mpeg";
+    case "wav":
+      return "audio/wav";
+    case "flac":
+      return "audio/flac";
+    case "m4a":
+    case "aac":
+      return "audio/aac";
+    case "oga":
+      return "audio/ogg";
+    case "opus":
+      return "audio/opus";
+    case "jpg":
+    case "jpeg":
+      return "image/jpeg";
+    case "png":
+      return "image/png";
+    case "gif":
+      return "image/gif";
+    case "webp":
+      return "image/webp";
+    case "svg":
+      return "image/svg+xml";
+    case "pdf":
+      return "application/pdf";
+    case "txt":
+      return "text/plain; charset=utf-8";
+    case "html":
+    case "htm":
+      return "text/html; charset=utf-8";
+    case "json":
+      return "application/json; charset=utf-8";
+    case "srt":
+      return "application/x-subrip";
+    case "vtt":
+      return "text/vtt";
+    default:
+      return "application/octet-stream";
   }
 }
 
@@ -635,7 +688,9 @@ export interface CreateServerOptions {
   transport?: Transport;
 }
 
-export function createServer(opts: CreateServerOptions = {}): WebTorrentServer {
+export function createServer(
+  opts: CreateServerOptions = {},
+): WebTorrentServer {
   let transport: Transport;
   let scope: string;
 
@@ -643,14 +698,15 @@ export function createServer(opts: CreateServerOptions = {}): WebTorrentServer {
     transport = opts.transport;
     scope = opts.scope || "/";
   } else if (opts.controller) {
-    scope = opts.scope || (opts.controller as unknown as { scope?: string }).scope || "/";
-    transport = createServiceWorkerTransport(opts.controller, scope);
+    scope = opts.scope ||
+      (opts.controller as unknown as { scope?: string }).scope || "/";
+    transport = createServiceWorkerTransport(opts.controller, scope,);
   } else {
     scope = opts.scope || "/";
     transport = new InProcessTransport();
   }
 
-  return new WebTorrentServer({ transport, scope });
+  return new WebTorrentServer({ transport, scope, },);
 }
 
 /**
@@ -669,9 +725,16 @@ export function registerTorrentFiles(
   const registered: StreamEntry[] = [];
   for (let i = 0; i < files.length; i++) {
     const file = files[i]!;
-    console.log("[server] registerTorrentFiles:", infoHash, "fileIndex:", i, "name:", file.name);
-    streamManager.register(infoHash, i, file);
-    registered.push({ infoHash, fileIndex: i, file });
+    console.log(
+      "[server] registerTorrentFiles:",
+      infoHash,
+      "fileIndex:",
+      i,
+      "name:",
+      file.name,
+    );
+    streamManager.register(infoHash, i, file,);
+    registered.push({ infoHash, fileIndex: i, file, },);
   }
   return registered;
 }
@@ -680,6 +743,6 @@ export function registerTorrentFiles(
  * Removes every file belonging to a torrent from the registry.  Called
  * when a torrent is removed from the client.
  */
-export function unregisterTorrentFiles(infoHash: string): void {
-  streamManager.unregisterTorrent(infoHash);
+export function unregisterTorrentFiles(infoHash: string,): void {
+  streamManager.unregisterTorrent(infoHash,);
 }

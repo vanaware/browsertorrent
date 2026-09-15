@@ -18,17 +18,22 @@
  * `HttpTracker`, `WsTracker`, `createTracker`) é preservada.
  */
 
-import { decode, BencodeDict, BencodeMap, BencodeValue } from "../utils/bencode.ts";
-import { TrackerError } from "../utils/errors.ts";
+import {
+  BencodeDict,
+  BencodeMap,
+  BencodeValue,
+  decode,
+} from "../utils/bencode.ts";
+import { TrackerError, } from "../utils/errors.ts";
 import {
   deduplicatePeers,
   parseCompactIpv4Peers,
   parseCompactIpv6Peers,
   type PeerEndpoint,
 } from "../utils/net.ts";
-import { uint8ArrayToBinaryString } from "../utils/encode-util.ts";
+import { uint8ArrayToBinaryString, } from "../utils/encode-util.ts";
 
-export type { PeerEndpoint };
+export type { PeerEndpoint, };
 
 // ── Limites de recursos (adaptados de torrent-tracker/request.ts) ───────
 
@@ -84,7 +89,7 @@ export interface TrackerResponse {
 }
 
 export interface Tracker {
-  announce(event?: TrackerAnnounceEvent): Promise<TrackerResponse>;
+  announce(event?: TrackerAnnounceEvent,): Promise<TrackerResponse>;
   destroy(): void;
 }
 
@@ -94,10 +99,10 @@ export interface Tracker {
  * Percent-encodes raw bytes byte-a-byte (`%XX`), como exigido pelo BEP 3
  * para `info_hash` e `peer_id`. Nunca passa pela codificação UTF-8.
  */
-export function percentEncodeBytes(bytes: Uint8Array): string {
+export function percentEncodeBytes(bytes: Uint8Array,): string {
   let result = "";
   for (let i = 0; i < bytes.length; i++) {
-    result += `%${bytes[i]!.toString(16).padStart(2, "0").toUpperCase()}`;
+    result += `%${bytes[i]!.toString(16,).padStart(2, "0",).toUpperCase()}`;
   }
   return result;
 }
@@ -109,13 +114,13 @@ export function integerInRange(
   minimum: number,
   maximum = Number.MAX_SAFE_INTEGER,
 ): number {
-  if (!Number.isSafeInteger(value) || value < minimum || value > maximum) {
-    throw new TrackerError(`${name} is invalid`);
+  if (!Number.isSafeInteger(value,) || value < minimum || value > maximum) {
+    throw new TrackerError(`${name} is invalid`,);
   }
   return value;
 }
 
-const TRACKER_EVENTS = new Set<string>(["started", "completed", "stopped"]);
+const TRACKER_EVENTS = new Set<string>(["started", "completed", "stopped",],);
 
 /**
  * Valida a URL do tracker + opções de announce antes do request.
@@ -131,30 +136,38 @@ export function validateTrackerOptions(
     !(opts.peerId instanceof Uint8Array) ||
     opts.infoHash.length !== 20 || opts.peerId.length !== 20
   ) {
-    throw new TrackerError("infoHash and peerId must contain 20 bytes");
+    throw new TrackerError("infoHash and peerId must contain 20 bytes",);
   }
   if (
     typeof baseUrl !== "string" || !baseUrl ||
     baseUrl.length > MAX_TRACKER_URL_LENGTH
   ) {
-    throw new TrackerError("tracker URL is invalid");
+    throw new TrackerError("tracker URL is invalid",);
   }
   try {
-    new URL(baseUrl);
+    new URL(baseUrl,);
   } catch (error) {
-    throw new TrackerError("tracker URL is invalid", "TRACKER_ERROR", { cause: error });
+    throw new TrackerError("tracker URL is invalid", "TRACKER_ERROR", {
+      cause: error,
+    },);
   }
-  if (opts.port !== undefined) integerInRange(opts.port, "port", 1, 65_535);
-  if (opts.uploaded !== undefined) integerInRange(opts.uploaded, "uploaded", 0);
-  if (opts.downloaded !== undefined) integerInRange(opts.downloaded, "downloaded", 0);
-  if (opts.left !== undefined) integerInRange(opts.left, "left", 0);
-  if (opts.numwant !== undefined) integerInRange(opts.numwant, "numwant", 0, MAX_NUM_WANT);
-  if (opts.key !== undefined) integerInRange(opts.key, "key", 0, 0xffff_ffff);
+  if (opts.port !== undefined) integerInRange(opts.port, "port", 1, 65_535,);
+  if (opts.uploaded !== undefined) {
+    integerInRange(opts.uploaded, "uploaded", 0,);
+  }
+  if (opts.downloaded !== undefined) {
+    integerInRange(opts.downloaded, "downloaded", 0,);
+  }
+  if (opts.left !== undefined) integerInRange(opts.left, "left", 0,);
+  if (opts.numwant !== undefined) {
+    integerInRange(opts.numwant, "numwant", 0, MAX_NUM_WANT,);
+  }
+  if (opts.key !== undefined) integerInRange(opts.key, "key", 0, 0xffff_ffff,);
   if (opts.timeoutMs !== undefined) {
-    integerInRange(opts.timeoutMs, "timeoutMs", 1, MAX_TIMEOUT_MS);
+    integerInRange(opts.timeoutMs, "timeoutMs", 1, MAX_TIMEOUT_MS,);
   }
-  if (event?.event !== undefined && !TRACKER_EVENTS.has(event.event)) {
-    throw new TrackerError("event is invalid");
+  if (event?.event !== undefined && !TRACKER_EVENTS.has(event.event,)) {
+    throw new TrackerError("event is invalid",);
   }
 }
 
@@ -169,19 +182,19 @@ export function buildAnnounceUrl(
   event?: TrackerAnnounceEvent,
   trackerId?: string,
 ): URL {
-  validateTrackerOptions(baseUrl, opts, event);
+  validateTrackerOptions(baseUrl, opts, event,);
 
-  const url = new URL(baseUrl);
+  const url = new URL(baseUrl,);
   if (
     (url.protocol !== "http:" && url.protocol !== "https:") ||
     !url.hostname
   ) {
-    throw new TrackerError(`unsupported HTTP tracker URL: ${url.protocol}`);
+    throw new TrackerError(`unsupported HTTP tracker URL: ${url.protocol}`,);
   }
 
   const parameters = [
-    `info_hash=${percentEncodeBytes(opts.infoHash)}`,
-    `peer_id=${percentEncodeBytes(opts.peerId)}`,
+    `info_hash=${percentEncodeBytes(opts.infoHash,)}`,
+    `peer_id=${percentEncodeBytes(opts.peerId,)}`,
     `port=${opts.port ?? 6881}`,
     `uploaded=${opts.uploaded ?? 0}`,
     `downloaded=${opts.downloaded ?? 0}`,
@@ -189,17 +202,19 @@ export function buildAnnounceUrl(
     "compact=1",
     `numwant=${opts.numwant ?? 50}`,
   ];
-  if (event?.event) parameters.push(`event=${event.event}`);
-  if (opts.key !== undefined) parameters.push(`key=${opts.key}`);
-  if (trackerId) parameters.push(`trackerid=${encodeURIComponent(trackerId)}`);
+  if (event?.event) parameters.push(`event=${event.event}`,);
+  if (opts.key !== undefined) parameters.push(`key=${opts.key}`,);
+  if (trackerId) {
+    parameters.push(`trackerid=${encodeURIComponent(trackerId,)}`,);
+  }
 
-  url.search += `${url.search ? "&" : ""}${parameters.join("&")}`;
+  url.search += `${url.search ? "&" : ""}${parameters.join("&",)}`;
   return url;
 }
 
 // ── Parsing de resposta (torrent-tracker/http.ts + compact.ts) ──────────
 
-function dictString(dict: BencodeDict, key: string): string | undefined {
+function dictString(dict: BencodeDict, key: string,): string | undefined {
   const value = dict[key];
   return typeof value === "string" ? value : undefined;
 }
@@ -209,41 +224,50 @@ function dictNonNegativeInteger(
   key: string,
 ): number | undefined {
   const value = dict[key];
-  if (typeof value === "number" && Number.isSafeInteger(value) && value >= 0) {
+  if (typeof value === "number" && Number.isSafeInteger(value,) && value >= 0) {
     return value;
   }
-  if (typeof value === "bigint" && value >= 0n && value <= BigInt(Number.MAX_SAFE_INTEGER)) {
-    return Number(value);
+  if (
+    typeof value === "bigint" && value >= 0n &&
+    value <= BigInt(Number.MAX_SAFE_INTEGER,)
+  ) {
+    return Number(value,);
   }
   return undefined;
 }
 
 /** Converte peers em formato dicionário (não-compacto) para endpoints. */
-function parseDictionaryPeers(values: unknown[]): PeerEndpoint[] {
+function parseDictionaryPeers(values: unknown[],): PeerEndpoint[] {
   const peers: PeerEndpoint[] = [];
   const textDecoder = new TextDecoder();
-  for (const value of values.slice(0, MAX_DICTIONARY_PEERS)) {
-    if (value === null || typeof value !== "object" || Array.isArray(value)) continue;
+  for (const value of values.slice(0, MAX_DICTIONARY_PEERS,)) {
+    if (value === null || typeof value !== "object" || Array.isArray(value,)) {
+      continue;
+    }
     const dict = value as BencodeDict;
     const ipRaw = dict["ip"];
     const hostname = typeof ipRaw === "string"
       ? ipRaw
       : ipRaw instanceof Uint8Array
-        ? textDecoder.decode(ipRaw)
-        : undefined;
+      ? textDecoder.decode(ipRaw,)
+      : undefined;
     const portRaw = dict["port"];
     const port = typeof portRaw === "number"
       ? portRaw
-      : typeof portRaw === "bigint" ? Number(portRaw) : undefined;
-    if (!hostname || port === undefined || !Number.isSafeInteger(port)) continue;
+      : typeof portRaw === "bigint"
+      ? Number(portRaw,)
+      : undefined;
+    if (!hostname || port === undefined || !Number.isSafeInteger(port,)) {
+      continue;
+    }
     if (port < 1 || port > 65_535) continue;
-    peers.push({ ip: hostname, port });
+    peers.push({ ip: hostname, port, },);
   }
   return peers;
 }
 
-function toBytes(value: string | Uint8Array): Uint8Array {
-  return typeof value === "string" ? new TextEncoder().encode(value) : value;
+function toBytes(value: string | Uint8Array,): Uint8Array {
+  return typeof value === "string" ? new TextEncoder().encode(value,) : value;
 }
 
 /**
@@ -253,32 +277,38 @@ function toBytes(value: string | Uint8Array): Uint8Array {
  * @throws {TrackerError} em `failure reason`, bencode inválido,
  *   ausência de `interval` válido ou lista compacta malformada.
  */
-export function parseHttpTrackerResponse(bytes: Uint8Array): TrackerResponse {
+export function parseHttpTrackerResponse(bytes: Uint8Array,): TrackerResponse {
   let dict: BencodeDict;
   try {
     const value = decode(bytes, {
       maxBytes: MAX_RESPONSE_BYTES,
       maxDepth: 32,
       allowUnsortedKeys: true,
-    });
-    if (value === null || typeof value !== "object" || Array.isArray(value) ||
-        value instanceof Uint8Array || value instanceof Map) {
-      throw new TrackerError("tracker response must be a dictionary");
+    },);
+    if (
+      value === null || typeof value !== "object" || Array.isArray(value,) ||
+      value instanceof Uint8Array || value instanceof Map
+    ) {
+      throw new TrackerError("tracker response must be a dictionary",);
     }
     dict = value as BencodeDict;
   } catch (error) {
     if (error instanceof TrackerError) throw error;
-    throw new TrackerError("tracker returned invalid bencode", "TRACKER_ERROR", { cause: error });
+    throw new TrackerError(
+      "tracker returned invalid bencode",
+      "TRACKER_ERROR",
+      { cause: error, },
+    );
   }
 
-  const failure = dictString(dict, "failure reason");
+  const failure = dictString(dict, "failure reason",);
   if (failure) {
-    throw new TrackerError(`tracker announce failed: ${failure}`);
+    throw new TrackerError(`tracker announce failed: ${failure}`,);
   }
 
-  const interval = dictNonNegativeInteger(dict, "interval");
+  const interval = dictNonNegativeInteger(dict, "interval",);
   if (interval === undefined || interval < 1) {
-    throw new TrackerError("tracker response has no valid interval");
+    throw new TrackerError("tracker response has no valid interval",);
   }
 
   const peers: PeerEndpoint[] = [];
@@ -286,34 +316,44 @@ export function parseHttpTrackerResponse(bytes: Uint8Array): TrackerResponse {
   const ipv4 = dict["peers"];
   if (ipv4 instanceof Uint8Array || typeof ipv4 === "string") {
     try {
-      peers.push(...parseCompactIpv4Peers(toBytes(ipv4)));
+      peers.push(...parseCompactIpv4Peers(toBytes(ipv4,),),);
     } catch (error) {
-      throw new TrackerError("invalid compact IPv4 peer list", "TRACKER_ERROR", { cause: error });
+      throw new TrackerError(
+        "invalid compact IPv4 peer list",
+        "TRACKER_ERROR",
+        { cause: error, },
+      );
     }
-  } else if (Array.isArray(ipv4)) {
-    peers.push(...parseDictionaryPeers(ipv4));
+  } else if (Array.isArray(ipv4,)) {
+    peers.push(...parseDictionaryPeers(ipv4,),);
   }
 
   const ipv6 = dict["peers6"];
   if (ipv6 instanceof Uint8Array || typeof ipv6 === "string") {
     try {
-      peers.push(...parseCompactIpv6Peers(toBytes(ipv6)));
+      peers.push(...parseCompactIpv6Peers(toBytes(ipv6,),),);
     } catch (error) {
-      throw new TrackerError("invalid compact IPv6 peer list", "TRACKER_ERROR", { cause: error });
+      throw new TrackerError(
+        "invalid compact IPv6 peer list",
+        "TRACKER_ERROR",
+        { cause: error, },
+      );
     }
   }
 
   // Porta 0 não é conectável — filtra antes da deduplicação (BEP 23).
-  const connectable = peers.filter((peer) => peer.port >= 1 && peer.port <= 65_535);
+  const connectable = peers.filter((peer,) =>
+    peer.port >= 1 && peer.port <= 65_535
+  );
 
   return {
     interval,
-    minInterval: dictNonNegativeInteger(dict, "min interval"),
-    trackerId: dictString(dict, "tracker id"),
-    warning: dictString(dict, "warning message"),
-    complete: dictNonNegativeInteger(dict, "complete") ?? 0,
-    incomplete: dictNonNegativeInteger(dict, "incomplete") ?? 0,
-    peers: deduplicatePeers(connectable),
+    minInterval: dictNonNegativeInteger(dict, "min interval",),
+    trackerId: dictString(dict, "tracker id",),
+    warning: dictString(dict, "warning message",),
+    complete: dictNonNegativeInteger(dict, "complete",) ?? 0,
+    incomplete: dictNonNegativeInteger(dict, "incomplete",) ?? 0,
+    peers: deduplicatePeers(connectable,),
   };
 }
 
@@ -323,19 +363,19 @@ async function readBoundedBody(
   response: Response,
   maximumBytes: number,
 ): Promise<Uint8Array> {
-  const contentLength = response.headers.get("content-length");
+  const contentLength = response.headers.get("content-length",);
   if (contentLength !== null) {
-    if (!/^\d+$/.test(contentLength)) {
-      throw new TrackerError("tracker response has invalid Content-Length");
+    if (!/^\d+$/.test(contentLength,)) {
+      throw new TrackerError("tracker response has invalid Content-Length",);
     }
-    const declaredBytes = Number(contentLength);
-    if (!Number.isSafeInteger(declaredBytes) || declaredBytes > maximumBytes) {
-      throw new TrackerError("tracker response is too large");
+    const declaredBytes = Number(contentLength,);
+    if (!Number.isSafeInteger(declaredBytes,) || declaredBytes > maximumBytes) {
+      throw new TrackerError("tracker response is too large",);
     }
   }
 
   if (!response.body) {
-    return new Uint8Array(await response.arrayBuffer());
+    return new Uint8Array(await response.arrayBuffer(),);
   }
 
   const reader = response.body.getReader();
@@ -343,22 +383,22 @@ async function readBoundedBody(
   let totalBytes = 0;
   try {
     for (;;) {
-      const { done, value } = await reader.read();
+      const { done, value, } = await reader.read();
       if (done) break;
       totalBytes += value.byteLength;
       if (totalBytes > maximumBytes) {
-        throw new TrackerError("tracker response is too large");
+        throw new TrackerError("tracker response is too large",);
       }
-      chunks.push(value);
+      chunks.push(value,);
     }
   } finally {
     reader.releaseLock();
   }
 
-  const bytes = new Uint8Array(totalBytes);
+  const bytes = new Uint8Array(totalBytes,);
   let offset = 0;
   for (const chunk of chunks) {
-    bytes.set(chunk, offset);
+    bytes.set(chunk, offset,);
     offset += chunk.byteLength;
   }
   return bytes;
@@ -373,14 +413,19 @@ export class HttpTracker implements Tracker {
   private timeoutId: ReturnType<typeof setTimeout> | null = null;
   private trackerId: string | undefined;
 
-  constructor(baseUrl: string, opts: TrackerOptions) {
+  constructor(baseUrl: string, opts: TrackerOptions,) {
     this.baseUrl = baseUrl;
     this.opts = opts;
   }
 
-  async announce(event?: TrackerAnnounceEvent): Promise<TrackerResponse> {
-    validateTrackerOptions(this.baseUrl, this.opts, event);
-    const url = buildAnnounceUrl(this.baseUrl, this.opts, event, this.trackerId);
+  async announce(event?: TrackerAnnounceEvent,): Promise<TrackerResponse> {
+    validateTrackerOptions(this.baseUrl, this.opts, event,);
+    const url = buildAnnounceUrl(
+      this.baseUrl,
+      this.opts,
+      event,
+      this.trackerId,
+    );
 
     this.abortController = new AbortController();
     const timeoutMs = this.opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
@@ -388,20 +433,20 @@ export class HttpTracker implements Tracker {
     this.timeoutId = setTimeout(() => {
       timedOut = true;
       this.abortController?.abort();
-    }, timeoutMs);
+    }, timeoutMs,);
 
     try {
       const response = await fetch(url, {
         signal: this.abortController.signal,
-        headers: { "User-Agent": "Loco-WebTorrent/0.1.0" },
-      });
+        headers: { "User-Agent": "Loco-WebTorrent/0.1.0", },
+      },);
 
       if (!response.ok) {
-        throw new TrackerError(`Tracker HTTP error: ${response.status}`);
+        throw new TrackerError(`Tracker HTTP error: ${response.status}`,);
       }
 
-      const bytes = await readBoundedBody(response, MAX_RESPONSE_BYTES);
-      const parsed = parseHttpTrackerResponse(bytes);
+      const bytes = await readBoundedBody(response, MAX_RESPONSE_BYTES,);
+      const parsed = parseHttpTrackerResponse(bytes,);
 
       if (parsed.trackerId) this.trackerId = parsed.trackerId;
 
@@ -416,20 +461,26 @@ export class HttpTracker implements Tracker {
       };
     } catch (err) {
       if (timedOut) {
-        throw new TrackerError("HTTP tracker request timed out", "TRACKER_ERROR", { cause: err });
+        throw new TrackerError(
+          "HTTP tracker request timed out",
+          "TRACKER_ERROR",
+          { cause: err, },
+        );
       }
       if (err instanceof Error && err.name === "AbortError") {
-        throw new TrackerError("Tracker announce aborted", "TRACKER_ERROR", { cause: err });
+        throw new TrackerError("Tracker announce aborted", "TRACKER_ERROR", {
+          cause: err,
+        },);
       }
       if (err instanceof TrackerError) throw err;
       throw new TrackerError(
         err instanceof Error ? err.message : "HTTP tracker request failed",
         "TRACKER_ERROR",
-        { cause: err },
+        { cause: err, },
       );
     } finally {
       if (this.timeoutId !== null) {
-        clearTimeout(this.timeoutId);
+        clearTimeout(this.timeoutId,);
         this.timeoutId = null;
       }
       this.abortController = null;
@@ -438,7 +489,7 @@ export class HttpTracker implements Tracker {
 
   destroy(): void {
     if (this.timeoutId !== null) {
-      clearTimeout(this.timeoutId);
+      clearTimeout(this.timeoutId,);
       this.timeoutId = null;
     }
     if (this.abortController) {
@@ -468,9 +519,9 @@ export interface ScrapeResponse {
  * @param infoHashes - Array of 20-byte info hashes.
  * @param opts - Optional timeout.
  */
-function mapToDict(m: BencodeMap): BencodeDict {
+function mapToDict(m: BencodeMap,): BencodeDict {
   const out: BencodeDict = {};
-  for (const [k, v] of m) {
+  for (const [k, v,] of m) {
     if (typeof k === "string") out[k] = v;
   }
   return out;
@@ -482,29 +533,29 @@ export async function scrapeTracker(
   opts: { timeoutMs?: number } = {},
 ): Promise<ScrapeResponse> {
   const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
-  const scrapeUrl = trackerUrl.replace(/\/announce(\?.*)?$/, "/scrape$1");
+  const scrapeUrl = trackerUrl.replace(/\/announce(\?.*)?$/, "/scrape$1",);
 
-  const sep = scrapeUrl.includes("?") ? "&" : "?";
+  const sep = scrapeUrl.includes("?",) ? "&" : "?";
   const queryParts: string[] = [];
   for (const ih of infoHashes) {
-    queryParts.push(`info_hash=${percentEncodeBytes(ih)}`);
+    queryParts.push(`info_hash=${percentEncodeBytes(ih,)}`,);
   }
-  const url = new URL(`${scrapeUrl}${sep}${queryParts.join("&")}`);
+  const url = new URL(`${scrapeUrl}${sep}${queryParts.join("&",)}`,);
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  const timeout = setTimeout(() => controller.abort(), timeoutMs,);
 
   try {
     const response = await fetch(url.toString(), {
       signal: controller.signal,
-      headers: { "User-Agent": "Loco-WebTorrent/0.1.0" },
-    });
+      headers: { "User-Agent": "Loco-WebTorrent/0.1.0", },
+    },);
 
     if (!response.ok) {
-      throw new TrackerError(`Tracker scrape HTTP error: ${response.status}`);
+      throw new TrackerError(`Tracker scrape HTTP error: ${response.status}`,);
     }
 
-    const bytes = await readBoundedBody(response, MAX_RESPONSE_BYTES);
+    const bytes = await readBoundedBody(response, MAX_RESPONSE_BYTES,);
     let dict: BencodeMap;
     try {
       const value = decode(bytes, {
@@ -512,19 +563,23 @@ export async function scrapeTracker(
         maxDepth: 16,
         allowUnsortedKeys: true,
         useMap: true,
-      });
+      },);
       if (!(value instanceof Map)) {
-        throw new TrackerError("scrape response must be a dictionary");
+        throw new TrackerError("scrape response must be a dictionary",);
       }
       dict = value;
     } catch (error) {
       if (error instanceof TrackerError) throw error;
-      throw new TrackerError("scrape returned invalid bencode", "TRACKER_ERROR", { cause: error });
+      throw new TrackerError(
+        "scrape returned invalid bencode",
+        "TRACKER_ERROR",
+        { cause: error, },
+      );
     }
 
     const files: ScrapeResponse["files"] = {};
 
-    for (const [key, value] of dict) {
+    for (const [key, value,] of dict) {
       if (typeof key !== "string") continue;
       if (key === "flags") continue;
 
@@ -534,25 +589,30 @@ export async function scrapeTracker(
         if (value instanceof Map) fileStats = value;
       } else {
         // Direct infoHash -> stats (some trackers use this form)
-        if (value instanceof Map) fileStats = new Map([[key, value]]);
+        if (value instanceof Map) fileStats = new Map([[key, value,],],);
       }
 
       if (fileStats) {
-        for (const [subKey, subVal] of fileStats) {
+        for (const [subKey, subVal,] of fileStats) {
           if (typeof subKey !== "string" || !(subVal instanceof Map)) continue;
-          const sub = mapToDict(subVal);
-          const complete = dictNonNegativeInteger(sub, "complete") ?? 0;
-          const incomplete = dictNonNegativeInteger(sub, "incomplete") ?? 0;
-          const downloaded = dictNonNegativeInteger(sub, "downloaded") ?? 0;
-          const name = dictString(sub, "name");
-          files[subKey] = { complete, incomplete, downloaded, ...(name ? { name } : {}) };
+          const sub = mapToDict(subVal,);
+          const complete = dictNonNegativeInteger(sub, "complete",) ?? 0;
+          const incomplete = dictNonNegativeInteger(sub, "incomplete",) ?? 0;
+          const downloaded = dictNonNegativeInteger(sub, "downloaded",) ?? 0;
+          const name = dictString(sub, "name",);
+          files[subKey] = {
+            complete,
+            incomplete,
+            downloaded,
+            ...(name ? { name, } : {}),
+          };
         }
       }
     }
 
-    return { files };
+    return { files, };
   } finally {
-    clearTimeout(timeout);
+    clearTimeout(timeout,);
   }
 }
 
@@ -563,40 +623,40 @@ export class WsTracker implements Tracker {
   private opts: TrackerOptions;
   private ws: WebSocket | null = null;
 
-  constructor(url: string, opts: TrackerOptions) {
+  constructor(url: string, opts: TrackerOptions,) {
     this.url = url;
     this.opts = opts;
   }
 
-  announce(event?: TrackerAnnounceEvent): Promise<TrackerResponse> {
-    return new Promise((resolve, reject) => {
+  announce(event?: TrackerAnnounceEvent,): Promise<TrackerResponse> {
+    return new Promise((resolve, reject,) => {
       try {
-        this.ws = new WebSocket(this.url);
+        this.ws = new WebSocket(this.url,);
 
         this.ws.onopen = () => {
           const msg = {
             action: "announce",
-            info_hash: uint8ArrayToBinaryString(this.opts.infoHash),
-            peer_id: uint8ArrayToBinaryString(this.opts.peerId),
+            info_hash: uint8ArrayToBinaryString(this.opts.infoHash,),
+            peer_id: uint8ArrayToBinaryString(this.opts.peerId,),
             port: this.opts.port || 6881,
             uploaded: this.opts.uploaded || 0,
             downloaded: this.opts.downloaded || 0,
             left: this.opts.left || 0,
             compact: 1,
             numwant: this.opts.numwant || 50,
-            ...(event?.event ? { event: event.event } : {}),
+            ...(event?.event ? { event: event.event, } : {}),
           };
-          this.ws?.send(JSON.stringify(msg));
+          this.ws?.send(JSON.stringify(msg,),);
         };
 
-        this.ws.onmessage = (event) => {
+        this.ws.onmessage = (event,) => {
           try {
-            const data = JSON.parse(event.data);
+            const data = JSON.parse(event.data,);
             if (data.action === "announce") {
               const peers: PeerEndpoint[] = [];
-              if (Array.isArray(data.peers)) {
+              if (Array.isArray(data.peers,)) {
                 for (const p of data.peers) {
-                  peers.push({ ip: p.ip || p.ipv4 || p.ipv6, port: p.port });
+                  peers.push({ ip: p.ip || p.ipv4 || p.ipv6, port: p.port, },);
                 }
               }
 
@@ -604,28 +664,28 @@ export class WsTracker implements Tracker {
                 interval: data.interval || 1800,
                 complete: data.complete || 0,
                 incomplete: data.incomplete || 0,
-                peers: deduplicatePeers(peers),
+                peers: deduplicatePeers(peers,),
               };
 
-              resolve(response);
+              resolve(response,);
               this.ws?.close();
             } else if (data["failure reason"]) {
-              reject(new TrackerError(String(data["failure reason"])));
+              reject(new TrackerError(String(data["failure reason"],),),);
               this.ws?.close();
             }
           } catch (err) {
-            reject(err);
+            reject(err,);
             this.ws?.close();
           }
         };
 
         this.ws.onerror = () => {
-          reject(new TrackerError("WebSocket connection failed"));
+          reject(new TrackerError("WebSocket connection failed",),);
         };
       } catch (err) {
-        reject(err);
+        reject(err,);
       }
-    });
+    },);
   }
 
   destroy(): void {
@@ -638,12 +698,17 @@ export class WsTracker implements Tracker {
 
 // ── Factory ──────────────────────────────────────────────────────────────
 
-export function createTracker(announceUrl: string, opts: TrackerOptions): Tracker {
-  if (announceUrl.startsWith("http://") || announceUrl.startsWith("https://")) {
-    return new HttpTracker(announceUrl, opts);
+export function createTracker(
+  announceUrl: string,
+  opts: TrackerOptions,
+): Tracker {
+  if (
+    announceUrl.startsWith("http://",) || announceUrl.startsWith("https://",)
+  ) {
+    return new HttpTracker(announceUrl, opts,);
   }
-  if (announceUrl.startsWith("ws://") || announceUrl.startsWith("wss://")) {
-    return new WsTracker(announceUrl, opts);
+  if (announceUrl.startsWith("ws://",) || announceUrl.startsWith("wss://",)) {
+    return new WsTracker(announceUrl, opts,);
   }
-  throw new TrackerError(`Unsupported tracker protocol: ${announceUrl}`);
+  throw new TrackerError(`Unsupported tracker protocol: ${announceUrl}`,);
 }

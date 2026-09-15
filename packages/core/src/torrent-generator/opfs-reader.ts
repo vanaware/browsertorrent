@@ -15,7 +15,7 @@
  * No `Deno.open`, no `Deno.FsFile`, no path strings.
  */
 
-import type { OPFSFileEntry } from "./types.ts";
+import type { OPFSFileEntry, } from "./types.ts";
 
 /**
  * Reads across multiple OPFS files sequentially as a single byte stream.
@@ -45,8 +45,8 @@ export class OPFSMultiFileReader {
    *   Each entry must have either a `handle` set, or a `size` matching a
    *   pre-fetched `File` (see {@link withFile}).
    */
-  constructor(entries: OPFSFileEntry[]) {
-    this.#entries = [...entries];
+  constructor(entries: OPFSFileEntry[],) {
+    this.#entries = [...entries,];
   }
 
   /**
@@ -57,9 +57,9 @@ export class OPFSMultiFileReader {
    * @param index - Index into the entries list.
    * @param file - The `File` object for that entry.
    */
-  withFile(index: number, file: File): void {
+  withFile(index: number, file: File,): void {
     if (index < 0 || index >= this.#entries.length) {
-      throw new RangeError(`index out of range: ${index}`);
+      throw new RangeError(`index out of range: ${index}`,);
     }
     if (index === this.#fileIndex) {
       this.#currentFile = file;
@@ -74,12 +74,12 @@ export class OPFSMultiFileReader {
    * @returns `Uint8Array` with 1–`size` bytes, or `null` at end-of-stream.
    * @throws {RangeError} If `size` is not a positive integer.
    */
-  async readChunk(size: number): Promise<Uint8Array | null> {
-    if (size <= 0 || !Number.isInteger(size)) {
-      throw new RangeError(`size must be a positive integer, got ${size}`);
+  async readChunk(size: number,): Promise<Uint8Array | null> {
+    if (size <= 0 || !Number.isInteger(size,)) {
+      throw new RangeError(`size must be a positive integer, got ${size}`,);
     }
 
-    if (this.#closed) throw new Error("reader is closed");
+    if (this.#closed) throw new Error("reader is closed",);
 
     const parts: Uint8Array[] = [];
     let remaining = size;
@@ -90,7 +90,7 @@ export class OPFSMultiFileReader {
         if (this.#fileIndex >= this.#entries.length) break;
         const entry = this.#entries[this.#fileIndex++]!;
         if (!entry.handle) {
-          throw new Error(`entry ${entry.name} has no OPFS handle attached`);
+          throw new Error(`entry ${entry.name} has no OPFS handle attached`,);
         }
         this.#currentFile = await entry.handle.getFile();
         this.#currentSize = this.#currentFile.size;
@@ -103,9 +103,12 @@ export class OPFSMultiFileReader {
         continue;
       }
 
-      const want = Math.min(remaining, available);
-      const blob = this.#currentFile.slice(this.#fileOffset, this.#fileOffset + want);
-      const buf = new Uint8Array(await blob.arrayBuffer());
+      const want = Math.min(remaining, available,);
+      const blob = this.#currentFile.slice(
+        this.#fileOffset,
+        this.#fileOffset + want,
+      );
+      const buf = new Uint8Array(await blob.arrayBuffer(),);
       this.#fileOffset += buf.length;
 
       if (buf.length === 0) {
@@ -113,7 +116,7 @@ export class OPFSMultiFileReader {
         continue;
       }
 
-      parts.push(buf);
+      parts.push(buf,);
       remaining -= buf.length;
     }
 
@@ -122,10 +125,10 @@ export class OPFSMultiFileReader {
     const first = parts[0]!;
     if (parts.length === 1) return first;
 
-    const result = new Uint8Array(size - remaining);
+    const result = new Uint8Array(size - remaining,);
     let offset = 0;
     for (const part of parts) {
-      result.set(part, offset);
+      result.set(part, offset,);
       offset += part.length;
     }
     return result;
@@ -136,9 +139,9 @@ export class OPFSMultiFileReader {
    *
    * @param size - Maximum chunk size in bytes (default 64 KiB).
    */
-  async *chunks(size = 64 * 1024): AsyncIterableIterator<Uint8Array> {
+  async *chunks(size = 64 * 1024,): AsyncIterableIterator<Uint8Array> {
     while (true) {
-      const chunk = await this.readChunk(size);
+      const chunk = await this.readChunk(size,);
       if (chunk === null) return;
       yield chunk;
     }

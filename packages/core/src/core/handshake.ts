@@ -15,11 +15,11 @@ import {
   HandshakeExtension,
   PEER_ID_LENGTH,
 } from "./constants.ts";
-import { ProtocolError } from "../utils/errors.ts";
+import { ProtocolError, } from "../utils/errors.ts";
 
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
-const protocolBytes = textEncoder.encode(BITTORRENT_PROTOCOL);
+const protocolBytes = textEncoder.encode(BITTORRENT_PROTOCOL,);
 
 // ── Types ───────────────────────────────────────────────────────────────
 
@@ -40,59 +40,59 @@ export interface EncodeHandshakeOptions {
 // ── Encode ──────────────────────────────────────────────────────────────
 
 /** Encode a 68-byte BitTorrent peer wire handshake. */
-export function encodeHandshake(options: EncodeHandshakeOptions): Uint8Array {
-  assertTwentyBytes("infoHash", options.infoHash);
+export function encodeHandshake(options: EncodeHandshakeOptions,): Uint8Array {
+  assertTwentyBytes("infoHash", options.infoHash,);
   const peerId = typeof options.peerId === "string"
-    ? textEncoder.encode(options.peerId)
+    ? textEncoder.encode(options.peerId,)
     : options.peerId;
-  assertTwentyBytes("peerId", peerId);
+  assertTwentyBytes("peerId", peerId,);
 
   const reserved = options.reserved
-    ? new Uint8Array(options.reserved)
-    : new Uint8Array(8);
+    ? new Uint8Array(options.reserved,)
+    : new Uint8Array(8,);
   if (reserved.length !== 8) {
-    throw new RangeError("reserved handshake field must contain 8 bytes");
+    throw new RangeError("reserved handshake field must contain 8 bytes",);
   }
   for (const extension of options.extensions ?? []) {
-    setExtension(reserved, extension, true);
+    setExtension(reserved, extension, true,);
   }
 
-  const bytes = new Uint8Array(HANDSHAKE_LENGTH);
+  const bytes = new Uint8Array(HANDSHAKE_LENGTH,);
   bytes[0] = protocolBytes.length;
-  bytes.set(protocolBytes, 1);
-  bytes.set(reserved, 20);
-  bytes.set(options.infoHash, 28);
-  bytes.set(peerId, 48);
+  bytes.set(protocolBytes, 1,);
+  bytes.set(reserved, 20,);
+  bytes.set(options.infoHash, 28,);
+  bytes.set(peerId, 48,);
   return bytes;
 }
 
 // ── Decode ──────────────────────────────────────────────────────────────
 
 /** Decode a 68-byte BitTorrent peer wire handshake. */
-export function decodeHandshake(bytes: Uint8Array): PeerHandshake {
+export function decodeHandshake(bytes: Uint8Array,): PeerHandshake {
   if (bytes.length !== HANDSHAKE_LENGTH) {
     throw new ProtocolError(
       `peer handshake must contain ${HANDSHAKE_LENGTH} bytes`,
     );
   }
   const protocolLength = bytes[0]!;
-  const protocol = textDecoder.decode(bytes.subarray(1, 1 + protocolLength));
+  const protocol = textDecoder.decode(bytes.subarray(1, 1 + protocolLength,),);
   if (
     protocolLength !== protocolBytes.length ||
     protocol !== BITTORRENT_PROTOCOL
   ) {
-    throw new ProtocolError(`unsupported peer protocol: ${protocol}`);
+    throw new ProtocolError(`unsupported peer protocol: ${protocol}`,);
   }
 
-  const reserved = bytes.slice(20, 28);
+  const reserved = bytes.slice(20, 28,);
   const extensions = new Set<HandshakeExtension>();
-  for (const extension of Object.values(HandshakeExtension)) {
-    if (hasExtension(reserved, extension)) extensions.add(extension);
+  for (const extension of Object.values(HandshakeExtension,)) {
+    if (hasExtension(reserved, extension,)) extensions.add(extension,);
   }
 
   return {
-    infoHash: bytes.slice(28, 48),
-    peerId: bytes.slice(48, 68),
+    infoHash: bytes.slice(28, 48,),
+    peerId: bytes.slice(48, 68,),
     reserved,
     extensions,
   };
@@ -106,7 +106,7 @@ export function hasExtension(
   extension: HandshakeExtension,
 ): boolean {
   if (reserved.length !== 8) return false;
-  const [byte, mask] = extensionLocation(extension);
+  const [byte, mask,] = extensionLocation(extension,);
   return (reserved[byte]! & mask) !== 0;
 }
 
@@ -117,28 +117,28 @@ export function setExtension(
   enabled: boolean,
 ): void {
   if (reserved.length !== 8) {
-    throw new RangeError("reserved handshake field must contain 8 bytes");
+    throw new RangeError("reserved handshake field must contain 8 bytes",);
   }
-  const [byte, mask] = extensionLocation(extension);
+  const [byte, mask,] = extensionLocation(extension,);
   if (enabled) reserved[byte]! |= mask;
   else reserved[byte]! &= ~mask;
 }
 
-function extensionLocation(extension: HandshakeExtension): [number, number] {
+function extensionLocation(extension: HandshakeExtension,): [number, number,] {
   switch (extension) {
     case HandshakeExtension.Fast:
-      return [7, 0x04];
+      return [7, 0x04,];
     case HandshakeExtension.ExtensionProtocol:
-      return [5, 0x10];
+      return [5, 0x10,];
     case HandshakeExtension.Dht:
-      return [7, 0x01];
+      return [7, 0x01,];
     case HandshakeExtension.V2:
-      return [7, 0x10];
+      return [7, 0x10,];
   }
 }
 
-function assertTwentyBytes(name: string, bytes: Uint8Array): void {
+function assertTwentyBytes(name: string, bytes: Uint8Array,): void {
   if (bytes.length !== PEER_ID_LENGTH) {
-    throw new RangeError(`${name} must contain ${PEER_ID_LENGTH} bytes`);
+    throw new RangeError(`${name} must contain ${PEER_ID_LENGTH} bytes`,);
   }
 }

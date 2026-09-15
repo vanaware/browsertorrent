@@ -7,6 +7,7 @@ import { Bitfield, } from "./bitfield.ts";
 import { sha1, } from "../crypto/hasher.ts";
 import { type BencodeDict, decode, } from "../utils/bencode.ts";
 import type { Wire, } from "./wire.ts";
+import type { Swarm, } from "../network/swarm.ts";
 import type { File, } from "./file.ts";
 import { Piece, } from "./piece.ts";
 
@@ -15,6 +16,7 @@ import { Piece, } from "./piece.ts";
 // ============================================================================
 
 export interface TorrentEvents {
+  [key: string]: Event | CustomEvent;
   ready: Event;
   metadata: CustomEvent<
     { files: ParsedTorrentFile[]; length: number; name: string }
@@ -538,7 +540,9 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
           }
         }
       } catch (err: unknown) {
-        if (err && typeof err === "object" && "notFound" in err && !err.notFound) {
+        if (
+          err && typeof err === "object" && "notFound" in err && !err.notFound
+        ) {
           console.warn(`[Torrent] Erro ao verificar peça ${i}:`, err,);
         }
       }

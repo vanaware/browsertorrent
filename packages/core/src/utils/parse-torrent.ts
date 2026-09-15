@@ -17,11 +17,11 @@
  * preservada; campos novos são opcionais.
  */
 
-import { BencodeDict } from "./bencode.ts";
-import { parseMagnet, ParsedMagnet } from "./magnet.ts";
-import { parseTorrentWithIdentity } from "./metainfo-identity.ts";
-import { flattenV2Files } from "./metainfo-v2.ts";
-import type { TorrentV2Info } from "./torrent-types.ts";
+import { BencodeDict, } from "./bencode.ts";
+import { ParsedMagnet, parseMagnet, } from "./magnet.ts";
+import { parseTorrentWithIdentity, } from "./metainfo-identity.ts";
+import { flattenV2Files, } from "./metainfo-v2.ts";
+import type { TorrentV2Info, } from "./torrent-types.ts";
 
 export interface ParsedTorrentFile {
   path: string;
@@ -68,31 +68,36 @@ export async function parseTorrent(
   options: ParseTorrentInputOptions = {},
 ): Promise<ParsedTorrent> {
   // 1. Se já for um objeto ParsedTorrent, apenas retorna
-  if (typeof torrentId === "object" && !(torrentId instanceof Uint8Array) && "infoHash" in torrentId && "files" in torrentId) {
+  if (
+    typeof torrentId === "object" && !(torrentId instanceof Uint8Array) &&
+    "infoHash" in torrentId && "files" in torrentId
+  ) {
     return torrentId as ParsedTorrent;
   }
 
   // 2. Se for string, assume que é Magnet URI (ou infoHash puro)
   if (typeof torrentId === "string") {
     let magnetUri = torrentId;
-    if (/^[a-f0-9]{40}$/i.test(torrentId) || /^[a-z2-7]{32}$/i.test(torrentId)) {
+    if (
+      /^[a-f0-9]{40}$/i.test(torrentId,) || /^[a-z2-7]{32}$/i.test(torrentId,)
+    ) {
       magnetUri = `magnet:?xt=urn:btih:${torrentId}`;
     }
-    if (!magnetUri.startsWith("magnet:?")) {
-      throw new Error("Invalid torrent identifier");
+    if (!magnetUri.startsWith("magnet:?",)) {
+      throw new Error("Invalid torrent identifier",);
     }
-    return magnetToParsed(parseMagnet(magnetUri));
+    return magnetToParsed(parseMagnet(magnetUri,),);
   }
 
   // 3. Se for Uint8Array, assume que é um arquivo .torrent codificado em Bencode
   if (torrentId instanceof Uint8Array) {
-    return await bufferToParsed(torrentId, options);
+    return await bufferToParsed(torrentId, options,);
   }
 
-  throw new Error("Invalid torrent identifier type");
+  throw new Error("Invalid torrent identifier type",);
 }
 
-function magnetToParsed(magnet: ParsedMagnet): ParsedTorrent {
+function magnetToParsed(magnet: ParsedMagnet,): ParsedTorrent {
   const version: "v1" | "v2" | "hybrid" =
     magnet.infoHashV1Hex !== undefined && magnet.infoHashV2Hex !== undefined
       ? "hybrid"
@@ -124,7 +129,7 @@ async function bufferToParsed(
   const identity = await parseTorrentWithIdentity(buffer, {
     maxBytes: options.maxBytes,
     allowMissingPieceLayers: options.allowMissingPieceLayers,
-  });
+  },);
   const torrent = identity.torrent;
   const infoRecord = torrent.info as unknown as BencodeDict;
 
@@ -135,7 +140,7 @@ async function bufferToParsed(
   if (identity.infoHashV1 !== undefined) {
     const piecesRaw = infoRecord["pieces"] as Uint8Array;
     for (let i = 0; i < piecesRaw.length; i += 20) {
-      pieces.push(piecesRaw.subarray(i, i + 20));
+      pieces.push(piecesRaw.subarray(i, i + 20,),);
     }
   }
 
@@ -144,11 +149,11 @@ async function bufferToParsed(
   let totalLength = 0;
 
   if (identity.version === "v2") {
-    const v2Files = flattenV2Files(torrent.info as unknown as TorrentV2Info);
+    const v2Files = flattenV2Files(torrent.info as unknown as TorrentV2Info,);
     for (const file of v2Files) {
-      const path = file.path.join("/");
+      const path = file.path.join("/",);
       const name = file.path[file.path.length - 1]!;
-      files.push({ path, name, length: file.length, offset: totalLength });
+      files.push({ path, name, length: file.length, offset: totalLength, },);
       totalLength += file.length;
     }
   } else if (infoRecord["files"]) {
@@ -156,46 +161,50 @@ async function bufferToParsed(
     for (const fileDict of filesList) {
       const length = fileDict["length"] as number;
       const pathParts = fileDict["path"] as string[];
-      const path = pathParts.join("/");
+      const path = pathParts.join("/",);
       const name = pathParts[pathParts.length - 1]!;
-      files.push({ path, name, length, offset: totalLength });
+      files.push({ path, name, length, offset: totalLength, },);
       totalLength += length;
     }
   } else {
     const length = infoRecord["length"] as number;
     const name = infoRecord["name"] as string;
-    files.push({ path: name, name, length, offset: 0 });
+    files.push({ path: name, name, length, offset: 0, },);
     totalLength = length;
   }
 
   // Announce + announce-list (ordem preservada, sem duplicatas).
   const announce: string[] = [];
   if (torrent.announce) {
-    announce.push(torrent.announce);
+    announce.push(torrent.announce,);
   }
   if (torrent["announce-list"]) {
     for (const tier of torrent["announce-list"]) {
       for (const url of tier) {
-        if (!announce.includes(url)) announce.push(url);
+        if (!announce.includes(url,)) announce.push(url,);
       }
     }
   }
 
   // Web seeds (BEP 19).
   const urlList: string[] = [];
-  const rawUrlList = torrent["url-list"] as string | string[] | Uint8Array | undefined;
+  const rawUrlList = torrent["url-list"] as
+    | string
+    | string[]
+    | Uint8Array
+    | undefined;
   if (rawUrlList !== undefined) {
-    const candidates = Array.isArray(rawUrlList) ? rawUrlList : [rawUrlList];
+    const candidates = Array.isArray(rawUrlList,) ? rawUrlList : [rawUrlList,];
     for (const url of candidates) {
       const urlStr = typeof url === "string"
         ? url
-        : new TextDecoder().decode(url as Uint8Array);
-      if (!urlList.includes(urlStr)) urlList.push(urlStr);
+        : new TextDecoder().decode(url as Uint8Array,);
+      if (!urlList.includes(urlStr,)) urlList.push(urlStr,);
     }
   }
 
   const infoHashHex = identity.infoHashHex;
-  const infoHashBuffer = new Uint8Array(identity.infoHash);
+  const infoHashBuffer = new Uint8Array(identity.infoHash,);
 
   return {
     infoHash: infoHashHex,
@@ -212,17 +221,17 @@ async function bufferToParsed(
     magnetURI: "",
     comment: torrent.comment,
     createdBy: torrent["created by"],
-    infoHashV2: identity.infoHashV2 ? toHex(identity.infoHashV2) : undefined,
+    infoHashV2: identity.infoHashV2 ? toHex(identity.infoHashV2,) : undefined,
     infoBytes: identity.infoBytes,
-    torrentFileBytes: new Uint8Array(buffer),
+    torrentFileBytes: new Uint8Array(buffer,),
     version: identity.version,
   };
 }
 
-function toHex(bytes: Uint8Array): string {
+function toHex(bytes: Uint8Array,): string {
   let hex = "";
   for (let i = 0; i < bytes.length; i++) {
-    hex += bytes[i]!.toString(16).padStart(2, "0");
+    hex += bytes[i]!.toString(16,).padStart(2, "0",);
   }
   return hex;
 }

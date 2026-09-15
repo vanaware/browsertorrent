@@ -9,9 +9,9 @@
  * Pure functions carry no side-effects and need no test mocking.
  */
 
-import { PieceSizeEnum } from "./types.ts";
-import type { OPFSFileEntry, PieceFile } from "./types.ts";
-import { OPFSMultiFileReader } from "./opfs-reader.ts";
+import { PieceSizeEnum, } from "./types.ts";
+import type { OPFSFileEntry, PieceFile, } from "./types.ts";
+import { OPFSMultiFileReader, } from "./opfs-reader.ts";
 
 /**
  * Sums the byte sizes of all given file entries.
@@ -19,7 +19,7 @@ import { OPFSMultiFileReader } from "./opfs-reader.ts";
  * @param files - OPFS file entries whose sizes are summed.
  * @returns Total size in bytes.
  */
-export function fileSizeSum(files: OPFSFileEntry[]): number {
+export function fileSizeSum(files: OPFSFileEntry[],): number {
   let total = 0;
   for (const file of files) total += file.size;
   return total;
@@ -37,17 +37,21 @@ export function fileSizeSum(files: OPFSFileEntry[]): number {
  * @param pieceSizeEnum - Desired preset, or `SIZE_AUTO` for heuristic selection.
  * @returns Piece size in bytes (≥ 1).
  */
-export function calcPieceSize(fileSize: number, pieceSizeEnum: PieceSizeEnum | number): number {
+export function calcPieceSize(
+  fileSize: number,
+  pieceSizeEnum: PieceSizeEnum | number,
+): number {
   if (pieceSizeEnum !== PieceSizeEnum.SIZE_AUTO) {
     return pieceSizeEnum as number;
   }
 
-  const presets = (Object.values(PieceSizeEnum) as number[])
-    .filter((v) => v !== 0 && typeof v === "number")
-    .sort((a, b) => a - b);
+  const presets = (Object.values(PieceSizeEnum,) as number[])
+    .filter((v,) => v !== 0 && typeof v === "number")
+    .sort((a, b,) => a - b);
 
-  const selected = presets.find((p) => fileSize < p) ?? presets[presets.length - 1] ?? 0;
-  return Math.min(selected!, PieceSizeEnum.SIZE_512KB as number);
+  const selected = presets.find((p,) => fileSize < p) ??
+    presets[presets.length - 1] ?? 0;
+  return Math.min(selected!, PieceSizeEnum.SIZE_512KB as number,);
 }
 
 /**
@@ -55,9 +59,9 @@ export function calcPieceSize(fileSize: number, pieceSizeEnum: PieceSizeEnum | n
  *
  * @param name - File name or path.
  */
-export function isHiddenFile(name: string): boolean {
-  const base = name.split("/").pop() ?? name;
-  return base.startsWith(".");
+export function isHiddenFile(name: string,): boolean {
+  const base = name.split("/",).pop() ?? name;
+  return base.startsWith(".",);
 }
 
 /**
@@ -71,7 +75,10 @@ export function isHiddenFile(name: string): boolean {
  * @param pieceSize - Target piece size in bytes.
  * @returns Ordered list of piece-file descriptors.
  */
-export function buildPieceFiles(files: OPFSFileEntry[], pieceSize: number): PieceFile[] {
+export function buildPieceFiles(
+  files: OPFSFileEntry[],
+  pieceSize: number,
+): PieceFile[] {
   const pieceFiles: PieceFile[] = [];
   let pieceOffset = 0;
 
@@ -81,11 +88,11 @@ export function buildPieceFiles(files: OPFSFileEntry[], pieceSize: number): Piec
 
     if (length > 0 && pieceOffset > 0) {
       const paddingLength = pieceSize - pieceOffset;
-      pieceFiles.push({ file: null, length: paddingLength, padding: true });
+      pieceFiles.push({ file: null, length: paddingLength, padding: true, },);
       pieceOffset = 0;
     }
 
-    pieceFiles.push({ file: entry, length, padding: false });
+    pieceFiles.push({ file: entry, length, padding: false, },);
     pieceOffset = (pieceOffset + length) % pieceSize;
   }
 
@@ -113,32 +120,32 @@ export async function sha1sum(
   pieceSize: number,
   alignPiece = false,
 ): Promise<Uint8Array> {
-  if (pieceSize < 1) throw new RangeError("pieceSize must be ≥ 1");
+  if (pieceSize < 1) throw new RangeError("pieceSize must be ≥ 1",);
 
-  if (alignPiece) return sha1sumAligned(files, pieceSize);
+  if (alignPiece) return sha1sumAligned(files, pieceSize,);
 
-  const totalSize = fileSizeSum(files);
-  const pieceCount = Math.ceil(totalSize / pieceSize);
+  const totalSize = fileSizeSum(files,);
+  const pieceCount = Math.ceil(totalSize / pieceSize,);
 
   const digestParts: Uint8Array[] = [];
-  const reader = new OPFSMultiFileReader(files);
+  const reader = new OPFSMultiFileReader(files,);
   try {
     let chunk: Uint8Array | null;
-    while ((chunk = await reader.readChunk(pieceSize)) !== null) {
+    while ((chunk = await reader.readChunk(pieceSize,)) !== null) {
       const digest = await crypto.subtle.digest(
         "SHA-1",
         chunk as unknown as Uint8Array<ArrayBuffer>,
       );
-      digestParts.push(new Uint8Array(digest));
+      digestParts.push(new Uint8Array(digest,),);
     }
   } finally {
     reader.close();
   }
 
-  const result = new Uint8Array(digestParts.length * 20);
+  const result = new Uint8Array(digestParts.length * 20,);
   let offset = 0;
   for (const d of digestParts) {
-    result.set(d, offset);
+    result.set(d, offset,);
     offset += 20;
   }
 
@@ -152,28 +159,33 @@ export async function sha1sum(
 }
 
 /** BEP-47 variant: inject padding zeros before each non-aligned file. */
-async function sha1sumAligned(files: OPFSFileEntry[], pieceSize: number): Promise<Uint8Array> {
-  const pieceFiles = buildPieceFiles(files, pieceSize);
+async function sha1sumAligned(
+  files: OPFSFileEntry[],
+  pieceSize: number,
+): Promise<Uint8Array> {
+  const pieceFiles = buildPieceFiles(files, pieceSize,);
   const digests: Uint8Array[] = [];
-  const piece = new Uint8Array(pieceSize);
+  const piece = new Uint8Array(pieceSize,);
   let pieceOffset = 0;
 
-  const digestPiece = async (len: number): Promise<void> => {
+  const digestPiece = async (len: number,): Promise<void> => {
     const digest = await crypto.subtle.digest(
       "SHA-1",
-      piece.subarray(0, len) as unknown as Uint8Array<ArrayBuffer>,
+      piece.subarray(0, len,) as unknown as Uint8Array<ArrayBuffer>,
     );
-    digests.push(new Uint8Array(digest));
+    digests.push(new Uint8Array(digest,),);
   };
 
-  const reader = new OPFSMultiFileReader(pieceFiles.map((pf) => pf.file!).filter(Boolean) as OPFSFileEntry[]);
+  const reader = new OPFSMultiFileReader(
+    pieceFiles.map((pf,) => pf.file!).filter(Boolean,) as OPFSFileEntry[],
+  );
 
   for (const pieceFile of pieceFiles) {
     if (pieceFile.padding) {
-      piece.fill(0, pieceOffset, pieceOffset + pieceFile.length);
+      piece.fill(0, pieceOffset, pieceOffset + pieceFile.length,);
       pieceOffset += pieceFile.length;
       if (pieceOffset === pieceSize) {
-        await digestPiece(pieceSize);
+        await digestPiece(pieceSize,);
         pieceOffset = 0;
       }
       continue;
@@ -184,25 +196,25 @@ async function sha1sumAligned(files: OPFSFileEntry[], pieceSize: number): Promis
     let fileOffset = 0;
 
     while (fileOffset < file.size) {
-      const want = Math.min(pieceSize - pieceOffset, file.size - fileOffset);
-      const blob = file.slice(fileOffset, fileOffset + want);
-      const buf = new Uint8Array(await blob.arrayBuffer());
+      const want = Math.min(pieceSize - pieceOffset, file.size - fileOffset,);
+      const blob = file.slice(fileOffset, fileOffset + want,);
+      const buf = new Uint8Array(await blob.arrayBuffer(),);
       fileOffset += buf.length;
 
-      piece.set(buf, pieceOffset);
+      piece.set(buf, pieceOffset,);
       pieceOffset += buf.length;
 
       if (pieceOffset === pieceSize) {
-        await digestPiece(pieceSize);
+        await digestPiece(pieceSize,);
         pieceOffset = 0;
       }
     }
   }
 
-  if (pieceOffset > 0) await digestPiece(pieceOffset);
+  if (pieceOffset > 0) await digestPiece(pieceOffset,);
 
-  const result = new Uint8Array(digests.length * 20);
-  digests.forEach((d, i) => result.set(d, i * 20));
+  const result = new Uint8Array(digests.length * 20,);
+  digests.forEach((d, i,) => result.set(d, i * 20,));
   return result;
 }
 

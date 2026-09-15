@@ -7,54 +7,56 @@
 
 export type EventMap = Record<string, Event | CustomEvent | unknown>;
 
-export class TypedEventTarget<Events extends EventMap> extends EventTarget {
+export class TypedEventTarget<Events extends EventMap,> extends EventTarget {
   /**
    * Registra um listener para um evento específico.
    */
-  on<K extends keyof Events>(
+  on<K extends keyof Events,>(
     type: K & string,
-    listener: (event: Events[K]) => void,
-    options?: boolean | AddEventListenerOptions
+    listener: (event: Events[K],) => void,
+    options?: boolean | AddEventListenerOptions,
   ): this {
-    this.addEventListener(type, listener as EventListener, options);
+    this.addEventListener(type, listener as EventListener, options,);
     return this;
   }
 
   /**
    * Registra um listener que será removido após a primeira execução.
    */
-  once<K extends keyof Events>(
+  once<K extends keyof Events,>(
     type: K & string,
-    listener: (event: Events[K]) => void
+    listener: (event: Events[K],) => void,
   ): this {
-    this.addEventListener(type, listener as EventListener, { once: true });
+    this.addEventListener(type, listener as EventListener, { once: true, },);
     return this;
   }
 
   /**
    * Remove um listener.
    */
-  off<K extends keyof Events>(
+  off<K extends keyof Events,>(
     type: K & string,
-    listener: (event: Events[K]) => void,
-    options?: boolean | EventListenerOptions
+    listener: (event: Events[K],) => void,
+    options?: boolean | EventListenerOptions,
   ): this {
-    this.removeEventListener(type, listener as EventListener, options);
+    this.removeEventListener(type, listener as EventListener, options,);
     return this;
   }
 
   /**
    * Emite um evento.
-   * 🔥 CORREÇÃO: Usamos `(detail as unknown) instanceof Event` para contornar 
+   * 🔥 CORREÇÃO: Usamos `(detail as unknown) instanceof Event` para contornar
    * a restrição do TypeScript com tipos genéricos union (TS2358).
    */
-  emit<K extends keyof Events>(type: K & string, detail?: Events[K]): boolean {
-    const event =
-      (detail && (detail as unknown as Event) instanceof Event)
-        ? (detail as unknown as Event)
-        : new CustomEvent(type, { detail, cancelable: true });
-    
-    return this.dispatchEvent(event);
+  emit<K extends keyof Events,>(
+    type: K & string,
+    detail?: Events[K],
+  ): boolean {
+    const event = (detail && (detail as unknown as Event) instanceof Event)
+      ? (detail as unknown as Event)
+      : new CustomEvent(type, { detail, cancelable: true, },);
+
+    return this.dispatchEvent(event,);
   }
 
   /**
@@ -62,9 +64,9 @@ export class TypedEventTarget<Events extends EventMap> extends EventTarget {
    * Nota: EventTarget nativo não expõe os listeners, então esta implementação
    * é um no-op seguro, confiando no Garbage Collector quando o alvo é destruído.
    */
-  removeAllListeners<K extends keyof Events>(type?: K & string): this {
+  removeAllListeners<K extends keyof Events,>(type?: K & string,): this {
     // Em implementações nativas, recriar o EventTarget é a forma mais limpa
-    // de limpar tudo, mas para o WebTorrent, o destroy() do objeto pai 
+    // de limpar tudo, mas para o WebTorrent, o destroy() do objeto pai
     // geralmente cuida da limpeza das referências.
     return this;
   }

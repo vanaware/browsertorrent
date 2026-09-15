@@ -22,50 +22,58 @@
  * Transport síncrono + buffer do Loco.
  */
 
-import { TypedEventTarget } from "../utils/event-target.ts";
-import { concat, equals, readUInt32BE, writeUInt32BE } from "../utils/buffer.ts";
-import { decode } from "../utils/bencode.ts";
+import { TypedEventTarget, } from "../utils/event-target.ts";
 import {
+  concat,
+  equals,
+  readUInt32BE,
+  writeUInt32BE,
+} from "../utils/buffer.ts";
+import { decode, } from "../utils/bencode.ts";
+import {
+  EofError,
   PeerWireError,
   ProtocolError,
-  EofError,
   TimeoutError,
 } from "../utils/errors.ts";
 import {
-  encodeHandshake,
   decodeHandshake,
+  encodeHandshake,
   hasExtension,
   type PeerHandshake,
 } from "./handshake.ts";
 import {
-  encodeMessage,
-  decodeMessagePayload,
-  type PeerMessage,
   type BlockCoordinates,
+  decodeMessagePayload,
+  encodeMessage,
+  type PeerMessage,
 } from "./message.ts";
 import {
   BITTORRENT_PROTOCOL,
-  HANDSHAKE_LENGTH,
-  HandshakeExtension,
-  DEFAULT_MAX_MESSAGE_LENGTH,
   DEFAULT_MAX_BLOCK_LENGTH,
+  DEFAULT_MAX_MESSAGE_LENGTH,
   DEFAULT_MAX_PENDING_REQUESTS,
   DEFAULT_MAX_QUEUED_WRITE_BYTES,
+  HANDSHAKE_LENGTH,
+  HandshakeExtension,
 } from "./constants.ts";
-import { ExtensionHost, type PeerWireExtension } from "./extension-host.ts";
+import { ExtensionHost, type PeerWireExtension, } from "./extension-host.ts";
 
 // ── Transport contract ──────────────────────────────────────────────────
 
 export interface Transport {
-  send(data: Uint8Array): void;
-  onMessage(handler: (data: Uint8Array) => void): void;
+  send(data: Uint8Array,): void;
+  onMessage(handler: (data: Uint8Array,) => void,): void;
   close(): void;
 }
 
 // ── Events ──────────────────────────────────────────────────────────────
 
 export interface WireEvents {
-  handshake: CustomEvent<{ peerId: Uint8Array; extensions: Uint8Array; infoHash: Uint8Array }>;
+  [key: string]: Event | CustomEvent;
+  handshake: CustomEvent<
+    { peerId: Uint8Array; extensions: Uint8Array; infoHash: Uint8Array }
+  >;
   choke: Event;
   unchoke: Event;
   interested: Event;
@@ -89,11 +97,36 @@ export interface WireEvents {
   /** BEP 6 — Fast: allowed fast */
   allowedFast: CustomEvent<{ index: number }>;
   /** BEP 52 v2: hash request */
-  hashRequest: CustomEvent<{ piecesRoot: Uint8Array; baseLayer: number; index: number; length: number; proofLayers: number }>;
+  hashRequest: CustomEvent<
+    {
+      piecesRoot: Uint8Array;
+      baseLayer: number;
+      index: number;
+      length: number;
+      proofLayers: number;
+    }
+  >;
   /** BEP 52 v2: hashes response */
-  hashes: CustomEvent<{ piecesRoot: Uint8Array; baseLayer: number; index: number; length: number; proofLayers: number; hashes: Uint8Array }>;
+  hashes: CustomEvent<
+    {
+      piecesRoot: Uint8Array;
+      baseLayer: number;
+      index: number;
+      length: number;
+      proofLayers: number;
+      hashes: Uint8Array;
+    }
+  >;
   /** BEP 52 v2: hash reject */
-  hashReject: CustomEvent<{ piecesRoot: Uint8Array; baseLayer: number; index: number; length: number; proofLayers: number }>;
+  hashReject: CustomEvent<
+    {
+      piecesRoot: Uint8Array;
+      baseLayer: number;
+      index: number;
+      length: number;
+      proofLayers: number;
+    }
+  >;
   keepAlive: Event;
   unknown: CustomEvent<{ id: number; payload: Uint8Array }>;
   error: CustomEvent<{ error: Error }>;
@@ -173,10 +206,14 @@ export class Wire extends TypedEventTarget<WireEvents> {
   private _speedInterval?: ReturnType<typeof setInterval>;
 
   /** Upload speed in bytes/s (rolling 1-second average). */
-  get uploadSpeed(): number { return this._uploadSpeed; }
+  get uploadSpeed(): number {
+    return this._uploadSpeed;
+  }
 
   /** Download speed in bytes/s (rolling 1-second average). */
-  get downloadSpeed(): number { return this._downloadSpeed; }
+  get downloadSpeed(): number {
+    return this._downloadSpeed;
+  }
 
   // ── Peer address ────────────────────────────────────────────────────
   /** Set by Peer when the DataChannel opens. */
@@ -235,7 +272,7 @@ export class Wire extends TypedEventTarget<WireEvents> {
 
   // ── Private ────────────────────────────────────────────────────────
   private transport: Transport;
-  private buffer: Uint8Array = new Uint8Array(0);
+  private buffer: Uint8Array = new Uint8Array(0,);
 
   private handshakeSent: boolean = false;
   private handshakeReceived: boolean = false;
@@ -261,55 +298,69 @@ export class Wire extends TypedEventTarget<WireEvents> {
   #handshakeTimer?: ReturnType<typeof setTimeout>;
   #keepAliveIntervalMs: number;
 
-  constructor(transport: Transport, opts: WireOptions = {}) {
+  constructor(transport: Transport, opts: WireOptions = {},) {
     super();
     this.transport = transport;
     this.expectedInfoHash = opts.expectedInfoHash ?? null;
     this.expectedPeerId = opts.expectedPeerId
-      ? new Uint8Array(opts.expectedPeerId)
+      ? new Uint8Array(opts.expectedPeerId,)
       : null;
-    this.localExtensions = new Set(opts.extensions);
+    this.localExtensions = new Set(opts.extensions,);
     this.pieceCount = opts.pieceCount;
     this.pieceLength = opts.pieceLength;
     this.totalLength = opts.totalLength;
     this.maxMessageLength = positiveOption(
-      "maxMessageLength", opts.maxMessageLength, DEFAULT_MAX_MESSAGE_LENGTH,
+      "maxMessageLength",
+      opts.maxMessageLength,
+      DEFAULT_MAX_MESSAGE_LENGTH,
     );
     this.maxBlockLength = positiveOption(
-      "maxBlockLength", opts.maxBlockLength, DEFAULT_MAX_BLOCK_LENGTH,
+      "maxBlockLength",
+      opts.maxBlockLength,
+      DEFAULT_MAX_BLOCK_LENGTH,
     );
     this.maxPendingRequests = positiveOption(
-      "maxPendingRequests", opts.maxPendingRequests, DEFAULT_MAX_PENDING_REQUESTS,
+      "maxPendingRequests",
+      opts.maxPendingRequests,
+      DEFAULT_MAX_PENDING_REQUESTS,
     );
     this.maxQueuedWriteBytes = positiveOption(
-      "maxQueuedWriteBytes", opts.maxQueuedWriteBytes, DEFAULT_MAX_QUEUED_WRITE_BYTES,
+      "maxQueuedWriteBytes",
+      opts.maxQueuedWriteBytes,
+      DEFAULT_MAX_QUEUED_WRITE_BYTES,
     );
     this.handshakeTimeoutMs = nonNegativeOption(
-      "handshakeTimeoutMs", opts.handshakeTimeoutMs, 30_000,
+      "handshakeTimeoutMs",
+      opts.handshakeTimeoutMs,
+      30_000,
     );
     this.idleTimeoutMs = nonNegativeOption(
-      "idleTimeoutMs", opts.idleTimeoutMs, 0,
+      "idleTimeoutMs",
+      opts.idleTimeoutMs,
+      0,
     );
     this.#keepAliveIntervalMs = nonNegativeOption(
-      "keepAliveIntervalMs", opts.keepAliveIntervalMs, 0,
+      "keepAliveIntervalMs",
+      opts.keepAliveIntervalMs,
+      0,
     );
 
     this.extensionHost = new ExtensionHost({
-      send: (id, payload) => this._sendExtendedMessage(id, payload),
+      send: (id, payload,) => this._sendExtendedMessage(id, payload,),
       client: opts.clientName,
       port: opts.listenPort,
       requestQueue: this.maxPendingRequests,
-    });
+    },);
 
-    this.transport.onMessage((data) => this._onData(data));
+    this.transport.onMessage((data,) => this._onData(data,));
 
     // Start handshake timeout
     if (this.handshakeTimeoutMs > 0) {
       this.#handshakeTimer = setTimeout(() => {
         if (this.state === WireState.Handshaking) {
-          this._terminate(new TimeoutError("handshake timed out"));
+          this._terminate(new TimeoutError("handshake timed out",),);
         }
-      }, this.handshakeTimeoutMs);
+      }, this.handshakeTimeoutMs,);
     }
   }
 
@@ -323,7 +374,7 @@ export class Wire extends TypedEventTarget<WireEvents> {
     extensions?: Uint8Array,
   ): void {
     if (infoHash.length !== 20 || peerId.length !== 20) {
-      throw new RangeError("infoHash and peerId must be exactly 20 bytes");
+      throw new RangeError("infoHash and peerId must be exactly 20 bytes",);
     }
 
     const bytes = encodeHandshake({
@@ -331,9 +382,9 @@ export class Wire extends TypedEventTarget<WireEvents> {
       peerId,
       extensions: this.localExtensions,
       reserved: extensions,
-    });
+    },);
 
-    this.transport.send(bytes);
+    this.transport.send(bytes,);
     this.handshakeSent = true;
     this._tryTransitionToConnected();
   }
@@ -341,81 +392,123 @@ export class Wire extends TypedEventTarget<WireEvents> {
   /** Send the BEP 10 extended handshake (after standard handshake completes). */
   public async sendExtendedHandshake(): Promise<void> {
     if (this.extensionHandshakeSent) return;
-    if (!this._hasNegotiated(HandshakeExtension.ExtensionProtocol)) return;
+    if (!this._hasNegotiated(HandshakeExtension.ExtensionProtocol,)) return;
     await this.extensionHost.sendHandshake();
     this.extensionHandshakeSent = true;
   }
 
   /** Register a BEP 10 extension before the standard handshake. */
-  public use<T extends PeerWireExtension>(extension: T): T {
+  public use<T extends PeerWireExtension,>(extension: T,): T {
     if (this.state !== WireState.Handshaking) {
-      throw new PeerWireError("extensions must be registered before handshaking");
+      throw new PeerWireError(
+        "extensions must be registered before handshaking",
+      );
     }
-    if (!this.localExtensions.has(HandshakeExtension.ExtensionProtocol)) {
-      throw new PeerWireError("BEP 10 must be enabled before registering extensions");
+    if (!this.localExtensions.has(HandshakeExtension.ExtensionProtocol,)) {
+      throw new PeerWireError(
+        "BEP 10 must be enabled before registering extensions",
+      );
     }
-    return this.extensionHost.use(extension);
+    return this.extensionHost.use(extension,);
   }
 
   // ====================================================================
   // BEP 3 messages
   // ====================================================================
 
-  public sendChoke(): void { this._sendMessage({ type: "choke" }); }
-  public sendUnchoke(): void { this._sendMessage({ type: "unchoke" }); }
-  public sendInterested(): void { this._sendMessage({ type: "interested" }); }
-  public sendNotInterested(): void { this._sendMessage({ type: "notInterested" }); }
-
-  public sendHave(index: number): void {
-    this._sendMessage({ type: "have", pieceIndex: index });
+  public sendChoke(): void {
+    this._sendMessage({ type: "choke", },);
+  }
+  public sendUnchoke(): void {
+    this._sendMessage({ type: "unchoke", },);
+  }
+  public sendInterested(): void {
+    this._sendMessage({ type: "interested", },);
+  }
+  public sendNotInterested(): void {
+    this._sendMessage({ type: "notInterested", },);
   }
 
-  public sendBitfield(bitfield: Uint8Array): void {
-    this._sendMessage({ type: "bitfield", bitfield });
+  public sendHave(index: number,): void {
+    this._sendMessage({ type: "have", pieceIndex: index, },);
   }
 
-  public sendRequest(index: number, offset: number, length: number): void {
+  public sendBitfield(bitfield: Uint8Array,): void {
+    this._sendMessage({ type: "bitfield", bitfield, },);
+  }
+
+  public sendRequest(index: number, offset: number, length: number,): void {
     // Backpressure: não enviar requests se o peer nos chokeou
     if (this.peerChoking) {
-      this._debug(`sendRequest bloqueado: peer está nos choking (piece ${index})`);
+      this._debug(
+        `sendRequest bloqueado: peer está nos choking (piece ${index})`,
+      );
       return;
     }
-    this._sendMessage({ type: "request", pieceIndex: index, begin: offset, length });
+    this._sendMessage({
+      type: "request",
+      pieceIndex: index,
+      begin: offset,
+      length,
+    },);
   }
 
-  public sendPiece(index: number, offset: number, block: Uint8Array): void {
-    this._sendMessage({ type: "piece", pieceIndex: index, begin: offset, block });
+  public sendPiece(index: number, offset: number, block: Uint8Array,): void {
+    this._sendMessage({
+      type: "piece",
+      pieceIndex: index,
+      begin: offset,
+      block,
+    },);
   }
 
-  public sendCancel(index: number, offset: number, length: number): void {
-    this._sendMessage({ type: "cancel", pieceIndex: index, begin: offset, length });
+  public sendCancel(index: number, offset: number, length: number,): void {
+    this._sendMessage({
+      type: "cancel",
+      pieceIndex: index,
+      begin: offset,
+      length,
+    },);
   }
 
   // ====================================================================
   // BEP 5, 6, 10 messages
   // ====================================================================
 
-  public sendPort(port: number): void {
-    this._sendMessage({ type: "port", port });
+  public sendPort(port: number,): void {
+    this._sendMessage({ type: "port", port, },);
   }
 
-  public sendSuggestPiece(index: number): void {
-    this._sendMessage({ type: "suggestPiece", pieceIndex: index });
+  public sendSuggestPiece(index: number,): void {
+    this._sendMessage({ type: "suggestPiece", pieceIndex: index, },);
   }
 
-  public sendHaveAll(): void { this._sendMessage({ type: "haveAll" }); }
-  public sendHaveNone(): void { this._sendMessage({ type: "haveNone" }); }
-
-  public sendRejectRequest(index: number, offset: number, length: number): void {
-    this._sendMessage({ type: "rejectRequest", pieceIndex: index, begin: offset, length });
+  public sendHaveAll(): void {
+    this._sendMessage({ type: "haveAll", },);
+  }
+  public sendHaveNone(): void {
+    this._sendMessage({ type: "haveNone", },);
   }
 
-  public sendAllowedFast(index: number): void {
-    this._sendMessage({ type: "allowedFast", pieceIndex: index });
+  public sendRejectRequest(
+    index: number,
+    offset: number,
+    length: number,
+  ): void {
+    this._sendMessage({
+      type: "rejectRequest",
+      pieceIndex: index,
+      begin: offset,
+      length,
+    },);
   }
 
-  public sendExtended(extId: number, payload: Uint8Array): void {
-    this._sendMessage({ type: "extended", extensionId: extId, payload });
+  public sendAllowedFast(index: number,): void {
+    this._sendMessage({ type: "allowedFast", pieceIndex: index, },);
+  }
+
+  public sendExtended(extId: number, payload: Uint8Array,): void {
+    this._sendMessage({ type: "extended", extensionId: extId, payload, },);
   }
 
   // ====================================================================
@@ -437,7 +530,7 @@ export class Wire extends TypedEventTarget<WireEvents> {
       index,
       length,
       proofLayers,
-    });
+    },);
   }
 
   /** Send a batch of SHA-256 hashes in response to a hash request. */
@@ -457,7 +550,7 @@ export class Wire extends TypedEventTarget<WireEvents> {
       length,
       proofLayers,
       hashes,
-    });
+    },);
   }
 
   /** Reject a hash request. */
@@ -475,7 +568,7 @@ export class Wire extends TypedEventTarget<WireEvents> {
       index,
       length,
       proofLayers,
-    });
+    },);
   }
 
   // ====================================================================
@@ -483,12 +576,14 @@ export class Wire extends TypedEventTarget<WireEvents> {
   // ====================================================================
 
   /** Configure inactivity-based keepalives; `true` selects two minutes. */
-  public setKeepAlive(interval: number | boolean = true): void {
+  public setKeepAlive(interval: number | boolean = true,): void {
     if (interval === false) this.#keepAliveIntervalMs = 0;
     else if (interval === true) this.#keepAliveIntervalMs = 120_000;
     else {
       this.#keepAliveIntervalMs = nonNegativeOption(
-        "keepAlive interval", interval, 0,
+        "keepAlive interval",
+        interval,
+        0,
       );
     }
     this.#resetKeepAlive();
@@ -500,12 +595,12 @@ export class Wire extends TypedEventTarget<WireEvents> {
 
   /** Block requests sent locally that still await a piece or rejection. */
   get pendingRequests(): readonly Readonly<BlockCoordinates>[] {
-    return [...this.#pendingRequests.values()];
+    return [...this.#pendingRequests.values(),];
   }
 
   /** Requests received from the peer that have not been served or rejected. */
   get peerRequests(): readonly Readonly<BlockCoordinates>[] {
-    return [...this.#peerRequests.values()];
+    return [...this.#peerRequests.values(),];
   }
 
   // ====================================================================
@@ -524,17 +619,22 @@ export class Wire extends TypedEventTarget<WireEvents> {
   // Data reception (buffer-based stream parser)
   // ====================================================================
 
-  private _onData(chunk: Uint8Array): void {
+  private _onData(chunk: Uint8Array,): void {
     if (this.state === WireState.Closed) return;
-    this.buffer = concat([this.buffer, chunk]);
+    this.buffer = concat([this.buffer, chunk,],);
 
     try {
       this._processBuffer();
     } catch (err) {
-      this.emit("error", new CustomEvent("error", {
-        detail: { error: err instanceof Error ? err : new Error(String(err)) },
-      }));
-      this._terminate(err);
+      this.emit(
+        "error",
+        new CustomEvent("error", {
+          detail: {
+            error: err instanceof Error ? err : new Error(String(err,),),
+          },
+        },),
+      );
+      this._terminate(err,);
     }
   }
 
@@ -543,34 +643,46 @@ export class Wire extends TypedEventTarget<WireEvents> {
     if (!this.handshakeReceived) {
       if (this.buffer.length < HANDSHAKE_LENGTH) return;
 
-      const handshake = decodeHandshake(this.buffer.subarray(0, HANDSHAKE_LENGTH));
+      const handshake = decodeHandshake(
+        this.buffer.subarray(0, HANDSHAKE_LENGTH,),
+      );
 
       // Validate infoHash
-      if (this.expectedInfoHash && !equals(handshake.infoHash, this.expectedInfoHash)) {
-        throw new ProtocolError("InfoHash mismatch in handshake: peer announced a different torrent");
+      if (
+        this.expectedInfoHash &&
+        !equals(handshake.infoHash, this.expectedInfoHash,)
+      ) {
+        throw new ProtocolError(
+          "InfoHash mismatch in handshake: peer announced a different torrent",
+        );
       }
 
       // Validate expectedPeerId
-      if (this.expectedPeerId && !equals(handshake.peerId, this.expectedPeerId)) {
-        throw new ProtocolError("Unexpected peer ID in handshake");
+      if (
+        this.expectedPeerId && !equals(handshake.peerId, this.expectedPeerId,)
+      ) {
+        throw new ProtocolError("Unexpected peer ID in handshake",);
       }
 
-      this.buffer = this.buffer.subarray(HANDSHAKE_LENGTH);
+      this.buffer = this.buffer.subarray(HANDSHAKE_LENGTH,);
       this.handshakeReceived = true;
       this.remoteHandshake = handshake;
 
       this.peerIdBuffer = handshake.peerId;
-      this.peerId = Array.from(handshake.peerId)
-        .map((b: number) => b.toString(16).padStart(2, "0"))
-        .join("");
+      this.peerId = Array.from(handshake.peerId,)
+        .map((b: number,) => b.toString(16,).padStart(2, "0",))
+        .join("",);
 
-      this.emit("handshake", new CustomEvent("handshake", {
-        detail: {
-          peerId: handshake.peerId,
-          extensions: handshake.reserved,
-          infoHash: handshake.infoHash,
-        },
-      }));
+      this.emit(
+        "handshake",
+        new CustomEvent("handshake", {
+          detail: {
+            peerId: handshake.peerId,
+            extensions: handshake.reserved,
+            infoHash: handshake.infoHash,
+          },
+        },),
+      );
 
       this._tryTransitionToConnected();
 
@@ -579,12 +691,12 @@ export class Wire extends TypedEventTarget<WireEvents> {
 
     // Phase 2: Length-prefixed messages
     while (this.buffer.length >= 4) {
-      const length = readUInt32BE(this.buffer, 0);
+      const length = readUInt32BE(this.buffer, 0,);
 
       // Keepalive
       if (length === 0) {
-        this.buffer = this.buffer.subarray(4);
-        this.emit("keepAlive");
+        this.buffer = this.buffer.subarray(4,);
+        this.emit("keepAlive",);
         this._touchActivity();
         continue;
       }
@@ -598,31 +710,31 @@ export class Wire extends TypedEventTarget<WireEvents> {
 
       if (this.buffer.length < 4 + length) return;
 
-      const payload = this.buffer.subarray(4, 4 + length);
-      const message = decodeMessagePayload(new Uint8Array(payload));
+      const payload = this.buffer.subarray(4, 4 + length,);
+      const message = decodeMessagePayload(new Uint8Array(payload,),);
 
       // Extension gating: reject messages for un-negotiated extensions
-      this._assertExtensionNegotiated(message);
+      this._assertExtensionNegotiated(message,);
 
       // Availability order validation
-      this._validateAvailabilityOrder(message, false);
+      this._validateAvailabilityOrder(message, false,);
 
       // Message bounds validation
-      this._validateIncoming(message);
+      this._validateIncoming(message,);
 
       // Commit availability order after validation passes
-      this._commitAvailabilityOrder(message, false);
+      this._commitAvailabilityOrder(message, false,);
 
       // Apply state transitions
-      this._applyRemoteState(message);
+      this._applyRemoteState(message,);
 
       // Track downloaded bytes
       this.downloadedBytes += 4 + length;
 
       // Dispatch to events and extension host
-      this._dispatchMessage(message);
+      this._dispatchMessage(message,);
 
-      this.buffer = this.buffer.subarray(4 + length);
+      this.buffer = this.buffer.subarray(4 + length,);
       this._touchActivity();
     }
   }
@@ -631,30 +743,33 @@ export class Wire extends TypedEventTarget<WireEvents> {
   // Message sending (with validation and backpressure)
   // ====================================================================
 
-  private _sendMessage(message: PeerMessage): void {
+  private _sendMessage(message: PeerMessage,): void {
     if (this.state === WireState.Closed) {
-      throw new PeerWireError("wire is closed");
+      throw new PeerWireError("wire is closed",);
     }
     if (this.state !== WireState.Connected && message.type !== "keepAlive") {
-      throw new PeerWireError("wire handshake is not complete");
+      throw new PeerWireError("wire handshake is not complete",);
     }
 
     // Extension gating
-    this._assertExtensionNegotiated(message);
+    this._assertExtensionNegotiated(message,);
 
     // Availability order validation
-    this._validateAvailabilityOrder(message, true);
+    this._validateAvailabilityOrder(message, true,);
 
     // Outgoing bounds validation
-    this._validateOutgoing(message);
+    this._validateOutgoing(message,);
 
     // Encode
     let frame: Uint8Array;
     try {
-      frame = encodeMessage(message);
+      frame = encodeMessage(message,);
     } catch (err) {
       if (err instanceof Error) {
-        this.emit("error", new CustomEvent("error", { detail: { error: err } }));
+        this.emit(
+          "error",
+          new CustomEvent("error", { detail: { error: err, }, },),
+        );
       }
       throw err;
     }
@@ -667,25 +782,28 @@ export class Wire extends TypedEventTarget<WireEvents> {
     }
 
     // Write with backpressure
-    this._writeFrame(frame);
+    this._writeFrame(frame,);
 
     // Commit availability order after successful write
-    this._commitAvailabilityOrder(message, true);
+    this._commitAvailabilityOrder(message, true,);
 
     // Apply local state transitions
-    this._applyLocalState(message);
+    this._applyLocalState(message,);
 
     // Track uploaded bytes
     this.uploadedBytes += frame.length;
     this._touchActivity();
   }
 
-  private _sendExtendedMessage(id: number, payload: Uint8Array): Promise<void> {
-    this._sendMessage({ type: "extended", extensionId: id, payload });
+  private _sendExtendedMessage(
+    id: number,
+    payload: Uint8Array,
+  ): Promise<void> {
+    this._sendMessage({ type: "extended", extensionId: id, payload, },);
     return Promise.resolve();
   }
 
-  private _writeFrame(frame: Uint8Array): void {
+  private _writeFrame(frame: Uint8Array,): void {
     if (this.#queuedWriteBytes + frame.length > this.maxQueuedWriteBytes) {
       throw new PeerWireError(
         `write queue exceeds configured limit ${this.maxQueuedWriteBytes}`,
@@ -693,7 +811,7 @@ export class Wire extends TypedEventTarget<WireEvents> {
     }
     this.#queuedWriteBytes += frame.length;
     try {
-      this.transport.send(frame);
+      this.transport.send(frame,);
     } finally {
       this.#queuedWriteBytes -= frame.length;
     }
@@ -703,60 +821,109 @@ export class Wire extends TypedEventTarget<WireEvents> {
   // Event dispatch
   // ====================================================================
 
-  private _dispatchMessage(message: PeerMessage): void {
+  private _dispatchMessage(message: PeerMessage,): void {
     switch (message.type) {
       case "choke":
-        this.emit("choke");
+        this.emit("choke",);
         break;
       case "unchoke":
-        this.emit("unchoke");
+        this.emit("unchoke",);
         break;
       case "interested":
-        this.emit("interested");
+        this.emit("interested",);
         break;
       case "notInterested":
-        this.emit("not-interested");
+        this.emit("not-interested",);
         break;
       case "have":
-        this.emit("have", new CustomEvent("have", { detail: { index: message.pieceIndex } }));
+        this.emit(
+          "have",
+          new CustomEvent("have", { detail: { index: message.pieceIndex, }, },),
+        );
         break;
       case "bitfield":
-        this.emit("bitfield", new CustomEvent("bitfield", { detail: { bitfield: message.bitfield } }));
+        this.emit(
+          "bitfield",
+          new CustomEvent("bitfield", {
+            detail: { bitfield: message.bitfield, },
+          },),
+        );
         break;
       case "request":
-        this.emit("request", new CustomEvent("request", {
-          detail: { index: message.pieceIndex, offset: message.begin, length: message.length },
-        }));
+        this.emit(
+          "request",
+          new CustomEvent("request", {
+            detail: {
+              index: message.pieceIndex,
+              offset: message.begin,
+              length: message.length,
+            },
+          },),
+        );
         break;
       case "piece":
-        this.emit("piece", new CustomEvent("piece", {
-          detail: { index: message.pieceIndex, offset: message.begin, block: message.block },
-        }));
+        this.emit(
+          "piece",
+          new CustomEvent("piece", {
+            detail: {
+              index: message.pieceIndex,
+              offset: message.begin,
+              block: message.block,
+            },
+          },),
+        );
         break;
       case "cancel":
-        this.emit("cancel", new CustomEvent("cancel", {
-          detail: { index: message.pieceIndex, offset: message.begin, length: message.length },
-        }));
+        this.emit(
+          "cancel",
+          new CustomEvent("cancel", {
+            detail: {
+              index: message.pieceIndex,
+              offset: message.begin,
+              length: message.length,
+            },
+          },),
+        );
         break;
       case "port":
-        this.emit("port", new CustomEvent("port", { detail: { port: message.port } }));
+        this.emit(
+          "port",
+          new CustomEvent("port", { detail: { port: message.port, }, },),
+        );
         break;
       case "suggestPiece":
-        this.emit("suggestPiece", new CustomEvent("suggestPiece", { detail: { index: message.pieceIndex } }));
+        this.emit(
+          "suggestPiece",
+          new CustomEvent("suggestPiece", {
+            detail: { index: message.pieceIndex, },
+          },),
+        );
         break;
       case "haveAll":
-        this.emit("haveAll");
+        this.emit("haveAll",);
         break;
       case "haveNone":
-        this.emit("haveNone");
+        this.emit("haveNone",);
         break;
       case "rejectRequest":
-        this.emit("rejectRequest", new CustomEvent("rejectRequest", {
-          detail: { index: message.pieceIndex, offset: message.begin, length: message.length },
-        }));
+        this.emit(
+          "rejectRequest",
+          new CustomEvent("rejectRequest", {
+            detail: {
+              index: message.pieceIndex,
+              offset: message.begin,
+              length: message.length,
+            },
+          },),
+        );
         break;
       case "allowedFast":
-        this.emit("allowedFast", new CustomEvent("allowedFast", { detail: { index: message.pieceIndex } }));
+        this.emit(
+          "allowedFast",
+          new CustomEvent("allowedFast", {
+            detail: { index: message.pieceIndex, },
+          },),
+        );
         break;
       case "extended": {
         if (message.extensionId === 0) {
@@ -764,59 +931,81 @@ export class Wire extends TypedEventTarget<WireEvents> {
             const handshake = decode(message.payload, {
               maxBytes: 256 * 1024,
               maxDepth: 32,
-            });
-            this.emit("extended", new CustomEvent("extended", { detail: { id: 0, payload: handshake } }));
+            },);
+            this.emit(
+              "extended",
+              new CustomEvent("extended", {
+                detail: { id: 0, payload: handshake, },
+              },),
+            );
           } catch {
-            this._debug("Failed to parse extended handshake");
+            this._debug("Failed to parse extended handshake",);
           }
         } else {
-          this.emit("extended", new CustomEvent("extended", { detail: { id: message.extensionId, payload: message.payload } }));
+          this.emit(
+            "extended",
+            new CustomEvent("extended", {
+              detail: { id: message.extensionId, payload: message.payload, },
+            },),
+          );
         }
         // Also dispatch through ExtensionHost
-        void this.extensionHost.handle(message).catch(() => {});
+        void this.extensionHost.handle(message,).catch(() => {},);
         break;
       }
       case "keepAlive":
-        this.emit("keepAlive");
+        this.emit("keepAlive",);
         break;
       case "unknown":
-        this.emit("unknown", new CustomEvent("unknown", {
-          detail: { id: message.id, payload: message.payload },
-        }));
+        this.emit(
+          "unknown",
+          new CustomEvent("unknown", {
+            detail: { id: message.id, payload: message.payload, },
+          },),
+        );
         break;
       case "hashRequest":
-        this.emit("hashRequest", new CustomEvent("hashRequest", {
-          detail: {
-            piecesRoot: message.piecesRoot,
-            baseLayer: message.baseLayer,
-            index: message.index,
-            length: message.length,
-            proofLayers: message.proofLayers,
-          },
-        }));
+        this.emit(
+          "hashRequest",
+          new CustomEvent("hashRequest", {
+            detail: {
+              piecesRoot: message.piecesRoot,
+              baseLayer: message.baseLayer,
+              index: message.index,
+              length: message.length,
+              proofLayers: message.proofLayers,
+            },
+          },),
+        );
         break;
       case "hashes":
-        this.emit("hashes", new CustomEvent("hashes", {
-          detail: {
-            piecesRoot: message.piecesRoot,
-            baseLayer: message.baseLayer,
-            index: message.index,
-            length: message.length,
-            proofLayers: message.proofLayers,
-            hashes: message.hashes,
-          },
-        }));
+        this.emit(
+          "hashes",
+          new CustomEvent("hashes", {
+            detail: {
+              piecesRoot: message.piecesRoot,
+              baseLayer: message.baseLayer,
+              index: message.index,
+              length: message.length,
+              proofLayers: message.proofLayers,
+              hashes: message.hashes,
+            },
+          },),
+        );
         break;
       case "hashReject":
-        this.emit("hashReject", new CustomEvent("hashReject", {
-          detail: {
-            piecesRoot: message.piecesRoot,
-            baseLayer: message.baseLayer,
-            index: message.index,
-            length: message.length,
-            proofLayers: message.proofLayers,
-          },
-        }));
+        this.emit(
+          "hashReject",
+          new CustomEvent("hashReject", {
+            detail: {
+              piecesRoot: message.piecesRoot,
+              baseLayer: message.baseLayer,
+              index: message.index,
+              length: message.length,
+              proofLayers: message.proofLayers,
+            },
+          },),
+        );
         break;
     }
   }
@@ -825,7 +1014,7 @@ export class Wire extends TypedEventTarget<WireEvents> {
   // State transitions
   // ====================================================================
 
-  private _applyLocalState(message: PeerMessage): void {
+  private _applyLocalState(message: PeerMessage,): void {
     switch (message.type) {
       case "choke":
         this.amChoking = true;
@@ -840,7 +1029,7 @@ export class Wire extends TypedEventTarget<WireEvents> {
         this.amInterested = false;
         break;
       case "allowedFast":
-        this.localAllowedFast.add(message.pieceIndex);
+        this.localAllowedFast.add(message.pieceIndex,);
         break;
       case "piece":
       case "rejectRequest":
@@ -850,24 +1039,24 @@ export class Wire extends TypedEventTarget<WireEvents> {
           length: message.type === "piece"
             ? message.block.length
             : message.length,
-        }));
+        },),);
         break;
       case "request":
-        this.#pendingRequests.set(blockKey(message), {
+        this.#pendingRequests.set(blockKey(message,), {
           pieceIndex: message.pieceIndex,
           begin: message.begin,
           length: message.length,
-        });
+        },);
         break;
       case "cancel": {
-        const key = blockKey(message);
-        this.#peerRequests.delete(key);
+        const key = blockKey(message,);
+        this.#peerRequests.delete(key,);
         break;
       }
     }
   }
 
-  private _applyRemoteState(message: PeerMessage): void {
+  private _applyRemoteState(message: PeerMessage,): void {
     switch (message.type) {
       case "choke":
         this.peerChoking = true;
@@ -886,17 +1075,17 @@ export class Wire extends TypedEventTarget<WireEvents> {
         this.peerInterested = false;
         break;
       case "allowedFast":
-        this.remoteAllowedFast.add(message.pieceIndex);
+        this.remoteAllowedFast.add(message.pieceIndex,);
         break;
       case "request":
-        this.#peerRequests.set(blockKey(message), {
+        this.#peerRequests.set(blockKey(message,), {
           pieceIndex: message.pieceIndex,
           begin: message.begin,
           length: message.length,
-        });
+        },);
         break;
       case "cancel":
-        this.#peerRequests.delete(blockKey(message));
+        this.#peerRequests.delete(blockKey(message,),);
         break;
       case "piece":
       case "rejectRequest":
@@ -906,7 +1095,7 @@ export class Wire extends TypedEventTarget<WireEvents> {
           length: message.type === "piece"
             ? message.block.length
             : message.length,
-        }));
+        },),);
         break;
     }
   }
@@ -915,39 +1104,42 @@ export class Wire extends TypedEventTarget<WireEvents> {
   // Validation
   // ====================================================================
 
-  private _validateOutgoing(message: PeerMessage): void {
-    this._validateMessageBounds(message, false);
+  private _validateOutgoing(message: PeerMessage,): void {
+    this._validateMessageBounds(message, false,);
   }
 
-  private _validateIncoming(message: PeerMessage): void {
-    this._validateMessageBounds(message, true);
+  private _validateIncoming(message: PeerMessage,): void {
+    this._validateMessageBounds(message, true,);
     if (
       message.type === "request" &&
       this.#peerRequests.size >= this.maxPendingRequests
     ) {
-      throw new ProtocolError("peer exceeded outstanding request limit");
+      throw new ProtocolError("peer exceeded outstanding request limit",);
     }
   }
 
-  private _validateMessageBounds(message: PeerMessage, incoming: boolean): void {
+  private _validateMessageBounds(
+    message: PeerMessage,
+    incoming: boolean,
+  ): void {
     const ErrorType = incoming ? ProtocolError : RangeError;
     switch (message.type) {
       case "have":
       case "suggestPiece":
       case "allowedFast":
-        this._validatePieceIndex(message.pieceIndex, incoming);
+        this._validatePieceIndex(message.pieceIndex, incoming,);
         break;
       case "request":
       case "cancel":
       case "rejectRequest":
-        this._validateBlock(message, incoming);
+        this._validateBlock(message, incoming,);
         break;
       case "piece":
         this._validateBlock({
           pieceIndex: message.pieceIndex,
           begin: message.begin,
           length: message.block.length,
-        }, incoming);
+        }, incoming,);
         break;
       case "bitfield":
         // Bitfield spare-bit validation can be added later with Bitfield.fromBytes
@@ -955,30 +1147,30 @@ export class Wire extends TypedEventTarget<WireEvents> {
     }
   }
 
-  private _validatePieceIndex(pieceIndex: number, incoming: boolean): void {
+  private _validatePieceIndex(pieceIndex: number, incoming: boolean,): void {
     if (
-      !Number.isInteger(pieceIndex) || pieceIndex < 0 ||
+      !Number.isInteger(pieceIndex,) || pieceIndex < 0 ||
       pieceIndex > 0xffffffff ||
       (this.pieceCount !== undefined && pieceIndex >= this.pieceCount)
     ) {
       const ErrorType = incoming ? ProtocolError : RangeError;
-      throw new ErrorType(`piece index ${pieceIndex} is out of range`);
+      throw new ErrorType(`piece index ${pieceIndex} is out of range`,);
     }
   }
 
-  private _validateBlock(request: BlockCoordinates, incoming: boolean): void {
+  private _validateBlock(request: BlockCoordinates, incoming: boolean,): void {
     const ErrorType = incoming ? ProtocolError : RangeError;
-    this._validatePieceIndex(request.pieceIndex, incoming);
+    this._validatePieceIndex(request.pieceIndex, incoming,);
     if (request.length < 1 || request.length > this.maxBlockLength) {
       throw new ErrorType(
         `block length must be from 1 to ${this.maxBlockLength}`,
       );
     }
     if (
-      !Number.isInteger(request.begin) || request.begin < 0 ||
+      !Number.isInteger(request.begin,) || request.begin < 0 ||
       request.begin > 0xffffffff
     ) {
-      throw new ErrorType("block begin must be a non-negative integer");
+      throw new ErrorType("block begin must be a non-negative integer",);
     }
     if (this.pieceLength !== undefined) {
       let actualLength = this.pieceLength;
@@ -990,14 +1182,17 @@ export class Wire extends TypedEventTarget<WireEvents> {
         actualLength = this.totalLength - request.pieceIndex * this.pieceLength;
       }
       if (request.begin + request.length > actualLength) {
-        throw new ErrorType("block exceeds piece boundary");
+        throw new ErrorType("block exceeds piece boundary",);
       }
     }
   }
 
   // ── Availability order ─────────────────────────────────────────────
 
-  private _validateAvailabilityOrder(message: PeerMessage, local: boolean): void {
+  private _validateAvailabilityOrder(
+    message: PeerMessage,
+    local: boolean,
+  ): void {
     if (message.type === "keepAlive" || message.type === "extended") return;
 
     const declaration = message.type === "bitfield" ||
@@ -1024,7 +1219,10 @@ export class Wire extends TypedEventTarget<WireEvents> {
     }
   }
 
-  private _commitAvailabilityOrder(message: PeerMessage, local: boolean): void {
+  private _commitAvailabilityOrder(
+    message: PeerMessage,
+    local: boolean,
+  ): void {
     if (message.type === "keepAlive" || message.type === "extended") return;
     const declaration = message.type === "bitfield" ||
       message.type === "haveAll" || message.type === "haveNone";
@@ -1039,7 +1237,7 @@ export class Wire extends TypedEventTarget<WireEvents> {
 
   // ── Extension negotiation ──────────────────────────────────────────
 
-  private _assertExtensionNegotiated(message: PeerMessage): void {
+  private _assertExtensionNegotiated(message: PeerMessage,): void {
     let required: HandshakeExtension | undefined;
     switch (message.type) {
       case "suggestPiece":
@@ -1063,25 +1261,25 @@ export class Wire extends TypedEventTarget<WireEvents> {
       default:
         return;
     }
-    if (!this._hasNegotiated(required)) {
+    if (!this._hasNegotiated(required,)) {
       throw new ProtocolError(
         `${required} message was used without negotiation`,
       );
     }
   }
 
-  private _hasNegotiated(extension: HandshakeExtension): boolean {
-    return this.localExtensions.has(extension) &&
-      this.remoteHandshake?.extensions.has(extension) === true;
+  private _hasNegotiated(extension: HandshakeExtension,): boolean {
+    return this.localExtensions.has(extension,) &&
+      this.remoteHandshake?.extensions.has(extension,) === true;
   }
 
   private _fastNegotiated(): boolean {
-    return this._hasNegotiated(HandshakeExtension.Fast);
+    return this._hasNegotiated(HandshakeExtension.Fast,);
   }
 
   private _rejectSemanticsNegotiated(): boolean {
     return this._fastNegotiated() ||
-      this._hasNegotiated(HandshakeExtension.V2);
+      this._hasNegotiated(HandshakeExtension.V2,);
   }
 
   // ====================================================================
@@ -1092,7 +1290,7 @@ export class Wire extends TypedEventTarget<WireEvents> {
     if (this.handshakeSent && this.handshakeReceived) {
       this.state = WireState.Connected;
       if (this.#handshakeTimer !== undefined) {
-        clearTimeout(this.#handshakeTimer);
+        clearTimeout(this.#handshakeTimer,);
         this.#handshakeTimer = undefined;
       }
       this.#resetKeepAlive();
@@ -1112,12 +1310,12 @@ export class Wire extends TypedEventTarget<WireEvents> {
       if (dt <= 0) return;
       const dl = this.downloadedBytes - this._lastDownloaded;
       const ul = this.uploadedBytes - this._lastUploaded;
-      this._downloadSpeed = Math.round(dl / dt);
-      this._uploadSpeed = Math.round(ul / dt);
+      this._downloadSpeed = Math.round(dl / dt,);
+      this._uploadSpeed = Math.round(ul / dt,);
       this._lastSpeedSample = now;
       this._lastDownloaded = this.downloadedBytes;
       this._lastUploaded = this.uploadedBytes;
-    }, 1000);
+    }, 1000,);
   }
 
   private _touchActivity(): void {
@@ -1126,23 +1324,23 @@ export class Wire extends TypedEventTarget<WireEvents> {
     this.#resetIdleTimeout();
   }
 
-  private _terminate(reason?: unknown): void {
+  private _terminate(reason?: unknown,): void {
     if (this.state === WireState.Closed) return;
     this.state = WireState.Closed;
 
-    if (this.#handshakeTimer !== undefined) clearTimeout(this.#handshakeTimer);
-    if (this.#keepAliveTimer !== undefined) clearTimeout(this.#keepAliveTimer);
-    if (this.#idleTimer !== undefined) clearTimeout(this.#idleTimer);
+    if (this.#handshakeTimer !== undefined) clearTimeout(this.#handshakeTimer,);
+    if (this.#keepAliveTimer !== undefined) clearTimeout(this.#keepAliveTimer,);
+    if (this.#idleTimer !== undefined) clearTimeout(this.#idleTimer,);
     if (this._speedInterval !== undefined) {
-      clearInterval(this._speedInterval);
+      clearInterval(this._speedInterval,);
       this._speedInterval = undefined;
     }
 
-    this.extensionHost.close(reason);
+    this.extensionHost.close(reason,);
     this.#pendingRequests.clear();
     this.#peerRequests.clear();
 
-    this.emit("close", new CustomEvent("close", { detail: { reason } }));
+    this.emit("close", new CustomEvent("close", { detail: { reason, }, },),);
 
     try {
       this.transport.close();
@@ -1156,7 +1354,7 @@ export class Wire extends TypedEventTarget<WireEvents> {
   // ====================================================================
 
   #resetKeepAlive(): void {
-    if (this.#keepAliveTimer !== undefined) clearTimeout(this.#keepAliveTimer);
+    if (this.#keepAliveTimer !== undefined) clearTimeout(this.#keepAliveTimer,);
     this.#keepAliveTimer = undefined;
     if (
       this.#keepAliveIntervalMs > 0 && this.state === WireState.Connected
@@ -1165,48 +1363,56 @@ export class Wire extends TypedEventTarget<WireEvents> {
         this.#keepAliveTimer = undefined;
         if (this.state === WireState.Connected) {
           try {
-            this._sendMessage({ type: "keepAlive" });
+            this._sendMessage({ type: "keepAlive", },);
           } catch {
             // send failed — connection likely dead
           }
         }
-      }, this.#keepAliveIntervalMs);
+      }, this.#keepAliveIntervalMs,);
     }
   }
 
   #resetIdleTimeout(): void {
-    if (this.#idleTimer !== undefined) clearTimeout(this.#idleTimer);
+    if (this.#idleTimer !== undefined) clearTimeout(this.#idleTimer,);
     this.#idleTimer = undefined;
     if (this.idleTimeoutMs > 0 && this.state === WireState.Connected) {
       this.#idleTimer = setTimeout(() => {
-        this._terminate(new TimeoutError("peer connection became idle"));
-      }, this.idleTimeoutMs);
+        this._terminate(new TimeoutError("peer connection became idle",),);
+      }, this.idleTimeoutMs,);
     }
   }
 
-  private _debug(msg: string): void {
-    console.debug(`[Wire] ${msg}`);
+  private _debug(msg: string,): void {
+    console.debug(`[Wire] ${msg}`,);
   }
 }
 
 // ── Helpers ─────────────────────────────────────────────────────────────
 
-function blockKey(request: BlockCoordinates): string {
+function blockKey(request: BlockCoordinates,): string {
   return `${request.pieceIndex}:${request.begin}:${request.length}`;
 }
 
-function positiveOption(name: string, value: number | undefined, fallback: number): number {
+function positiveOption(
+  name: string,
+  value: number | undefined,
+  fallback: number,
+): number {
   const resolved = value ?? fallback;
-  if (!Number.isSafeInteger(resolved) || resolved < 1) {
-    throw new RangeError(`${name} must be a positive safe integer`);
+  if (!Number.isSafeInteger(resolved,) || resolved < 1) {
+    throw new RangeError(`${name} must be a positive safe integer`,);
   }
   return resolved;
 }
 
-function nonNegativeOption(name: string, value: number | undefined, fallback: number): number {
+function nonNegativeOption(
+  name: string,
+  value: number | undefined,
+  fallback: number,
+): number {
   const resolved = value ?? fallback;
-  if (!Number.isSafeInteger(resolved) || resolved < 0) {
-    throw new RangeError(`${name} must be a non-negative safe integer`);
+  if (!Number.isSafeInteger(resolved,) || resolved < 0) {
+    throw new RangeError(`${name} must be a non-negative safe integer`,);
   }
   return resolved;
 }
