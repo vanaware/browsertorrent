@@ -12,6 +12,7 @@ import {
   type PexUpdate,
 } from "../src/extensions/ut-pex.ts";
 import { encode, decode } from "../src/utils/bencode.ts";
+import type { Wire, } from "../src/core/wire.ts";
 
 // Helper: cria um peer IPv4 compacto
 function makePeer(ip: number[], port: number, flags?: number): PexPeer {
@@ -175,8 +176,8 @@ Deno.test("ut_pex: round-trip preserve flags corretamente", () => {
 });
 
 Deno.test("ut_pex: UtPexExtension registra listeners onUpdate", () => {
-  const wire = { extended: () => {} };
-  const ext = new UtPexExtension(wire);
+  const wire = { extended: () => {}, sendExtended: () => {} };
+  const ext = new UtPexExtension(wire as unknown as Wire);
 
   let receivedUpdate: PexUpdate | null = null;
   const unsubscribe = ext.onUpdate((update) => {
@@ -202,8 +203,8 @@ Deno.test("ut_pex: UtPexExtension registra listeners onUpdate", () => {
 });
 
 Deno.test("ut_pex: UtPexExtension rejeita send sem registro prévio", async () => {
-  const wire = { extended: () => {} };
-  const ext = new UtPexExtension(wire);
+  const wire = { extended: () => {}, sendExtended: () => {} };
+  const ext = new UtPexExtension(wire as unknown as Wire);
 
   const update: PexUpdate = {
     added: [makePeer([1, 2, 3, 4], 1234)],
@@ -221,13 +222,13 @@ Deno.test("ut_pex: UtPexExtension envia após registro no handshake estendido", 
   let sentPayload: Uint8Array | null = null;
   let sentId: number | null = null;
   const wire = {
-    extended: (id: number, payload: Uint8Array) => {
+    sendExtended: (id: number, payload: Uint8Array) => {
       sentId = id;
       sentPayload = payload;
     },
   };
 
-  const ext = new UtPexExtension(wire, { minSendIntervalMs: 0 });
+  const ext = new UtPexExtension(wire as unknown as Wire, { minSendIntervalMs: 0 });
 
   // Simula extended handshake do peer anunciando ut_pex com ID 5
   ext.onExtendedHandshake({ m: { ut_pex: 5 } });
@@ -250,8 +251,8 @@ Deno.test("ut_pex: UtPexExtension envia após registro no handshake estendido", 
 });
 
 Deno.test("ut_pex: UtPexExtension respeita intervalo mínimo entre sends", async () => {
-  const wire = { extended: () => {} };
-  const ext = new UtPexExtension(wire, { minSendIntervalMs: 60_000 });
+  const wire = { sendExtended: () => {} };
+  const ext = new UtPexExtension(wire as unknown as Wire, { minSendIntervalMs: 60_000 });
 
   ext.onExtendedHandshake({ m: { ut_pex: 1 } });
 
@@ -273,7 +274,7 @@ Deno.test("ut_pex: UtPexExtension respeita intervalo mínimo entre sends", async
 
 Deno.test("ut_pex: UtPexExtension rejeita update excedendo maxPeers", async () => {
   const wire = { extended: () => {} };
-  const ext = new UtPexExtension(wire, { minSendIntervalMs: 0, maxPeersPerMessage: 2 });
+  const ext = new UtPexExtension(wire as unknown as Wire, { minSendIntervalMs: 0, maxPeersPerMessage: 2 });
 
   ext.onExtendedHandshake({ m: { ut_pex: 1 } });
 
@@ -295,7 +296,7 @@ Deno.test("ut_pex: UtPexExtension rejeita update excedendo maxPeers", async () =
 
 Deno.test("ut_pex: UtPexExtension lida com payload inválido gracefully", () => {
   const wire = { extended: () => {} };
-  const ext = new UtPexExtension(wire);
+  const ext = new UtPexExtension(wire as unknown as Wire);
 
   let warningReceived = false;
   ext.on("warning", () => {

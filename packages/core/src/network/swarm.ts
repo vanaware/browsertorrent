@@ -12,6 +12,7 @@ import { UtMetadata, } from "../extensions/ut-metadata.ts";
 import type { Wire, } from "../core/wire.ts";
 
 export interface SwarmEvents {
+  [key: string]: Event | CustomEvent;
   peer: CustomEvent<{ peer: Peer; source: string }>;
   wire: CustomEvent<{ wire: Wire; addr: string }>;
   error: CustomEvent<{ error: Error }>;
@@ -47,12 +48,12 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
   public readonly peers: Map<string, Peer> = new Map();
   private queue: QueuedPeer[] = [];
   private trackers: Tracker[] = [];
-  private maxConns: number;
-  private wrtc?: typeof RTCPeerConnection;
+  public maxConns: number;
+  public wrtc?: typeof RTCPeerConnection;
   private metadata?: Uint8Array;
 
   /** Torrent dono deste swarm. Definido externamente (ver WebTorrent.add). */
-  public torrent: unknown | null = null;
+  public torrent: { emit?: (type: string, event: Event | CustomEvent) => boolean; _registerWire?: (wire: Wire, addr: string) => void; } | null = null;
 
   public destroyed = false;
   private paused = false;

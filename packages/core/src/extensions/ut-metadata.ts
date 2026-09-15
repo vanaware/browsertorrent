@@ -4,6 +4,7 @@ import { Extension, } from "../core/extension.ts";
 import { BencodeDict, decode, encode, } from "../utils/bencode.ts";
 import { Bitfield, } from "../core/bitfield.ts";
 import { sha1, sha256, } from "../crypto/hasher.ts";
+import type { Wire, } from "../core/wire.ts";
 
 const MAX_METADATA_SIZE = 10_000_000;
 const PIECE_LENGTH = 16384;
@@ -32,6 +33,7 @@ export class UtMetadata extends Extension {
   public metadata: Uint8Array | null = null;
   private _requestedPieces: Map<number, PieceRequest> = new Map();
   private _timeoutMs: number;
+  private _extensionId: number | null = null;
 
   constructor(wire: Wire, opts?: UtMetadataOptions,) {
     super(wire,);
@@ -40,6 +42,10 @@ export class UtMetadata extends Extension {
     if (opts?.metadata) {
       this.setMetadata(opts.metadata,);
     }
+  }
+
+  public onRegister(context: { host: import("../core/extension-host.ts").ExtensionHost; send: (payload: Uint8Array,) => Promise<void>; }): void {
+    this._extensionId = context.host.localExtensions.get(this.name,) ?? null;
   }
 
   public onHandshake(
@@ -51,7 +57,8 @@ export class UtMetadata extends Extension {
   }
 
   public onExtendedHandshake(handshake: Record<string, unknown>,) {
-    if (handshake.m && typeof handshake.m.ut_metadata === "number") {
+    const handshakeMap = handshake.m as Record<string, unknown> | undefined;
+    if (handshakeMap && typeof handshakeMap.ut_metadata === "number") {
       if (
         typeof handshake.metadata_size !== "number" ||
         handshake.metadata_size > MAX_METADATA_SIZE ||
@@ -153,8 +160,8 @@ export class UtMetadata extends Extension {
     this._metadataComplete = true;
     this._metadataSize = this._metadataSize ?? this.metadata.length;
 
-    if (this.wire.extendedHandshake) {
-      this.wire.extendedHandshake.metadata_size = this._metadataSize;
+    if (this.wire.extensionHost.peerExtensions.has("ut_metadata")) {
+      this.wire.extensionHost.setHandshakeField("metadata_size", this._metadataSize,);
     }
 
     this.emit(
@@ -172,7 +179,9 @@ export class UtMetadata extends Extension {
       combined.set(trailer, buf.length,);
       buf = combined;
     }
-    this.wire.extended("ut_metadata", buf,);
+    if (this._extensionId !== null) {
+      this.wire.sendExtended(this._extensionId, buf,);
+    }
   }
 
   private _request(piece: number,) {

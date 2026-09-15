@@ -83,7 +83,7 @@ export const CONFIGURACOES: Record<ModoExportacao, ExportConfig> = {
     arquivoSaida: "snapshots/docs.md",
     extensoesPermitidas: [".md", ".txt",],
     pastaBase: "./",
-    subpastasPermitidas: ["docs/browsertorrent",],
+    subpastasPermitidas: ["docs/browsertorrent",], // incluir esta sub pasta "./docs/browsertorrent", deixar assim
     arquivosRaizPermitidos: [
       "readme.md",
       "readme",

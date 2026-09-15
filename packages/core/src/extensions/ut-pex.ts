@@ -7,6 +7,7 @@
 // criando uma rede verdadeiramente descentralizada e resiliente.
 
 import { Extension, } from "../core/extension.ts";
+import type { Wire, } from "../core/wire.ts";
 import {
   BencodeDict,
   BencodeValue,
@@ -103,8 +104,9 @@ export class UtPexExtension extends Extension {
    * Registers this extension if the peer supports ut_pex.
    */
   public onExtendedHandshake(handshake: Record<string, unknown>,): void {
-    if (handshake.m && typeof handshake.m[UT_PEX_NAME] === "number") {
-      this._extensionId = handshake.m[UT_PEX_NAME];
+    const handshakeMap = handshake.m as Record<string, unknown> | undefined;
+    if (handshakeMap && typeof handshakeMap[UT_PEX_NAME] === "number") {
+      this._extensionId = handshakeMap[UT_PEX_NAME];
       this.emit(
         "info",
         new CustomEvent("info", {
@@ -179,9 +181,17 @@ export class UtPexExtension extends Extension {
     }
 
     const payload = encodePexUpdate(update,);
-    this.wire.extended(this._extensionId, payload,);
+    this.wire.sendExtended(this._extensionId, payload,);
     this._lastSentAt = now;
     return Promise.resolve();
+  }
+
+  public onRegister(context: { host: import("../core/extension-host.ts").ExtensionHost; send: (payload: Uint8Array,) => Promise<void>; }): void {
+    // When this extension is registered with the wire, capture the extension ID
+    const id = context.host.localExtensions.get(this.name,);
+    if (id !== undefined) {
+      this._extensionId = id;
+    }
   }
 }
 

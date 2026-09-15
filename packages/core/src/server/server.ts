@@ -136,7 +136,7 @@ export function createServiceWorkerTransport(
   const PORT_TIMEOUT_MS = 5000;
   const pending = new Map<string, (data: StreamResponseMetadata,) => void>();
 
-  const onMessage = (event: unknown,) => {
+  const onMessage = (event: MessageEvent,) => {
     if (!event.data || typeof event.data !== "object") return;
     if (
       event.data.type === "webtorrent-response" &&

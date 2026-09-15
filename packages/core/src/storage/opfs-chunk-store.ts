@@ -87,7 +87,17 @@ export class OPFSChunkStore implements ChunkStore {
       if (typeof optsOrCb === "function") {
         return this.fallbackStore.get(index, optsOrCb,);
       }
-      return this.fallbackStore.get(index, optsOrCb, cb,);
+      if (cb) {
+        return this.fallbackStore.get(
+          index,
+          optsOrCb ?? ({} as { offset?: number; length?: number }),
+          cb,
+        );
+      }
+      return this.fallbackStore.get(
+        index,
+        optsOrCb ?? ({} as { offset?: number; length?: number }),
+      );
     }
 
     const opts = typeof optsOrCb === "object" ? optsOrCb : undefined;

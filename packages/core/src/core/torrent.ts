@@ -64,7 +64,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
   private _rawFiles: ParsedTorrentFile[] = [];
 
   private parsedTorrent: ParsedTorrent;
-  private store: ChunkStore;
+  private _store: ChunkStore;
   private bitfield: Bitfield;
   private expectedPieces: Uint8Array[];
   /** Array de Piece objects exposto via `torrent.pieces` (paridade com WebTorrent). */
@@ -103,7 +103,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
   constructor(parsedTorrent: ParsedTorrent, opts: TorrentOptions,) {
     super();
     this.parsedTorrent = parsedTorrent;
-    this.store = opts.store;
+    this._store = opts.store;
     this._swarm = opts.swarm;
 
     this.infoHash = parsedTorrent.infoHash;
@@ -153,6 +153,11 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
   get uploaded(): number {
     return this._uploaded;
   }
+  /** Backend chunk store backing this torrent's pieces. */
+  get store(): ChunkStore {
+    return this._store;
+  }
+
   get paused(): boolean {
     return this._paused;
   }
@@ -530,7 +535,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
         const opts = i === this.numPieces - 1
           ? { length: this.lastPieceLength, }
           : undefined;
-        const buf = await this.store.get(i, opts,);
+        const buf = await this._store.get(i, opts,);
         await this._verifyPiece(i, buf,);
         // Marca o Piece object como baixado (hash setado = verificado)
         if (i < this._pieces.length) {
@@ -560,7 +565,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
 
     try {
       await this._verifyPiece(index, buf,);
-      await this.store.put(index, buf,);
+      await this._store.put(index, buf,);
       this.bitfield.set(index,);
       const pieceLen = index === this.numPieces - 1
         ? this.lastPieceLength
@@ -629,7 +634,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
       const opts = index === this.numPieces - 1
         ? { length: this.lastPieceLength, }
         : undefined;
-      return await this.store.get(index, opts,);
+      return await this._store.get(index, opts,);
     } catch {
       return null;
     }

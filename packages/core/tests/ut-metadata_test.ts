@@ -3,6 +3,7 @@
 import { assertEquals } from "@std/assert";
 import { UtMetadata } from "../src/extensions/ut-metadata.ts";
 import { encode } from "../src/utils/bencode.ts";
+import type { Wire, } from "../src/core/wire.ts";
 
 class MockWire {
   public extendedHandshake: Record<string, unknown> = { metadata_size: 100 };
@@ -11,18 +12,32 @@ class MockWire {
   extended(type: string, payload: Uint8Array) {
     this.extendedCalls.push({ type, payload });
   }
+
+  public extensionHost = {
+    peerExtensions: new Map<string, number>(),
+    localExtensions: new Map<string, number>(),
+    setHandshakeField: (_name: string, _value: unknown) => {},
+  };
+
+  sendExtended(_type: number, _payload: Uint8Array) {
+    this.extendedCalls.push({ type: "extended", payload: _payload });
+  }
 }
 
 Deno.test("ut-metadata: initializes correctly", () => {
   const mockWire = new MockWire();
-  const ut = new UtMetadata(mockWire);
+  const ut = new UtMetadata(mockWire as unknown as Wire);
   assertEquals(ut.name, "ut_metadata");
   assertEquals(ut.metadata, null);
 });
 
 Deno.test("ut-metadata: processes extended handshake", () => {
   const mockWire = new MockWire();
-  const ut = new UtMetadata(mockWire);
+  const ut = new UtMetadata(mockWire as unknown as Wire);
+
+  // Registra a extensão no extensionHost para que _extensionId seja definido
+  mockWire.extensionHost.localExtensions.set("ut_metadata", 1);
+  ut.onRegister({ host: mockWire.extensionHost as any, send: async () => {} });
 
   ut.onExtendedHandshake({
     m: { ut_metadata: 1 },
@@ -35,7 +50,7 @@ Deno.test("ut-metadata: processes extended handshake", () => {
 
 Deno.test("ut-metadata: rejects invalid metadata size", () => {
   const mockWire = new MockWire();
-  const ut = new UtMetadata(mockWire);
+  const ut = new UtMetadata(mockWire as unknown as Wire);
   let warningEmitted = false;
 
   ut.on("warning", () => { warningEmitted = true; });
@@ -50,7 +65,7 @@ Deno.test("ut-metadata: rejects invalid metadata size", () => {
 
 Deno.test("ut-metadata: setMetadata marks as complete", () => {
   const mockWire = new MockWire();
-  const ut = new UtMetadata(mockWire);
+  const ut = new UtMetadata(mockWire as unknown as Wire);
   
   // Buffer inválido de propósito para testar a resiliência do try/catch
   const fakeMetadata = new Uint8Array(100).fill(42);

@@ -1,10 +1,11 @@
 // /loco/monorepo/webtorrent/src/mod.ts
 import { TypedEventTarget, } from "./utils/event-target.ts";
-import { type ParsedTorrent, parseTorrent, } from "./utils/parse-torrent.ts";
+import { type ParsedTorrent, type ParsedTorrentFile, parseTorrent, } from "./utils/parse-torrent.ts";
 import { Torrent, } from "./core/torrent.ts";
 import { Swarm, } from "./network/swarm.ts";
 import { generateLocoPeerId, } from "./utils/peerid.ts";
 import { OPFSChunkStore, } from "./storage/opfs-chunk-store.ts";
+import { type ChunkStore, } from "./storage/opfs-chunk-store.ts";
 import { MemoryChunkStore, } from "./storage/memory-chunk-store.ts";
 import { decode, encode, } from "./utils/bencode.ts";
 import type { BencodeDict, } from "./utils/bencode.ts";
@@ -35,6 +36,7 @@ const _WEBRTC_SUPPORT: boolean = (() => {
 })();
 
 export interface WebTorrentEvents {
+  [key: string]: Event | CustomEvent;
   /** Emitted when a torrent is added to the client (after add/seed). */
   torrent: CustomEvent<{ torrent: Torrent }>;
   /**
@@ -327,7 +329,7 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
   private _makeFileObjects(torrent: Torrent, scope: string,): File[] {
     return torrent.files.map((pf, idx,) =>
       new File({
-        store: (torrent as unknown as { store: unknown }).store,
+        store: torrent.store,
         length: pf.length,
         offset: pf.offset,
         pieceLength: torrent.pieceLength,
@@ -520,12 +522,12 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
 
     // 4. Popula o OPFSChunkStore com os dados do arquivo original (para streaming)
     // Sem isso, o streaming falha com "Chunk N not found"
-    const store = (torrent as unknown as { store: unknown }).store;
+    const store = torrent.store;
     console.log(
       "[seed] store available:",
       !!store,
       "put?",
-      typeof store?.put,
+      typeof store.put,
       "entry?",
       !!entry,
       "pieceLength:",
@@ -545,7 +547,7 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
     } else {
       console.log(
         "[seed] Skipping chunk store population: store=" + !!store,
-        "put=" + typeof store?.put,
+        "put=" + typeof store.put,
         "entry=" + !!entry,
       );
     }

@@ -8,6 +8,7 @@ import { Transport, Wire, } from "../core/wire.ts";
 // ============================================================================
 
 export interface PeerEvents {
+  [key: string]: Event | CustomEvent;
   /** Emitido quando o Peer precisa enviar dados de sinalização (offer, answer, ICE) para o Tracker/SW */
   signal: CustomEvent<
     { data: RTCSessionDescriptionInit | RTCIceCandidateInit }

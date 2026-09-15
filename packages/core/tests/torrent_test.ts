@@ -6,6 +6,7 @@ import { MemoryChunkStore, } from "../src/storage/memory-chunk-store.ts";
 import { sha1, } from "../src/crypto/hasher.ts";
 import { ParsedTorrent, } from "../src/utils/parse-torrent.ts";
 import { encode, } from "../src/utils/bencode.ts";
+import type { Swarm, } from "../src/network/swarm.ts";
 
 // Helper para criar um ParsedTorrent fake com peças reais (simulando um .torrent completo)
 async function createFakeParsedTorrent(): Promise<ParsedTorrent> {
@@ -209,7 +210,7 @@ Deno.test("torrent: integration - setMetadata dynamically updates torrent state 
     assertEquals(e.detail.name, "loco-update-v2.zip",);
     assertEquals(e.detail.length, 2048,);
     assertEquals(e.detail.files.length, 1,);
-    assertEquals(e.detail.files[0].name, "loco-update-v2.zip",);
+    assertEquals(e.detail.files[0]!.name, "loco-update-v2.zip",);
   },);
 
   const success = await torrent.setMetadata(infoBuffer,);
@@ -790,7 +791,7 @@ Deno.test("torrent: maxWebConns returns swarm maxConns when set", async () => {
     chunkLength: parsed.pieceLength,
     length: parsed.length,
   },);
-  const mockSwarm = { maxConns: 5 };
+  const mockSwarm = { maxConns: 5 } as unknown as Swarm;
   const torrent = new Torrent(parsed, { store, swarm: mockSwarm, },);
 
   await new Promise<void>((resolve,) => torrent.on("ready", () => resolve(),));

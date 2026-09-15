@@ -311,10 +311,9 @@ export class File extends TypedEventTarget<FileEvents> {
     let cursor = absStart;
     let cancelled = false;
     let doneEmitted = false;
-    const self = this;
 
     const stream = new ReadableStream<Uint8Array>({
-      async pull(controller,): Promise<void> {
+      pull: async (controller,): Promise<void> => {
         if (cancelled) {
           controller.close();
           return;
@@ -322,16 +321,16 @@ export class File extends TypedEventTarget<FileEvents> {
         if (cursor >= absEnd) {
           if (!doneEmitted) {
             doneEmitted = true;
-            self.emit("done", new CustomEvent("done",),);
+            this.emit("done", new CustomEvent("done",),);
           }
           controller.close();
           return;
         }
 
         try {
-          const block = await self._readBlock(
+          const block = await this._readBlock(
             cursor,
-            Math.min(self._blockSize, absEnd - cursor,),
+            Math.min(this._blockSize, absEnd - cursor,),
           );
           if (cancelled) return;
           if (block.length === 0) {
@@ -342,14 +341,14 @@ export class File extends TypedEventTarget<FileEvents> {
           cursor += block.length;
         } catch (err) {
           const error = err instanceof Error ? err : new Error(String(err,),);
-          self.emit(
+          this.emit(
             "error",
             new CustomEvent("error", { detail: { error, }, },),
           );
           controller.error(error,);
         }
       },
-      cancel(): void {
+      cancel: (): void => {
         cancelled = true;
       },
     },);

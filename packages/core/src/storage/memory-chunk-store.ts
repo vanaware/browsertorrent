@@ -41,7 +41,7 @@ export class MemoryChunkStore implements ChunkStore {
   ): void;
 
   // ── Implementation (SEM a palavra-chave 'async') ──
-  get(
+  public get(
     index: number,
     optsOrCb?:
       | { offset?: number; length?: number }
