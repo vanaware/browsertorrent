@@ -1110,6 +1110,13 @@
           "jsr:@std/testing@*"
         ]
       },
+      "packages/websocket-tracker": {
+        "dependencies": [
+          "jsr:@std/collections@1",
+          "jsr:@std/encoding@1",
+          "jsr:@std/http@1"
+        ]
+      },
       "packages/worker-db": {
         "dependencies": [
           "jsr:@std/assert@*",

@@ -1,0 +1,36 @@
+{
+  "name": "@browsertorrent/websocket-tracker",
+  "version": "1.0.0",
+  "description": "Simple WebSocket tracker for BrowserTorrent - optimized for small servers",
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "dom.asynciterable",
+      "esnext",
+      "deno.ns"
+    ],
+    "strict": true,
+    "noImplicitAny": true,
+    "noUncheckedIndexedAccess": true
+  },
+  "imports": {
+    "@std/http": "jsr:@std/http@^1",
+    "@std/encoding/json": "jsr:@std/encoding@^1/json",
+    "@std/collections": "jsr:@std/collections@^1"
+  },
+  "tasks": {
+    "start": "deno run --allow-net --allow-env --allow-read src/mod.ts",
+    "test": "deno test --allow-env --allow-net --allow-read --allow-write tests/",
+    "check": "deno check src/**/*.ts tests/**/*.ts"
+  },
+  "exports": {
+    ".": "./src/mod.ts",
+    "./server": "./src/server.ts",
+    "./peer": "./src/peer.ts",
+    "./swarm": "./src/swarm.ts",
+    "./lru": "./src/lru.ts",
+    "./stats": "./src/stats.ts",
+    "./parse-websocket": "./src/parse-websocket.ts"
+  }
+}

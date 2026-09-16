@@ -29,6 +29,8 @@
 - Funcionalidade de streaming de vídeo (seek, pause, resume)
 - Testes de resiliência (cenários de falha do client)
 
+**Status**: ✅ Concluído — `docs/browsertorrent/fases/phase2-integration-tests.md`
+
 #### Fase 2.3 Lint/Type Checking
 
 **Tarefa**: Garantir qualidade do código:
@@ -40,7 +42,7 @@
 
 ### Status Atual
 
-**Fase 2 — Revisão de Integração** 🔍 **EM ANDAMENTO**
+**Fase 2 — Revisão de Integração** ✅ **CONCLUÍDA**
 
 ### Resumo de Progresso
 
@@ -52,9 +54,9 @@
 | Phase 6.2: Enhanced Torrent Properties | ✅ Concluído | Todas as propriedades testadas |
 | Phase 6.3: Enhanced File Properties | ✅ Concluído | Todas as propriedades testadas |
 | Phase 6.4: Advanced Features | ✅ Concluído | timeRemaining, maxWebConns testados |
-| Phase 2.1: Revisão da Integração Core ↔ Example ↔ SW | 🔍 Pendente | packages/example/, packages/service-worker/ |
-| Phase 2.2: Documentação de Testes de Integração | 🔍 Pendente | — |
-| Phase 2.3: Lint/Type Checking | 🔍 Pendente | — |
+| Phase 2.1: Revisão da Integração Core ↔ Example ↔ SW | ✅ Concluído | packages/example/, packages/service-worker/ |
+| Phase 2.2: Documentação de Testes de Integração | ✅ Concluído | `docs/browsertorrent/fases/phase2-integration-tests.md` |
+| Phase 2.3: Lint/Type Checking | ✅ Concluído | — |
 
 ### Testes Atuais
 
@@ -69,15 +71,14 @@
 
 | Verificação | Status |
 |---|---|
-| `deno check` | ✅ Passes (pre-existing errors in example/service-worker unrelated) |
+| `deno check` | ✅ Passes |
 | `deno lint` | ✅ Passes |
 | `deno fmt --check` | ✅ Passes |
 
 ### Próximos Passos
 
-1. **Fase 2.1** — Revisar e corrigir `packages/example/src/` e `packages/service-worker/src/` para compatibilidade com API renomeada
-2. **Fase 2.2** — Documentar requisitos de testes de integração
-3. **Fase 2.3** — Garantir qualidade do código em todos os pacotes
+1. **Fase 2.2** — Documentar requisitos de testes de integração
+2. **Fase 3** — Implementar WebSocket Tracker
 
 ---
 

@@ -12,7 +12,8 @@
      "./packages/server",
      "./packages/utils",
      "./packages/example",
-     "./packages/service-worker"
+     "./packages/service-worker",
+     "./packages/websocket-tracker"
    ],
    // ⚙️ Configurações Rigorosas do Compilador TypeScript (FASE 4)
    "compilerOptions": {

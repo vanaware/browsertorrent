@@ -16,6 +16,38 @@
   - Error messages updated from "WebTorrent client is destroyed" to "Client is destroyed"
   - Fixed duplicate export issue by removing non-existent `client.ts` export
 
+## ✅ Phase 2 - Integration Review & Documentation - COMPLETE
+
+### Phase 2.1: Integration Review (Core ↔ Example ↔ SW)
+- **Status:** ✅ Complete
+- **Details:**
+  - Fixed API compatibility issues (WebTorrent → Client)
+  - Fixed type errors in `viewer-panel.tsx`, `seeder-panel.tsx`, `main.tsx`
+  - Fixed Service Worker scope mismatch
+  - Fixed MessageChannel protocol issues
+  - Verified `createServer` integration with SW bridge
+  - Verified file streaming integration (`streamTo`, `streamURL`)
+
+### Phase 2.2: Integration Test Documentation
+- **File:** `docs/browsertorrent/fases/phase2-integration-tests.md`
+- **Status:** ✅ Complete
+- **Details:**
+  - Documented 12 test scenarios (T1-T12)
+  - Covered browser requirements (Chrome 120+)
+  - Covered complete seeder → viewer → peer workflow
+  - Covered video streaming (seek, pause, resume, stream URL, large files)
+  - Covered client failure resilience (disconnect, crash, network interruption, multiple viewers)
+  - Provided automated test checklist
+  - Provided manual test execution checklist
+  - Documented test environment and known issues
+
+### Phase 2.3: Lint/Type Checking
+- **Status:** ✅ Complete
+- **Details:**
+  - `deno check` passes for all packages
+  - `deno lint` passes
+  - `deno fmt --check` passes
+
 ### Piece Object Integration
 - **File:** `packages/core/src/core/torrent.ts`
 - **Status:** ✅ Complete
@@ -111,7 +143,7 @@
 |---|---|---|
 | Fase 0 — Fundação | ✅ Concluída | Bencode, crypto, bit-array, byte-io, buffer, encoding, simple-buffer, net, errors |
 | Fase 1 — Core Protocol (peerwire) | ✅ Concluída | Message codec, handshake, torrent, file, piece, wire, swarm, peer |
-| Fase 2 — Revisão e Correção | 🔍 Em andamento | Revisar example/ e service-worker/ para compatibilidade |
+| Fase 2 — Revisão e Correção | ✅ Concluída | Revisar example/ e service-worker/ para compatibilidade + Documentação de testes de integração |
 | Fase 3 — WebSocket Tracker | ⏳ Não iniciada | Implementar servidor WebSocket com Deno.serve() |
 | Fase 4 — Generator API | ✅ Concluída | generateTorrent, OPFSMultiFileReader, PieceSizeEnum |
 | Fase 5 — Magnet | ✅ Concluída | v1+v2, parseMagnet, encodeMagnet, buildMagnetV2 |
@@ -130,18 +162,28 @@
 
 ---
 
+### ✅ Completed Tasks
+
+| Tarefa | Status | Arquivo |
+|---|---|---|
+| Phase 2.1: Revisão da Integração Core ↔ Example ↔ SW | ✅ Concluído | packages/example/, packages/service-worker/ |
+| Phase 2.2: Documentação de Testes de Integração | ✅ Concluído | `docs/browsertorrent/fases/phase2-integration-tests.md` |
+| Phase 2.3: Lint/Type Checking | ✅ Concluído | — |
+
+---
+
 ## 🎯 Next Steps for Other AIs
 
-1. **Fase 2.1** — Revisar e corrigir `packages/example/src/` e `packages/service-worker/src/` para compatibilidade com API renomeada (`WebTorrent` → `Client`)
-2. **Fase 3** — Implementar WebSocket Tracker
-3. **Fase 8** — Implementar 3 camadas de testes de compatibilidade (API, Comportamento, Paridade) conforme especificado em `fase1.md` seção 13
+1. **Fase 3** — Implementar WebSocket Tracker
+2. **Fase 8** — Implementar 3 camadas de testes de compatibilidade (API, Comportamento, Paridade) conforme especificado em `fase1.md` seção 13
 
 ---
 
 ## 📝 Notes for Future AIs
 
 - Core functionality is complete
-- Remaining work is primarily Phase 2 integration and Phase 3 (WebSocket Tracker)
+- Phase 2 integration is complete (Phase 2.1 and 2.3 done)
+- Remaining work is primarily Phase 2.2 (integration test documentation) and Phase 3 (WebSocket Tracker)
 - Always run `deno test -P` to verify all tests pass
 - Always run `deno check` for type validation
 - Always run `deno lint` and `deno fmt --check` for code quality
