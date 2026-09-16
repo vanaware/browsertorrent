@@ -13,33 +13,36 @@ type EventMap = {
   // ==========================================
   // 1. COMUNICAÇÃO SW -> UI (Notificações de Estado)
   // ==========================================
-  'sw:notify:pong-version': { version: string };
+  "sw:notify:pong-version": { version: string };
 
   // ==========================================
   // 2. EVENTOS DE REDE E CONECTIVIDADE
   // ==========================================
-  'browsertorrent:network:online': void;
-  'browsertorrent:network:offline': void;
-  'browsertorrent:network:sync-completed': { syncedCount: number };
+  "browsertorrent:network:online": void;
+  "browsertorrent:network:offline": void;
+  "browsertorrent:network:sync-completed": { syncedCount: number };
 
   // ==========================================
   // 3. EVENTOS DE HANDSHAKE E SW (Internos / Entrada)
   // ==========================================
-  'browsertorrent:sw:ready': void;
-  'browsertorrent:sw:message-received': { type: string; payload: unknown };
+  "browsertorrent:sw:ready": void;
+  "browsertorrent:sw:message-received": { type: string; payload: unknown };
 
   // ==========================================
   // 4. EVENTOS DE UI E NAVEGAÇÃO
   // ==========================================
-  'browsertorrent:ui:route-changed': { path: string; params: Record<string, string> };
-  'browsertorrent:ui:theme-changed': { theme: 'light' | 'dark' };
-  'browsertorrent:ui:config-updated': { key: string; value: unknown };
+  "browsertorrent:ui:route-changed": {
+    path: string;
+    params: Record<string, string>;
+  };
+  "browsertorrent:ui:theme-changed": { theme: "light" | "dark" };
+  "browsertorrent:ui:config-updated": { key: string; value: unknown };
 
   // ==========================================
   // 5. EVENTOS DE CICLO DE VIDA DO APP
   // ==========================================
-  'browsertorrent:app:backgrounded': void;
-  'browsertorrent:app:foregrounded': void;
+  "browsertorrent:app:backgrounded": void;
+  "browsertorrent:app:foregrounded": void;
 };
 
 type EventCallback<T,> = (payload: T,) => void;
@@ -85,7 +88,10 @@ class EventBusImpl {
         try {
           callback(payload,);
         } catch (error) {
-          console.error(`[EventBus] Erro no listener do evento '${String(event,)}':`, error,);
+          console.error(
+            `[EventBus] Erro no listener do evento '${String(event,)}':`,
+            error,
+          );
         }
       }
     }

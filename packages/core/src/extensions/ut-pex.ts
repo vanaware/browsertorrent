@@ -186,7 +186,12 @@ export class UtPexExtension extends Extension {
     return Promise.resolve();
   }
 
-  public onRegister(context: { host: import("../core/extension-host.ts").ExtensionHost; send: (payload: Uint8Array,) => Promise<void>; }): void {
+  public onRegister(
+    context: {
+      host: import("../core/extension-host.ts").ExtensionHost;
+      send: (payload: Uint8Array,) => Promise<void>;
+    },
+  ): void {
     // When this extension is registered with the wire, capture the extension ID
     const id = context.host.localExtensions.get(this.name,);
     if (id !== undefined) {

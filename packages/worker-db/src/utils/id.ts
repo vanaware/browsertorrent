@@ -8,15 +8,17 @@ export type WithId<T,> = T & { _id: string };
  * @returns {string} ID gerado
  */
 export function gerarId(): string {
-  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
     const array = new Uint8Array(12,);
     crypto.getRandomValues(array,);
-    return Array.from(array, (byte,) => byte.toString(16,).padStart(2, '0',),).join('',).substring(
-      0,
-      12,
-    );
+    return Array.from(array, (byte,) => byte.toString(16,).padStart(2, "0",),)
+      .join("",).substring(
+        0,
+        12,
+      );
   }
-  return Date.now().toString(36,) + Math.random().toString(36,).substring(2, 8,);
+  return Date.now().toString(36,) +
+    Math.random().toString(36,).substring(2, 8,);
 }
 
 /**
@@ -25,7 +27,7 @@ export function gerarId(): string {
  * @returns {boolean}
  */
 export function validarId(id: string,): boolean {
-  return typeof id === 'string' && id.length > 0 && id.length <= 24;
+  return typeof id === "string" && id.length > 0 && id.length <= 24;
 }
 
 export function gerarIdComPrefixo(prefix: string,): string {
@@ -33,10 +35,18 @@ export function gerarIdComPrefixo(prefix: string,): string {
 }
 
 // Injeta dinamicamente o '_id' sem o prefixo ao LER do banco/localStorage
-export function formatDbItem<T>(key: IDBValidKey, val: unknown, prefix = '',): WithId<T> {
-  if (!val || typeof val !== 'object' || Array.isArray(val,)) return val as WithId<T>;
+export function formatDbItem<T,>(
+  key: IDBValidKey,
+  val: unknown,
+  prefix = "",
+): WithId<T> {
+  if (!val || typeof val !== "object" || Array.isArray(val,)) {
+    return val as WithId<T>;
+  }
   const keyStr = String(key,);
-  const _id = prefix && keyStr.startsWith(prefix,) ? keyStr.slice(prefix.length,) : keyStr;
+  const _id = prefix && keyStr.startsWith(prefix,)
+    ? keyStr.slice(prefix.length,)
+    : keyStr;
   return { _id, ...(val as Record<string, unknown>), } as WithId<T>;
 }
 
@@ -44,18 +54,20 @@ export function formatDbItem<T>(key: IDBValidKey, val: unknown, prefix = '',): W
 export function prepareForSave(
   key: string | undefined | null,
   val: unknown,
-  prefix = '',
+  prefix = "",
 ): { key: string; cleanVal: unknown } {
-  let rawId = val && typeof val === 'object' ? (val as Record<string, unknown>)._id as string | undefined : undefined;
+  let rawId = val && typeof val === "object"
+    ? (val as Record<string, unknown>)._id as string | undefined
+    : undefined;
 
-  if (rawId === 'auto') {
+  if (rawId === "auto") {
     rawId = gerarId();
   }
 
   // Intercepta a chave informada como "auto" via parâmetro direto ou tupla do setMany
-  const processKey = key === 'auto' ? gerarId() : key;
+  const processKey = key === "auto" ? gerarId() : key;
 
-  let finalKey = processKey || '';
+  let finalKey = processKey || "";
 
   if (rawId) {
     if (prefix && rawId.startsWith(prefix,)) {
@@ -72,10 +84,12 @@ export function prepareForSave(
   }
 
   if (!finalKey) {
-    throw new Error("Uma chave (key) ou um atributo '_id' no objeto deve ser fornecido.",);
+    throw new Error(
+      "Uma chave (key) ou um atributo '_id' no objeto deve ser fornecido.",
+    );
   }
 
-  if (val && typeof val === 'object' && !Array.isArray(val,) && '_id' in val) {
+  if (val && typeof val === "object" && !Array.isArray(val,) && "_id" in val) {
     const { _id: _, ...cleanVal } = val;
     return { key: finalKey, cleanVal, };
   }

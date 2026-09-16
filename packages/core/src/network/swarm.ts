@@ -53,7 +53,10 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
   private metadata?: Uint8Array;
 
   /** Torrent dono deste swarm. Definido externamente (ver WebTorrent.add). */
-  public torrent: { emit?: (type: string, event: Event | CustomEvent) => boolean; _registerWire?: (wire: Wire, addr: string) => void; } | null = null;
+  public torrent: {
+    emit?: (type: string, event: Event | CustomEvent,) => boolean;
+    _registerWire?: (wire: Wire, addr: string,) => void;
+  } | null = null;
 
   public destroyed = false;
   private paused = false;

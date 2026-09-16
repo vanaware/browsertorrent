@@ -4,7 +4,14 @@
   // 🔧 Compiler Options específicos do pacote
   // ----------------------------------------------------------------------
   "compilerOptions": {
-    "lib": ["dom", "dom.iterable", "dom.asynciterable", "esnext", "deno.ns", "deno.worker"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "dom.asynciterable",
+      "esnext",
+      "deno.ns",
+      "deno.worker"
+    ],
     "strict": true,
     "noImplicitAny": true,
     "noUncheckedIndexedAccess": true

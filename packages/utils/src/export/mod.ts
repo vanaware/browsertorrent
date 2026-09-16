@@ -11,7 +11,7 @@
 // 📦 TIPOS E INTERFACES
 // ============================================================================
 
-import type { ExportConfig, } from '../interfaces/mod.ts';
+import type { ExportConfig, } from "../interfaces/mod.ts";
 
 // ============================================================================
 // 🛠️ FUNÇÕES UTILITÁRIAS PURAS
@@ -23,7 +23,7 @@ import type { ExportConfig, } from '../interfaces/mod.ts';
  * - Converte para minúsculas
  */
 export function normalizarCaminho(caminho: string,): string {
-  return caminho.replace(/\\/g, '/',).toLowerCase();
+  return caminho.replace(/\\/g, "/",).toLowerCase();
 }
 
 /**
@@ -37,16 +37,16 @@ export function normalizarCaminho(caminho: string,): string {
  * - "." → ""
  */
 function normalizarPrefixo(caminho: string,): string {
-  let normalized = caminho.replace(/\\/g, '/',).toLowerCase();
+  let normalized = caminho.replace(/\\/g, "/",).toLowerCase();
   // Remove ./ prefixo
-  if (normalized === './' || normalized === '.') {
-    return '';
+  if (normalized === "./" || normalized === ".") {
+    return "";
   }
-  if (normalized.startsWith('./',)) {
+  if (normalized.startsWith("./",)) {
     normalized = normalized.substring(2,);
   }
   // Remove trailing slash para comparação
-  normalized = normalized.replace(/\/$/, '',);
+  normalized = normalized.replace(/\/$/, "",);
   return normalized;
 }
 
@@ -61,27 +61,27 @@ function normalizarPrefixo(caminho: string,): string {
  */
 export function calcularCraseWrapper(texto: string,): string {
   const matches = texto.match(/`+/g,);
-  if (!matches) return '```';
+  if (!matches) return "```";
   const maiorSequencia = Math.max(...matches.map((m,) => m.length),);
   const tamanhoNecessario = Math.max(3, maiorSequencia + 1,);
-  return '`'.repeat(tamanhoNecessario,);
+  return "`".repeat(tamanhoNecessario,);
 }
 
 /**
  * Mapeia extensões de arquivo para a sintaxe de highlight do markdown.
  */
 export function mapearExtensao(caminhoRelativo: string,): string {
-  const ext = caminhoRelativo.split('.',).pop()?.toLowerCase() || '';
+  const ext = caminhoRelativo.split(".",).pop()?.toLowerCase() || "";
   const mapa: Record<string, string> = {
-    manifest: 'json',
-    jsonc: 'json',
-    yml: 'yaml',
-    sh: 'bash',
-    env: 'properties',
+    manifest: "json",
+    jsonc: "json",
+    yml: "yaml",
+    sh: "bash",
+    env: "properties",
   };
 
   // Casos especiais
-  if (caminhoRelativo.includes('.env',)) return 'properties';
+  if (caminhoRelativo.includes(".env",)) return "properties";
 
   return mapa[ext] || ext;
 }
@@ -108,7 +108,7 @@ export function deveIncluirArquivo(
   const caminhoNormalizado = normalizarCaminho(caminhoRelativo,);
 
   // 🔒 Proteção anti-loop: nunca inclui arquivos da pasta exports/
-  if (caminhoNormalizado.startsWith('exports/',)) {
+  if (caminhoNormalizado.startsWith("exports/",)) {
     return false;
   }
 
@@ -122,14 +122,15 @@ export function deveIncluirArquivo(
         const extraNormalizado = normalizarCaminho(caminhoExtra,);
         return (
           caminhoNormalizado === extraNormalizado ||
-          caminhoNormalizado.startsWith(extraNormalizado + '/',)
+          caminhoNormalizado.startsWith(extraNormalizado + "/",)
         );
       },
     );
 
     if (correspondeAdicional) {
       return config.extensoesPermitidas.some(
-        (ext,) => caminhoNormalizado.endsWith(ext,) || caminhoNormalizado === ext,
+        (ext,) =>
+          caminhoNormalizado.endsWith(ext,) || caminhoNormalizado === ext,
       );
     }
   }
@@ -137,20 +138,23 @@ export function deveIncluirArquivo(
   // 🔍 Verifica se está dentro de pastaBase
   // 🔥 CORREÇÃO: Usa normalizarPrefixo que remove "./" para comparação consistente
   const prefixoBase = normalizarPrefixo(config.pastaBase,);
-  const prefixoBaseComBarra = prefixoBase !== '' ? prefixoBase + '/' : '';
+  const prefixoBaseComBarra = prefixoBase !== "" ? prefixoBase + "/" : "";
 
-  if (prefixoBaseComBarra !== '' && !caminhoNormalizado.startsWith(prefixoBaseComBarra,)) {
+  if (
+    prefixoBaseComBarra !== "" &&
+    !caminhoNormalizado.startsWith(prefixoBaseComBarra,)
+  ) {
     return false;
   }
 
   // 🔍 Extrai o caminho relativo dentro de pastaBase
-  const caminhoInterno = prefixoBaseComBarra !== ''
+  const caminhoInterno = prefixoBaseComBarra !== ""
     ? caminhoNormalizado.substring(prefixoBaseComBarra.length,)
     : caminhoNormalizado;
 
   // 🔥 CORREÇÃO: Verifica se está NA RAIZ (não tem / no caminhoInterno)
   // Arquivos na raiz precisam estar explicitamente em arquivosRaizPermitidos
-  const estaNaRaiz = !caminhoInterno.includes('/',);
+  const estaNaRaiz = !caminhoInterno.includes("/",);
 
   if (estaNaRaiz) {
     // Verifica se está na lista de arquivos raiz permitidos (case insensitive)
@@ -167,7 +171,7 @@ export function deveIncluirArquivo(
     emSubpastaPermitida = true;
   } else {
     emSubpastaPermitida = config.subpastasPermitidas.some((sub,) => {
-      const subNormalizada = normalizarCaminho(sub,) + '/';
+      const subNormalizada = normalizarCaminho(sub,) + "/";
       return (
         caminhoInterno.startsWith(subNormalizada,) ||
         caminhoInterno === normalizarCaminho(sub,)
@@ -197,7 +201,7 @@ export function gerarCabecalho(
   modo: string,
   versaoApp: string,
 ): string {
-  const versaoDisplay = config.incluiVersao ? `[v${versaoApp}] ` : '';
+  const versaoDisplay = config.incluiVersao ? `[v${versaoApp}] ` : "";
 
   return `> **INSTRUÇÃO PARA A IA:** 
 > ${config.instrucaoCustomizada}

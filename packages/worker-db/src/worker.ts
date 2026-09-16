@@ -1,8 +1,8 @@
 // ## Arquivo: monorepo/worker-db/src/db.ts
-import { internalAPI, } from './db.ts';
-import type { DbStoreOptions, OpfsStoreOptions, } from './db.ts';
+import { internalAPI, } from "./db.ts";
+import type { DbStoreOptions, OpfsStoreOptions, } from "./db.ts";
 
-import { APP_VERSION, } from '@browsertorrent/utils/config';
+import { APP_VERSION, } from "@browsertorrent/utils/config";
 
 console.log(`[DB] 🌌 Worker-db carregado (v${APP_VERSION}).`,);
 
@@ -24,92 +24,126 @@ self.onmessage = async (e: MessageEvent,) => {
     let result;
 
     switch (command) {
-      case 'VERSION':
+      case "VERSION":
         result = { version: APP_VERSION, };
         break;
-      case 'GET':
+      case "GET":
         result = await internalAPI.get(args.key, dbOpts,);
         break;
-      case 'SET':
+      case "SET":
         if (args.key !== undefined) {
           result = await internalAPI.set(args.key, args.val, dbOpts,);
         } else {
           result = await internalAPI.set(args.val, dbOpts,);
         }
         break;
-      case 'DELETE':
+      case "DELETE":
         result = await internalAPI.delete(args.key, dbOpts,);
         break;
-      case 'GET_MANY':
+      case "GET_MANY":
         result = await internalAPI.getMany(args.keys, dbOpts,);
         break;
-      case 'SET_MANY':
+      case "SET_MANY":
         result = await internalAPI.setMany(args.entries, dbOpts,);
         break;
-      case 'DEL_MANY':
+      case "DEL_MANY":
         result = await internalAPI.deleteMany(args.keys, dbOpts,);
         break;
-      case 'KEYS':
+      case "KEYS":
         result = await internalAPI.keys(dbOpts,);
         break;
-      case 'VALUES':
+      case "VALUES":
         result = await internalAPI.values(dbOpts,);
         break;
-      case 'ENTRIES':
+      case "ENTRIES":
         result = await internalAPI.entries(dbOpts,);
         break;
-      case 'CLEAR':
+      case "CLEAR":
         result = await internalAPI.clear(dbOpts,);
         break;
-      case 'PATCH': {
+      case "PATCH": {
         let patchOrFn;
         if (args.fnStr) {
-          patchOrFn = new Function('prev', 'ctx', `return (${args.fnStr})(prev, ctx);`,) as unknown;
+          patchOrFn = new Function(
+            "prev",
+            "ctx",
+            `return (${args.fnStr})(prev, ctx);`,
+          ) as unknown;
         } else {
           patchOrFn = args.patch;
         }
-        result = await internalAPI.patch(args.key, patchOrFn, args.context, dbOpts,);
+        result = await internalAPI.patch(
+          args.key,
+          patchOrFn,
+          args.context,
+          dbOpts,
+        );
         break;
       }
-      case 'QUERY': {
-        const fn = new Function('items', 'ctx', `return (${args.fnStr})(items, ctx);`,) as (items: { _id: string; }[], ctx?: unknown) => { _id: string; }[];
+      case "QUERY": {
+        const fn = new Function(
+          "items",
+          "ctx",
+          `return (${args.fnStr})(items, ctx);`,
+        ) as (items: { _id: string }[], ctx?: unknown,) => { _id: string }[];
         result = await internalAPI.query(fn, args.context, dbOpts,);
         break;
       }
-      case 'GET_SOME': {
-        const fn = new Function('items', 'ctx', `return (${args.fnStr})(items, ctx);`,) as (items: { _id: string; }[], ctx?: unknown) => { _id: string; }[];
+      case "GET_SOME": {
+        const fn = new Function(
+          "items",
+          "ctx",
+          `return (${args.fnStr})(items, ctx);`,
+        ) as (items: { _id: string }[], ctx?: unknown,) => { _id: string }[];
         result = await internalAPI.getSome(fn, args.context, dbOpts,);
         break;
       }
-      case 'DEL_SOME': {
-        const fn = new Function('items', 'ctx', `return (${args.fnStr})(items, ctx);`,) as (items: { _id: string; }[], ctx?: unknown) => { _id: string; }[];
+      case "DEL_SOME": {
+        const fn = new Function(
+          "items",
+          "ctx",
+          `return (${args.fnStr})(items, ctx);`,
+        ) as (items: { _id: string }[], ctx?: unknown,) => { _id: string }[];
         result = await internalAPI.delSome(fn, args.context, dbOpts,);
         break;
       }
-      case 'SET_SOME': {
+      case "SET_SOME": {
         const selectFn = new Function(
-          'items',
-          'ctx',
+          "items",
+          "ctx",
           `return (${args.selectFnStr})(items, ctx);`,
-        ) as (items: { _id: string; }[], ctx?: unknown) => { _id: string; }[];
+        ) as (items: { _id: string }[], ctx?: unknown,) => { _id: string }[];
         const updateFn = new Function(
-          'item',
-          'ctx',
+          "item",
+          "ctx",
           `return (${args.updateFnStr})(item, ctx);`,
-        ) as (item: { _id: string; }, ctx?: unknown) => { _id: string; };
-        result = await internalAPI.setSome(selectFn, updateFn, args.context, dbOpts,);
+        ) as (item: { _id: string }, ctx?: unknown,) => { _id: string };
+        result = await internalAPI.setSome(
+          selectFn,
+          updateFn,
+          args.context,
+          dbOpts,
+        );
         break;
       }
-      case 'EXPORT':
+      case "EXPORT":
         result = await internalAPI.exportDB(dbOpts,);
         break;
-      case 'IMPORT':
-        result = await internalAPI.importDB(args.data, args.clearFirst, dbOpts,);
+      case "IMPORT":
+        result = await internalAPI.importDB(
+          args.data,
+          args.clearFirst,
+          dbOpts,
+        );
         break;
-      case 'BACKUP_OPFS':
-        result = await internalAPI.backupToOpfs(args.key, args.fileName, dbOpts,);
+      case "BACKUP_OPFS":
+        result = await internalAPI.backupToOpfs(
+          args.key,
+          args.fileName,
+          dbOpts,
+        );
         break;
-      case 'RESTORE_OPFS':
+      case "RESTORE_OPFS":
         result = await internalAPI.restoreFromOpfs(
           args.key,
           args.fileName,
@@ -119,25 +153,40 @@ self.onmessage = async (e: MessageEvent,) => {
         break;
 
       // ==== OPFS EXTENSION ====
-      case 'OPFS_LIST':
+      case "OPFS_LIST":
         result = await internalAPI.listFiles(args.key, opfsOpts,);
         break;
-      case 'OPFS_GET':
+      case "OPFS_GET":
         result = await internalAPI.getFile(args.key, args.fileName, opfsOpts,);
         break;
-      case 'OPFS_ADD':
-        result = await internalAPI.addFile(args.key, args.file, args.fileName, opfsOpts,);
+      case "OPFS_ADD":
+        result = await internalAPI.addFile(
+          args.key,
+          args.file,
+          args.fileName,
+          opfsOpts,
+        );
         break;
-      case 'OPFS_DEL':
+      case "OPFS_DEL":
         result = await internalAPI.delFile(args.key, args.fileName, opfsOpts,);
         break;
-      case 'OPFS_REN':
-        result = await internalAPI.renFile(args.key, args.oldName, args.newName, opfsOpts,);
+      case "OPFS_REN":
+        result = await internalAPI.renFile(
+          args.key,
+          args.oldName,
+          args.newName,
+          opfsOpts,
+        );
         break;
-      case 'OPFS_MV':
-        result = await internalAPI.mvFile(args.key, args.fileName, args.newKey, opfsOpts,);
+      case "OPFS_MV":
+        result = await internalAPI.mvFile(
+          args.key,
+          args.fileName,
+          args.newKey,
+          opfsOpts,
+        );
         break;
-      case 'OPFS_ZIP':
+      case "OPFS_ZIP":
         result = await internalAPI.zip(
           args.key,
           args.zipName,
@@ -146,10 +195,15 @@ self.onmessage = async (e: MessageEvent,) => {
           opfsOpts,
         );
         break;
-      case 'OPFS_UNZIP':
-        result = await internalAPI.unzip(args.key, args.zipName, args.deleteZip, opfsOpts,);
+      case "OPFS_UNZIP":
+        result = await internalAPI.unzip(
+          args.key,
+          args.zipName,
+          args.deleteZip,
+          opfsOpts,
+        );
         break;
-      case 'OPFS_ADDZIP':
+      case "OPFS_ADDZIP":
         result = await internalAPI.addZip(
           args.key,
           args.zipName,
@@ -158,8 +212,13 @@ self.onmessage = async (e: MessageEvent,) => {
           opfsOpts,
         );
         break;
-      case 'OPFS_DELZIP':
-        result = await internalAPI.delZip(args.key, args.zipName, args.fileName, opfsOpts,);
+      case "OPFS_DELZIP":
+        result = await internalAPI.delZip(
+          args.key,
+          args.zipName,
+          args.fileName,
+          opfsOpts,
+        );
         break;
 
       default:
@@ -168,6 +227,10 @@ self.onmessage = async (e: MessageEvent,) => {
 
     self.postMessage({ requestId, success: true, result, },);
   } catch (error) {
-    self.postMessage({ requestId, success: false, error: (error as Error).message, },);
+    self.postMessage({
+      requestId,
+      success: false,
+      error: (error as Error).message,
+    },);
   }
 };

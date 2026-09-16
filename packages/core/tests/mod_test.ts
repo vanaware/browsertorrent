@@ -301,8 +301,17 @@ Deno.test("webtorrent: emits 'add' event when torrent is added", async () => {
   const torrent = await client.add(bytes,);
   // The 'add' event detail contains the real torrent
   assertEquals(addEvent !== null, true,);
-  assertEquals(typeof (addEvent as unknown as { detail: { torrent: { infoHash: string } } }).detail.torrent.infoHash, "string",);
-  assertEquals((addEvent as unknown as { detail: { torrent: { infoHash: string } } }).detail.torrent.infoHash, torrent.infoHash,);
+  assertEquals(
+    typeof (addEvent as unknown as {
+      detail: { torrent: { infoHash: string } };
+    }).detail.torrent.infoHash,
+    "string",
+  );
+  assertEquals(
+    (addEvent as unknown as { detail: { torrent: { infoHash: string } } })
+      .detail.torrent.infoHash,
+    torrent.infoHash,
+  );
   client.destroy();
 });
 
@@ -322,7 +331,11 @@ Deno.test("webtorrent: emits 'remove' event when torrent is removed", async () =
   await client.remove(realInfoHash,);
 
   assertEquals(removeEvent !== null, true,);
-  assertEquals((removeEvent as unknown as { detail: { infoHash: string } }).detail.infoHash, realInfoHash,);
+  assertEquals(
+    (removeEvent as unknown as { detail: { infoHash: string } }).detail
+      .infoHash,
+    realInfoHash,
+  );
   client.destroy();
 });
 
@@ -350,11 +363,11 @@ Deno.test("webtorrent: 'add' and 'remove' fire on torrent lifecycle", async () =
   let addIH: string | null = null;
   let removeIH: string | null = null;
 
-  client.on("add", (e) => {
+  client.on("add", (e,) => {
     const ev = e as unknown as CustomEvent<{ torrent: { infoHash: string } }>;
     addIH = ev.detail.torrent.infoHash;
   },);
-  client.on("remove", (e) => {
+  client.on("remove", (e,) => {
     const ev = e as unknown as CustomEvent<{ infoHash: string }>;
     removeIH = ev.detail.infoHash;
   },);

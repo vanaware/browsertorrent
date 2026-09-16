@@ -1,6 +1,10 @@
 // /loco/monorepo/webtorrent/src/mod.ts
 import { TypedEventTarget, } from "./utils/event-target.ts";
-import { type ParsedTorrent, type ParsedTorrentFile, parseTorrent, } from "./utils/parse-torrent.ts";
+import {
+  type ParsedTorrent,
+  type ParsedTorrentFile,
+  parseTorrent,
+} from "./utils/parse-torrent.ts";
 import { Torrent, } from "./core/torrent.ts";
 import { Swarm, } from "./network/swarm.ts";
 import { generateLocoPeerId, } from "./utils/peerid.ts";

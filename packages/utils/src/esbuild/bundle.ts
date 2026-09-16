@@ -14,11 +14,11 @@
  * - Sem plugins customizados
  * - Define via regex (menos preciso que AST transform)
  */
-import { ensureDir, } from '@std/fs';
+import { ensureDir, } from "@std/fs";
 // ============================================================================
 // 📦 TIPOS
 // ============================================================================
-import type { DenoBundleTargetConfig, } from '../interfaces/mod.ts';
+import type { DenoBundleTargetConfig, } from "../interfaces/mod.ts";
 // ============================================================================
 // 📂 FUNÇÕES COMPARTILHADAS (reimportadas do mod.ts)
 // ============================================================================
@@ -28,7 +28,7 @@ import {
   resolveEntryPoints,
   resolveOutputPaths,
   validateTargetConfig,
-} from './mod.ts';
+} from "./mod.ts";
 
 // ============================================================================
 // 🔧 APLICAÇÃO DE DEFINES (em memória, antes de salvar)
@@ -40,8 +40,8 @@ export function applyDefines(
   let result = text;
   for (const [key, value,] of Object.entries(defines,)) {
     // Escapa caracteres especiais de regex no key
-    const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&',);
-    const regex = new RegExp(escapedKey, 'g',);
+    const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&",);
+    const regex = new RegExp(escapedKey, "g",);
     result = result.replace(regex, value,);
   }
   return result;
@@ -54,7 +54,10 @@ export function buildBundleOptions(
   config: DenoBundleTargetConfig,
 ): Deno.bundle.Options {
   // 🔥 RESOLUÇÃO DE ENTRYPOINTS (srcdir opcional)
-  const resolvedEntryPoints = resolveEntryPoints(config.srcdir, config.entryPoints,);
+  const resolvedEntryPoints = resolveEntryPoints(
+    config.srcdir,
+    config.entryPoints,
+  );
 
   // 🔥 RESOLUÇÃO DE OUTPUT PATHS (outfile relativo ao distdir)
   const { outfile, outdir, } = resolveOutputPaths(config,);
@@ -101,9 +104,9 @@ export async function processBundleTarget(
   // 🔥 VALIDAÇÃO FAIL-FAST: Verifica configuração ANTES de qualquer operação
   validateTargetConfig(targetName, config,);
 
-  console.log(`\n${'='.repeat(60,)}`,);
+  console.log(`\n${"=".repeat(60,)}`,);
   console.log(`🎯 PROCESSANDO ALVO: ${targetName.toUpperCase()}`,);
-  console.log(`${'='.repeat(60,)}`,);
+  console.log(`${"=".repeat(60,)}`,);
 
   // 1. Limpar diretório de saída
   if (config.clean && config.clean.length > 0) {
@@ -111,7 +114,9 @@ export async function processBundleTarget(
     if (config.distdir) {
       await cleanTarget(config.distdir, config.clean,);
     } else {
-      console.warn(`⚠️ 'clean' configurado mas 'distdir' ausente. Pulando limpeza.`,);
+      console.warn(
+        `⚠️ 'clean' configurado mas 'distdir' ausente. Pulando limpeza.`,
+      );
     }
   }
 
@@ -125,9 +130,9 @@ export async function processBundleTarget(
   };
 
   // 🔥 CORREÇÃO: Só lista assets se distdir existe
-  if (targetName === 'sw' && listAssetsFn && config.distdir) {
+  if (targetName === "sw" && listAssetsFn && config.distdir) {
     const assets = await listAssetsFn(config.distdir,);
-    defines['__GENERATED_ASSETS__'] = JSON.stringify(assets,);
+    defines["__GENERATED_ASSETS__"] = JSON.stringify(assets,);
     console.log(`📋 ${assets.length} assets listados para cache do SW`,);
   }
 
@@ -139,11 +144,11 @@ export async function processBundleTarget(
 
   // 5. Verificar erros
   if (!result.success) {
-    console.error('❌ Erros de compilação:',);
+    console.error("❌ Erros de compilação:",);
     for (const error of result.errors) {
       const loc = error.location
         ? ` (${error.location.file}:${error.location.line}:${error.location.column})`
-        : '';
+        : "";
       console.error(`   ${error.text}${loc}`,);
       for (const note of error.notes ?? []) {
         console.error(`      💡 ${note.text}`,);
@@ -156,7 +161,7 @@ export async function processBundleTarget(
   for (const warning of result.warnings) {
     const loc = warning.location
       ? ` (${warning.location.file}:${warning.location.line}:${warning.location.column})`
-      : '';
+      : "";
     console.warn(`   ⚠️ ${warning.text}${loc}`,);
   }
 
@@ -171,7 +176,7 @@ export async function processBundleTarget(
   const hasDefines = defineKeys.length > 0;
   if (hasDefines) {
     console.log(
-      `🔧 Injetando ${defineKeys.length} define(s): ${defineKeys.join(', ',)}`,
+      `🔧 Injetando ${defineKeys.length} define(s): ${defineKeys.join(", ",)}`,
     );
   }
 
@@ -179,7 +184,7 @@ export async function processBundleTarget(
     // Garante que o diretório de destino existe
     const dir = outputFile.path.substring(
       0,
-      outputFile.path.lastIndexOf('/',),
+      outputFile.path.lastIndexOf("/",),
     );
     if (dir) {
       await ensureDir(dir,);

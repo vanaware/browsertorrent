@@ -5,17 +5,17 @@
  * conforme definido na ADR 008.
  */
 
-import { assert, assertEquals } from "@std/assert";
-import { describe, it } from "@std/testing/bdd";
+import { assert, assertEquals, } from "@std/assert";
+import { describe, it, } from "@std/testing/bdd";
 
 describe("bdd_example", () => {
   it("deve passar com uma afirmação simples", () => {
-    assertEquals(1 + 1, 2);
+    assertEquals(1 + 1, 2,);
   });
 
   it("deve falhar corretamente quando a condição não é atendida", () => {
     // Este teste demonstra que o framework BDD funciona conforme esperado.
     const value = "browsertorrent";
-    assert(value.length > 0);
+    assert(value.length > 0,);
   });
 });

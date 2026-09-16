@@ -44,7 +44,12 @@ export class UtMetadata extends Extension {
     }
   }
 
-  public onRegister(context: { host: import("../core/extension-host.ts").ExtensionHost; send: (payload: Uint8Array,) => Promise<void>; }): void {
+  public onRegister(
+    context: {
+      host: import("../core/extension-host.ts").ExtensionHost;
+      send: (payload: Uint8Array,) => Promise<void>;
+    },
+  ): void {
     this._extensionId = context.host.localExtensions.get(this.name,) ?? null;
   }
 
@@ -160,8 +165,11 @@ export class UtMetadata extends Extension {
     this._metadataComplete = true;
     this._metadataSize = this._metadataSize ?? this.metadata.length;
 
-    if (this.wire.extensionHost.peerExtensions.has("ut_metadata")) {
-      this.wire.extensionHost.setHandshakeField("metadata_size", this._metadataSize,);
+    if (this.wire.extensionHost.peerExtensions.has("ut_metadata",)) {
+      this.wire.extensionHost.setHandshakeField(
+        "metadata_size",
+        this._metadataSize,
+      );
     }
 
     this.emit(

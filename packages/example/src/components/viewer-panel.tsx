@@ -1,23 +1,23 @@
 /**
  * viewer-panel.tsx — Input magnet/infoHash e player de vídeo.
  */
-import { useSignal } from "@preact/signals";
+import { useSignal, } from "@preact/signals";
 import {
   addTorrent,
-  torrentSignal,
   clientSignal,
-  serverSignal,
-  modeSignal,
   errorSignal,
+  modeSignal,
+  serverSignal,
+  torrentSignal,
 } from "../torrent-context.tsx";
-import { buildStreamURL } from "@loco/webtorrent";
-import { useEffect, useRef } from "preact/hooks";
+import { buildStreamURL, } from "@loco/webtorrent";
+import { useEffect, useRef, } from "preact/hooks";
 
 export function ViewerPanel() {
-  const input = useSignal("");
-  const loading = useSignal(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const streamUrl = useSignal<string | null>(null);
+  const input = useSignal("",);
+  const loading = useSignal(false,);
+  const videoRef = useRef<HTMLVideoElement>(null,);
+  const streamUrl = useSignal<string | null>(null,);
 
   const torrent = torrentSignal.value;
   const isLeeching = modeSignal.value === "leeching";
@@ -29,15 +29,20 @@ export function ViewerPanel() {
     const file = torrent.files[0];
     if (!file) return;
 
-    streamUrl.value = buildStreamURL("/", torrent.infoHash, 0, file.name);
+    streamUrl.value = buildStreamURL("/", torrent.infoHash, 0, file.name,);
 
     // Conecta stream ao <video> via client._makeFileObjects() (File wrapper com streamTo)
     const client = clientSignal.value;
     if (client && videoRef.current) {
-      const files = (client as unknown as { _makeFileObjects: (torrent: unknown, scope: string) => unknown[] })._makeFileObjects(torrent, "/");
-      files[0]?.streamTo(videoRef.current);
+      const files = (client as unknown as {
+        _makeFileObjects: (
+          torrent: unknown,
+          scope: string,
+        ) => Array<{ streamTo: (target: HTMLVideoElement,) => void }>;
+      })._makeFileObjects(torrent, "/",);
+      files[0]?.streamTo(videoRef.current,);
     }
-  }, [torrent?.infoHash, serverSignal.value]);
+  }, [torrent?.infoHash, serverSignal.value,],);
 
   const handleWatch = async () => {
     const id = input.value.trim();
@@ -45,21 +50,25 @@ export function ViewerPanel() {
 
     loading.value = true;
     try {
-      await addTorrent(id);
+      await addTorrent(id,);
     } finally {
       loading.value = false;
     }
   };
 
-  const handleKeyDown = (e: KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent,) => {
     if (e.key === "Enter") handleWatch();
   };
 
   return (
     <div class="panel no-padding">
       <div class="middle">
-        <span class="material-symbols">play_circle</span>
-        <h4>Viewer</h4>
+        <span class="material-symbols">
+          play_circle
+        </span>
+        <h4>
+          Viewer
+        </h4>
       </div>
 
       {!isLeeching
@@ -70,15 +79,20 @@ export function ViewerPanel() {
               id="magnet-input"
               placeholder="magnet:?xt=... ou infoHash"
               value={input.value}
-              onInput={(e) => { input.value = (e.target as HTMLInputElement).value; }}
-              onKeyDown={handleKeyDown}
-            />
-            <label for="magnet-input">Magnet URI / InfoHash</label>
+              onInput={(e,) => {
+                input.value = (e.target as HTMLInputElement).value;
+              }}
+              onKeyDown={handleKeyDown} />
+            <label for="magnet-input">
+              Magnet URI / InfoHash
+            </label>
           </div>
         )
         : (
           <div class="blue small-text">
-            <span class="material-symbols small">link</span>
+            <span class="material-symbols small">
+              link
+            </span>
             {torrent?.name ?? "connecting..."}
           </div>
         )}
@@ -88,9 +102,10 @@ export function ViewerPanel() {
           type="button"
           class={loading.value ? "loading" : ""}
           disabled={!input.value || loading.value}
-          onClick={handleWatch}
-        >
-          <span class="material-symbols">movie</span>
+          onClick={handleWatch}>
+          <span class="material-symbols">
+            movie
+          </span>
           Watch
         </button>
       )}
@@ -102,22 +117,24 @@ export function ViewerPanel() {
               ref={videoRef}
               controls
               autoplay
-              style="width:100%; border-radius: 8px;"
-            />
+              style="width:100%; border-radius: 8px;" />
             {torrent && (
               <div class="field label suffix border" style="margin-top:0.5rem">
                 <input
                   type="text"
                   value={streamUrl.value}
                   readonly
-                  onClick={(e) => { (e.target as HTMLInputElement).select(); }}
-                />
-                <label>Stream URL</label>
+                  onClick={(e,) => {
+                    (e.target as HTMLInputElement).select();
+                  }} />
+                <label>
+                  Stream URL
+                </label>
                 <i
                   class="front"
                   style="cursor:pointer"
-                  onClick={() => navigator.clipboard.writeText(streamUrl.value!)}
-                >
+                  onClick={() =>
+                    navigator.clipboard.writeText(streamUrl.value!,)}>
                   📋
                 </i>
               </div>
@@ -128,7 +145,9 @@ export function ViewerPanel() {
 
       {errorSignal.value && (
         <div class="red">
-          <span class="material-symbols small">error</span>
+          <span class="material-symbols small">
+            error
+          </span>
           {errorSignal.value}
         </div>
       )}

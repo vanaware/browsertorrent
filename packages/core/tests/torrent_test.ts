@@ -201,11 +201,13 @@ Deno.test("torrent: integration - setMetadata dynamically updates torrent state 
   const infoBuffer = encode(infoDict,);
 
   let metadataEventEmitted = false;
-  torrent.on("metadata", (e: CustomEvent<{
-    files: Array<{ name: string }>;
-    length: number;
-    name: string;
-  }>,) => {
+  torrent.on("metadata", (
+    e: CustomEvent<{
+      files: Array<{ name: string }>;
+      length: number;
+      name: string;
+    }>,
+  ) => {
     metadataEventEmitted = true;
     assertEquals(e.detail.name, "loco-update-v2.zip",);
     assertEquals(e.detail.length, 2048,);
@@ -791,7 +793,7 @@ Deno.test("torrent: maxWebConns returns swarm maxConns when set", async () => {
     chunkLength: parsed.pieceLength,
     length: parsed.length,
   },);
-  const mockSwarm = { maxConns: 5 } as unknown as Swarm;
+  const mockSwarm = { maxConns: 5, } as unknown as Swarm;
   const torrent = new Torrent(parsed, { store, swarm: mockSwarm, },);
 
   await new Promise<void>((resolve,) => torrent.on("ready", () => resolve(),));

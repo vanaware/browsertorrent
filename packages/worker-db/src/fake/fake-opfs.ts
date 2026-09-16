@@ -1,5 +1,5 @@
 export class FakeOPFSFileHandle {
-  public kind: 'file' | 'directory' = 'file';
+  public kind: "file" | "directory" = "file";
 
   constructor(
     private fullPath: string,
@@ -31,21 +31,25 @@ export class FakeOPFSFileHandle {
     if (content === undefined) {
       throw new Error(`File ${this.fullPath} not found in Fake OPFS`,);
     }
-    const fileName = this.fullPath.split('/',).pop() || 'file';
-    return Promise.resolve(new File([content as BlobPart], fileName, {
-      type: 'application/octet-stream',
-      lastModified: Date.now(),
-    }));
+    const fileName = this.fullPath.split("/",).pop() || "file";
+    return Promise.resolve(
+      new File([content as BlobPart,], fileName, {
+        type: "application/octet-stream",
+        lastModified: Date.now(),
+      },),
+    );
   }
 }
 
 export class FakeOPFSDirectory {
   private static sharedStorage = new Map<string, Uint8Array>();
 
-  constructor(private path: string = '',) {}
+  constructor(private path: string = "",) {}
 
   getDirectoryHandle(name: string, options?: { create?: boolean },) {
-    return Promise.resolve(new FakeOPFSDirectory(this.path ? `${this.path}/${name}` : name,));
+    return Promise.resolve(
+      new FakeOPFSDirectory(this.path ? `${this.path}/${name}` : name,),
+    );
   }
 
   getFileHandle(name: string, options?: { create?: boolean },) {
@@ -53,7 +57,9 @@ export class FakeOPFSDirectory {
     if (!options?.create && !FakeOPFSDirectory.sharedStorage.has(fullPath,)) {
       throw new Error(`File ${fullPath} not found in Fake OPFS`,);
     }
-    return Promise.resolve(new FakeOPFSFileHandle(fullPath, FakeOPFSDirectory.sharedStorage,));
+    return Promise.resolve(
+      new FakeOPFSFileHandle(fullPath, FakeOPFSDirectory.sharedStorage,),
+    );
   }
 
   removeEntry(name: string,) {
@@ -65,8 +71,8 @@ export class FakeOPFSDirectory {
     for (const key of FakeOPFSDirectory.sharedStorage.keys()) {
       if (this.path && key.startsWith(`${this.path}/`,)) {
         const localName = key.slice(this.path.length + 1,);
-        if (!localName.includes('/',)) yield localName;
-      } else if (!this.path && !key.includes('/',)) {
+        if (!localName.includes("/",)) yield localName;
+      } else if (!this.path && !key.includes("/",)) {
         yield key;
       }
     }
@@ -76,14 +82,17 @@ export class FakeOPFSDirectory {
     for (const key of FakeOPFSDirectory.sharedStorage.keys()) {
       if (this.path && key.startsWith(`${this.path}/`,)) {
         const localName = key.slice(this.path.length + 1,);
-        if (!localName.includes('/',)) {
+        if (!localName.includes("/",)) {
           yield [
             localName,
             new FakeOPFSFileHandle(key, FakeOPFSDirectory.sharedStorage,),
           ] as const;
         }
-      } else if (!this.path && !key.includes('/',)) {
-        yield [key, new FakeOPFSFileHandle(key, FakeOPFSDirectory.sharedStorage,),] as const;
+      } else if (!this.path && !key.includes("/",)) {
+        yield [
+          key,
+          new FakeOPFSFileHandle(key, FakeOPFSDirectory.sharedStorage,),
+        ] as const;
       }
     }
   }
@@ -92,10 +101,10 @@ export class FakeOPFSDirectory {
     for (const key of FakeOPFSDirectory.sharedStorage.keys()) {
       if (this.path && key.startsWith(`${this.path}/`,)) {
         const localName = key.slice(this.path.length + 1,);
-        if (!localName.includes('/',)) {
+        if (!localName.includes("/",)) {
           yield new FakeOPFSFileHandle(key, FakeOPFSDirectory.sharedStorage,);
         }
-      } else if (!this.path && !key.includes('/',)) {
+      } else if (!this.path && !key.includes("/",)) {
         yield new FakeOPFSFileHandle(key, FakeOPFSDirectory.sharedStorage,);
       }
     }
