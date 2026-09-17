@@ -120,10 +120,8 @@ export class Peer extends TypedEventTarget<PeerEvents> {
         if (data.type === "offer" && !this.opts.initiator) {
           const answer = await this.pc!.createAnswer();
           await this.pc!.setLocalDescription(answer,);
-          this.emit(
-            "signal",
-            new CustomEvent("signal", { detail: { data: answer, }, },),
-          );
+          // Não emitimos o signal aqui. O 'onicegatheringstatechange' emitirá
+          // quando o processo de coleta de candidatos terminar.
         }
       } else if ("candidate" in data && data.candidate) {
         await this.pc!.addIceCandidate(data,);
@@ -176,14 +174,32 @@ export class Peer extends TypedEventTarget<PeerEvents> {
   // ==========================================================================
 
   private _setupPeerConnection(): void {
-    this.pc!.onicecandidate = (event,) => {
-      if (event.candidate) {
-        this.emit(
-          "signal",
-          new CustomEvent("signal", {
-            detail: { data: event.candidate.toJSON(), },
-          },),
-        );
+    // Interoperabilidade estrita: WebTorrent não usa Trickle ICE (trickle: false).
+    // Coletamos todos os candidatos ICE antes de emitir a oferta/resposta.
+    this.pc!.onicegatheringstatechange = () => {
+      if (this.pc!.iceGatheringState === "complete") {
+        if (this.pc!.localDescription) {
+          this.emit(
+            "signal",
+            new CustomEvent("signal", {
+              detail: { data: this.pc!.localDescription },
+            }),
+          );
+        }
+      }
+    };
+
+    // Necessário para acelerar o processo se todos os candidatos terminarem antes
+    this.pc!.onicecandidate = (event) => {
+      if (!event.candidate) {
+        if (this.pc!.localDescription) {
+          this.emit(
+            "signal",
+            new CustomEvent("signal", {
+              detail: { data: this.pc!.localDescription },
+            }),
+          );
+        }
       }
     };
 
@@ -213,10 +229,8 @@ export class Peer extends TypedEventTarget<PeerEvents> {
     try {
       const offer = await this.pc!.createOffer();
       await this.pc!.setLocalDescription(offer,);
-      this.emit(
-        "signal",
-        new CustomEvent("signal", { detail: { data: offer, }, },),
-      );
+      // Não emitimos o signal aqui. O 'onicegatheringstatechange' emitirá
+      // quando o processo de coleta de candidatos terminar, embutindo-os no SDP.
     } catch (err) {
       this._onError(err instanceof Error ? err : new Error(String(err,),),);
     }

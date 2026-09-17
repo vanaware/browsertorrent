@@ -52,10 +52,55 @@ export const MAX_RESPONSE_BYTES = 2 * 1024 * 1024;
 /** Maximum peers parsed from a dictionary-format response. */
 export const MAX_DICTIONARY_PEERS = 2_000;
 
-// ── Tipos ────────────────────────────────────────────────────────────────
+// ── Tipos e WebRTC Signaling ─────────────────────────────────────────────
+
+import { TypedEventTarget, } from "../utils/event-target.ts";
 
 /** Lifecycle event sent to a tracker (BEP 3). */
 export type TrackerEvent = "started" | "completed" | "stopped";
+
+// Interface base para mensagens SDP
+export interface WebRTCSdp {
+  type: "offer" | "answer";
+  sdp: string;
+}
+
+// Oferta embutida no request de Announce
+export interface TrackerOffer {
+  offer: WebRTCSdp;
+  offer_id: string; // ID único para a oferta (gerado pelo initiator)
+}
+
+// Mensagem recebida do Tracker (Pode ser uma resposta ao announce, uma offer ou uma answer)
+export interface TrackerMessage {
+  action?: "announce" | "scrape" | "error";
+  info_hash?: string;
+  interval?: number;
+  complete?: number;
+  incomplete?: number;
+  peer_id?: string; // ID do peer remoto
+  offer?: WebRTCSdp; // Se recebemos uma oferta
+  offer_id?: string; // ID da oferta recebida
+  answer?: WebRTCSdp; // Se recebemos uma resposta a uma oferta nossa
+  "failure reason"?: string;
+  peers?: Array<{ ip?: string; ipv4?: string; ipv6?: string; port: number }>;
+}
+
+// Request de Announce (Enviado pelo cliente ao Tracker via WebSocket)
+export interface TrackerAnnounceRequest {
+  action: "announce";
+  info_hash: string;
+  peer_id: string;
+  numwant?: number;
+  uploaded?: number;
+  downloaded?: number;
+  left?: number;
+  event?: TrackerEvent;
+  offers?: TrackerOffer[];
+  answer?: WebRTCSdp;
+  to_peer_id?: string;
+  offer_id?: string;
+}
 
 export interface TrackerOptions {
   infoHash: Uint8Array;
@@ -74,6 +119,11 @@ export interface TrackerOptions {
 
 export interface TrackerAnnounceEvent {
   event?: TrackerEvent;
+  offers?: TrackerOffer[]; // Enviado pelo Initiator
+  answer?: WebRTCSdp; // Enviado pelo Responder (direcionado)
+  to_peer_id?: string; // Necessário quando enviando uma 'answer'
+  offer_id?: string; // Necessário quando enviando uma 'answer'
+  numwant?: number;
 }
 
 export interface TrackerResponse {
@@ -88,7 +138,16 @@ export interface TrackerResponse {
   warning?: string;
 }
 
-export interface Tracker {
+export type TrackerEvents = {
+  update: CustomEvent<TrackerResponse>;
+  peer: CustomEvent<
+    { peerId: string; offer?: WebRTCSdp; answer?: WebRTCSdp; offerId?: string }
+  >;
+  warning: CustomEvent<string>;
+  error: CustomEvent<Error>;
+};
+
+export interface Tracker extends TypedEventTarget<TrackerEvents> {
   announce(event?: TrackerAnnounceEvent,): Promise<TrackerResponse>;
   destroy(): void;
 }
@@ -406,7 +465,8 @@ async function readBoundedBody(
 
 // ── HttpTracker ──────────────────────────────────────────────────────────
 
-export class HttpTracker implements Tracker {
+export class HttpTracker extends TypedEventTarget<TrackerEvents>
+  implements Tracker {
   private baseUrl: string;
   private opts: TrackerOptions;
   private abortController: AbortController | null = null;
@@ -414,6 +474,7 @@ export class HttpTracker implements Tracker {
   private trackerId: string | undefined;
 
   constructor(baseUrl: string, opts: TrackerOptions,) {
+    super();
     this.baseUrl = baseUrl;
     this.opts = opts;
   }
@@ -618,45 +679,74 @@ export async function scrapeTracker(
 
 // ── WsTracker ────────────────────────────────────────────────────────────
 
-export class WsTracker implements Tracker {
+export class WsTracker extends TypedEventTarget<TrackerEvents>
+  implements Tracker {
   private url: string;
   private opts: TrackerOptions;
   private ws: WebSocket | null = null;
+  private pendingAnnounces: Array<
+    {
+      event: TrackerAnnounceEvent | undefined;
+      resolve: (val: TrackerResponse,) => void;
+      reject: (err: Error,) => void;
+    }
+  > = [];
+  private hasConnected = false;
+  private destroyed = false;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private trackerId?: string;
 
   constructor(url: string, opts: TrackerOptions,) {
+    super();
     this.url = url;
     this.opts = opts;
   }
 
   announce(event?: TrackerAnnounceEvent,): Promise<TrackerResponse> {
     return new Promise((resolve, reject,) => {
-      try {
-        this.ws = new WebSocket(this.url,);
+      if (this.destroyed) {
+        return reject(new TrackerError("Tracker destroyed",),);
+      }
 
-        this.ws.onopen = () => {
-          const msg = {
-            action: "announce",
-            info_hash: uint8ArrayToBinaryString(this.opts.infoHash,),
-            peer_id: uint8ArrayToBinaryString(this.opts.peerId,),
-            port: this.opts.port || 6881,
-            uploaded: this.opts.uploaded || 0,
-            downloaded: this.opts.downloaded || 0,
-            left: this.opts.left || 0,
-            compact: 1,
-            numwant: this.opts.numwant || 50,
-            ...(event?.event ? { event: event.event, } : {}),
-          };
-          this.ws?.send(JSON.stringify(msg,),);
-        };
+      this.pendingAnnounces.push({ event, resolve, reject, },);
 
-        this.ws.onmessage = (event,) => {
-          try {
-            const data = JSON.parse(event.data,);
-            if (data.action === "announce") {
+      if (
+        !this.ws || this.ws.readyState === WebSocket.CLOSED ||
+        this.ws.readyState === WebSocket.CLOSING
+      ) {
+        this._connect();
+      } else if (this.ws.readyState === WebSocket.OPEN) {
+        this._flushAnnounces();
+      }
+    },);
+  }
+
+  private _connect() {
+    if (this.destroyed) return;
+    try {
+      this.ws = new WebSocket(this.url,);
+
+      this.ws.onopen = () => {
+        this.hasConnected = true;
+        this._flushAnnounces();
+      };
+
+      this.ws.onmessage = (event,) => {
+        if (this.destroyed) return;
+        try {
+          const data = JSON.parse(event.data,) as TrackerMessage;
+
+          if (data.action === "announce") {
+            if (data.interval !== undefined || data.peers !== undefined) {
               const peers: PeerEndpoint[] = [];
               if (Array.isArray(data.peers,)) {
                 for (const p of data.peers) {
-                  peers.push({ ip: p.ip || p.ipv4 || p.ipv6, port: p.port, },);
+                  if (p.ip || p.ipv4 || p.ipv6) {
+                    peers.push({
+                      ip: (p.ip || p.ipv4 || p.ipv6) as string,
+                      port: p.port,
+                    },);
+                  }
                 }
               }
 
@@ -665,34 +755,126 @@ export class WsTracker implements Tracker {
                 complete: data.complete || 0,
                 incomplete: data.incomplete || 0,
                 peers: deduplicatePeers(peers,),
+                trackerId: this.trackerId,
               };
+              this.emit(
+                "update",
+                new CustomEvent("update", { detail: response, },),
+              );
 
-              resolve(response,);
-              this.ws?.close();
-            } else if (data["failure reason"]) {
-              reject(new TrackerError(String(data["failure reason"],),),);
-              this.ws?.close();
+              // Resolve any pending announce promises waiting for the generic interval response
+              const pending = [...this.pendingAnnounces,];
+              this.pendingAnnounces = [];
+              for (const p of pending) {
+                p.resolve(response,);
+              }
             }
-          } catch (err) {
-            reject(err,);
-            this.ws?.close();
-          }
-        };
 
-        this.ws.onerror = () => {
-          reject(new TrackerError("WebSocket connection failed",),);
-        };
-      } catch (err) {
-        reject(err,);
+            // Handle signaling (WebRTC)
+            if (data.peer_id) {
+              this.emit(
+                "peer",
+                new CustomEvent("peer", {
+                  detail: {
+                    peerId: data.peer_id,
+                    offer: data.offer,
+                    answer: data.answer,
+                    offerId: data.offer_id,
+                  },
+                },),
+              );
+            }
+          } else if (data["failure reason"]) {
+            const err = new TrackerError(String(data["failure reason"],),);
+            this.emit("error", new CustomEvent("error", { detail: err, },),);
+            this._rejectPending(err,);
+          } else if (data.action === "error") {
+            const err = new TrackerError(
+              String(data["failure reason"] || "Unknown error",),
+            );
+            this.emit("error", new CustomEvent("error", { detail: err, },),);
+            this._rejectPending(err,);
+          }
+        } catch (err) {
+          console.warn("WsTracker parse error:", err,);
+        }
+      };
+
+      this.ws.onerror = () => {
+        // Will close right after, handled in onclose
+      };
+
+      this.ws.onclose = () => {
+        this.ws = null;
+        if (!this.destroyed && this.hasConnected) {
+          this.reconnectTimer = setTimeout(() => this._connect(), 5000,);
+        } else {
+          this._rejectPending(
+            new TrackerError("WebSocket connection closed",),
+          );
+        }
+      };
+    } catch (err) {
+      this._rejectPending(
+        err instanceof Error ? err : new TrackerError(String(err,),),
+      );
+    }
+  }
+
+  private _flushAnnounces() {
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+
+    for (const pending of this.pendingAnnounces) {
+      const e = pending.event || {};
+      const msg: TrackerAnnounceRequest = {
+        action: "announce",
+        info_hash: uint8ArrayToBinaryString(this.opts.infoHash,),
+        peer_id: uint8ArrayToBinaryString(this.opts.peerId,),
+        numwant: e.numwant || this.opts.numwant || 50,
+        uploaded: this.opts.uploaded || 0,
+        downloaded: this.opts.downloaded || 0,
+        left: this.opts.left || 0,
+      };
+
+      if (e.event) (msg as any).event = e.event;
+      if (e.offers) msg.offers = e.offers;
+      if (e.answer) msg.answer = e.answer;
+      if (e.to_peer_id) msg.to_peer_id = e.to_peer_id;
+      if (e.offer_id) msg.offer_id = e.offer_id;
+
+      if (this.trackerId) (msg as any).trackerid = this.trackerId;
+
+      this.ws.send(JSON.stringify(msg,),);
+    }
+
+    // We don't clear pendingAnnounces here, we wait for the response to resolve them
+    // But if we send an 'answer' (which has to_peer_id), the tracker might NOT send back an interval response!
+    // We need to resolve immediately for directed messages.
+    this.pendingAnnounces = this.pendingAnnounces.filter((p,) => {
+      if (p.event?.to_peer_id) {
+        p.resolve({ interval: 1800, complete: 0, incomplete: 0, peers: [], },);
+        return false;
       }
+      return true;
     },);
   }
 
+  private _rejectPending(err: Error,) {
+    const pending = [...this.pendingAnnounces,];
+    this.pendingAnnounces = [];
+    for (const p of pending) {
+      p.reject(err,);
+    }
+  }
+
   destroy(): void {
+    this.destroyed = true;
+    if (this.reconnectTimer) clearTimeout(this.reconnectTimer,);
     if (this.ws) {
       this.ws.close();
       this.ws = null;
     }
+    this._rejectPending(new TrackerError("Tracker destroyed",),);
   }
 }
 

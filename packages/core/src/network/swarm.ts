@@ -1,12 +1,12 @@
-// /loco/monorepo/webtorrent/src/network/swarm.ts
-
 import { TypedEventTarget, } from "../utils/event-target.ts";
 import { Peer, } from "./peer.ts";
 import {
   createTracker,
   Tracker,
+  TrackerOffer,
   TrackerOptions,
   TrackerResponse,
+  WebRTCSdp,
 } from "./tracker.ts";
 import { UtMetadata, } from "../extensions/ut-metadata.ts";
 import type { Wire, } from "../core/wire.ts";
@@ -44,15 +44,14 @@ const MAX_QUEUED_PEERS = 200;
 export class Swarm extends TypedEventTarget<SwarmEvents> {
   public readonly infoHash: Uint8Array;
   public readonly peerId: Uint8Array;
-
-  public readonly peers: Map<string, Peer> = new Map();
+  public peers = new Map<string, Peer>();
   private queue: QueuedPeer[] = [];
   private trackers: Tracker[] = [];
   public maxConns: number;
   public wrtc?: typeof RTCPeerConnection;
   private metadata?: Uint8Array;
+  private pendingOffers = new Map<string, Peer>(); // offer_id -> Peer (initiator)
 
-  /** Torrent dono deste swarm. Definido externamente (ver WebTorrent.add). */
   public torrent: {
     emit?: (type: string, event: Event | CustomEvent,) => boolean;
     _registerWire?: (wire: Wire, addr: string,) => void;
@@ -60,9 +59,7 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
 
   public destroyed = false;
   private paused = false;
-  /** Download rate limit in bytes/s (0 = unlimited). */
   private _downloadLimit: number = 0;
-  /** Upload rate limit in bytes/s (0 = unlimited). */
   private _uploadLimit: number = 0;
 
   constructor(opts: SwarmOptions,) {
@@ -81,6 +78,29 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
           port: opts.port || 6881,
         };
         const tracker = createTracker(announceUrl, trackerOpts,);
+
+        // Ouça eventos de peers recebidos via WsTracker
+        tracker.on("peer", (e: any,) => {
+          const { peerId, offer, answer, offerId, } = e.detail;
+          this._onTrackerPeer(tracker, peerId, offer, answer, offerId,);
+        },);
+
+        tracker.on("warning", (e: any,) => {
+          this.emit(
+            "warning",
+            new CustomEvent("warning", {
+              detail: { error: new Error(e.detail,), },
+            },),
+          );
+        },);
+
+        tracker.on("error", (e: any,) => {
+          this.emit(
+            "warning",
+            new CustomEvent("warning", { detail: { error: e.detail, }, },),
+          );
+        },);
+
         this.trackers.push(tracker,);
       } catch (err) {
         this.emit(
@@ -95,22 +115,141 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
     }
   }
 
-  public start(): void {
+  public async start(): Promise<void> {
     if (this.destroyed) return;
 
     for (const tracker of this.trackers) {
-      tracker.announce({ event: "started", },).then(
-        (response: TrackerResponse,) => {
-          this._onTrackerResponse(response, tracker,);
-        },
-      ).catch((err: Error,) => {
+      try {
+        let offers: TrackerOffer[] = [];
+
+        // Gera ofertas apenas para WsTrackers
+        if (tracker.constructor.name === "WsTracker") {
+          offers = await this._generateOffers(
+            Math.min(this.maxConns - this.peers.size, 5,),
+          );
+        }
+
+        const response = await tracker.announce({ event: "started", offers, },);
+        this._onTrackerResponse(response, tracker,);
+      } catch (err) {
         this.emit(
           "warning",
           new CustomEvent("warning", {
-            detail: { error: err, },
+            detail: {
+              error: err instanceof Error ? err : new Error(String(err,),),
+            },
           },),
         );
+      }
+    }
+  }
+
+  private async _generateOffers(count: number,): Promise<TrackerOffer[]> {
+    const offers: TrackerOffer[] = [];
+    const promises = Array.from({ length: count, },).map(async () => {
+      const offerId = Array.from(crypto.getRandomValues(new Uint8Array(20,),),)
+        .map((b,) => b.toString(16,).padStart(2, "0",)).join("",);
+
+      const peer = new Peer({
+        initiator: true,
+        infoHash: this.infoHash,
+        peerId: this.peerId,
+        wrtc: this.wrtc,
+        addr: `webrtc:${offerId}`,
       },);
+
+      this.pendingOffers.set(offerId, peer,);
+
+      return new Promise<void>((resolve,) => {
+        let resolved = false;
+        const timeoutId = setTimeout(() => {
+          if (!resolved) {
+            resolved = true;
+            resolve();
+          }
+        }, 5000,); // Max wait for ICE gathering
+
+        peer.on("signal", (e: any,) => {
+          if (resolved) return;
+          resolved = true;
+          clearTimeout(timeoutId,);
+          offers.push({
+            offer: e.detail.data as WebRTCSdp,
+            offer_id: offerId,
+          },);
+          resolve();
+        },);
+
+        peer.on("error", () => {
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeoutId,);
+            resolve();
+          }
+        },);
+      },);
+    },);
+
+    await Promise.all(promises,);
+    return offers;
+  }
+
+  private _onTrackerPeer(
+    tracker: Tracker,
+    peerIdHex: string,
+    offer?: WebRTCSdp,
+    answer?: WebRTCSdp,
+    offerId?: string,
+  ): void {
+    if (this.destroyed || this.paused) return;
+
+    // Recebemos uma RESPOSTA (Answer) a uma oferta nossa
+    if (answer && offerId) {
+      const peer = this.pendingOffers.get(offerId,);
+      if (peer) {
+        peer.id = peerIdHex;
+        this.peers.set(`webrtc:${peerIdHex}`, peer,);
+        this.pendingOffers.delete(offerId,);
+        this._hookPeerEvents(peer, `webrtc:${peerIdHex}`,);
+        peer.signal(answer,);
+        this.emit(
+          "peer",
+          new CustomEvent("peer", { detail: { peer, source: "tracker", }, },),
+        );
+      }
+      return;
+    }
+
+    // Recebemos uma OFERTA (Offer) de um peer remoto
+    if (offer && offerId) {
+      if (this.peers.has(`webrtc:${peerIdHex}`,)) return; // Já estamos conectados ou conectando
+
+      const peer = new Peer({
+        initiator: false,
+        infoHash: this.infoHash,
+        peerId: this.peerId,
+        wrtc: this.wrtc,
+        addr: `webrtc:${peerIdHex}`,
+      },);
+      peer.id = peerIdHex;
+      this.peers.set(`webrtc:${peerIdHex}`, peer,);
+      this._hookPeerEvents(peer, `webrtc:${peerIdHex}`,);
+
+      // Quando nossa answer for gerada, enviaremos de volta pelo Tracker
+      peer.on("signal", (e: any,) => {
+        const answerSdp = e.detail.data as WebRTCSdp;
+        tracker.announce({
+          to_peer_id: peerIdHex,
+          offer_id: offerId,
+          answer: answerSdp,
+        },).catch(console.warn,);
+      },);
+
+      peer.signal(offer,);
+      this.emit(
+        "peer",
+        new CustomEvent("peer", { detail: { peer, source: "tracker", }, },),
+      );
     }
   }
 
@@ -146,77 +285,43 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
     this._drain();
   }
 
-  // ==========================================================================
-  // THROTTLE
-  // ==========================================================================
-
-  /** Currently configured download rate limit (bytes/s). */
   get downloadLimit(): number {
     return this._downloadLimit;
   }
-
-  /** Currently configured upload rate limit (bytes/s). */
   get uploadLimit(): number {
     return this._uploadLimit;
   }
 
-  /**
-   * Set the download rate limit for this swarm's wires.
-   * @param rate bytes/s; `0` removes the limit.
-   */
   throttleDownload(rate: number,): void {
     this._downloadLimit = Math.max(0, rate,);
     for (const peer of this.peers.values()) {
-      if (
-        peer.wire &&
-        !(peer.wire as unknown as { isDestroyed?: boolean }).isDestroyed
-      ) {
-        (peer.wire as unknown as { throttleDownload?: (rate: number,) => void })
-          .throttleDownload?.(this._downloadLimit,);
+      if (peer.wire && !(peer.wire as any).isDestroyed) {
+        (peer.wire as any).throttleDownload?.(this._downloadLimit,);
       }
     }
   }
 
-  /**
-   * Set the upload rate limit for this swarm's wires.
-   * @param rate bytes/s; `0` removes the limit.
-   */
   throttleUpload(rate: number,): void {
     this._uploadLimit = Math.max(0, rate,);
     for (const peer of this.peers.values()) {
-      if (
-        peer.wire &&
-        !(peer.wire as unknown as { isDestroyed?: boolean }).isDestroyed
-      ) {
-        (peer.wire as unknown as { throttleUpload?: (rate: number,) => void })
-          .throttleUpload?.(this._uploadLimit,);
+      if (peer.wire && !(peer.wire as any).isDestroyed) {
+        (peer.wire as any).throttleUpload?.(this._uploadLimit,);
       }
     }
   }
 
-  // ==========================================================================
-  // DELEGAÇÃO DO TORRENT
-  // ==========================================================================
-
-  /** Envia `interested` para todos os wires conectados. */
   public _sendInterested(): void {
     for (const [, peer,] of this.peers) {
-      if (peer.wire && !peer.wire.isDestroyed) {
-        peer.wire.sendInterested();
-      }
+      if (peer.wire && !peer.wire.isDestroyed) peer.wire.sendInterested();
     }
   }
 
-  /** Envia `not-interested` para todos os wires conectados. */
   public _sendNotInterested(): void {
     for (const [, peer,] of this.peers) {
-      if (peer.wire && !peer.wire.isDestroyed) {
-        peer.wire.sendNotInterested();
-      }
+      if (peer.wire && !peer.wire.isDestroyed) peer.wire.sendNotInterested();
     }
   }
 
-  /** Envia `suggest-piece` (BEP 6) para todos os wires. */
   public _sendSuggestPiece(index: number,): void {
     for (const [, peer,] of this.peers) {
       if (peer.wire && !peer.wire.isDestroyed) {
@@ -238,6 +343,11 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
       peer.destroy();
     }
     this.peers.clear();
+
+    for (const [, peer,] of this.pendingOffers) {
+      peer.destroy();
+    }
+    this.pendingOffers.clear();
 
     for (const tracker of this.trackers) {
       tracker.destroy();
@@ -277,6 +387,7 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
     if (this.destroyed || this.paused) return;
     if (this.peers.has(addr,)) return;
 
+    // Conexões IP regulares assumem initiator true (se for WebRTC e falhar o fallback pro WsTracker não existe, mas mantemos o padrão)
     const peer = new Peer({
       initiator: true,
       infoHash: this.infoHash,
@@ -286,127 +397,78 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
     },);
 
     this.peers.set(addr, peer,);
+    this._hookPeerEvents(peer, addr,);
+  }
 
+  private _hookPeerEvents(peer: Peer, addr: string,): void {
     peer.on("connect", () => {
-      this.emit(
-        "peer",
-        new CustomEvent("peer", { detail: { peer, source: "tracker", }, },),
-      );
+      // Connect emitido no _onTrackerPeer e _connectPeer, mas evitamos duplicação
+      // O peer do _onTrackerPeer já emitiu 'peer', entao so faz o hook de wire.
     },);
 
-    // 🔥 INTEGRAÇÃO: Quando o Wire é criado, registrar extensão ut_metadata
     peer.on("handshake", (e,) => {
       if (peer.wire) {
         const wire: Wire = peer.wire;
-
-        // Cria e registra a extensão ut_metadata
         const utMetadata = new UtMetadata(wire, { metadata: this.metadata, },);
 
-        // Se temos o metadata, define no ut_metadata para servir a outros peers
         if (this.metadata) {
           utMetadata.setMetadata(this.metadata,);
         }
 
-        // Registra listener para quando o metadata for recebido
-        utMetadata.on(
-          "metadata",
-          (metadataEvent: CustomEvent<{ metadata: Uint8Array }>,) => {
-            const metadata = metadataEvent.detail?.metadata || metadataEvent;
-            this.emit(
-              "metadata",
-              new CustomEvent("metadata", {
-                detail: { metadata, peer, },
-              },),
-            );
-          },
-        );
+        utMetadata.on("metadata", (metadataEvent: any,) => {
+          const metadata = metadataEvent.detail?.metadata || metadataEvent;
+          this.emit(
+            "metadata",
+            new CustomEvent("metadata", { detail: { metadata, peer, }, },),
+          );
+        },);
 
-        utMetadata.on(
-          "warning",
-          (warningEvent: CustomEvent<{ error: Error }>,) => {
-            const error = warningEvent.detail?.error || warningEvent;
-            this.emit(
-              "warning",
-              new CustomEvent("warning", { detail: { error, }, },),
-            );
-            this.torrent?.emit?.(
-              "warning",
-              new CustomEvent("warning", { detail: { error, }, },),
-            );
-          },
-        );
+        utMetadata.on("warning", (warningEvent: any,) => {
+          const error = warningEvent.detail?.error || warningEvent;
+          this.emit(
+            "warning",
+            new CustomEvent("warning", { detail: { error, }, },),
+          );
+          this.torrent?.emit?.(
+            "warning",
+            new CustomEvent("warning", { detail: { error, }, },),
+          );
+        },);
 
-        // Inicia o fetch do metadata se não temos
         if (!this.metadata) {
           utMetadata.fetch();
         }
 
         this.emit(
           "wire",
-          new CustomEvent("wire", {
-            detail: { wire, addr, },
-          },),
+          new CustomEvent("wire", { detail: { wire, addr, }, },),
         );
-
-        // Repassa o wire ao Torrent (que cria interval de velocidade, idle timer etc.)
-        if (this.torrent && typeof this.torrent._registerWire === "function") {
-          this.torrent._registerWire(wire, addr,);
-        }
+        this.torrent?._registerWire?.(wire, addr,);
       }
-    },);
-
-    peer.on("error", (e,) => {
-      this._onPeerError(addr, e.detail.error,);
     },);
 
     peer.on("close", () => {
-      this._onPeerClose(addr,);
+      this.peers.delete(addr,);
+      this._drain();
     },);
-  }
 
-  private _onPeerError(addr: string, error: Error,): void {
-    this.emit("warning", new CustomEvent("warning", { detail: { error, }, },),);
-    this.torrent?.emit?.(
-      "warning",
-      new CustomEvent("warning", { detail: { error, }, },),
-    );
-    this.peers.delete(addr,);
-    this._drain();
-  }
-
-  private _onPeerClose(addr: string,): void {
-    this.peers.delete(addr,);
-
-    const queued = this.queue.find((q,) => q.addr === addr);
-    const retries = queued ? queued.retries : 0;
-
-    if (retries < RECONNECT_WAIT.length && !this.destroyed && !this.paused) {
-      const waitMs = RECONNECT_WAIT[retries]!;
-      const timeoutId = setTimeout(() => {
-        if (!this.destroyed && !this.paused) {
-          this._connectPeer(addr,);
-        }
-      }, waitMs,) as unknown as number;
-
-      if (!queued) {
-        this.queue.push({ addr, retries: retries + 1, timeoutId, },);
-      } else {
-        queued.retries = retries + 1;
-        queued.timeoutId = timeoutId;
-      }
-    }
-
-    this._drain();
+    peer.on("error", (e: any,) => {
+      this.peers.delete(addr,);
+      const error = e.detail?.error || e;
+      this.emit(
+        "warning",
+        new CustomEvent("warning", { detail: { error, }, },),
+      );
+      this._drain();
+    },);
   }
 
   private _drain(): void {
     if (this.destroyed || this.paused) return;
-
     while (this.peers.size < this.maxConns && this.queue.length > 0) {
-      const next = this.queue.shift();
-      if (next) {
-        if (next.timeoutId) clearTimeout(next.timeoutId,);
-        this._connectPeer(next.addr,);
+      const queued = this.queue.shift();
+      if (queued) {
+        this._connectPeer(queued.addr,);
       }
     }
   }
