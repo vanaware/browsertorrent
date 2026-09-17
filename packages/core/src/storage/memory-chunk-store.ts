@@ -74,7 +74,7 @@ export class MemoryChunkStore implements ChunkStore {
     return this._getAsync(index, opts,); // Retorna Promise<Uint8Array>
   }
 
-  private _getAsync(
+  private async _getAsync(
     index: number,
     opts?: { offset?: number; length?: number },
   ): Promise<Uint8Array> {
@@ -90,10 +90,10 @@ export class MemoryChunkStore implements ChunkStore {
     if (opts) {
       const offset = opts.offset || 0;
       const length = opts.length || buf.length - offset;
-      return Promise.resolve(buf.subarray(offset, offset + length,),);
+      return buf.subarray(offset, offset + length,);
     }
 
-    return Promise.resolve(buf,);
+    return buf;
   }
 
   put(
@@ -108,7 +108,7 @@ export class MemoryChunkStore implements ChunkStore {
     return promise;
   }
 
-  private _putAsync(index: number, buf: Uint8Array,): Promise<void> {
+  private async _putAsync(index: number, buf: Uint8Array,): Promise<void> {
     if (this.closed) throw new Error("Storage is closed",);
 
     const isLastChunk = index === this.lastChunkIndex;
@@ -123,7 +123,6 @@ export class MemoryChunkStore implements ChunkStore {
     }
 
     this.chunks.set(index, buf,);
-    return Promise.resolve();
   }
 
   close(cb?: (err: Error | null,) => void,): Promise<void> {
@@ -134,11 +133,10 @@ export class MemoryChunkStore implements ChunkStore {
     return promise;
   }
 
-  private _closeAsync(): Promise<void> {
+  private async _closeAsync(): Promise<void> {
     if (this.closed) throw new Error("Storage is already closed",);
     this.closed = true;
     this.chunks.clear();
-    return Promise.resolve();
   }
 
   destroy(cb?: (err: Error | null,) => void,): Promise<void> {
@@ -149,9 +147,8 @@ export class MemoryChunkStore implements ChunkStore {
     return promise;
   }
 
-  private _destroyAsync(): Promise<void> {
+  private async _destroyAsync(): Promise<void> {
     this.closed = true;
     this.chunks.clear();
-    return Promise.resolve();
   }
 }

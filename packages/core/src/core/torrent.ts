@@ -573,6 +573,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
         wire.amInterested = true;
         wire.sendInterested();
       }
+      console.log(`[Torrent] updateInterest done: peerChoking=${wire.peerChoking}, numPieces=${this.numPieces}, remotePiecesSize=${remotePieces.size}`);
       if (!wire.peerChoking) {
         requestBlocks();
       }
@@ -593,6 +594,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     },);
 
     const syncRemotePieces = () => {
+      console.log(`[Torrent] syncRemotePieces triggered: isHaveAll=${isHaveAll}, savedBitfield=${!!savedBitfield}, numPieces=${this.numPieces}`);
       if (isHaveAll) {
         for (let i = 0; i < this.numPieces; i++) remotePieces.add(i,);
       } else if (savedBitfield) {
@@ -604,6 +606,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
           }
         }
       }
+      console.log(`[Torrent] syncRemotePieces remotePieces now has ${remotePieces.size} items`);
       updateInterest();
     };
 
@@ -745,6 +748,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
       this.emit("ready",);
       return true;
     } catch (err) {
+      console.error("[Torrent] setMetadata error:", err);
       this._onError(err instanceof Error ? err : new Error(String(err,),),);
       return false;
     }
