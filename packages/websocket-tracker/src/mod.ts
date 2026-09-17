@@ -36,6 +36,7 @@ export interface WebSocketTrackerOptions {
   maxPeers?: number;
   maxPeersPerTorrent?: number;
   maxTorrents?: number;
+  intervalMs?: number;
 }
 
 const defaultOptions: WebSocketTrackerOptions = {
@@ -44,6 +45,7 @@ const defaultOptions: WebSocketTrackerOptions = {
   maxPeers: 1000,
   maxPeersPerTorrent: 50,
   maxTorrents: 100,
+  intervalMs: 120000,
 };
 
 export { defaultOptions };
@@ -62,6 +64,7 @@ export async function runCLI() {
     maxPeers: Number(Deno.env.get("MAX_PEERS") || "1000"),
     maxPeersPerTorrent: Number(Deno.env.get("MAX_PEERS_PER_TORRENT") || "50"),
     maxTorrents: Number(Deno.env.get("MAX_TORRENTS") || "100"),
+    intervalMs: Number(Deno.env.get("INTERVAL_MS") || "120000"),
   });
 
   // Handle graceful shutdown
