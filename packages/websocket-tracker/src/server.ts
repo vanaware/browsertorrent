@@ -6,6 +6,7 @@
 import { LRUCache } from "./lru.ts";
 import { parseWebSocketMessage } from "./parse-websocket.ts";
 import { StatsManager } from "./stats.ts";
+import { TrackerRouter } from "./router.ts";
 
 interface Peer {
   id: string;
@@ -56,6 +57,7 @@ export class WebSocketTracker {
   private readonly port: number;
   private readonly idleTimeout: number;
   private readonly intervalMs: number;
+  private readonly router: TrackerRouter;
 
   constructor(port: number = 8000, options: Partial<WebSocketTrackerOptions> = {}) {
     const config = { ...defaultOptions, ...options };
@@ -70,25 +72,157 @@ export class WebSocketTracker {
     this.peersByInfoHash = new LRUCache<Set<string>>(config.maxTorrents ?? 100);
     this.torrents = new Map<string, TorrentInfo>();
     this.stats = new StatsManager();
+    this.router = new TrackerRouter(this);
   }
 
   async start(): Promise<void> {
     this.server = Deno.serve({
       port: this.port,
-    }, (req: Request): Response | Promise<Response> => this.handleRequest(req));
+    }, (req: Request): Response | Promise<Response> => this.router.handleRequest(req));
 
     console.log("[TRACKER] WebSocket server listening on port", this.port);
     // Deno.serve() runs indefinitely until shutdown() is called
     await new Promise(() => {});
   }
 
-  private async handleRequest(req: Request): Promise<Response> {
-    if (req.headers.get("upgrade") === "websocket") {
-      const { socket, response } = Deno.upgradeWebSocket(req);
-      this.handleConnection(socket);
-      return response;
+  async handleHttpAnnounce(url: URL, req: Request): Promise<Response> {
+    const params = url.searchParams;
+    const infoHash = params.get("info_hash") || "";
+    const peerId = params.get("peer_id") || "";
+    const port = Number(params.get("port")) || 0;
+    const uploaded = Number(params.get("uploaded")) || 0;
+    const downloaded = Number(params.get("downloaded")) || 0;
+    const left = Number(params.get("left")) || 0;
+    const event = params.get("event") || undefined;
+    const numwant = params.has("numwant") ? Math.min(Number(params.get("numwant")) ?? 50, this.maxPeersPerTorrent) : undefined;
+
+    if (!infoHash || !peerId) {
+      return new Response(JSON.stringify({
+        action: "error",
+        error: "Missing required parameters: info_hash and peer_id",
+        failure_reason: "Missing required parameters: info_hash and peer_id",
+      }), { status: 400, headers: { "Content-Type": "application/json" } });
     }
-    return new Response("Not Found", { status: 404 });
+
+    // Find or create HTTP peer
+    let peer = this.peers.get(peerId);
+    if (!peer) {
+      peer = {
+        id: peerId,
+        ws: {} as WebSocket,
+        infoHash: "",
+        peerId,
+        port,
+        uploaded,
+        downloaded,
+        left,
+        connectedAt: Date.now(),
+        infoHashes: [],
+      };
+      this.peers.set(peerId, peer);
+      this.stats.incrementConnections();
+    }
+
+    // Process announce using existing logic
+    peer.infoHash = infoHash;
+    peer.port = port;
+    peer.uploaded = uploaded;
+    peer.downloaded = downloaded;
+    peer.left = left;
+
+    if (!peer.infoHashes.includes(infoHash)) {
+      peer.infoHashes.push(infoHash);
+    }
+
+    switch (event) {
+      case "started":
+        this.addPeerToTorrent(infoHash, peer);
+        break;
+      case "completed":
+        this.addPeerToTorrent(infoHash, peer);
+        this.incrementComplete(infoHash);
+        break;
+      case "stopped":
+        this.removePeerFromTorrent(infoHash, peer);
+        break;
+      case "update":
+        this.addPeerToTorrent(infoHash, peer);
+        break;
+      default:
+        this.addPeerToTorrent(infoHash, peer);
+        break;
+    }
+
+    this.peers.set(peerId, peer);
+
+    // Build response
+    const response = this.buildAnnounceResponse(infoHash, peer, numwant);
+
+    return new Response(JSON.stringify(response), {
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  async handleHttpScrape(url: URL, req: Request): Promise<Response> {
+    const params = url.searchParams;
+    const infoHash = params.get("info_hash") || "";
+
+    if (!infoHash) {
+      return new Response(JSON.stringify({
+        action: "error",
+        error: "Missing required parameter: info_hash",
+        failure_reason: "Missing required parameter: info_hash",
+      }), { status: 400, headers: { "Content-Type": "application/json" } });
+    }
+
+    const peerIds = this.peersByInfoHash.get(infoHash);
+    const peerCount = peerIds ? peerIds.size : 0;
+    const torrentInfo = this.torrents.get(infoHash) || { complete: 0, incomplete: 0 };
+
+    const response = {
+      action: "scrape",
+      info_hash: infoHash,
+      complete: torrentInfo.complete,
+      incomplete: torrentInfo.incomplete,
+      downloaded: this.stats.getDownloaded(),
+    };
+
+    return new Response(JSON.stringify(response), {
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  buildAnnounceResponse(infoHash: string, peer: Peer, numwant?: number): {
+    action: string;
+    interval: number;
+    complete: number;
+    incomplete: number;
+    peers: Array<{ peer_id: string; ip: string; port: number }>;
+  } {
+    const peerIds = this.peersByInfoHash.get(infoHash);
+    let peers: Array<{ peer_id: string; ip: string; port: number }> = [];
+
+    if (peerIds) {
+      const limit = numwant ?? Math.min(peerIds.size, this.maxPeersPerTorrent);
+      for (const pid of peerIds) {
+        if (peers.length >= limit) break;
+        if (pid === peer.id) continue;
+        const p = this.peers.get(pid);
+        if (p && p.port > 0) {
+          peers.push({ peer_id: p.peerId, ip: "127.0.0.1", port: p.port });
+        }
+      }
+    }
+
+    const torrentInfo = this.torrents.get(infoHash) || { complete: 0, incomplete: 0 };
+
+    return {
+      action: "announce",
+      interval: Math.ceil(this.intervalMs / 1000),
+      complete: torrentInfo.complete,
+      incomplete: torrentInfo.incomplete,
+      peers,
+    };
   }
 
   private handleDisconnection(peer: Peer): void {
@@ -100,7 +234,7 @@ export class WebSocketTracker {
     console.log("[TRACKER] Peer disconnected:", peer.id);
   }
 
-  private handleConnection(ws: WebSocket): void {
+  handleConnection(ws: WebSocket): void {
     const peerId = crypto.randomUUID();
     const peer: Peer = {
       id: peerId,

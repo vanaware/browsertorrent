@@ -4,6 +4,7 @@
  */
 
 import { WebSocketTracker } from "./server.ts";
+import { TrackerRouter } from "./router.ts";
 import { PeerConnectionManager } from "./peer.ts";
 import { SwarmManager } from "./swarm.ts";
 import { LRUCache } from "./lru.ts";
@@ -11,6 +12,7 @@ import { StatsManager } from "./stats.ts";
 import { parseWebSocketMessage } from "./parse-websocket.ts";
 
 export { WebSocketTracker };
+export { TrackerRouter };
 export { PeerConnectionManager };
 export { SwarmManager };
 export { LRUCache };
