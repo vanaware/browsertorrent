@@ -162,6 +162,7 @@ export const CONFIGURACOES: Record<ModoExportacao, ExportConfig> = {
       "deno.json",
       "deno.jsonc",
       "readme.md",
+      "deploy.sh",
     ],
     incluiVersao: false,
     instrucaoCustomizada:

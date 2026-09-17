@@ -77,6 +77,9 @@ Deno.test("deveIncluirArquivo: Deve BLOQUEAR arquivos raiz NÃO configurados", (
 Deno.test("deveIncluirArquivo: Configuração 'docs' deve capturar raiz e subpasta docs", () => {
   const config = CONFIGURACOES.docs;
   assertEquals(deveIncluirArquivo("readme.md", config,), true,);
-  assertEquals(deveIncluirArquivo("docs/arquitetura.md", config,), true,);
+  assertEquals(
+    deveIncluirArquivo("docs/browsertorrent/arquitetura.md", config,),
+    true,
+  );
   assertEquals(deveIncluirArquivo("src/main.ts", config,), false,);
 });

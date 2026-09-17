@@ -28,7 +28,7 @@ export class PeerConnectionManager {
   private connections: Map<string, PeerConnection>;
   private readonly maxConnections: number;
 
-  constructor(maxConnections: number = 1000) {
+  constructor(maxConnections: number = 1000,) {
     this.connections = new Map();
     this.maxConnections = maxConnections;
   }
@@ -36,7 +36,12 @@ export class PeerConnectionManager {
   /**
    * Add a new peer connection.
    */
-  addConnection(ws: WebSocket, peerId: string, infoHash: string, port: number): PeerInfo {
+  addConnection(
+    ws: WebSocket,
+    peerId: string,
+    infoHash: string,
+    port: number,
+  ): PeerInfo {
     // Check if we're at max connections
     if (this.connections.size >= this.maxConnections) {
       this.evictOldestConnection();
@@ -54,7 +59,7 @@ export class PeerConnectionManager {
       lastSeen: Date.now(),
     };
 
-    this.connections.set(peerId, { ws, info });
+    this.connections.set(peerId, { ws, info, },);
 
     return info;
   }
@@ -62,8 +67,8 @@ export class PeerConnectionManager {
   /**
    * Get a peer connection by peer ID.
    */
-  getConnection(peerId: string): PeerConnection | undefined {
-    const conn = this.connections.get(peerId);
+  getConnection(peerId: string,): PeerConnection | undefined {
+    const conn = this.connections.get(peerId,);
     if (conn) {
       conn.info.lastSeen = Date.now();
     }
@@ -73,8 +78,13 @@ export class PeerConnectionManager {
   /**
    * Update peer stats.
    */
-  updateStats(peerId: string, uploaded: number, downloaded: number, left: number): void {
-    const conn = this.connections.get(peerId);
+  updateStats(
+    peerId: string,
+    uploaded: number,
+    downloaded: number,
+    left: number,
+  ): void {
+    const conn = this.connections.get(peerId,);
     if (conn) {
       conn.info.uploaded = uploaded;
       conn.info.downloaded = downloaded;
@@ -86,8 +96,8 @@ export class PeerConnectionManager {
   /**
    * Update peer event.
    */
-  updateEvent(peerId: string, event: string): void {
-    const conn = this.connections.get(peerId);
+  updateEvent(peerId: string, event: string,): void {
+    const conn = this.connections.get(peerId,);
     if (conn) {
       conn.info.event = event;
       conn.info.lastSeen = Date.now();
@@ -97,11 +107,11 @@ export class PeerConnectionManager {
   /**
    * Remove a peer connection.
    */
-  removeConnection(peerId: string): boolean {
-    const conn = this.connections.get(peerId);
+  removeConnection(peerId: string,): boolean {
+    const conn = this.connections.get(peerId,);
     if (conn) {
       conn.ws.close();
-      this.connections.delete(peerId);
+      this.connections.delete(peerId,);
       return true;
     }
     return false;
@@ -110,12 +120,12 @@ export class PeerConnectionManager {
   /**
    * Get all peers for a specific infoHash.
    */
-  getPeersByInfoHash(infoHash: string): PeerInfo[] {
+  getPeersByInfoHash(infoHash: string,): PeerInfo[] {
     const peers: PeerInfo[] = [];
 
     for (const conn of this.connections.values()) {
       if (conn.info.infoHash === infoHash) {
-        peers.push(conn.info);
+        peers.push(conn.info,);
       }
     }
 
@@ -125,12 +135,12 @@ export class PeerConnectionManager {
   /**
    * Get all peer IDs for a specific infoHash.
    */
-  getPeerIdsByInfoHash(infoHash: string): string[] {
+  getPeerIdsByInfoHash(infoHash: string,): string[] {
     const peerIds: string[] = [];
 
     for (const conn of this.connections.values()) {
       if (conn.info.infoHash === infoHash) {
-        peerIds.push(conn.info.peerId);
+        peerIds.push(conn.info.peerId,);
       }
     }
 
@@ -148,7 +158,7 @@ export class PeerConnectionManager {
    * Get all connections.
    */
   getAllConnections(): PeerConnection[] {
-    return Array.from(this.connections.values());
+    return Array.from(this.connections.values(),);
   }
 
   /**
@@ -166,9 +176,9 @@ export class PeerConnectionManager {
    */
   private evictOldestConnection(): void {
     let oldestPeerId: string | null = null;
-    let oldestTime = Date.now();
+    let oldestTime = Infinity;
 
-    for (const [peerId, conn] of this.connections.entries()) {
+    for (const [peerId, conn,] of this.connections.entries()) {
       if (conn.info.connectedAt < oldestTime) {
         oldestTime = conn.info.connectedAt;
         oldestPeerId = peerId;
@@ -176,8 +186,8 @@ export class PeerConnectionManager {
     }
 
     if (oldestPeerId) {
-      this.removeConnection(oldestPeerId);
-      console.log("[PEER] Evicted oldest connection:", oldestPeerId);
+      this.removeConnection(oldestPeerId,);
+      console.log("[PEER] Evicted oldest connection:", oldestPeerId,);
     }
   }
 }

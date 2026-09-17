@@ -33,7 +33,7 @@ export class StatsManager {
   private startTime: number;
   private readonly maxMemoryMB: number;
 
-  constructor(maxMemoryMB: number = 512) {
+  constructor(maxMemoryMB: number = 512,) {
     this.connections = 0;
     this.messages = 0;
     this.completed = 0;
@@ -75,7 +75,7 @@ export class StatsManager {
   /**
    * Increment downloaded bytes.
    */
-  addDownloaded(bytes: number): void {
+  addDownloaded(bytes: number,): void {
     this.downloaded += bytes;
   }
 
@@ -98,7 +98,7 @@ export class StatsManager {
   /**
    * Get server health status.
    */
-  getHealth(totalPeers: number, totalTorrents: number): ServerHealth {
+  getHealth(totalPeers: number, totalTorrents: number,): ServerHealth {
     const memoryUsage = this.getMemoryUsage();
 
     let status: "healthy" | "degraded" | "unhealthy" = "healthy";
@@ -123,7 +123,9 @@ export class StatsManager {
    */
   private getMemoryUsage(): number {
     if (typeof performance !== "undefined") {
-      const mem = (performance as Performance & { memory?: { usedJSHeapSize: number } }).memory;
+      const mem =
+        (performance as Performance & { memory?: { usedJSHeapSize: number } })
+          .memory;
       if (mem) {
         return mem.usedJSHeapSize / (1024 * 1024);
       }
@@ -135,7 +137,7 @@ export class StatsManager {
    * Get uptime in seconds.
    */
   getUptimeSeconds(): number {
-    return Math.floor((Date.now() - this.startTime) / 1000);
+    return Math.floor((Date.now() - this.startTime) / 1000,);
   }
 
   /**
@@ -143,11 +145,13 @@ export class StatsManager {
    */
   getFormattedUptime(): string {
     const seconds = this.getUptimeSeconds();
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
+    const hours = Math.floor(seconds / 3600,);
+    const minutes = Math.floor((seconds % 3600) / 60,);
     const secs = seconds % 60;
 
-    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    return `${hours.toString().padStart(2, "0",)}:${
+      minutes.toString().padStart(2, "0",)
+    }:${secs.toString().padStart(2, "0",)}`;
   }
 
   /**

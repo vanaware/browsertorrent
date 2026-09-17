@@ -3,7 +3,7 @@
  * Optimized for small servers with minimal memory footprint.
  */
 
-interface LRUNode<T> {
+interface LRUNode<T,> {
   key: string;
   value: T;
   prev: LRUNode<T> | null;
@@ -14,14 +14,14 @@ interface LRUNode<T> {
  * LRU Cache implementation using a doubly-linked list + Map.
  * Provides O(1) get and put operations.
  */
-export class LRUCache<T> {
+export class LRUCache<T,> {
   private map: Map<string, LRUNode<T>>;
   private head: LRUNode<T> | null;
   private tail: LRUNode<T> | null;
   private readonly capacity: number;
   private size: number;
 
-  constructor(capacity: number = 100) {
+  constructor(capacity: number = 100,) {
     this.capacity = capacity;
     this.map = new Map();
     this.head = null;
@@ -32,45 +32,45 @@ export class LRUCache<T> {
   /**
    * Get a value by key. Moves the accessed node to the front (most recently used).
    */
-  get(key: string): T | undefined {
-    const node = this.map.get(key);
+  get(key: string,): T | undefined {
+    const node = this.map.get(key,);
     if (!node) return undefined;
 
-    this.moveToFront(node);
+    this.moveToFront(node,);
     return node.value;
   }
 
   /**
    * Put a value into the cache. Evicts the least recently used item if at capacity.
    */
-  put(key: string, value: T): void {
-    const existing = this.map.get(key);
+  put(key: string, value: T,): void {
+    const existing = this.map.get(key,);
     if (existing) {
       existing.value = value;
-      this.moveToFront(existing);
+      this.moveToFront(existing,);
       return;
     }
 
-    const newNode: LRUNode<T> = { key, value, prev: null, next: null };
+    const newNode: LRUNode<T> = { key, value, prev: null, next: null, };
 
     if (this.size >= this.capacity) {
       this.evict();
     }
 
-    this.addToFront(newNode);
-    this.map.set(key, newNode);
+    this.addToFront(newNode,);
+    this.map.set(key, newNode,);
     this.size++;
   }
 
   /**
    * Remove a value by key.
    */
-  remove(key: string): boolean {
-    const node = this.map.get(key);
+  remove(key: string,): boolean {
+    const node = this.map.get(key,);
     if (!node) return false;
 
-    this.removeNode(node);
-    this.map.delete(key);
+    this.removeNode(node,);
+    this.map.delete(key,);
     this.size--;
     return true;
   }
@@ -78,8 +78,8 @@ export class LRUCache<T> {
   /**
    * Check if a key exists in the cache.
    */
-  has(key: string): boolean {
-    return this.map.has(key);
+  has(key: string,): boolean {
+    return this.map.has(key,);
   }
 
   /**
@@ -106,7 +106,7 @@ export class LRUCache<T> {
     const keys: string[] = [];
     let current = this.head;
     while (current) {
-      keys.push(current.key);
+      keys.push(current.key,);
       current = current.next;
     }
     return keys;
@@ -119,7 +119,7 @@ export class LRUCache<T> {
     const values: T[] = [];
     let current = this.head;
     while (current) {
-      values.push(current.value);
+      values.push(current.value,);
       current = current.next;
     }
     return values;
@@ -128,24 +128,24 @@ export class LRUCache<T> {
   /**
    * Get all entries as [key, value] pairs.
    */
-  entries(): [string, T][] {
-    const entries: [string, T][] = [];
+  entries(): [string, T,][] {
+    const entries: [string, T,][] = [];
     let current = this.head;
     while (current) {
-      entries.push([current.key, current.value]);
+      entries.push([current.key, current.value,],);
       current = current.next;
     }
     return entries;
   }
 
-  private moveToFront(node: LRUNode<T>): void {
+  private moveToFront(node: LRUNode<T>,): void {
     if (node === this.head) return;
 
-    this.removeNode(node);
-    this.addToFront(node);
+    this.removeNode(node,);
+    this.addToFront(node,);
   }
 
-  private addToFront(node: LRUNode<T>): void {
+  private addToFront(node: LRUNode<T>,): void {
     node.prev = null;
     node.next = this.head;
 
@@ -159,7 +159,7 @@ export class LRUCache<T> {
     }
   }
 
-  private removeNode(node: LRUNode<T>): void {
+  private removeNode(node: LRUNode<T>,): void {
     if (node.prev) {
       node.prev.next = node.next;
     } else {
@@ -180,8 +180,8 @@ export class LRUCache<T> {
     if (!this.tail) return;
 
     const key = this.tail.key;
-    this.removeNode(this.tail);
-    this.map.delete(key);
+    this.removeNode(this.tail,);
+    this.map.delete(key,);
     this.size--;
   }
 }

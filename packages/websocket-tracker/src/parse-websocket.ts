@@ -8,9 +8,9 @@ export interface TrackerAnnounceRequest {
   info_hash: string;
   peer_id: string;
   port: number;
-  uploaded: number;
-  downloaded: number;
-  left: number;
+  uploaded?: number;
+  downloaded?: number;
+  left?: number;
   event?: "started" | "completed" | "stopped" | "";
   numwant?: number;
   compact?: number;
@@ -45,14 +45,17 @@ export interface TrackerScrapeResponse {
 }
 
 export type TrackerMessage = TrackerAnnounceRequest | TrackerScrapeRequest;
-export type TrackerResponse = TrackerAnnounceResponse | TrackerScrapeResponse | TrackerErrorResponse;
+export type TrackerResponse =
+  | TrackerAnnounceResponse
+  | TrackerScrapeResponse
+  | TrackerErrorResponse;
 
 /**
  * Parse an incoming WebSocket message.
  */
-export function parseWebSocketMessage(data: string): TrackerMessage | null {
+export function parseWebSocketMessage(data: string,): TrackerMessage | null {
   try {
-    const parsed = JSON.parse(data);
+    const parsed = JSON.parse(data,);
 
     // Validate required fields
     if (!parsed.action || !parsed.info_hash || !parsed.peer_id) {
@@ -62,14 +65,14 @@ export function parseWebSocketMessage(data: string): TrackerMessage | null {
     // Parse based on action type
     switch (parsed.action) {
       case "announce":
-        return parseAnnounceRequest(parsed);
+        return parseAnnounceRequest(parsed,);
       case "scrape":
-        return parseScrapeRequest(parsed);
+        return parseScrapeRequest(parsed,);
       default:
         return null;
     }
   } catch (error) {
-    console.error("[PARSE] Failed to parse message:", error);
+    console.error("[PARSE] Failed to parse message:", error,);
     return null;
   }
 }
@@ -77,7 +80,9 @@ export function parseWebSocketMessage(data: string): TrackerMessage | null {
 /**
  * Parse an announce request.
  */
-function parseAnnounceRequest(data: any): TrackerAnnounceRequest | null {
+function parseAnnounceRequest(
+  data: Record<string, unknown>,
+): TrackerAnnounceRequest | null {
   // Validate required fields
   if (!data.info_hash || !data.peer_id || !data.port) {
     return null;
@@ -85,23 +90,25 @@ function parseAnnounceRequest(data: any): TrackerAnnounceRequest | null {
 
   return {
     action: "announce",
-    info_hash: data.info_hash,
-    peer_id: data.peer_id,
-    port: Number(data.port),
-    uploaded: Number(data.uploaded) || 0,
-    downloaded: Number(data.downloaded) || 0,
-    left: Number(data.left) || 0,
-    event: data.event || "",
-    numwant: data.numwant || 50,
-    compact: data.compact || 0,
-    no_peer_id: data.no_peer_id || 0,
+    info_hash: String(data.info_hash,),
+    peer_id: String(data.peer_id,),
+    port: Number(data.port,),
+    uploaded: Number(data.uploaded,) || 0,
+    downloaded: Number(data.downloaded,) || 0,
+    left: Number(data.left,) || 0,
+    event: (data.event as TrackerAnnounceRequest["event"]) || "",
+    numwant: Number(data.numwant,) || 50,
+    compact: Number(data.compact,) || 0,
+    no_peer_id: Number(data.no_peer_id,) || 0,
   };
 }
 
 /**
  * Parse a scrape request.
  */
-function parseScrapeRequest(data: any): TrackerScrapeRequest | null {
+function parseScrapeRequest(
+  data: Record<string, unknown>,
+): TrackerScrapeRequest | null {
   // Validate required fields
   if (!data.info_hash || !data.peer_id) {
     return null;
@@ -109,15 +116,18 @@ function parseScrapeRequest(data: any): TrackerScrapeRequest | null {
 
   return {
     action: "scrape",
-    info_hash: data.info_hash,
-    peer_id: data.peer_id,
+    info_hash: String(data.info_hash,),
+    peer_id: String(data.peer_id,),
   };
 }
 
 /**
  * Format an error response.
  */
-export function formatErrorResponse(code: string, message: string): TrackerErrorResponse {
+export function formatErrorResponse(
+  code: string,
+  message: string,
+): TrackerErrorResponse {
   return {
     action: "error",
     code,
@@ -131,7 +141,7 @@ export function formatErrorResponse(code: string, message: string): TrackerError
 export function formatAnnounceResponse(
   infoHash: string,
   peerId: string,
-  peers: string[]
+  peers: string[],
 ): TrackerAnnounceResponse {
   return {
     action: "announce",
@@ -148,7 +158,7 @@ export function formatScrapeResponse(
   infoHash: string,
   complete: number,
   incomplete: number,
-  downloaded: number
+  downloaded: number,
 ): TrackerScrapeResponse {
   return {
     action: "scrape",
@@ -162,7 +172,7 @@ export function formatScrapeResponse(
 /**
  * Validate a tracker message.
  */
-export function validateTrackerMessage(message: TrackerMessage): boolean {
+export function validateTrackerMessage(message: TrackerMessage,): boolean {
   // Validate info_hash format (should be 20-byte hex string)
   if (!message.info_hash || message.info_hash.length < 20) {
     return false;
@@ -175,7 +185,7 @@ export function validateTrackerMessage(message: TrackerMessage): boolean {
 
   // Validate port range
   if ("port" in message) {
-    const port = Number(message.port);
+    const port = Number(message.port,);
     if (port < 1 || port > 65535) {
       return false;
     }
