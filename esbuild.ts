@@ -67,6 +67,7 @@ const CONFIG: GlobalTargetConfig = {
     distdir: "packages/server/build/dist",
     clean: ["worker-db.js", "worker-db.js.map",],
     entryPoints: ["worker.ts",],
+    outfile: "worker-db.js",
     platform: "browser",
     format: "esm",
     bundle: true,

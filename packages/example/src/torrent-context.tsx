@@ -8,6 +8,7 @@ import { signal, } from "@preact/signals";
 import type { ComponentChildren, } from "preact";
 import type { Client, Torrent, Wire, } from "@loco/webtorrent";
 import type { WebTorrentServer, } from "@loco/webtorrent";
+import { db, } from "@loco/worker-db";
 
 // ─── Trackers públicos ─────────────────────────────────────────────────────────
 
@@ -21,10 +22,12 @@ export const PUBLIC_TRACKERS = [
 
 export const clientSignal = signal<Client | null>(null,);
 export const serverSignal = signal<WebTorrentServer | null>(null,);
+export const torrentsSignal = signal<Torrent[]>([]);
 export const torrentSignal = signal<Torrent | null>(null,);
 export const peersSignal = signal<Wire[]>([],);
 export const downSpeedSignal = signal(0,);
 export const upSpeedSignal = signal(0,);
+export const tickSignal = signal(0,);
 export const errorSignal = signal<string | null>(null,);
 export const modeSignal = signal<"idle" | "seeding" | "leeching">("idle",);
 export const debugSignal = signal<string[]>([],);
@@ -41,6 +44,8 @@ function dbg(...args: unknown[]) {
 }
 
 // ─── Helpers de ciclo de vida ────────────────────────────────────────────────
+
+const torrentsDb = db("browsertorrent", "torrents",);
 
 export async function initClient(): Promise<Client> {
   const existing = clientSignal.value;
@@ -83,10 +88,34 @@ export async function initClient(): Promise<Client> {
   wt.on("torrent", (e: Event,) => {
     const ce = e as CustomEvent<Torrent>;
     dbg("wt.torrent event:", ce.detail?.infoHash,);
+    const t = ce.detail;
+    if (!torrentsSignal.value.find((x,) => x.infoHash === t.infoHash)) {
+      torrentsSignal.value = [...torrentsSignal.value, t,];
+    }
   },);
 
   clientSignal.value = wt;
   dbg("initClient: client created and stored",);
+
+  // Periodic UI tick
+  setInterval(() => {
+    tickSignal.value += 1;
+  }, 1000,);
+
+  // Resume torrents from DB
+  try {
+    const saved = await torrentsDb.values<{ magnetURI: string }>();
+    dbg(`initClient: found ${saved.length} torrents in DB`,);
+    for (const item of saved) {
+      dbg(`initClient: resuming torrent ${item.magnetURI}`,);
+      wt.add(item.magnetURI,).catch((err,) => {
+        dbg(`initClient: error resuming torrent:`, err,);
+      },);
+    }
+  } catch (err) {
+    dbg("initClient: error loading torrents from DB", err,);
+  }
+
   return wt;
 }
 
@@ -147,6 +176,13 @@ export async function seedFile(file: File,): Promise<void> {
     torrentSignal.value = torrent;
     modeSignal.value = "seeding";
     dbg("seedFile: torrentSignal.value set, mode = seeding",);
+
+    // Save to DB
+    torrentsDb.set(torrent.infoHash, {
+      name: torrent.name,
+      magnetURI: torrent.magnetURI,
+      addedAt: Date.now(),
+    },).catch(console.warn,);
 
     // ── Torrent lifecycle events ──────────────────────────────────────────────
 
@@ -298,6 +334,13 @@ export async function addTorrent(torrentId: string,): Promise<void> {
     modeSignal.value = "leeching";
     dbg("addTorrent: torrentSignal.value set, mode = leeching",);
 
+    // Save to DB
+    torrentsDb.set(torrent.infoHash, {
+      name: torrent.name,
+      magnetURI: torrent.magnetURI,
+      addedAt: Date.now(),
+    },).catch(console.warn,);
+
     // ── Torrent lifecycle events ──────────────────────────────────────────────
 
     torrent.on("infoHash", () => {
@@ -416,6 +459,27 @@ export async function addTorrent(torrentId: string,): Promise<void> {
     errorSignal.value = msg;
     throw e;
   }
+}
+
+export async function removeTorrent(infoHash: string,): Promise<void> {
+  dbg("removeTorrent: starting, infoHash:", infoHash,);
+  const wt = clientSignal.value;
+  if (wt) {
+    const torrent = await wt.get(infoHash,);
+    if (torrent) {
+      dbg("removeTorrent: destroying torrent object",);
+      torrent.destroy();
+    }
+  }
+  torrentsSignal.value = torrentsSignal.value.filter((t,) =>
+    t.infoHash !== infoHash
+  );
+  if (torrentSignal.value?.infoHash === infoHash) {
+    torrentSignal.value = null;
+    modeSignal.value = "idle";
+  }
+  await torrentsDb.delete(infoHash,);
+  dbg("removeTorrent: done",);
 }
 
 export function cleanup(): void {

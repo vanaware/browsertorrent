@@ -31,6 +31,7 @@ export function LeecherPanel({ disabled, }: Props,) {
     loading.value = true;
     try {
       await addTorrent(id,);
+      magnetInput.value = "";
     } catch {
       // erro no signal
     } finally {

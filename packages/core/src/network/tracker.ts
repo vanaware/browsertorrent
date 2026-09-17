@@ -73,7 +73,7 @@ export interface TrackerOffer {
 
 // Mensagem recebida do Tracker (Pode ser uma resposta ao announce, uma offer ou uma answer)
 export interface TrackerMessage {
-  action?: "announce" | "scrape" | "error";
+  action?: "announce" | "scrape" | "error" | "offer" | "answer";
   info_hash?: string;
   interval?: number;
   complete?: number;
@@ -777,6 +777,22 @@ export class WsTracker extends TypedEventTarget<TrackerEvents>
                 new CustomEvent("peer", {
                   detail: {
                     peerId: data.peer_id,
+                    offer: data.offer,
+                    answer: data.answer,
+                    offerId: data.offer_id,
+                  },
+                },),
+              );
+            }
+          } else if (data.action === "offer" || data.action === "answer") {
+            // Handle signaling (WebRTC) - dedicated actions
+            const peerId = (data as any).from_peer_id || data.peer_id;
+            if (peerId) {
+              this.emit(
+                "peer",
+                new CustomEvent("peer", {
+                  detail: {
+                    peerId,
                     offer: data.offer,
                     answer: data.answer,
                     offerId: data.offer_id,

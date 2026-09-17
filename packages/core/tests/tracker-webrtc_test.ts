@@ -63,7 +63,7 @@ Deno.test("WsTracker: sends announce with offers and receives interval", async (
     const mockWs = tracker["ws"] as unknown as MockWebSocket;
     assertExists(mockWs,);
 
-    const sentMsg = JSON.parse(mockWs.sentMessages[0],);
+    const sentMsg = JSON.parse(mockWs.sentMessages[0] as string,);
     assertEquals(sentMsg.action, "announce",);
     assertEquals(sentMsg.offers[0].offer_id, "id1",);
 
@@ -95,7 +95,7 @@ Deno.test("WsTracker: emits peer event when receiving offer", async () => {
       peerId: new Uint8Array(20,).fill(2,),
     },);
 
-    tracker.announce();
+    const announcePromise = tracker.announce().catch(() => {});
     await new Promise((resolve,) => setTimeout(resolve, 50,));
 
     const mockWs = tracker["ws"] as unknown as MockWebSocket;
@@ -109,12 +109,13 @@ Deno.test("WsTracker: emits peer event when receiving offer", async () => {
 
     mockWs.simulateMessage({
       action: "announce",
+      interval: 1800,
       peer_id: "remote-peer",
       offer_id: "remote-id",
       offer: { type: "offer", sdp: "remote-sdp", },
     },);
 
-    await new Promise((resolve,) => setTimeout(resolve, 10,));
+    await announcePromise;
     assertEquals(peerEventEmitted, true,);
 
     tracker.destroy();

@@ -14,8 +14,10 @@ class MockRTCPeerConnection {
   public ondatachannel: ((event: unknown,) => void) | null = null;
   public onconnectionstatechange: (() => void) | null = null;
   public oniceconnectionstatechange: (() => void) | null = null;
+  public onicegatheringstatechange: (() => void) | null = null;
   public connectionState: RTCPeerConnectionState = "new";
   public iceConnectionState: RTCIceConnectionState = "new";
+  public iceGatheringState: RTCIceGatheringState = "new";
 
   private channel: MockRTCDataChannel | null = null;
   private static instances: MockRTCPeerConnection[] = [];
@@ -34,6 +36,11 @@ class MockRTCPeerConnection {
 
   setLocalDescription(desc: RTCSessionDescriptionInit,) {
     this.localDescription = desc;
+    setTimeout(() => {
+      this.iceGatheringState = "complete";
+      this.onicecandidate?.({ candidate: null, } as any,);
+      this.onicegatheringstatechange?.();
+    }, 10,);
   }
 
   setRemoteDescription(desc: RTCSessionDescriptionInit,) {
@@ -130,7 +137,7 @@ Deno.test("peer: initiator creates offer and data channel", async () => {
     peerError = err.detail?.error || (e as Error);
   },);
 
-  await new Promise((resolve,) => setTimeout(resolve, 100,));
+  await new Promise((resolve,) => setTimeout(resolve, 500,));
 
   if (peerError) {
     // 🔥 CORREÇÃO: Assegão de tipo para acessar .message com segurança

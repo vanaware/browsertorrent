@@ -422,6 +422,147 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
 
     this._speedIntervals.add(interval,);
     this._resetIdleTimer();
+
+    // ── 1. Enviar Bitfield inicial e Unchoke ────────────────────────────────
+    if (this.bitfield.count() > 0) {
+      try {
+        wire.sendBitfield(this.bitfield.toBuffer());
+      } catch (err) {
+        console.warn("[Torrent] Erro ao enviar bitfield inicial:", err,);
+      }
+    }
+    // Desafogar o peer remoto para permitir requisições
+    wire.sendUnchoke();
+
+    // ── 2. Responder a requisições de blocos ────────────────────────────────
+    wire.on("request", async (e: any,) => {
+      const { index, offset, length, } = e.detail;
+      const piece = await this.getPiece(index,);
+      if (piece && offset + length <= piece.length) {
+        const block = piece.subarray(offset, offset + length,);
+        wire.sendPiece(index, offset, block,);
+        this._uploaded += block.length;
+        this.emit(
+          "upload",
+          new CustomEvent("upload", { detail: { bytes: block.length, }, },),
+        );
+        this._forwardToFiles("upload", index, block.length,);
+      }
+    },);
+
+    // ── 3. Download de peças a partir do peer remoto ───────────────────────
+    const remotePieces = new Set<number>();
+    const BLOCK_SIZE = 16384;
+    let activePiece: {
+      index: number;
+      length: number;
+      buffer: Uint8Array;
+      receivedBytes: number;
+      pendingOffsets: Set<number>;
+    } | null = null;
+
+    const requestBlocks = () => {
+      if (wire.isDestroyed || wire.peerChoking || this.done) return;
+      if (activePiece) return;
+
+      let targetPieceIndex = -1;
+      for (let i = 0; i < this.numPieces; i++) {
+        if (!this.bitfield.get(i,) && remotePieces.has(i,)) {
+          targetPieceIndex = i;
+          break;
+        }
+      }
+
+      if (targetPieceIndex === -1) return;
+
+      const pLen = targetPieceIndex === this.numPieces - 1
+        ? this.lastPieceLength
+        : this.pieceLength;
+
+      activePiece = {
+        index: targetPieceIndex,
+        length: pLen,
+        buffer: new Uint8Array(pLen,),
+        receivedBytes: 0,
+        pendingOffsets: new Set(),
+      };
+
+      for (let offset = 0; offset < pLen; offset += BLOCK_SIZE) {
+        const len = Math.min(BLOCK_SIZE, pLen - offset,);
+        activePiece.pendingOffsets.add(offset,);
+        wire.sendRequest(targetPieceIndex, offset, len,);
+      }
+    };
+
+    const updateInterest = () => {
+      if (this.done) return;
+      let hasInterestingPiece = false;
+      for (let i = 0; i < this.numPieces; i++) {
+        if (!this.bitfield.get(i,) && remotePieces.has(i,)) {
+          hasInterestingPiece = true;
+          break;
+        }
+      }
+      if (hasInterestingPiece && !wire.amInterested) {
+        wire.amInterested = true;
+        wire.sendInterested();
+      }
+      if (!wire.peerChoking) {
+        requestBlocks();
+      }
+    };
+
+    wire.on("bitfield", (e: any,) => {
+      const bf: Uint8Array = e.detail.bitfield;
+      for (let i = 0; i < this.numPieces; i++) {
+        const byteIdx = Math.floor(i / 8,);
+        const bitIdx = 7 - (i % 8);
+        if (byteIdx < bf.length && (bf[byteIdx]! & (1 << bitIdx))) {
+          remotePieces.add(i,);
+        }
+      }
+      updateInterest();
+    },);
+
+    wire.on("have", (e: any,) => {
+      remotePieces.add(e.detail.index,);
+      updateInterest();
+    },);
+
+    wire.on("haveAll", () => {
+      for (let i = 0; i < this.numPieces; i++) remotePieces.add(i,);
+      updateInterest();
+    },);
+
+    wire.on("unchoke", () => {
+      updateInterest();
+    },);
+
+    wire.on("piece", async (e: any,) => {
+      const { index, offset, block, } = e.detail;
+      if (!activePiece || activePiece.index !== index) return;
+
+      activePiece.buffer.set(block, offset,);
+      if (activePiece.pendingOffsets.has(offset,)) {
+        activePiece.pendingOffsets.delete(offset,);
+        activePiece.receivedBytes += block.length;
+      }
+
+      if (activePiece.receivedBytes >= activePiece.length) {
+        const completedPiece = activePiece;
+        activePiece = null;
+
+        const success = await this.receivePiece(
+          completedPiece.index,
+          completedPiece.buffer,
+        );
+        if (success) {
+          wire.sendHave(completedPiece.index,);
+          (this._swarm as any)?.broadcastHave?.(completedPiece.index,);
+        }
+        requestBlocks();
+      }
+    },);
   }
 
   // ==========================================================================
@@ -537,6 +678,11 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
           : undefined;
         const buf = await this._store.get(i, opts,);
         await this._verifyPiece(i, buf,);
+        this.bitfield.set(i,);
+        const pieceLen = i === this.numPieces - 1
+          ? this.lastPieceLength
+          : this.pieceLength;
+        this._downloaded += pieceLen;
         // Marca o Piece object como baixado (hash setado = verificado)
         if (i < this._pieces.length) {
           const piece = this._pieces[i];
@@ -551,6 +697,9 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
           console.warn(`[Torrent] Erro ao verificar peça ${i}:`, err,);
         }
       }
+    }
+    if (this.progress >= 1) {
+      this.emit("done",);
     }
   }
 

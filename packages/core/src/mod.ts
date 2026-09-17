@@ -80,6 +80,7 @@ export interface ClientOptions {
 export interface AddTorrentOptions {
   skipVerify?: boolean;
   destroyStoreOnDestroy?: boolean;
+  announce?: string[];
   onReady?: (torrent: Torrent,) => void;
   /**
    * Optional callback invoked when the torrent is fully done.
@@ -95,6 +96,8 @@ export interface SeedOptions {
   pieceSize?: PieceSizeEnum | number;
   /** BEP-12 trackers. */
   trackers?: string[];
+  /** Alias for trackers to match WebTorrent API. */
+  announce?: string[];
   /** BEP-19 web seeds. */
   webSeeds?: string[];
   /** BEP-9 comment. */
@@ -378,12 +381,21 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
 
     const store = await this._createChunkStore(parsed,);
 
+    const announceList: string[] = [];
+    if (parsed.announce) {
+      announceList.push(...parsed.announce,);
+    }
+    if (opts.announce) {
+      announceList.push(...opts.announce,);
+    }
+
     const swarm = new Swarm({
       infoHash: parsed.infoHashBuffer,
       peerId: this.peerIdBuffer,
-      announce: parsed.announce,
+      announce: announceList.length > 0 ? announceList : undefined,
       maxConns: this.opts.maxConns,
       port: this.opts.port,
+      rtcConfig: this.opts.rtcConfig,
       metadata: parsed.pieces.length > 0 ? encode(parsed.info,) : undefined,
     },);
 
@@ -493,7 +505,7 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
       entry,
       writer,
       pieceSize: opts.pieceSize ?? PieceSizeEnum.SIZE_AUTO,
-      trackers: opts.trackers ?? [],
+      trackers: opts.trackers ?? (opts.announce ?? []),
       webSeeds: opts.webSeeds ?? [],
       comment: opts.comment,
       createdBy: opts.createdBy,
@@ -547,7 +559,8 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
         store,
         torrent.pieceLength,
       );
-      console.log("[seed] Chunk store populated successfully",);
+      await torrent.rescanFiles();
+      console.log("[seed] Chunk store populated and verified successfully",);
     } else {
       console.log(
         "[seed] Skipping chunk store population: store=" + !!store,

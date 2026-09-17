@@ -21,7 +21,8 @@
     "preact/": "https://esm.sh/preact@10.29.7/",
     "preact/jsx-runtime": "https://esm.sh/preact@10.29.7/jsx-runtime",
     "@preact/signals": "https://esm.sh/@preact/signals@1.3.1?deps=preact@10.29.7",
-    "@loco/webtorrent": "../core/src/mod.ts"
+    "@loco/webtorrent": "../core/src/mod.ts",
+    "@loco/worker-db": "../worker-db/src/mod-main.ts"
   },
   "tasks": {
     "test": "deno test --allow-env --allow-net --allow-read --allow-write tests/",

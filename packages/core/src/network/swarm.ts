@@ -30,6 +30,7 @@ export interface SwarmOptions {
   port?: number;
   wrtc?: typeof RTCPeerConnection;
   metadata?: Uint8Array; // Metadata já conhecido (para seed)
+  rtcConfig?: RTCConfiguration;
 }
 
 interface QueuedPeer {
@@ -49,6 +50,7 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
   private trackers: Tracker[] = [];
   public maxConns: number;
   public wrtc?: typeof RTCPeerConnection;
+  public rtcConfig?: RTCConfiguration;
   private metadata?: Uint8Array;
   private pendingOffers = new Map<string, Peer>(); // offer_id -> Peer (initiator)
 
@@ -68,6 +70,7 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
     this.peerId = opts.peerId;
     this.maxConns = opts.maxConns || 55;
     this.wrtc = opts.wrtc;
+    this.rtcConfig = opts.rtcConfig;
     this.metadata = opts.metadata;
 
     for (const announceUrl of opts.announce) {
@@ -123,7 +126,7 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
         let offers: TrackerOffer[] = [];
 
         // Gera ofertas apenas para WsTrackers
-        if (tracker.constructor.name === "WsTracker") {
+        if (tracker.constructor.name === "WsTracker" || (tracker as any).url?.startsWith?.("ws")) {
           offers = await this._generateOffers(
             Math.min(this.maxConns - this.peers.size, 5,),
           );
@@ -156,6 +159,7 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
         peerId: this.peerId,
         wrtc: this.wrtc,
         addr: `webrtc:${offerId}`,
+        config: this.rtcConfig,
       },);
 
       this.pendingOffers.set(offerId, peer,);
@@ -196,7 +200,7 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
 
   private _onTrackerPeer(
     tracker: Tracker,
-    peerIdHex: string,
+    peerId: string,
     offer?: WebRTCSdp,
     answer?: WebRTCSdp,
     offerId?: string,
@@ -207,10 +211,10 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
     if (answer && offerId) {
       const peer = this.pendingOffers.get(offerId,);
       if (peer) {
-        peer.id = peerIdHex;
-        this.peers.set(`webrtc:${peerIdHex}`, peer,);
+        peer.id = peerId;
+        this.peers.set(`webrtc:${peerId}`, peer,);
         this.pendingOffers.delete(offerId,);
-        this._hookPeerEvents(peer, `webrtc:${peerIdHex}`,);
+        this._hookPeerEvents(peer, `webrtc:${peerId}`,);
         peer.signal(answer,);
         this.emit(
           "peer",
@@ -222,24 +226,25 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
 
     // Recebemos uma OFERTA (Offer) de um peer remoto
     if (offer && offerId) {
-      if (this.peers.has(`webrtc:${peerIdHex}`,)) return; // Já estamos conectados ou conectando
+      if (this.peers.has(`webrtc:${peerId}`,)) return; // Já estamos conectados ou conectando
 
       const peer = new Peer({
         initiator: false,
         infoHash: this.infoHash,
         peerId: this.peerId,
         wrtc: this.wrtc,
-        addr: `webrtc:${peerIdHex}`,
+        addr: `webrtc:${peerId}`,
+        config: this.rtcConfig,
       },);
-      peer.id = peerIdHex;
-      this.peers.set(`webrtc:${peerIdHex}`, peer,);
-      this._hookPeerEvents(peer, `webrtc:${peerIdHex}`,);
+      peer.id = peerId;
+      this.peers.set(`webrtc:${peerId}`, peer,);
+      this._hookPeerEvents(peer, `webrtc:${peerId}`,);
 
       // Quando nossa answer for gerada, enviaremos de volta pelo Tracker
       peer.on("signal", (e: any,) => {
         const answerSdp = e.detail.data as WebRTCSdp;
         tracker.announce({
-          to_peer_id: peerIdHex,
+          to_peer_id: peerId,
           offer_id: offerId,
           answer: answerSdp,
         },).catch(console.warn,);
@@ -326,6 +331,14 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
     for (const [, peer,] of this.peers) {
       if (peer.wire && !peer.wire.isDestroyed) {
         peer.wire.sendSuggestPiece(index,);
+      }
+    }
+  }
+
+  public broadcastHave(index: number,): void {
+    for (const [, peer,] of this.peers) {
+      if (peer.wire && !peer.wire.isDestroyed) {
+        peer.wire.sendHave(index,);
       }
     }
   }

@@ -7,6 +7,9 @@ const port = Number(Deno.env.get("PORT") ?? 3000);
 // Initialize a local tracker instance sharing the main port
 const tracker = new WebSocketTracker(port);
 
+const __dirname = new URL(".", import.meta.url).pathname;
+const fsRoot = Deno.env.get("FS_ROOT") ?? new URL("../build/dist", import.meta.url).pathname;
+
 Deno.serve({ port }, async (req) => {
   try {
     const url = new URL(req.url);
@@ -19,7 +22,7 @@ Deno.serve({ port }, async (req) => {
     }
 
     const staticResponse = await serveDir(req, {
-      fsRoot: "./build/dist",
+      fsRoot,
       showDirListing: false,
       quiet: true,
     });

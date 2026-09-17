@@ -7,6 +7,7 @@ import { SeederPanel, } from "./components/seeder-panel.tsx";
 import { LeecherPanel, } from "./components/leecher-panel.tsx";
 import { PlayerPanel, } from "./components/player-panel.tsx";
 import { DebugPanel, } from "./components/debug-panel.tsx";
+import { TorrentList, } from "./components/torrent-list.tsx";
 import {
   cleanup,
   debugSignal,
@@ -50,21 +51,17 @@ export function App() {
     <>
       {/* Header com status */}
       <nav class="top primary">
-        {/* Status no header */}
-        <label class="chip transparent white-text">
-          <i class="material-symbols small white-text">
-            {mode === "idle"
-              ? "power_off"
-              : mode === "seeding"
-              ? "upload"
-              : "download"}
+        <button class="circle transparent">
+          <i class="material-symbols white-text">
+            hub
           </i>
-          {mode === "idle"
-            ? "Off"
-            : mode === "seeding"
-            ? "Seeding"
-            : "Leeching"}
+        </button>
+        <label class="max">
+          <h5 class="white-text">
+            SyntaxMesh
+          </h5>
         </label>
+
         <label class="chip transparent white-text">
           <i class="material-symbols small white-text">
             group
@@ -72,13 +69,6 @@ export function App() {
           {peersSignal.value.length}
         </label>
 
-        <label class="max center-align">
-          <h5 class="white-text">
-            Loco WebTorrent
-          </h5>
-        </label>
-
-        {/* Toggle WebTorrent */}
         <label class="switch">
           <input
             type="checkbox"
@@ -104,49 +94,72 @@ export function App() {
         </article>
       )}
 
-      {/* 3 cards full-width verticais em mobile, lado a lado em large */}
       <main class="responsive">
-        {/* Card 1: Seeder */}
-        <article class="border round">
-          <nav class="middle">
-            <i class="material-symbols">
-              upload
-            </i>
-            <h5>
-              Seeder
-            </h5>
-          </nav>
-          <SeederPanel disabled={!wtEnabled.value} />
-        </article>
+        <div class="grid">
+          {/* Coluna Esquerda: Add & Control */}
+          <div class="s12 m4">
+            <article class="border round">
+              <nav class="middle">
+                <i class="material-symbols">
+                  add
+                </i>
+                <h5>
+                  Novo Torrent
+                </h5>
+              </nav>
+              
+              <div class="tabs">
+                <a class="active">
+                  <i class="material-symbols">
+                    upload
+                  </i>
+                  <span>Seed</span>
+                </a>
+                <a>
+                  <i class="material-symbols">
+                    download
+                  </i>
+                  <span>Leech</span>
+                </a>
+              </div>
 
-        {/* Card 2: Leecher */}
-        <article class="border round">
-          <nav class="middle">
-            <i class="material-symbols">
-              download
-            </i>
-            <h5>
-              Leecher
-            </h5>
-          </nav>
-          <LeecherPanel disabled={!wtEnabled.value} />
-        </article>
+              <div class="padding">
+                <SeederPanel disabled={!wtEnabled.value} />
+                <hr class="divider" />
+                <LeecherPanel disabled={!wtEnabled.value} />
+              </div>
+            </article>
 
-        {/* Card 3: Player */}
-        <article class="border round">
-          <nav class="middle">
-            <i class="material-symbols">
-              play_circle
-            </i>
-            <h5>
-              Player
-            </h5>
-          </nav>
-          <PlayerPanel />
-        </article>
+            <article class="border round top-margin">
+              <nav class="middle">
+                <i class="material-symbols">
+                  play_circle
+                </i>
+                <h5>
+                  Player
+                </h5>
+              </nav>
+              <PlayerPanel />
+            </article>
+          </div>
 
-        {/* Card 4: Debug Log */}
-        <DebugPanel />
+          {/* Coluna Direita: Lista de Torrents */}
+          <div class="s12 m8">
+            <article class="border round">
+              <nav class="middle">
+                <i class="material-symbols">
+                  list
+                </i>
+                <h5 class="max">
+                  Torrents
+                </h5>
+              </nav>
+              <TorrentList />
+            </article>
+
+            <DebugPanel />
+          </div>
+        </div>
       </main>
     </>
   );

@@ -18,6 +18,7 @@ import { render } from "preact";
 import { App } from "./app.tsx";
 import { TorrentProvider } from "./torrent-context.tsx";
 
+import { Client } from "../../core/src/mod.ts";
 import { Torrent } from "../../core/src/core/torrent.ts"; // ADDED FOR TESTING
 import { Swarm } from "../../core/src/network/swarm.ts"; // ADDED FOR TESTING
 import { Peer } from "../../core/src/network/peer.ts"; // ADDED FOR TESTING
@@ -25,6 +26,7 @@ import { WsTracker } from "../../core/src/network/tracker.ts"; // ADDED FOR TEST
 
 // EXPOSE GLOBALS FOR E2E PLAYWRIGHT TESTING
 (window as any).LocoTest = {
+  Client,
   Torrent,
   Swarm,
   Peer,

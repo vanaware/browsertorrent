@@ -61,6 +61,9 @@ export class Peer extends TypedEventTarget<PeerEvents> {
 
   private connectTimeoutId: number | null = null;
   private handshakeTimeoutId: number | null = null;
+  private _signalEmitted = false;
+  private _iceGatherTimeoutId: number | null = null;
+  private _gatheredCandidates: string[] = [];
 
   constructor(opts: PeerOptions,) {
     super();
@@ -114,14 +117,17 @@ export class Peer extends TypedEventTarget<PeerEvents> {
 
     try {
       if ("type" in data && (data.type === "offer" || data.type === "answer")) {
+        console.log(`[Peer ${this.opts.initiator ? 'initiator' : 'receiver'}] signal() received ${data.type}`);
         await this.pc!.setRemoteDescription(data,);
 
         // Se recebemos uma offer e não somos o iniciador, geramos uma answer
         if (data.type === "offer" && !this.opts.initiator) {
           const answer = await this.pc!.createAnswer();
           await this.pc!.setLocalDescription(answer,);
-          // Não emitimos o signal aqui. O 'onicegatheringstatechange' emitirá
-          // quando o processo de coleta de candidatos terminar.
+          // Safety timeout: emit answer if gathering is slow or STUN is unreachable
+          this._iceGatherTimeoutId = setTimeout(() => {
+            this._emitLocalSignal();
+          }, 5000) as unknown as number;
         }
       } else if ("candidate" in data && data.candidate) {
         await this.pc!.addIceCandidate(data,);
@@ -173,38 +179,54 @@ export class Peer extends TypedEventTarget<PeerEvents> {
   // LÓGICA INTERNA (WebRTC)
   // ==========================================================================
 
+  private _emitLocalSignal(): void {
+    if (this._signalEmitted || this.destroyed || !this.pc) return;
+    if (this.pc.localDescription) {
+      this._signalEmitted = true;
+      if (this._iceGatherTimeoutId !== null) {
+        clearTimeout(this._iceGatherTimeoutId);
+        this._iceGatherTimeoutId = null;
+      }
+      console.log(
+        `[Peer ${this.opts.initiator ? 'initiator' : 'receiver'}] Emitting local signal, type: ${this.pc.localDescription.type}, sdp has candidate:`,
+        this.pc.localDescription.sdp.includes("a=candidate"),
+      );
+      this.emit(
+        "signal",
+        new CustomEvent("signal", {
+          detail: { data: this.pc.localDescription },
+        }),
+      );
+    }
+  }
+
   private _setupPeerConnection(): void {
     // Interoperabilidade estrita: WebTorrent não usa Trickle ICE (trickle: false).
     // Coletamos todos os candidatos ICE antes de emitir a oferta/resposta.
     this.pc!.onicegatheringstatechange = () => {
-      if (this.pc!.iceGatheringState === "complete") {
-        if (this.pc!.localDescription) {
-          this.emit(
-            "signal",
-            new CustomEvent("signal", {
-              detail: { data: this.pc!.localDescription },
-            }),
-          );
-        }
+      if (this.pc && this.pc.iceGatheringState === "complete") {
+        this._emitLocalSignal();
       }
     };
 
     // Necessário para acelerar o processo se todos os candidatos terminarem antes
     this.pc!.onicecandidate = (event) => {
-      if (!event.candidate) {
-        if (this.pc!.localDescription) {
-          this.emit(
-            "signal",
-            new CustomEvent("signal", {
-              detail: { data: this.pc!.localDescription },
-            }),
-          );
-        }
+      if (event.candidate && event.candidate.candidate) {
+        this._gatheredCandidates.push(event.candidate.candidate);
+        console.log(`[Peer ${this.opts.initiator ? 'initiator' : 'receiver'}] gathered candidate:`, event.candidate.candidate);
+      } else if (!event.candidate) {
+        console.log(`[Peer ${this.opts.initiator ? 'initiator' : 'receiver'}] end of candidates (null)`);
+        this._emitLocalSignal();
       }
+    };
+
+    this.pc!.oniceconnectionstatechange = () => {
+      console.log(`[Peer ${this.opts.initiator ? 'initiator' : 'receiver'}] iceConnectionState:`, this.pc?.iceConnectionState);
     };
 
     this.pc!.onconnectionstatechange = () => {
       const state = this.pc!.connectionState;
+      console.log(`[Peer ${this.opts.initiator ? 'initiator' : 'receiver'}] connectionState:`, state);
       if (state === "failed" || state === "closed") {
         this._onError(new Error(`WebRTC connection ${state}`,),);
       }
@@ -213,6 +235,7 @@ export class Peer extends TypedEventTarget<PeerEvents> {
     // Se não somos o iniciador, esperamos o outro peer criar o DataChannel
     if (!this.opts.initiator) {
       this.pc!.ondatachannel = (event,) => {
+        console.log(`[Peer receiver] Received remote datachannel:`, event.channel.label);
         this._setupData(event.channel,);
       };
     }
@@ -229,8 +252,10 @@ export class Peer extends TypedEventTarget<PeerEvents> {
     try {
       const offer = await this.pc!.createOffer();
       await this.pc!.setLocalDescription(offer,);
-      // Não emitimos o signal aqui. O 'onicegatheringstatechange' emitirá
-      // quando o processo de coleta de candidatos terminar, embutindo-os no SDP.
+      // Fallback: emit offer after 5000ms if STUN gathering is slow or blocked
+      this._iceGatherTimeoutId = setTimeout(() => {
+        this._emitLocalSignal();
+      }, 5000) as unknown as number;
     } catch (err) {
       this._onError(err instanceof Error ? err : new Error(String(err,),),);
     }
@@ -241,6 +266,7 @@ export class Peer extends TypedEventTarget<PeerEvents> {
     this.channel.binaryType = "arraybuffer";
 
     this.channel.onopen = () => {
+      console.log(`[Peer ${this.opts.initiator ? 'initiator' : 'receiver'}] DataChannel OPEN!`);
       this._clearConnectTimeout();
       this.connected = true;
       this.emit("connect",);
@@ -365,6 +391,10 @@ export class Peer extends TypedEventTarget<PeerEvents> {
   }
 
   private _clearTimeouts(): void {
+    if (this._iceGatherTimeoutId !== null) {
+      clearTimeout(this._iceGatherTimeoutId);
+      this._iceGatherTimeoutId = null;
+    }
     this._clearConnectTimeout();
     this._clearHandshakeTimeout();
   }

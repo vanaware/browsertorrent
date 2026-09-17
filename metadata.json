@@ -1,6 +1,6 @@
 {
-  "name": "BrowserTorrent",
-  "description": "A pure browser-based BitTorrent client implementation using WebRTC for peer-to-peer file sharing.",
+  "name": "SyntaxMesh",
+  "description": "A high-performance Deno-based PWA BitTorrent client with WebRTC P2P sharing and OPFS storage.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -34,10 +34,10 @@ interface TrackerMessage {
   numwant?: number;
   compact?: number;
   no_peer_id?: number;
-  answer?: boolean;
+  answer?: any;
   to_peer_id?: string;
   offer_id?: string;
-  offers?: Array<{ offer: string; offer_id: string }>;
+  offers?: Array<{ offer: any; offer_id: string }>;
 }
 
 interface TorrentInfo {
@@ -367,6 +367,12 @@ export class WebSocketTracker {
 
     this.peers.set(peer.id, peer,);
     this.sendPeersToPeer(peer, info_hash,);
+
+    // FASE 7: Handle signaling embedded in announce (offers/answer)
+    if (message.offers || message.answer) {
+      this.handleWebSocketSignaling(peer, message,);
+    }
+
     console.log(
       `[TRACKER] Announce from ${peer_id} for ${info_hash} (event: ${
         event || "regular"
@@ -400,43 +406,81 @@ export class WebSocketTracker {
   }
 
   private handleWebSocketSignaling(peer: Peer, message: TrackerMessage,): void {
-    if (message.action === "offer") {
-      if (!message.offers || !message.to_peer_id) {
-        this.sendError(
-          peer,
-          "invalid_offer",
-          "Offer requires offers and to_peer_id",
-        );
-        return;
-      }
+    if (message.action === "offer" || message.offers) {
+      if (!message.offers) return;
 
-      for (const offer of message.offers) {
-        const targetPeer = Array.from(this.peers.values()).find(p => p.peerId === message.to_peer_id);
-        if (targetPeer && targetPeer.ws.readyState === WebSocket.OPEN) {
+      if (message.to_peer_id) {
+        // Targeted offer
+        console.log(`[TRACKER] Targeted offer from ${peer.peerId} to ${message.to_peer_id}`);
+        for (const offer of message.offers) {
+          const targetPeer = Array.from(this.peers.values()).find(p => p.peerId === message.to_peer_id);
+          if (targetPeer && targetPeer.ws.readyState === WebSocket.OPEN) {
+            targetPeer.ws.send(JSON.stringify({
+              action: "announce",
+              info_hash: message.info_hash || peer.infoHash,
+              offer_id: offer.offer_id,
+              offer: offer.offer,
+              peer_id: peer.peerId,
+              from_peer_id: peer.peerId,
+            },),);
+          }
+        }
+      } else {
+        // Distribute offers to other peers in the swarm
+        const infoHash = message.info_hash || peer.infoHash;
+        if (!infoHash) return;
+
+        const peerIds = this.peersByInfoHash.get(infoHash,);
+        if (!peerIds) return;
+
+        const availablePeers = Array.from(peerIds,)
+          .filter((id,) => id !== peer.id)
+          .map((id,) => this.peers.get(id,))
+          .filter((p,) => p && p.ws.readyState === WebSocket.OPEN) as Peer[];
+
+        console.log(`[TRACKER] Distributing ${message.offers.length} offers from ${peer.peerId} to ${availablePeers.length} peers in ${infoHash}`);
+
+        // Distribute one offer per peer
+        for (
+          let i = 0;
+          i < Math.min(message.offers.length, availablePeers.length,);
+          i++
+        ) {
+          const targetPeer = availablePeers[i]!;
+          const offer = message.offers[i]!;
           targetPeer.ws.send(JSON.stringify({
-            action: "offer",
+            action: "announce",
+            info_hash: infoHash,
             offer_id: offer.offer_id,
             offer: offer.offer,
+            peer_id: peer.peerId,
             from_peer_id: peer.peerId,
           },),);
         }
       }
-    } else if (message.action === "answer") {
+    } else if (message.action === "answer" || message.answer) {
       if (!message.answer || !message.to_peer_id) {
-        this.sendError(
-          peer,
-          "invalid_answer",
-          "Answer requires answer and to_peer_id",
-        );
+        if (message.action === "answer") {
+          this.sendError(
+            peer,
+            "invalid_answer",
+            "Answer requires answer and to_peer_id",
+          );
+        }
         return;
       }
 
+      console.log(`[TRACKER] Routing answer from ${peer.peerId} to ${message.to_peer_id}`);
       const targetPeer = Array.from(this.peers.values()).find(p => p.peerId === message.to_peer_id);
       if (targetPeer && targetPeer.ws.readyState === WebSocket.OPEN) {
         targetPeer.ws.send(JSON.stringify({
-          action: "answer",
+          action: "announce",
+          info_hash: message.info_hash || peer.infoHash,
+          offer_id: message.offer_id,
           answer: message.answer,
+          peer_id: peer.peerId,
           from_peer_id: peer.peerId,
+          to_peer_id: message.to_peer_id,
         },),);
       }
     }
@@ -507,6 +551,7 @@ export class WebSocketTracker {
     const response = {
       action: "announce",
       interval: Math.ceil(this.intervalMs / 1000,),
+      info_hash: infoHash,
       complete: torrentInfo.complete,
       incomplete: torrentInfo.incomplete,
       peers,

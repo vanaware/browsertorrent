@@ -44,6 +44,7 @@ export function SeederPanel({ disabled, }: Props,) {
     loading.value = true;
     try {
       await seedFile(file,);
+      selectedFile.value = null;
     } catch {
       // erro no signal
     } finally {
