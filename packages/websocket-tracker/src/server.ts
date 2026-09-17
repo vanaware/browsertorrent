@@ -141,6 +141,7 @@ export class WebSocketTracker {
     }
 
     // Process announce using existing logic
+    peer.peerId = peerId;
     peer.infoHash = infoHash;
     peer.port = port;
     peer.uploaded = uploaded;
@@ -334,6 +335,7 @@ export class WebSocketTracker {
       event,
     } = message;
 
+    peer.peerId = peer_id;
     peer.infoHash = info_hash;
     peer.port = port;
     peer.uploaded = uploaded;
@@ -409,7 +411,7 @@ export class WebSocketTracker {
       }
 
       for (const offer of message.offers) {
-        const targetPeer = this.peers.get(message.to_peer_id,);
+        const targetPeer = Array.from(this.peers.values()).find(p => p.peerId === message.to_peer_id);
         if (targetPeer && targetPeer.ws.readyState === WebSocket.OPEN) {
           targetPeer.ws.send(JSON.stringify({
             action: "offer",
@@ -429,7 +431,7 @@ export class WebSocketTracker {
         return;
       }
 
-      const targetPeer = this.peers.get(message.to_peer_id,);
+      const targetPeer = Array.from(this.peers.values()).find(p => p.peerId === message.to_peer_id);
       if (targetPeer && targetPeer.ws.readyState === WebSocket.OPEN) {
         targetPeer.ws.send(JSON.stringify({
           action: "answer",

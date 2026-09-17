@@ -1,8 +1,12 @@
-# Current Project Status
+# CURRENT TASK
+Phase 8: Integração WorkerDB, OPFS e Interface de Usuário (BeerCSS)
 
-- **Fase 7 concluída**: WebRTC Signaling e Interoperabilidade P2P. A comunicação com trackers WebSocket públicos agora funciona nativamente da mesma forma que o WebTorrent original. 
-  - WsTracker mantém as conexões abertas e injeta SD Offer/Answer perfeitamente.
-  - Swarm agora gere orquestração de pares de oferta WebRTC.
+## Status
+- E2E Tracker Testing passed via Playwright.
+- Local Tracker signaling patched and verified.
+- Core WebRTC Data Channel Engine verified.
 
-## Next Task
-- **Fase 8: WorkerDB e Engine de Download / Upload**. Conectar a Engine P2P (Torrent e Swarm) diretamente à WorkerDB (OPFS File System) e interface BeerCSS na camada `packages/example`. Validar a importação de `.torrent` files reais através da UI e visualizar os downloads através de IndexedDB.
+## Next Step
+- Implement ChunkStore to map torrent data directly to OPFS via `worker-db`.
+- Establish TorrentProvider to wrap core engine inside Preact via Signals.
+- Build UI components (AddTorrentModal, TorrentListItem) using BeerCSS.

@@ -14,9 +14,23 @@
  *   4. SW pede chunks: `port1.postMessage(true)`
  *   5. Página responde com chunks: `port1.postMessage(Uint8Array)` ou `null`
  */
-import { render, } from "preact";
-import { App, } from "./app.tsx";
-import { TorrentProvider, } from "./torrent-context.tsx";
+import { render } from "preact";
+import { App } from "./app.tsx";
+import { TorrentProvider } from "./torrent-context.tsx";
+
+import { Torrent } from "../../core/src/core/torrent.ts"; // ADDED FOR TESTING
+import { Swarm } from "../../core/src/network/swarm.ts"; // ADDED FOR TESTING
+import { Peer } from "../../core/src/network/peer.ts"; // ADDED FOR TESTING
+import { WsTracker } from "../../core/src/network/tracker.ts"; // ADDED FOR TESTING
+
+// EXPOSE GLOBALS FOR E2E PLAYWRIGHT TESTING
+(window as any).LocoTest = {
+  Torrent,
+  Swarm,
+  Peer,
+  WsTracker,
+};
+
 import {
   parseStreamURL,
   streamManager,
