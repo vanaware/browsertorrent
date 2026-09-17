@@ -8,7 +8,7 @@
 
 Nesta auditoria, analisamos as diferenças entre a implementação original do WebTorrent (focando no pacote `bittorrent-tracker` e na negociação de peers via WebRTC) e a implementação atual do `BrowserTorrent` (nos pacotes `core/src/network/tracker.ts`, `swarm.ts` e `peer.ts`). O objetivo desta auditoria é identificar por que os clientes não conseguem se conectar entre si utilizando web trackers públicos.
 
-## 1. Tracker Connectivity e Sinalização WebRTC
+## 1. Tracker Connectivity (RESOLVIDO) e Sinalização WebRTC
 
 ### WebTorrent Original (bittorrent-tracker)
 O WebTorrent original utiliza os Trackers WebSocket primariamente como **Servidores de Sinalização WebRTC**. 
