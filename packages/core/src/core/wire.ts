@@ -305,7 +305,12 @@ export class Wire extends TypedEventTarget<WireEvents> {
     this.expectedPeerId = opts.expectedPeerId
       ? new Uint8Array(opts.expectedPeerId,)
       : null;
-    this.localExtensions = new Set(opts.extensions,);
+    this.localExtensions = new Set(
+      opts.extensions ?? [
+        HandshakeExtension.ExtensionProtocol,
+        HandshakeExtension.Fast,
+      ],
+    );
     this.pieceCount = opts.pieceCount;
     this.pieceLength = opts.pieceLength;
     this.totalLength = opts.totalLength;
@@ -673,6 +678,8 @@ export class Wire extends TypedEventTarget<WireEvents> {
         .map((b: number,) => b.toString(16,).padStart(2, "0",))
         .join("",);
 
+      this._tryTransitionToConnected();
+
       this.emit(
         "handshake",
         new CustomEvent("handshake", {
@@ -683,8 +690,6 @@ export class Wire extends TypedEventTarget<WireEvents> {
           },
         },),
       );
-
-      this._tryTransitionToConnected();
 
       // Fall through to process remaining messages in buffer
     }
@@ -1296,6 +1301,19 @@ export class Wire extends TypedEventTarget<WireEvents> {
       this.#resetKeepAlive();
       this.#resetIdleTimeout();
       this._startSpeedTracking();
+
+      if (this._hasNegotiated(HandshakeExtension.ExtensionProtocol,)) {
+        this.sendExtendedHandshake().catch((err,) => {
+          this.emit(
+            "warning",
+            new CustomEvent("warning", {
+              detail: {
+                error: err instanceof Error ? err : new Error(String(err,),),
+              },
+            },),
+          );
+        },);
+      }
     }
   }
 

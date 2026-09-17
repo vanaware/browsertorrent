@@ -8,5 +8,10 @@
     "build": "bash ./install-script.sh && deno task build",
     "lint": "bash ./install-script.sh && deno task lint",
     "test": "bash ./install-script.sh && deno task check-all"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.63.0",
+    "playwright": "^1.63.0",
+    "ws": "^8.21.3"
   }
 }

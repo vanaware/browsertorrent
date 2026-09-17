@@ -396,7 +396,8 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
       maxConns: this.opts.maxConns,
       port: this.opts.port,
       rtcConfig: this.opts.rtcConfig,
-      metadata: parsed.pieces.length > 0 ? encode(parsed.info,) : undefined,
+      metadata: parsed.infoBytes ??
+        (parsed.pieces.length > 0 ? encode(parsed.info,) : undefined),
     },);
 
     const torrent = new Torrent(parsed, {
@@ -407,9 +408,12 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
 
     swarm.torrent = torrent;
 
-    swarm.on("metadata", async (e: CustomEvent<{ metadata: Uint8Array }>,) => {
-      const metadataBuffer = e.detail.metadata;
-      await torrent.setMetadata(metadataBuffer,);
+    swarm.on("metadata", async (e: any,) => {
+      const metadataBuffer = e.detail?.metadata || e.metadata || e;
+      console.log("[Client] swarm metadata event fired, size:", metadataBuffer?.length);
+      if (metadataBuffer instanceof Uint8Array) {
+        await torrent.setMetadata(metadataBuffer,);
+      }
     },);
 
     swarm.on("error", (e: CustomEvent<{ error: Error }>,) => {
@@ -753,7 +757,7 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
     } else if (item instanceof Uint8Array) {
       // Ensure non-shared ArrayBuffer for OPFS compatibility.
       data = item.buffer instanceof ArrayBuffer &&
-          !(item.buffer instanceof SharedArrayBuffer)
+          !(typeof SharedArrayBuffer !== "undefined" && item.buffer instanceof SharedArrayBuffer)
         ? item
         : new Uint8Array(item,);
       name = "file";
@@ -763,7 +767,7 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
       name = String(item.name,);
       data = item.data instanceof Uint8Array
         ? (item.data.buffer instanceof ArrayBuffer &&
-            !(item.data.buffer instanceof SharedArrayBuffer)
+            !(typeof SharedArrayBuffer !== "undefined" && item.data.buffer instanceof SharedArrayBuffer)
           ? item.data
           : new Uint8Array(item.data,))
         : new Uint8Array(item.data as ArrayBuffer,);

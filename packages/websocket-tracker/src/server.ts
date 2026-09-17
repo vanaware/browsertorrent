@@ -436,7 +436,7 @@ export class WebSocketTracker {
         const availablePeers = Array.from(peerIds,)
           .filter((id,) => id !== peer.id)
           .map((id,) => this.peers.get(id,))
-          .filter((p,) => p && p.ws.readyState === WebSocket.OPEN) as Peer[];
+          .filter((p,) => p && p.ws.readyState === WebSocket.OPEN && p.peerId !== peer.peerId) as Peer[];
 
         console.log(`[TRACKER] Distributing ${message.offers.length} offers from ${peer.peerId} to ${availablePeers.length} peers in ${infoHash}`);
 

@@ -38,6 +38,8 @@ export interface PeerOptions {
   channelName?: string;
   /** Endereço do peer (usado para stats `remoteAddress`/`remotePort`). */
   addr?: string;
+  /** Callback opcional chamado logo após a instanciação do Wire (antes do handshake) */
+  onWire?: (wire: Wire) => void;
 }
 
 // ============================================================================
@@ -326,6 +328,10 @@ export class Peer extends TypedEventTarget<PeerEvents> {
       const parts = this.opts.addr.split(":",);
       this.wire.remoteAddress = parts[0] ?? "";
       this.wire.remotePort = parseInt(parts[1] ?? "0", 10,) || 0;
+    }
+
+    if (this.opts.onWire) {
+      this.opts.onWire(this.wire,);
     }
 
     // Listener do Handshake do BitTorrent

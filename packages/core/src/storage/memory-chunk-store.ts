@@ -19,9 +19,22 @@ export class MemoryChunkStore implements ChunkStore {
     this.chunkLength = opts.chunkLength;
     this.length = opts.length || Infinity;
 
-    if (this.length !== Infinity) {
+    if (this.length !== Infinity && this.length > 0) {
       this.lastChunkLength = this.length % this.chunkLength || this.chunkLength;
-      this.lastChunkIndex = Math.floor(this.length / this.chunkLength,);
+      this.lastChunkIndex = Math.floor((this.length - 1) / this.chunkLength,);
+    } else {
+      this.lastChunkLength = this.chunkLength;
+      this.lastChunkIndex = Infinity;
+    }
+  }
+
+  public updateLength(chunkLength: number, length?: number,): void {
+    this.chunkLength = chunkLength;
+    this.length = length || Infinity;
+
+    if (this.length !== Infinity && this.length > 0) {
+      this.lastChunkLength = this.length % this.chunkLength || this.chunkLength;
+      this.lastChunkIndex = Math.floor((this.length - 1) / this.chunkLength,);
     } else {
       this.lastChunkLength = this.chunkLength;
       this.lastChunkIndex = Infinity;

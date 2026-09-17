@@ -147,20 +147,68 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
     }
   }
 
+  private _createPeer(initiator: boolean, addr: string,): Peer {
+    let utMetadata: UtMetadata | null = null;
+    const peer = new Peer({
+      initiator,
+      infoHash: this.infoHash,
+      peerId: this.peerId,
+      wrtc: this.wrtc,
+      addr,
+      config: this.rtcConfig,
+      onWire: (wire: Wire) => {
+        utMetadata = new UtMetadata(wire, { metadata: this.metadata, },);
+        try {
+          wire.use(utMetadata,);
+        } catch (err) {
+          console.warn("[Swarm] Error registering ut_metadata on wire:", err,);
+        }
+
+        if (this.metadata) {
+          utMetadata.setMetadata(this.metadata,);
+        }
+
+        utMetadata.on("metadata", (metadataEvent: any,) => {
+          const metadata = metadataEvent.detail?.metadata || metadataEvent;
+          if (!this.metadata) {
+            this.metadata = metadata;
+          }
+          this.emit(
+            "metadata",
+            new CustomEvent("metadata", { detail: { metadata, peer, }, },),
+          );
+        },);
+
+        utMetadata.on("warning", (warningEvent: any,) => {
+          const error = warningEvent.detail?.error || warningEvent;
+          this.emit(
+            "warning",
+            new CustomEvent("warning", { detail: { error, }, },),
+          );
+          this.torrent?.emit?.(
+            "warning",
+            new CustomEvent("warning", { detail: { error, }, },),
+          );
+        },);
+      },
+    },);
+
+    peer.on("handshake", () => {
+      if (!this.metadata && utMetadata) {
+        utMetadata.fetch();
+      }
+    },);
+
+    return peer;
+  }
+
   private async _generateOffers(count: number,): Promise<TrackerOffer[]> {
     const offers: TrackerOffer[] = [];
     const promises = Array.from({ length: count, },).map(async () => {
       const offerId = Array.from(crypto.getRandomValues(new Uint8Array(20,),),)
         .map((b,) => b.toString(16,).padStart(2, "0",)).join("",);
 
-      const peer = new Peer({
-        initiator: true,
-        infoHash: this.infoHash,
-        peerId: this.peerId,
-        wrtc: this.wrtc,
-        addr: `webrtc:${offerId}`,
-        config: this.rtcConfig,
-      },);
+      const peer = this._createPeer(true, `webrtc:${offerId}`,);
 
       this.pendingOffers.set(offerId, peer,);
 
@@ -228,14 +276,7 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
     if (offer && offerId) {
       if (this.peers.has(`webrtc:${peerId}`,)) return; // Já estamos conectados ou conectando
 
-      const peer = new Peer({
-        initiator: false,
-        infoHash: this.infoHash,
-        peerId: this.peerId,
-        wrtc: this.wrtc,
-        addr: `webrtc:${peerId}`,
-        config: this.rtcConfig,
-      },);
+      const peer = this._createPeer(false, `webrtc:${peerId}`,);
       peer.id = peerId;
       this.peers.set(`webrtc:${peerId}`, peer,);
       this._hookPeerEvents(peer, `webrtc:${peerId}`,);
@@ -400,15 +441,7 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
     if (this.destroyed || this.paused) return;
     if (this.peers.has(addr,)) return;
 
-    // Conexões IP regulares assumem initiator true (se for WebRTC e falhar o fallback pro WsTracker não existe, mas mantemos o padrão)
-    const peer = new Peer({
-      initiator: true,
-      infoHash: this.infoHash,
-      peerId: this.peerId,
-      wrtc: this.wrtc,
-      addr,
-    },);
-
+    const peer = this._createPeer(true, addr,);
     this.peers.set(addr, peer,);
     this._hookPeerEvents(peer, addr,);
   }
@@ -416,42 +449,11 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
   private _hookPeerEvents(peer: Peer, addr: string,): void {
     peer.on("connect", () => {
       // Connect emitido no _onTrackerPeer e _connectPeer, mas evitamos duplicação
-      // O peer do _onTrackerPeer já emitiu 'peer', entao so faz o hook de wire.
     },);
 
-    peer.on("handshake", (e,) => {
+    peer.on("handshake", () => {
       if (peer.wire) {
         const wire: Wire = peer.wire;
-        const utMetadata = new UtMetadata(wire, { metadata: this.metadata, },);
-
-        if (this.metadata) {
-          utMetadata.setMetadata(this.metadata,);
-        }
-
-        utMetadata.on("metadata", (metadataEvent: any,) => {
-          const metadata = metadataEvent.detail?.metadata || metadataEvent;
-          this.emit(
-            "metadata",
-            new CustomEvent("metadata", { detail: { metadata, peer, }, },),
-          );
-        },);
-
-        utMetadata.on("warning", (warningEvent: any,) => {
-          const error = warningEvent.detail?.error || warningEvent;
-          this.emit(
-            "warning",
-            new CustomEvent("warning", { detail: { error, }, },),
-          );
-          this.torrent?.emit?.(
-            "warning",
-            new CustomEvent("warning", { detail: { error, }, },),
-          );
-        },);
-
-        if (!this.metadata) {
-          utMetadata.fetch();
-        }
-
         this.emit(
           "wire",
           new CustomEvent("wire", { detail: { wire, addr, }, },),

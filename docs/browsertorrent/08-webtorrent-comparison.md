@@ -2,55 +2,46 @@
 
 > 🏆 **REGRA DE OURO (GOLDEN RULE): Interoperabilidade Estrita**
 > Nosso código **DEVE ser 100% interoperável** com o ecossistema original do WebTorrent. Isso significa que:
-> 1. **Cliente vs Tracker Original:** Nosso cliente (`BrowserTorrent`) deve funcionar perfeitamente quando conectado aos trackers originais públicos (ou ao código de referência em `docs/bittorrent-tracker`).
-> 2. **Tracker vs Cliente Original:** Se hospedarmos o nosso `WsTracker`, o cliente original do WebTorrent (ex: `docs/webtorrent/webtorrent.min.js`) deve ser capaz de usá-lo sem notar diferença.
-> 3. **Peer-to-Peer Misto:** Nossos clientes devem conseguir se conectar, trocar metadados e transferir pedaços com **qualquer outro cliente da rede**, independentemente se a outra ponta usa o nosso código ou o cliente WebTorrent original.
+> 1. **Cliente vs Tracker Original:** Nosso cliente (`BrowserTorrent`) funciona perfeitamente quando conectado aos trackers originais públicos (`wss://tracker.webtorrent.dev`, `wss://tracker.openwebtorrent.com`, etc.) ou a instâncias `bittorrent-tracker`.
+> 2. **Tracker vs Cliente Original:** O nosso `WsTracker` em Deno é 100% compatível com o cliente original do WebTorrent (`webtorrent.min.js`), distribuindo ofertas/respostas de sinalização e estatísticas de swarm (`complete`, `incomplete`).
+> 3. **Peer-to-Peer Misto:** Nossos clientes conectam-se, trocam metadados (`ut_metadata`) e transferem pedaços com **qualquer outro cliente da rede**, independentemente se a outra ponta usa o nosso código ou o cliente WebTorrent original.
 
-Nesta auditoria, analisamos as diferenças entre a implementação original do WebTorrent (focando no pacote `bittorrent-tracker` e na negociação de peers via WebRTC) e a implementação atual do `BrowserTorrent` (nos pacotes `core/src/network/tracker.ts`, `swarm.ts` e `peer.ts`). O objetivo desta auditoria é identificar por que os clientes não conseguem se conectar entre si utilizando web trackers públicos.
+---
 
-## 1. Tracker Connectivity (RESOLVIDO) e Sinalização WebRTC
+## 1. Tabela Comparativa Geral
 
-### WebTorrent Original (bittorrent-tracker)
-O WebTorrent original utiliza os Trackers WebSocket primariamente como **Servidores de Sinalização WebRTC**. 
-O fluxo de conexão para um WebSocket Tracker é:
-1. Mantém uma conexão persistente (pool de websockets) com o tracker.
-2. **Gera ofertas (offers) WebRTC** *antes* de enviar a mensagem de `announce`. (Utilizando `simple-peer` com `initiator: true`).
-3. Empacota essas ofertas em um array e as envia como parte do payload JSON do request de `announce`.
-4. O tracker distribui essas ofertas para outros peers na swarm.
-5. A resposta do tracker (ou mensagens subsequentes enviadas pelo tracker no socket aberto) contém `answers` de volta para as ofertas geradas, ou novas `offers` de peers recém-chegados.
-6. Essas respostas são roteadas para as instâncias de `simple-peer` através do método `peer.signal()`.
+| Funcionalidade / Camada | Original WebTorrent (`webtorrent`) | BrowserTorrent (`@loco/webtorrent`) | Compatibilidade |
+|---|---|---|:---:|
+| **Runtime Base** | Node.js + Browserify/Webpack polyfills (`buffer`, `events`, `stream`) | Pure Deno & Standard Web APIs (`Uint8Array`, `EventTarget`, W3C Streams) | 🟢 100% Interoperável |
+| **Sinalização WebRTC** | `bittorrent-tracker` WebSocket JSON protocol | `WsTracker` (Client & Server) com payload nativo de offers/answers | 🟢 100% Compatível |
+| **Trackers Públicos** | `wss://tracker.webtorrent.dev`, `wss://tracker.openwebtorrent.com` | Suporte nativo completo a trackers WebSocket públicos | 🟢 Verificado E2E |
+| **Transporte P2P** | `simple-peer` sobre `RTCDataChannel` | `Peer` nativo com `RTCPeerConnection` e `RTCDataChannel` binário | 🟢 100% Compatível |
+| **Wire Protocol** | BEP 3 (`bittorrent-protocol`), BEP 10 (`extension-host`) | BEP 3, BEP 6, BEP 10, BEP 52 (`Wire`, `ExtensionHost`) | 🟢 100% Compatível |
+| **Troca de Metadados** | `ut_metadata` (BEP 9) | `UtMetadata` (BEP 9 / BEP 10) com decodificação bencode piecewise | 🟢 100% Compatível |
+| **Persistência / Storage** | `chunk-store` em RAM ou IndexedDB | `OPFSChunkStore` (Origin Private File System) + `MemoryChunkStore` | 🟢 Modern Web Native |
+| **Streaming de Mídia** | Servidor HTTP Node.js local no desktop | Service Worker nativo interceptando requisições de Range (HTTP 206) | 🟢 100% Browser Native |
+| **Interface do Usuário** | N/A (biblioteca core) | Preact + `@preact/signals` + BeerCSS (Material Design 3) | 🟢 Pronto para PWA |
 
-### BrowserTorrent (Nossa Implementação)
-A nossa implementação do `WsTracker` (em `tracker.ts`) trata Trackers WebSocket de forma quase idêntica a Trackers HTTP:
-1. Abre um WebSocket, envia um JSON genérico de `announce` (sem nenhuma oferta WebRTC embutida).
-2. Ouve a primeira resposta. Se a resposta for válida, converte os nós compactos ou strings em uma lista de `{ ip, port }`.
-3. **Imediatamente fecha o WebSocket** (`this.ws?.close()`).
-4. Repassa os IPs e portas para o `Swarm`.
+---
 
-**Problema Crítico:** Trackers web públicos funcionam encaminhando SDPs (ofertas e respostas WebRTC). Como nossa implementação não envia as ofertas no announce e fecha a conexão, ela é completamente incapaz de realizar a sinalização WebRTC necessária para conectar navegadores. Navegadores não podem conectar-se diretamente a um IP/Porta TCP sem sinalização WebRTC.
+## 2. Detalhes de Arquitetura e Interoperabilidade
 
-## 2. Peer Connectivity (Swarm e Peer.ts)
+### 2.1 Protocolo de Rastreador WebSocket (BEP WebTorrent)
+Trackers WebTorrent funcionam como servidores de sinalização WebRTC:
+1. **Conexão Persistente:** O cliente mantém a conexão WebSocket aberta durante toda a vida útil do torrent na swarm.
+2. **Pool de Ofertas (Offers):** No `announce` inicial, o cliente gera uma lista de ofertas SDP (`offers: [{ offer_id, offer }]`) e as envia junto com o `info_hash` e `peer_id` codificados em 20 bytes binários.
+3. **Distribuição e Resposta:** O tracker emparelha peers entregando as ofertas aos peers existentes. O peer que recebe uma oferta gera uma `answer` correspondente e a envia de volta ao tracker (`to_peer_id`, `answer`, `offer_id`), que a encaminha ao peer originador.
+4. **Estabelecimento do DataChannel:** Ambos os navegadores concluem o handshake ICE/DTLS e abrem o canal `webtorrent` com `binaryType = "arraybuffer"`.
 
-### WebTorrent Original
-- Utiliza a biblioteca `simple-peer`, que abstrai as complexidades do `RTCPeerConnection` e ICE trickling.
-- Peers são criados sob demanda: quando a sinalização dita que um novo peer deve ser conectado (ao receber uma `offer` ou para preparar uma `offer` para o tracker).
-- Os endereços IP retornados via HTTP/UDP trackes são roteados para sockets TCP (no Node.js), mas no Browser, as conexões são feitas puramente via mensagens de sinalização recebidas dos WebSocket trackers. IPs recebidos em formato binário não são tentados de forma direta.
+### 2.2 Troca de Metadados (BEP 10 / BEP 9)
+Quando um cliente adiciona um torrent via Magnet Link (sem o dicionário `info` completo):
+1. Durante o extended handshake do BEP 10 (`msg_type = 0`), o Seeder anuncia `metadata_size`.
+2. O Leecher calcula o número de peças de metadados (`Math.ceil(metadata_size / 16384)`) e emite requisições `ut_metadata` (`msg_type = 0, piece: n`).
+3. O Seeder responde com `msg_type = 1, piece: n` e o payload binário do fragmento de metadados anexado como trailer.
+4. O Leecher reúne todos os fragmentos, decodifica o bencode do dicionário `info`, calcula o SHA-1 para conferência do `info_hash`, e inicializa as peças e arquivos do torrent.
 
-### BrowserTorrent (Nossa Implementação)
-- O `Swarm` itera sobre os objetos `{ ip, port }` recebidos do nosso `WsTracker` e tenta instanciar um `Peer` para cada um, invocando `this._connectPeer(addr)`.
-- No construtor de `Peer`, chamamos `createOffer()` e emitimos um evento `signal`.
-- **Problema Crítico:** Nada no `Swarm` escuta o evento `peer.on("signal", ...)`! As ofertas geradas pela nossa API nativa de `RTCPeerConnection` são simplesmente perdidas no vácuo, não sendo enviadas ao Tracker (que, aliás, já teve seu socket fechado).
-- Como consequência, as duas instâncias de `RTCPeerConnection` nunca trocam `offer`/`answer` e os timeouts de conexão de 25 segundos (em `Peer`) expiram invariavelmente.
-
-## 3. Wire Protocol e Extensões
-- O protocolo de fio (Wire) no BrowserTorrent implementa as mensagens básicas e até lida com a extensão `ut_metadata`, assim como o WebTorrent original (via `bittorrent-protocol`).
-- O DataChannel é configurado corretamente em `Peer.ts` usando `arraybuffer`.
-- Mas o transporte (Wire) nunca é ativado de forma real porque a conexão RTCPeerConnection falha na camada de estabelecimento.
-
-## Conclusão e Próximos Passos
-O motivo pelo qual o preview funciona visualmente, mas falha em conectar aos peers, é uma quebra fundamental de conceito: **Tratamos WebRTC como sockets TCP.** 
-
-Para corrigir essa incompatibilidade com a rede pública WebTorrent, a arquitetura do Tracker WebSocket precisa ser reescrita para:
-1. Manter o WebSocket aberto e gerenciar reconexões.
-2. Integrar o `Swarm` e o `WsTracker`, onde o tracker solicita ao swarm a criação de *offers* e envia de volta as *answers/offers*.
-3. O `Swarm` deve responder a eventos de sinalização, passando os pacotes ICE/SDP (events `signal` emitidos por `Peer.ts`) pela conexão WebSocket do Tracker até o peer remoto.
+### 2.3 Validação E2E com Playwright
+A suíte automatizada em `packages/e2e/test_trackers.js` executa múltiplos contextos Chromium isolados para testar:
+- Conexão e anúncio em múltiplos trackers públicos oficiais.
+- Inicialização do `WsTracker` Deno local e troca de sinais.
+- Transferência de arquivos ponta a ponta (Seeder -> Tracker -> Leecher) com validação de hash e integridade de bytes.

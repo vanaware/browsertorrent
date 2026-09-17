@@ -140,6 +140,41 @@ export function decode(
   return value;
 }
 
+export function decodePrefix(
+  data: Uint8Array,
+  options: DecodeOptions = {},
+): [BencodeValue, Uint8Array] {
+  const maxBytes = options.maxBytes ?? _defaultMaxBytes;
+  const maxDepth = options.maxDepth ?? _defaultMaxDepth;
+
+  if (!Number.isSafeInteger(maxBytes,) || maxBytes < 0) {
+    throw new BencodeDecodeError(
+      "maxBytes must be a non-negative safe integer",
+    );
+  }
+  if (!Number.isSafeInteger(maxDepth,) || maxDepth < 0) {
+    throw new BencodeDecodeError(
+      "maxDepth must be a non-negative safe integer",
+    );
+  }
+  if (data.length > maxBytes) {
+    throw new BencodeDecodeError(
+      `input exceeds maximum size of ${maxBytes} bytes`,
+    );
+  }
+
+  const useMap = options.useMap === true;
+  const allowUnsortedKeys = options.allowUnsortedKeys === true;
+
+  const [value, nextOffset,] = _decodeOne(
+    data,
+    maxDepth,
+    useMap,
+    allowUnsortedKeys,
+  );
+  return [value, data.subarray(nextOffset,),];
+}
+
 // --- Internal decode types ---
 
 type _Frame = _ListFrame | _DictFrame;
