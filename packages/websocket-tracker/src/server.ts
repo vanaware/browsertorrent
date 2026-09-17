@@ -61,10 +61,12 @@ export class WebSocketTracker {
   async start(): Promise<void> {
     this.server = Deno.serve({
       port: this.port,
-    }, (req: Request): Promise<Response> => this.handleRequest(req));
+    }, (req: Request): Response | Promise<Response> => this.handleRequest(req));
 
     console.log("[TRACKER] WebSocket server listening on port", this.port);
-    await this.server;
+    // Deno.serve() runs indefinitely until shutdown() is called
+    // Keep the process alive
+    await new Promise(() => {});
   }
 
   private async handleRequest(req: Request): Promise<Response> {
@@ -145,20 +147,22 @@ export class WebSocketTracker {
 
     switch (event) {
       case "started":
-        this.addPeerToTorrent(info_hash, peer_id, peer);
+        this.addPeerToTorrent(info_hash, peer);
         break;
       case "completed":
-        this.addPeerToTorrent(info_hash, peer_id, peer);
+        this.addPeerToTorrent(info_hash, peer);
         this.stats.incrementCompleted();
         break;
       case "stopped":
-        this.removePeerFromTorrent(info_hash, peer_id);
+        this.removePeerFromTorrent(info_hash, peer);
         break;
       default:
-        this.addPeerToTorrent(info_hash, peer_id, peer);
+        this.addPeerToTorrent(info_hash, peer);
         break;
     }
 
+    // Ensure peer is in the peers map before sending peers response
+    this.peers.set(peer.id, peer);
     this.sendPeersToPeer(peer, info_hash);
     console.log(`[TRACKER] Announce from ${peer_id} for ${info_hash} (event: ${event || "regular"})`);
   }
@@ -180,7 +184,7 @@ export class WebSocketTracker {
     console.log("[TRACKER] Scrape for", info_hash, "returned", peerCount, "peers");
   }
 
-  private addPeerToTorrent(infoHash: string, peerId: string, peer: Peer): void {
+  private addPeerToTorrent(infoHash: string, peer: Peer): void {
     if (this.peers.size >= this.maxPeers) {
       this.evictLeastActivePeer();
     }
@@ -196,32 +200,29 @@ export class WebSocketTracker {
           const oldestPeerId = oldestPeerIds[0];
           if (typeof oldestPeerId === "string") {
             const oldestPeer = this.peers.get(oldestPeerId);
-            if (oldestPeer) {
-              this.removePeerFromTorrent(infoHash, oldestPeerId);
+            if (oldestPeer && oldestPeer.infoHash === infoHash) {
+              this.removePeerFromTorrent(infoHash, oldestPeer);
             }
           }
         }
       }
     }
 
-    peerIds.add(peerId);
+    peerIds.add(peer.id);
     this.peersByInfoHash.put(infoHash, peerIds);
     this.stats.incrementPeers();
   }
 
-  private removePeerFromTorrent(infoHash: string, peerId: string): void {
+  private removePeerFromTorrent(infoHash: string, peer: Peer): void {
     const peerIds = this.peersByInfoHash.get(infoHash);
     if (!peerIds) return;
 
-    peerIds.delete(peerId);
+    peerIds.delete(peer.id);
     this.peersByInfoHash.put(infoHash, peerIds);
 
-    const peer = this.peers.get(peerId);
-    if (peer) {
-      peer.ws.close();
-      this.peers.delete(peerId);
-      this.stats.decrementPeers();
-    }
+    peer.ws.close();
+    this.peers.delete(peer.id);
+    this.stats.decrementPeers();
   }
 
   private sendPeersToPeer(peer: Peer, infoHash: string): void {

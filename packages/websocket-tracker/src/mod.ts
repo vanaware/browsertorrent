@@ -74,8 +74,8 @@ export async function runCLI() {
   Deno.addSignalListener("SIGINT", shutdown);
   Deno.addSignalListener("SIGTERM", shutdown);
 
-  // Keep the process running
-  await new Promise(() => {});
+  // Start listening (runs indefinitely until close() is called)
+  await tracker.start();
 }
 
 // Auto-start if run directly
