@@ -29,7 +29,7 @@ Deno.test("peerid: decodePeerId correctly parses BrowserTorrent PeerId", () => {
   const peerId = generateBrowserTorrentPeerId();
   const clientInfo = decodePeerId(peerId,);
 
-  assertEquals(clientInfo?.code, "LO",);
+  assertEquals(clientInfo?.code, "BT",);
   assertEquals(clientInfo?.name, "BrowserTorrent",);
   // "0100" -> major: 0, minor: 1, patch: parseInt("00") -> "0"
   assertEquals(clientInfo?.version, "0.1.0",);

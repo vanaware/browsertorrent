@@ -28,7 +28,7 @@ const AZUREUS_CLIENTS: Record<string, string> = {
   "BP": "BitTorrent Pro",
   "BR": "BitRocket",
   "BS": "BTSlave",
-  "BT": "mainline BitTorrent",
+  "BT": "BrowserTorrent",
   "BW": "BitWombat",
   "BX": "~Bittorrent X",
   "CD": "Enhanced CTorrent",

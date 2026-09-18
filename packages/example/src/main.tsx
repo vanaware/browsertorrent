@@ -18,11 +18,16 @@ import { render, } from "preact";
 import { App, } from "./app.tsx";
 import { getScope, TorrentProvider, } from "./torrent-context.tsx";
 
-import { Client, } from "../../core/src/mod.ts";
-import { Torrent, } from "../../core/src/core/torrent.ts"; // ADDED FOR TESTING
-import { Swarm, } from "../../core/src/network/swarm.ts"; // ADDED FOR TESTING
-import { Peer, } from "../../core/src/network/peer.ts"; // ADDED FOR TESTING
-import { WsTracker, } from "../../core/src/network/tracker.ts"; // ADDED FOR TESTING
+import {
+  Client,
+  Peer,
+  Swarm,
+  Torrent,
+  WsTracker,
+  parseStreamURL,
+  streamManager,
+  type WebTorrentServer,
+} from "@vanaware/browsertorrent";
 
 // EXPOSE GLOBALS FOR E2E PLAYWRIGHT TESTING
 (window as any).BrowserTorrentTest = {
@@ -32,12 +37,6 @@ import { WsTracker, } from "../../core/src/network/tracker.ts"; // ADDED FOR TES
   Peer,
   WsTracker,
 };
-
-import {
-  parseStreamURL,
-  streamManager,
-  type WebTorrentServer,
-} from "@vanaware/browsertorrent";
 
 function waitForActivation(worker: ServiceWorker,): Promise<void> {
   return new Promise((resolve,) => {

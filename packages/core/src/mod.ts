@@ -25,8 +25,9 @@ import {
   type OPFSFileEntry,
   PieceSizeEnum,
 } from "./torrent-generator/mod.ts";
+import { CORE_VERSION, VERSION, } from "./version.ts";
 
-export const CORE_VERSION = "0.0.0-placeholder";
+export { CORE_VERSION, VERSION, } from "./version.ts";
 
 // ── WebRTC feature detection ──────────────────────────────────────────
 const _WEBRTC_SUPPORT: boolean = (() => {
@@ -879,6 +880,8 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
 export { Torrent, } from "./core/torrent.ts";
 export { Swarm, } from "./network/swarm.ts";
 export { Peer, } from "./network/peer.ts";
+export { HttpTracker, WsTracker, } from "./network/tracker.ts";
+export type { Tracker, } from "./network/tracker.ts";
 export { Wire, } from "./core/wire.ts";
 export { File, } from "./core/file.ts";
 export { Piece, } from "./core/piece.ts";
@@ -929,3 +932,15 @@ export type {
   Torrent as GeneratedTorrent,
   Writer as TorrentWriter,
 } from "./torrent-generator/mod.ts";
+// Service Worker integration
+export {
+  getWebTorrentPrefix,
+  guessDestination,
+  handleStream,
+  initStreamingServiceWorker,
+  isServiceWorkerSupported,
+  registerServiceWorker,
+  type ServiceWorkerRegisterOptions,
+  type StreamHandlerOptions,
+} from "./service-worker/mod.ts";
+

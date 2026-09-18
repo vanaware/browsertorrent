@@ -327,6 +327,25 @@ export async function incrementVersion(
   let content = await Deno.readTextFile(denoJsoncPath,);
   content = replaceVersionInContent(content, newVersion,);
   await Deno.writeTextFile(denoJsoncPath, content,);
+
+  // Update packages/core/src/version.ts
+  try {
+    const coreVersionContent = `// packages/core/src/version.ts\n// Auto-generated during build\nexport const VERSION = "${newVersion}";\nexport const CORE_VERSION = VERSION;\n`;
+    await Deno.writeTextFile("packages/core/src/version.ts", coreVersionContent,);
+  } catch (_e) {
+    // ignore if path does not exist
+  }
+
+  // Update packages/core/deno.jsonc if present
+  try {
+    const coreJsonPath = "packages/core/deno.jsonc";
+    let coreJson = await Deno.readTextFile(coreJsonPath,);
+    coreJson = replaceVersionInContent(coreJson, newVersion,);
+    await Deno.writeTextFile(coreJsonPath, coreJson,);
+  } catch (_e) {
+    // ignore if path does not exist
+  }
+
   console.log(`📈 Versão incrementada para: v${newVersion}`,);
   return newVersion;
 }
