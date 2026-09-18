@@ -25,13 +25,16 @@
     - [x] WebTorrent ➔ BrowserTorrent SW Streaming Compatibility: PASSED
     - [x] Public Tracker Scenarios (B_PUBLIC/C): TIMEOUT (Sandbox env limitation)
     - [x] Documentation of streaming differences (`packages/e2e/STREAMING_DIFFERENCES.md`).
-
-## Critical Debugging (Active)
-- [x] **Fix P2P Transfer Timeout**: Solved! Resolved a Temporal Dead Zone (TDZ) ReferenceError in `_registerWire` by moving `attachInitialState` to the bottom of the method.
-  - **See Log**: `docs/bugsfound/2026-09-17-e2e-p2p-timeout.md`
+- [x] Phase 8: Core Consolidation & Service Worker Decoupling
+  - [x] Migrated all required utilities into `@vanaware/browsertorrent` core package.
+  - [x] Made `packages/core` 100% self-contained for JSR publishing (`jsr:@vanaware/browsertorrent`).
+  - [x] Synchronized versioning with `packages/core/src/version.ts` and `packages/core/deno.jsonc`.
+  - [x] Decoupled Service Worker into streaming fetch runtime (`packages/core/src/service-worker`) and reference PWA cache example (`packages/service-worker`).
+  - [x] Exported subpath modules: `.`, `./service-worker`, `./server`, `./torrent-generator`.
+  - [x] Updated documentation (`README.md`, `IMPORT_GUIDE.md`, `00-api-browsertorrent.md`, `08-comparison-table.md`).
 
 ## Current Task
-- [ ] Phase 8: OPFS WorkerDB and UI integration.
+- [ ] Phase 9: OPFS WorkerDB and UI integration.
   - [ ] Integrate `WorkerDB` for persistent torrent state.
   - [ ] Connect `Swarm` and `Peer` logic to the UI reactive signals.
   - [ ] Implement a clean dashboard using BeerCSS for managing torrents.

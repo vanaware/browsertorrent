@@ -1,0 +1,36 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-and-lint:
+    name: Lint, Type Check, and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Run Linter
+        run: deno lint
+
+      - name: Check Formatting
+        run: deno fmt --check
+
+      - name: Type Check Core & Tracker
+        run: |
+          deno check packages/core/src/mod.ts
+          deno check packages/websocket-tracker/src/mod.ts
+
+      - name: Run Test Suite
+        run: deno test -A packages/

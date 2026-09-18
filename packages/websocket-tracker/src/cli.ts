@@ -113,8 +113,8 @@ async function main(): Promise<void> {
   Deno.addSignalListener("SIGINT", shutdown,);
   Deno.addSignalListener("SIGTERM", shutdown,);
 
-  // Keep the process running
-  await new Promise(() => {},);
+  // Start server and await until closed
+  await tracker.start();
 }
 
 main().catch((error,) => {

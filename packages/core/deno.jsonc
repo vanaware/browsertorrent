@@ -4,7 +4,6 @@
   "exports": {
     ".": "./src/mod.ts",
     "./service-worker": "./src/service-worker/mod.ts",
-    "./sw": "./src/service-worker/sw.ts",
     "./server": "./src/server/server.ts",
     "./torrent-generator": "./src/torrent-generator/mod.ts"
   },

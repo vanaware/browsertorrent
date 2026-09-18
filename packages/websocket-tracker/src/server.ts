@@ -5,7 +5,7 @@
 
 import { LRUCache, } from "./lru.ts";
 import { parseWebSocketMessage, } from "./parse-websocket.ts";
-import { StatsManager, } from "./stats.ts";
+import { StatsManager, type TrackerStats, } from "./stats.ts";
 import { TrackerRouter, } from "./router.ts";
 
 interface Peer {
@@ -84,14 +84,16 @@ export class WebSocketTracker {
     this.server = Deno.serve(
       {
         port: this.port,
+        hostname: this.hostname,
+        onListen: ({ hostname, port, }: { hostname: string; port: number }) => {
+          console.log(`[TRACKER] WebSocket server listening on ws://${hostname}:${port}`,);
+        },
       },
       (req: Request,): Response | Promise<Response> =>
         this.router.handleRequest(req,),
     );
 
-    console.log("[TRACKER] WebSocket server listening on port", this.port,);
-    // Deno.serve() runs indefinitely until shutdown() is called
-    await new Promise(() => {},);
+    await this.server.finished;
   }
 
   handleHttpAnnounce(url: URL, req: Request,): Response {
@@ -620,7 +622,7 @@ export class WebSocketTracker {
     }
   }
 
-  getStats() {
+  getStats(): TrackerStats {
     return this.stats.getStats();
   }
 

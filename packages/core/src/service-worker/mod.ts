@@ -1,10 +1,17 @@
 // packages/core/src/service-worker/mod.ts
+/**
+ * BrowserTorrent Service Worker module.
+ * Provides streaming fetch interception and client registration utilities for BitTorrent web seeding and playback.
+ */
+
 export {
+  createWebTorrentFetchHandler,
   getWebTorrentPrefix,
   guessDestination,
   handleStream,
-  initStreamingServiceWorker,
+  isWebTorrentStreamRequest,
   type StreamHandlerOptions,
+  type WebTorrentFetchHandler,
 } from "./stream-handler.ts";
 
 export {
@@ -12,10 +19,3 @@ export {
   registerServiceWorker,
   type ServiceWorkerRegisterOptions,
 } from "./register.ts";
-
-export {
-  CACHE_NAME,
-  handleCacheActivate,
-  handleCacheFetch,
-  handleCacheInstall,
-} from "./cache.ts";

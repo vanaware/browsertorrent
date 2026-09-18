@@ -1,76 +1,152 @@
-# Importing BrowserTorrent from GitHub
+# BrowserTorrent Integration & Import Guide
 
-This guide explains how to use the `browsertorrent` library in your own projects by importing it directly from the GitHub repository.
+This guide explains how to integrate and use the `@vanaware/browsertorrent` library across different environments: via JSR, direct GitHub imports, and bundlers.
 
-## 1. Deno Usage
+---
 
-Deno supports importing TypeScript files directly via URLs. You can point to the `mod.ts` file in the `packages/core` directory.
+## 1. JSR (Recommended for Deno & Modern TypeScript)
+
+`@vanaware/browsertorrent` is published on [JSR](https://jsr.io/@vanaware/browsertorrent) as a zero-dependency, pure browser & Deno TypeScript library.
+
+### Installation / Import in Deno
+
+```bash
+deno add jsr:@vanaware/browsertorrent
+```
+
+Or import directly in your code without an installation step:
 
 ```typescript
-import { Client } from "https://raw.githubusercontent.com/vanaware/browsertorrent/main/packages/core/src/mod.ts";
+import { Client } from "jsr:@vanaware/browsertorrent";
 
 const client = new Client();
 
 // Seed a file
-const file = new File(["hello world"], "hello.txt", { type: "text/plain" });
+const file = new File(["Hello P2P World!"], "hello.txt", { type: "text/plain" });
 const torrent = await client.seed(file);
 
-console.log("InfoHash:", torrent.infoHash);
+console.log("Seeding InfoHash:", torrent.infoHash);
+console.log("Magnet URI:", torrent.magnetURI);
 ```
 
-## 2. Browser Usage (Vite, Webpack, etc.)
+### Subpath Exports on JSR
 
-For standard web projects, we recommend using [esm.sh](https://esm.sh) to handle dependencies and TypeScript compilation automatically.
+- **Core Client & Torrent Engine**: `jsr:@vanaware/browsertorrent`
+- **Service Worker Streaming Runtime**: `jsr:@vanaware/browsertorrent/service-worker`
+- **Virtual Stream Server**: `jsr:@vanaware/browsertorrent/server`
+- **OPFS Torrent Generator**: `jsr:@vanaware/browsertorrent/torrent-generator`
+
+---
+
+## 2. Direct GitHub Import
+
+Deno allows direct URL imports from GitHub without npm or package registries:
 
 ```typescript
-import { Client } from "https://esm.sh/gh/vanaware/browsertorrent@main/packages/core/src/mod.ts";
+import {
+  Client,
+  Torrent,
+  VERSION
+} from "https://raw.githubusercontent.com/vanaware/browsertorrent/main/packages/core/src/mod.ts";
 
+console.log(`BrowserTorrent v${VERSION}`);
 const client = new Client();
 ```
 
-If you are using a bundler like Vite, you can add it to your `package.json`:
+---
 
-```json
-{
-  "dependencies": {
-    "@vanaware/browsertorrent": "https://esm.sh/gh/vanaware/browsertorrent@main/packages/core/src/mod.ts"
-  }
-}
+## 3. Browser & Bundler Usage (Vite, Webpack, esbuild)
+
+For standard web bundlers, you can use [esm.sh](https://esm.sh) or install from JSR via `npm` / `pnpm` / `yarn`:
+
+```bash
+npx jsr add @vanaware/browsertorrent
 ```
 
-## 3. Service Worker Integration (Streaming)
-
-To enable video/audio streaming, you must register the `browsertorrent` Service Worker.
-
-### A. Host the Service Worker
-Copy `packages/service-worker/src/sw.ts` to your public directory (or use `esbuild` to bundle it).
-
-### B. Register the Service Worker
-In your main application file:
+Or import directly in browser ES modules via CDN:
 
 ```typescript
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./sw.js", { scope: "./" });
-}
-```
+import { Client } from "https://esm.sh/jsr/@vanaware/browsertorrent";
 
-### C. Connect the Client to the SW
-The `Client` needs to communicate with the Service Worker to register streamable files.
+const client = new Client();
 
-```typescript
-import { streamManager } from "https://esm.sh/gh/vanaware/browsertorrent@main/packages/core/src/mod.ts";
-
-// When a torrent is ready
-torrent.on("ready", () => {
-  streamManager.registerTorrent(torrent);
+// Download a torrent from a Magnet Link
+const torrent = await client.add("magnet:?xt=urn:btih:...");
+torrent.on("download", (bytes) => {
+  console.log(`Downloaded ${bytes} bytes. Progress: ${(torrent.progress * 100).toFixed(1)}%`);
 });
 ```
 
-## 4. WebTorrent Drop-in Replacement
+---
 
-If you are already using the original `webtorrent` library, you can use our compatibility wrapper which provides a similar API but uses our high-performance Deno-native core.
+## 4. Service Worker Media Streaming Integration
 
-**Importing the wrapper:**
-`https://raw.githubusercontent.com/vanaware/browsertorrent/main/packages/webtorrent/index.ts`
+BrowserTorrent provides a decoupled Service Worker streaming layer. The core package (`@vanaware/browsertorrent/service-worker`) handles WebRTC chunk pull & fetch interception, allowing your application to retain full control over caching, install, and activation.
 
-(Note: Ensure the path matches your repository structure).
+### Step A: Create your Service Worker (`sw.ts`)
+
+```typescript
+/// <reference lib="webworker" />
+declare const self: ServiceWorkerGlobalScope;
+
+import { createWebTorrentFetchHandler } from "@vanaware/browsertorrent/service-worker";
+
+// 1. Initialize the WebTorrent stream interception handler
+const torrentStreamHandler = createWebTorrentFetchHandler();
+
+// 2. Capture the communication port sent by the main application
+self.addEventListener("message", (e: ExtendableMessageEvent) => {
+  const { data } = e;
+  if (data?.type === "PORT" && e.ports[0]) {
+    torrentStreamHandler.setPagePort(e.ports[0]);
+  }
+});
+
+// 3. Delegate streaming requests to BrowserTorrent, other requests to your cache/network
+self.addEventListener("fetch", (e: FetchEvent) => {
+  const streamResponse = torrentStreamHandler.handleFetch(e);
+  if (streamResponse) {
+    e.respondWith(streamResponse);
+    return;
+  }
+
+  // Your custom caching or network fallback logic here:
+  e.respondWith(fetch(e.request));
+});
+```
+
+### Step B: Register the Service Worker in your Main Application
+
+```typescript
+import {
+  Client,
+  registerServiceWorker,
+  streamManager,
+} from "@vanaware/browsertorrent";
+
+// Register the Service Worker
+await registerServiceWorker({ scriptUrl: "./sw.js", scope: "./" });
+
+// Create the client
+const client = new Client();
+
+// Seed or add torrents and connect to the streaming bridge
+const torrent = await client.add(magnetURI);
+torrent.on("ready", () => {
+  // Stream files directly to HTML5 <video> / <audio> tags
+  const file = torrent.files[0];
+  const videoElement = document.querySelector("video");
+  if (videoElement && file) {
+    file.streamTo(videoElement);
+  }
+});
+```
+
+---
+
+## 5. WebTorrent API Compatibility
+
+`@vanaware/browsertorrent` is designed to be an easy upgrade from legacy `webtorrent`:
+- Both `Client` and `WebTorrent` constructor aliases are exported.
+- Standard events (`ready`, `torrent`, `download`, `upload`, `wire`, `done`, `error`) are supported.
+- `torrent.files[i].streamTo(mediaElement)` provides seamless streaming with automatic backpressure.

@@ -1,7 +1,8 @@
 {
-  "name": "@browsertorrent/websocket-tracker",
+  "name": "@vanaware/browsertorrent-tracker",
   "version": "1.0.0",
-  "description": "Simple WebSocket tracker for BrowserTorrent - optimized for small servers",
+  "description": "High-performance, lightweight WebSocket & HTTP BitTorrent tracker in pure Deno TypeScript for WebTorrent & BrowserTorrent WebRTC swarms.",
+  "license": "MIT",
   "compilerOptions": {
     "lib": [
       "dom",
@@ -21,16 +22,19 @@
   },
   "tasks": {
     "start": "deno run --allow-net --allow-env --allow-read src/mod.ts",
+    "cli": "deno run --allow-net --allow-env --allow-read src/cli.ts",
     "test": "deno test --allow-env --allow-net --allow-read --allow-write tests/",
     "check": "deno check src/**/*.ts tests/**/*.ts"
   },
   "exports": {
     ".": "./src/mod.ts",
+    "./cli": "./src/cli.ts",
     "./server": "./src/server.ts",
+    "./router": "./src/router.ts",
     "./peer": "./src/peer.ts",
     "./swarm": "./src/swarm.ts",
-    "./lru": "./src/lru.ts",
     "./stats": "./src/stats.ts",
+    "./lru": "./src/lru.ts",
     "./parse-websocket": "./src/parse-websocket.ts"
   }
 }

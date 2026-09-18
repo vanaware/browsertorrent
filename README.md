@@ -1,39 +1,98 @@
 # BrowserTorrent
 
-A modern, browser-native BitTorrent client and PWA built in TypeScript with Deno, WebRTC, OPFS (Origin Private File System), and BeerCSS.
+A modern, browser-native BitTorrent client, library, and PWA built in TypeScript with Deno, WebRTC, OPFS (Origin Private File System), and BeerCSS.
 
-## Overview
+---
 
-BrowserTorrent is a zero-dependency, browser-first BitTorrent client engineered to operate 100% within modern web browsers. It implements full peer-to-peer data transfers over WebRTC DataChannels and communicates with both public WebTorrent WebSocket trackers and custom Deno-based WebSocket trackers (`WsTracker`).
+## 🚀 Overview
 
-## Key Features
+**BrowserTorrent** is a zero-dependency, browser-first BitTorrent client engineered to operate 100% within modern web browsers. It provides direct peer-to-peer data transfers over WebRTC DataChannels and communicates with both public WebTorrent WebSocket trackers and built-in Deno-based WebSocket trackers (`WsTracker`).
 
-- **Pure Deno & Web Standards**: Built without local Node.js or npm dependencies; bundling orchestrated via native esbuild and Deno tasks.
-- **WebRTC P2P DataChannels**: Direct browser-to-browser torrent transfer with framing over binary `ArrayBuffer` channels.
-- **Full BitTorrent Wire Protocol**: Supports core BEP 3 wire protocol, BEP 52 v2 Merkle hashing, BEP 6 fast extension, and BEP 10 extension protocol.
-- **Metadata Exchange (`ut_metadata` / BEP 9)**: Piecewise torrent metainfo retrieval directly over WebRTC extension channels.
-- **Bi-directional WebRTC Signaling via WebSocket Trackers**: Fully compliant with the original WebTorrent `bittorrent-tracker` JSON specification, supporting embedded offers/answers for immediate peer discovery and connection establishment.
-- **Local Deno Tracker (`WsTracker`)**: Built-in, high-performance WebSocket tracker server with offer pool rotation and client compatibility.
-- **OPFS & In-Memory Storage**: ChunkStore persistence using the high-performance browser Origin Private File System (`FileSystemSyncAccessHandle`) and worker threads.
-- **Service Worker Media Streaming**: Real-time range-request (HTTP 206 Partial Content) streaming from WebRTC swarms directly to HTML5 video and audio tags.
-- **Material Design 3 (BeerCSS)**: Lightweight, semantic UI with responsive design powered by `@preact/signals`.
+Available on JSR as [`@vanaware/browsertorrent`](https://jsr.io/@vanaware/browsertorrent).
 
-## E2E & Protocol Verification
+---
 
-BrowserTorrent includes a Playwright and Headless Chromium end-to-end testing suite validating:
-1. Public tracker connectivity (`wss://tracker.webtorrent.dev`, `wss://tracker.openwebtorrent.com`).
-2. Local Deno tracker (`ws://127.0.0.1:3000/tracker`) handshake and peer signaling.
-3. Seeder-to-Leecher P2P file transfers and metadata exchange over local and public swarms.
-4. Full compatibility with official WebTorrent clients.
+## 📦 Quick Start
+
+### 1. Deno (via JSR)
 
 ```bash
-# Run tests
-deno task test
-
-# Run E2E Playwright validation
-node packages/e2e/test_trackers.js
+deno add jsr:@vanaware/browsertorrent
 ```
 
-## How to Use
+```typescript
+import { Client } from "jsr:@vanaware/browsertorrent";
 
-To use BrowserTorrent in your own application directly from GitHub, check out our **[GitHub Import Guide](./docs/browsertorrent/IMPORT_GUIDE.md)**.
+const client = new Client();
+
+// Seed a file directly from the browser
+const file = new File(["Hello WebRTC P2P!"], "hello.txt", { type: "text/plain" });
+const torrent = await client.seed(file);
+
+console.log("Seeding InfoHash:", torrent.infoHash);
+console.log("Magnet URI:", torrent.magnetURI);
+```
+
+### 2. Browser / ESM
+
+```typescript
+import { Client } from "https://esm.sh/jsr/@vanaware/browsertorrent";
+
+const client = new Client();
+const torrent = await client.add("magnet:?xt=urn:btih:...");
+
+torrent.on("download", (bytes) => {
+  console.log(`Progress: ${(torrent.progress * 100).toFixed(1)}%`);
+});
+```
+
+---
+
+## 🧩 Modular Subpath Exports
+
+| Module | Purpose |
+| --- | --- |
+| `@vanaware/browsertorrent` | Core client, torrent engine, swarm coordinator, bencode, and wire protocols. |
+| `@vanaware/browsertorrent/service-worker` | Decoupled streaming fetch interceptor and registration helpers for P2P video/audio playback. |
+| `@vanaware/browsertorrent/server` | In-browser HTTP server bridge for Service Worker streaming. |
+| `@vanaware/browsertorrent/torrent-generator` | High-speed torrent metainfo generator over Origin Private File System (OPFS). |
+
+---
+
+## ✨ Key Features
+
+- **Pure Deno & Web Standards**: Zero Node.js runtime dependencies; uses standard `Uint8Array`, `EventTarget`, and `ReadableStream`.
+- **Decoupled Service Worker Streaming**: Real-time HTTP 206 Partial Content range requests streaming directly into HTML5 `<video>` and `<audio>` tags.
+- **WebRTC P2P DataChannels**: Binary `ArrayBuffer` transport with automatic framing and backpressure management.
+- **Full BitTorrent Wire Protocol**: Supports BEP 3 wire protocol, BEP 52 v2 Merkle hashing, BEP 6 fast extension, and BEP 10 extension protocol.
+- **Metadata Exchange (`ut_metadata` / BEP 9)**: Piecewise metainfo retrieval for magnet links directly across WebRTC swarms.
+- **Bi-directional WebRTC Signaling**: 100% interoperable with `bittorrent-tracker` WebSocket JSON specification and public trackers (`wss://tracker.webtorrent.dev`).
+- **OPFS & In-Memory Storage**: High-performance persistence via `FileSystemSyncAccessHandle` in dedicated workers.
+- **Responsive UI**: Built with `@preact/signals` and BeerCSS (Material Design 3).
+
+---
+
+## 🧪 Testing & Verification
+
+BrowserTorrent includes a comprehensive test suite of **700+ unit, integration, and E2E tests**:
+
+```bash
+# Run full unit and integration test suite
+deno task test
+
+# Run build orchestrator (esbuild + Deno.bundle)
+deno task build
+
+# Run linting and type checks
+deno task lint
+deno task check
+```
+
+---
+
+## 📚 Documentation & Integration Guides
+
+- **[Integration & Import Guide](./docs/browsertorrent/IMPORT_GUIDE.md)**
+- **[API Reference](./docs/browsertorrent/00-api-browsertorrent.md)**
+- **[WebTorrent vs BrowserTorrent Comparison Table](./docs/browsertorrent/08-comparison-table.md)**
+- **[WebRTC Signaling Architecture](./docs/browsertorrent/09-webrtc-signaling-architecture.md)**
