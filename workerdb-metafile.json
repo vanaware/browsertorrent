@@ -1,0 +1,146 @@
+{
+  "inputs": {
+    "https:https://esm.sh/idb-keyval@6.2.1/denonext/idb-keyval.mjs": {
+      "bytes": 1929,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "https:https://esm.sh/idb-keyval@6.2.1": {
+      "bytes": 91,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/idb-keyval@6.2.1/denonext/idb-keyval.mjs",
+          "kind": "import-statement",
+          "original": "/idb-keyval@6.2.1/denonext/idb-keyval.mjs"
+        }
+      ],
+      "format": "esm"
+    },
+    "https:https://esm.sh/fflate@0.8.2/es2022/fflate.mjs": {
+      "bytes": 31916,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "https:https://esm.sh/fflate@0.8.2?target=es2022": {
+      "bytes": 77,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/fflate@0.8.2/es2022/fflate.mjs",
+          "kind": "import-statement",
+          "original": "/fflate@0.8.2/es2022/fflate.mjs"
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/worker-db/src/utils/id.ts": {
+      "bytes": 8231,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/worker-db/src/db.ts": {
+      "bytes": 71745,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/idb-keyval@6.2.1",
+          "kind": "import-statement",
+          "original": "idb-keyval"
+        },
+        {
+          "path": "https:https://esm.sh/fflate@0.8.2?target=es2022",
+          "kind": "import-statement",
+          "original": "fflate"
+        },
+        {
+          "path": "packages/worker-db/src/utils/id.ts",
+          "kind": "import-statement",
+          "original": "./utils/id.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/utils/src/config/mod.ts": {
+      "bytes": 2474,
+      "imports": [],
+      "format": "esm"
+    },
+    "packages/worker-db/src/worker.ts": {
+      "bytes": 18776,
+      "imports": [
+        {
+          "path": "packages/worker-db/src/db.ts",
+          "kind": "import-statement",
+          "original": "./db.ts"
+        },
+        {
+          "path": "packages/utils/src/config/mod.ts",
+          "kind": "import-statement",
+          "original": "@browsertorrent/utils/config"
+        }
+      ],
+      "format": "esm"
+    }
+  },
+  "outputs": {
+    "packages/server/build/dist/worker-db.js.map": {
+      "imports": [],
+      "exports": [],
+      "inputs": {},
+      "bytes": 139283
+    },
+    "packages/server/build/dist/worker-db.js": {
+      "imports": [],
+      "exports": [],
+      "entryPoint": "packages/worker-db/src/worker.ts",
+      "inputs": {
+        "https:https://esm.sh/idb-keyval@6.2.1/denonext/idb-keyval.mjs": {
+          "bytesInOutput": 1938
+        },
+        "https:https://esm.sh/idb-keyval@6.2.1": {
+          "bytesInOutput": 0
+        },
+        "https:https://esm.sh/fflate@0.8.2/es2022/fflate.mjs": {
+          "bytesInOutput": 41880
+        },
+        "https:https://esm.sh/fflate@0.8.2?target=es2022": {
+          "bytesInOutput": 0
+        },
+        "packages/worker-db/src/utils/id.ts": {
+          "bytesInOutput": 1823
+        },
+        "packages/worker-db/src/db.ts": {
+          "bytesInOutput": 20967
+        },
+        "packages/utils/src/config/mod.ts": {
+          "bytesInOutput": 54
+        },
+        "packages/worker-db/src/worker.ts": {
+          "bytesInOutput": 4911
+        }
+      },
+      "bytes": 72048
+    }
+  }
+}

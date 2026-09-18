@@ -1,0 +1,1778 @@
+{
+  "inputs": {
+    "https:https://esm.sh/preact@10.29.7/denonext/preact.mjs": {
+      "bytes": 11798,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "https:https://esm.sh/preact@10.29.7/denonext/jsx-runtime.mjs": {
+      "bytes": 1895,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/preact@10.29.7/denonext/preact.mjs",
+          "kind": "import-statement",
+          "original": "./preact.mjs"
+        },
+        {
+          "path": "https:https://esm.sh/preact@10.29.7/denonext/preact.mjs",
+          "kind": "import-statement",
+          "original": "./preact.mjs"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "https:https://esm.sh/preact@10.29.7/jsx-runtime": {
+      "bytes": 146,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/preact@10.29.7/denonext/preact.mjs",
+          "kind": "import-statement",
+          "original": "/preact@10.29.7/denonext/preact.mjs"
+        },
+        {
+          "path": "https:https://esm.sh/preact@10.29.7/denonext/jsx-runtime.mjs",
+          "kind": "import-statement",
+          "original": "/preact@10.29.7/denonext/jsx-runtime.mjs"
+        }
+      ],
+      "format": "esm"
+    },
+    "https:https://esm.sh/preact@10.29.7": {
+      "bytes": 83,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/preact@10.29.7/denonext/preact.mjs",
+          "kind": "import-statement",
+          "original": "/preact@10.29.7/denonext/preact.mjs"
+        }
+      ],
+      "format": "esm"
+    },
+    "https:https://esm.sh/@preact/signals-core@1.14.4/denonext/signals-core.mjs": {
+      "bytes": 5209,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "https:https://esm.sh/@preact/signals-core@^1.7.0?target=denonext": {
+      "bytes": 115,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/@preact/signals-core@1.14.4/denonext/signals-core.mjs",
+          "kind": "import-statement",
+          "original": "/@preact/signals-core@1.14.4/denonext/signals-core.mjs"
+        }
+      ],
+      "format": "esm"
+    },
+    "https:https://esm.sh/preact@10.29.7/denonext/hooks.mjs": {
+      "bytes": 3683,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/preact@10.29.7/denonext/preact.mjs",
+          "kind": "import-statement",
+          "original": "./preact.mjs"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "https:https://esm.sh/@preact/signals@1.3.1/X-ZHByZWFjdEAxMC4yOS43/denonext/signals.mjs": {
+      "bytes": 2909,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/preact@10.29.7/denonext/preact.mjs",
+          "kind": "import-statement",
+          "original": "/preact@10.29.7/denonext/preact.mjs"
+        },
+        {
+          "path": "https:https://esm.sh/preact@10.29.7/denonext/hooks.mjs",
+          "kind": "import-statement",
+          "original": "/preact@10.29.7/denonext/hooks.mjs"
+        },
+        {
+          "path": "https:https://esm.sh/@preact/signals-core@^1.7.0?target=denonext",
+          "kind": "import-statement",
+          "original": "/@preact/signals-core@^1.7.0?target=denonext"
+        },
+        {
+          "path": "https:https://esm.sh/@preact/signals-core@^1.7.0?target=denonext",
+          "kind": "import-statement",
+          "original": "/@preact/signals-core@^1.7.0?target=denonext"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "https:https://esm.sh/@preact/signals@1.3.1?deps=preact@10.29.7": {
+      "bytes": 267,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/@preact/signals-core@^1.7.0?target=denonext",
+          "kind": "import-statement",
+          "original": "/@preact/signals-core@^1.7.0?target=denonext"
+        },
+        {
+          "path": "https:https://esm.sh/preact@10.29.7/denonext/hooks.mjs",
+          "kind": "import-statement",
+          "original": "/preact@10.29.7/denonext/hooks.mjs"
+        },
+        {
+          "path": "https:https://esm.sh/preact@10.29.7/denonext/preact.mjs",
+          "kind": "import-statement",
+          "original": "/preact@10.29.7/denonext/preact.mjs"
+        },
+        {
+          "path": "https:https://esm.sh/@preact/signals@1.3.1/X-ZHByZWFjdEAxMC4yOS43/denonext/signals.mjs",
+          "kind": "import-statement",
+          "original": "/@preact/signals@1.3.1/X-ZHByZWFjdEAxMC4yOS43/denonext/signals.mjs"
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/worker-db/src/utils/id.ts": {
+      "bytes": 8231,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/worker-db/src/ls.ts": {
+      "bytes": 23347,
+      "imports": [
+        {
+          "path": "packages/worker-db/src/utils/id.ts",
+          "kind": "import-statement",
+          "original": "./utils/id.ts"
+        },
+        {
+          "path": "packages/worker-db/src/mod-main.ts",
+          "kind": "import-statement",
+          "original": "./mod-main.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "https:https://esm.sh/idb-keyval@6.2.1/denonext/idb-keyval.mjs": {
+      "bytes": 1929,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "https:https://esm.sh/idb-keyval@6.2.1": {
+      "bytes": 91,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/idb-keyval@6.2.1/denonext/idb-keyval.mjs",
+          "kind": "import-statement",
+          "original": "/idb-keyval@6.2.1/denonext/idb-keyval.mjs"
+        }
+      ],
+      "format": "esm"
+    },
+    "https:https://esm.sh/fflate@0.8.2/es2022/fflate.mjs": {
+      "bytes": 31916,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "https:https://esm.sh/fflate@0.8.2?target=es2022": {
+      "bytes": 77,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/fflate@0.8.2/es2022/fflate.mjs",
+          "kind": "import-statement",
+          "original": "/fflate@0.8.2/es2022/fflate.mjs"
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/worker-db/src/db.ts": {
+      "bytes": 71745,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/idb-keyval@6.2.1",
+          "kind": "import-statement",
+          "original": "idb-keyval"
+        },
+        {
+          "path": "https:https://esm.sh/fflate@0.8.2?target=es2022",
+          "kind": "import-statement",
+          "original": "fflate"
+        },
+        {
+          "path": "packages/worker-db/src/utils/id.ts",
+          "kind": "import-statement",
+          "original": "./utils/id.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/worker-db/src/rpc.ts": {
+      "bytes": 33536,
+      "imports": [
+        {
+          "path": "packages/worker-db/src/utils/id.ts",
+          "kind": "import-statement",
+          "original": "./utils/id.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/worker-db/src/mod-main.ts": {
+      "bytes": 764,
+      "imports": [
+        {
+          "path": "packages/worker-db/src/ls.ts",
+          "kind": "import-statement",
+          "original": "./ls.ts"
+        },
+        {
+          "path": "packages/worker-db/src/db.ts",
+          "kind": "import-statement",
+          "original": "./db.ts"
+        },
+        {
+          "path": "packages/worker-db/src/rpc.ts",
+          "kind": "import-statement",
+          "original": "./rpc.ts"
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/event-target.ts": {
+      "bytes": 5958,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/encoding.ts": {
+      "bytes": 15920,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/magnet.ts": {
+      "bytes": 36360,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/encoding.ts",
+          "kind": "import-statement",
+          "original": "./encoding.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/bencode.ts": {
+      "bytes": 48889,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/errors.ts": {
+      "bytes": 9432,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/torrent-types.ts": {
+      "bytes": 13611,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/errors.ts",
+          "kind": "import-statement",
+          "original": "./errors.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/metainfo-v2.ts": {
+      "bytes": 33950,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/errors.ts",
+          "kind": "import-statement",
+          "original": "./errors.ts"
+        },
+        {
+          "path": "packages/core/src/utils/torrent-types.ts",
+          "kind": "import-statement",
+          "original": "./torrent-types.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/metainfo-parser.ts": {
+      "bytes": 36579,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "./bencode.ts"
+        },
+        {
+          "path": "packages/core/src/utils/errors.ts",
+          "kind": "import-statement",
+          "original": "./errors.ts"
+        },
+        {
+          "path": "packages/core/src/utils/torrent-types.ts",
+          "kind": "import-statement",
+          "original": "./torrent-types.ts"
+        },
+        {
+          "path": "packages/core/src/utils/metainfo-v2.ts",
+          "kind": "import-statement",
+          "original": "./metainfo-v2.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/metainfo-identity.ts": {
+      "bytes": 27274,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "./bencode.ts"
+        },
+        {
+          "path": "packages/core/src/utils/errors.ts",
+          "kind": "import-statement",
+          "original": "./errors.ts"
+        },
+        {
+          "path": "packages/core/src/utils/metainfo-parser.ts",
+          "kind": "import-statement",
+          "original": "./metainfo-parser.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/parse-torrent.ts": {
+      "bytes": 21023,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/magnet.ts",
+          "kind": "import-statement",
+          "original": "./magnet.ts"
+        },
+        {
+          "path": "packages/core/src/utils/metainfo-identity.ts",
+          "kind": "import-statement",
+          "original": "./metainfo-identity.ts"
+        },
+        {
+          "path": "packages/core/src/utils/metainfo-v2.ts",
+          "kind": "import-statement",
+          "original": "./metainfo-v2.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/core/bitfield.ts": {
+      "bytes": 10536,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/errors.ts",
+          "kind": "import-statement",
+          "original": "../utils/errors.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/crypto/hasher.ts": {
+      "bytes": 35761,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/buffer.ts": {
+      "bytes": 19391,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/core/constants.ts": {
+      "bytes": 8101,
+      "imports": [],
+      "format": "esm"
+    },
+    "packages/core/src/core/handshake.ts": {
+      "bytes": 13935,
+      "imports": [
+        {
+          "path": "packages/core/src/core/constants.ts",
+          "kind": "import-statement",
+          "original": "./constants.ts"
+        },
+        {
+          "path": "packages/core/src/utils/errors.ts",
+          "kind": "import-statement",
+          "original": "../utils/errors.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/net.ts": {
+      "bytes": 26026,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/core/message.ts": {
+      "bytes": 44941,
+      "imports": [
+        {
+          "path": "packages/core/src/core/constants.ts",
+          "kind": "import-statement",
+          "original": "./constants.ts"
+        },
+        {
+          "path": "packages/core/src/utils/errors.ts",
+          "kind": "import-statement",
+          "original": "../utils/errors.ts"
+        },
+        {
+          "path": "packages/core/src/utils/net.ts",
+          "kind": "import-statement",
+          "original": "../utils/net.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/core/extension-host.ts": {
+      "bytes": 37930,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "../utils/bencode.ts"
+        },
+        {
+          "path": "packages/core/src/utils/errors.ts",
+          "kind": "import-statement",
+          "original": "../utils/errors.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/core/wire.ts": {
+      "bytes": 126243,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/event-target.ts",
+          "kind": "import-statement",
+          "original": "../utils/event-target.ts"
+        },
+        {
+          "path": "packages/core/src/utils/buffer.ts",
+          "kind": "import-statement",
+          "original": "../utils/buffer.ts"
+        },
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "../utils/bencode.ts"
+        },
+        {
+          "path": "packages/core/src/utils/errors.ts",
+          "kind": "import-statement",
+          "original": "../utils/errors.ts"
+        },
+        {
+          "path": "packages/core/src/core/handshake.ts",
+          "kind": "import-statement",
+          "original": "./handshake.ts"
+        },
+        {
+          "path": "packages/core/src/core/message.ts",
+          "kind": "import-statement",
+          "original": "./message.ts"
+        },
+        {
+          "path": "packages/core/src/core/constants.ts",
+          "kind": "import-statement",
+          "original": "./constants.ts"
+        },
+        {
+          "path": "packages/core/src/core/extension-host.ts",
+          "kind": "import-statement",
+          "original": "./extension-host.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/core/piece.ts": {
+      "bytes": 4368,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/core/torrent.ts": {
+      "bytes": 96873,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/event-target.ts",
+          "kind": "import-statement",
+          "original": "../utils/event-target.ts"
+        },
+        {
+          "path": "packages/core/src/core/bitfield.ts",
+          "kind": "import-statement",
+          "original": "./bitfield.ts"
+        },
+        {
+          "path": "packages/core/src/crypto/hasher.ts",
+          "kind": "import-statement",
+          "original": "../crypto/hasher.ts"
+        },
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "../utils/bencode.ts"
+        },
+        {
+          "path": "packages/core/src/core/wire.ts",
+          "kind": "import-statement",
+          "original": "./wire.ts"
+        },
+        {
+          "path": "packages/core/src/core/piece.ts",
+          "kind": "import-statement",
+          "original": "./piece.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/network/peer.ts": {
+      "bytes": 41652,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/event-target.ts",
+          "kind": "import-statement",
+          "original": "../utils/event-target.ts"
+        },
+        {
+          "path": "packages/core/src/core/wire.ts",
+          "kind": "import-statement",
+          "original": "../core/wire.ts"
+        },
+        {
+          "path": "packages/core/src/core/constants.ts",
+          "kind": "import-statement",
+          "original": "../core/constants.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/encode-util.ts": {
+      "bytes": 2512,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/network/tracker.ts": {
+      "bytes": 82921,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "../utils/bencode.ts"
+        },
+        {
+          "path": "packages/core/src/utils/errors.ts",
+          "kind": "import-statement",
+          "original": "../utils/errors.ts"
+        },
+        {
+          "path": "packages/core/src/utils/net.ts",
+          "kind": "import-statement",
+          "original": "../utils/net.ts"
+        },
+        {
+          "path": "packages/core/src/utils/encode-util.ts",
+          "kind": "import-statement",
+          "original": "../utils/encode-util.ts"
+        },
+        {
+          "path": "packages/core/src/utils/event-target.ts",
+          "kind": "import-statement",
+          "original": "../utils/event-target.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/core/extension.ts": {
+      "bytes": 2196,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/event-target.ts",
+          "kind": "import-statement",
+          "original": "../utils/event-target.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/extensions/ut-metadata.ts": {
+      "bytes": 39552,
+      "imports": [
+        {
+          "path": "packages/core/src/core/extension.ts",
+          "kind": "import-statement",
+          "original": "../core/extension.ts"
+        },
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "../utils/bencode.ts"
+        },
+        {
+          "path": "packages/core/src/core/bitfield.ts",
+          "kind": "import-statement",
+          "original": "../core/bitfield.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/network/swarm.ts": {
+      "bytes": 41406,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/event-target.ts",
+          "kind": "import-statement",
+          "original": "../utils/event-target.ts"
+        },
+        {
+          "path": "packages/core/src/network/peer.ts",
+          "kind": "import-statement",
+          "original": "./peer.ts"
+        },
+        {
+          "path": "packages/core/src/network/tracker.ts",
+          "kind": "import-statement",
+          "original": "./tracker.ts"
+        },
+        {
+          "path": "packages/core/src/extensions/ut-metadata.ts",
+          "kind": "import-statement",
+          "original": "../extensions/ut-metadata.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/crypto/random.ts": {
+      "bytes": 3636,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/peerid.ts": {
+      "bytes": 25526,
+      "imports": [
+        {
+          "path": "packages/core/src/crypto/random.ts",
+          "kind": "import-statement",
+          "original": "../crypto/random.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/storage/memory-chunk-store.ts": {
+      "bytes": 13135,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/storage/opfs-chunk-store.ts": {
+      "bytes": 22473,
+      "imports": [
+        {
+          "path": "packages/core/src/storage/memory-chunk-store.ts",
+          "kind": "import-statement",
+          "original": "./memory-chunk-store.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/server/stream-manager.ts": {
+      "bytes": 15265,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/server/server.ts": {
+      "bytes": 58797,
+      "imports": [
+        {
+          "path": "packages/core/src/server/stream-manager.ts",
+          "kind": "import-statement",
+          "original": "./stream-manager.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/core/file.ts": {
+      "bytes": 45476,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/event-target.ts",
+          "kind": "import-statement",
+          "original": "../utils/event-target.ts"
+        },
+        {
+          "path": "packages/core/src/server/stream-manager.ts",
+          "kind": "import-statement",
+          "original": "../server/stream-manager.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/torrent-generator/types.ts": {
+      "bytes": 6389,
+      "imports": [],
+      "format": "esm"
+    },
+    "packages/core/src/torrent-generator/opfs-walker.ts": {
+      "bytes": 8602,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/torrent-generator/opfs-reader.ts": {
+      "bytes": 13996,
+      "imports": [
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/torrent-generator/util.ts": {
+      "bytes": 20648,
+      "imports": [
+        {
+          "path": "packages/core/src/torrent-generator/types.ts",
+          "kind": "import-statement",
+          "original": "./types.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/opfs-reader.ts",
+          "kind": "import-statement",
+          "original": "./opfs-reader.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/torrent-generator/generator.ts": {
+      "bytes": 20026,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "../utils/bencode.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/types.ts",
+          "kind": "import-statement",
+          "original": "./types.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/opfs-walker.ts",
+          "kind": "import-statement",
+          "original": "./opfs-walker.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/util.ts",
+          "kind": "import-statement",
+          "original": "./util.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/torrent-generator/mod.ts": {
+      "bytes": 2004,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "../utils/bencode.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/generator.ts",
+          "kind": "import-statement",
+          "original": "./generator.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/opfs-walker.ts",
+          "kind": "import-statement",
+          "original": "./opfs-walker.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/opfs-reader.ts",
+          "kind": "import-statement",
+          "original": "./opfs-reader.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/util.ts",
+          "kind": "import-statement",
+          "original": "./util.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/types.ts",
+          "kind": "import-statement",
+          "original": "./types.ts"
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/extensions/ut-pex.ts": {
+      "bytes": 32027,
+      "imports": [
+        {
+          "path": "packages/core/src/core/extension.ts",
+          "kind": "import-statement",
+          "original": "../core/extension.ts"
+        },
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "../utils/bencode.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/mod.ts": {
+      "bytes": 78671,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/event-target.ts",
+          "kind": "import-statement",
+          "original": "./utils/event-target.ts"
+        },
+        {
+          "path": "packages/core/src/utils/parse-torrent.ts",
+          "kind": "import-statement",
+          "original": "./utils/parse-torrent.ts"
+        },
+        {
+          "path": "packages/core/src/core/torrent.ts",
+          "kind": "import-statement",
+          "original": "./core/torrent.ts"
+        },
+        {
+          "path": "packages/core/src/network/swarm.ts",
+          "kind": "import-statement",
+          "original": "./network/swarm.ts"
+        },
+        {
+          "path": "packages/core/src/utils/peerid.ts",
+          "kind": "import-statement",
+          "original": "./utils/peerid.ts"
+        },
+        {
+          "path": "packages/core/src/storage/opfs-chunk-store.ts",
+          "kind": "import-statement",
+          "original": "./storage/opfs-chunk-store.ts"
+        },
+        {
+          "path": "packages/core/src/storage/memory-chunk-store.ts",
+          "kind": "import-statement",
+          "original": "./storage/memory-chunk-store.ts"
+        },
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "./utils/bencode.ts"
+        },
+        {
+          "path": "packages/core/src/server/server.ts",
+          "kind": "import-statement",
+          "original": "./server/server.ts"
+        },
+        {
+          "path": "packages/core/src/core/file.ts",
+          "kind": "import-statement",
+          "original": "./core/file.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/mod.ts",
+          "kind": "import-statement",
+          "original": "./torrent-generator/mod.ts"
+        },
+        {
+          "path": "packages/core/src/core/torrent.ts",
+          "kind": "import-statement",
+          "original": "./core/torrent.ts"
+        },
+        {
+          "path": "packages/core/src/network/swarm.ts",
+          "kind": "import-statement",
+          "original": "./network/swarm.ts"
+        },
+        {
+          "path": "packages/core/src/network/peer.ts",
+          "kind": "import-statement",
+          "original": "./network/peer.ts"
+        },
+        {
+          "path": "packages/core/src/core/wire.ts",
+          "kind": "import-statement",
+          "original": "./core/wire.ts"
+        },
+        {
+          "path": "packages/core/src/core/file.ts",
+          "kind": "import-statement",
+          "original": "./core/file.ts"
+        },
+        {
+          "path": "packages/core/src/core/piece.ts",
+          "kind": "import-statement",
+          "original": "./core/piece.ts"
+        },
+        {
+          "path": "packages/core/src/utils/parse-torrent.ts",
+          "kind": "import-statement",
+          "original": "./utils/parse-torrent.ts"
+        },
+        {
+          "path": "packages/core/src/utils/peerid.ts",
+          "kind": "import-statement",
+          "original": "./utils/peerid.ts"
+        },
+        {
+          "path": "packages/core/src/extensions/ut-metadata.ts",
+          "kind": "import-statement",
+          "original": "./extensions/ut-metadata.ts"
+        },
+        {
+          "path": "packages/core/src/extensions/ut-pex.ts",
+          "kind": "import-statement",
+          "original": "./extensions/ut-pex.ts"
+        },
+        {
+          "path": "packages/core/src/server/server.ts",
+          "kind": "import-statement",
+          "original": "./server/server.ts"
+        },
+        {
+          "path": "packages/core/src/server/stream-manager.ts",
+          "kind": "import-statement",
+          "original": "./server/stream-manager.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/mod.ts",
+          "kind": "import-statement",
+          "original": "./torrent-generator/mod.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/mod.ts",
+          "kind": "dynamic-import",
+          "original": "./torrent-generator/mod.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/example/src/torrent-context.tsx": {
+      "bytes": 62859,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/preact@10.29.7/jsx-runtime",
+          "kind": "import-statement",
+          "original": "preact/jsx-runtime"
+        },
+        {
+          "path": "https:https://esm.sh/preact@10.29.7",
+          "kind": "import-statement",
+          "original": "preact"
+        },
+        {
+          "path": "https:https://esm.sh/@preact/signals@1.3.1?deps=preact@10.29.7",
+          "kind": "import-statement",
+          "original": "@preact/signals"
+        },
+        {
+          "path": "packages/worker-db/src/mod-main.ts",
+          "kind": "import-statement",
+          "original": "@vanaware/worker-db"
+        },
+        {
+          "path": "packages/core/src/mod.ts",
+          "kind": "import-statement",
+          "original": "@vanaware/browsertorrent"
+        },
+        {
+          "path": "packages/core/src/mod.ts",
+          "kind": "dynamic-import",
+          "original": "@vanaware/browsertorrent"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/example/src/components/seeder-panel.tsx": {
+      "bytes": 15179,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/preact@10.29.7/jsx-runtime",
+          "kind": "import-statement",
+          "original": "preact/jsx-runtime"
+        },
+        {
+          "path": "https:https://esm.sh/@preact/signals@1.3.1?deps=preact@10.29.7",
+          "kind": "import-statement",
+          "original": "@preact/signals"
+        },
+        {
+          "path": "packages/example/src/torrent-context.tsx",
+          "kind": "import-statement",
+          "original": "../torrent-context.tsx"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/example/src/components/leecher-panel.tsx": {
+      "bytes": 11945,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/preact@10.29.7/jsx-runtime",
+          "kind": "import-statement",
+          "original": "preact/jsx-runtime"
+        },
+        {
+          "path": "https:https://esm.sh/@preact/signals@1.3.1?deps=preact@10.29.7",
+          "kind": "import-statement",
+          "original": "@preact/signals"
+        },
+        {
+          "path": "packages/example/src/torrent-context.tsx",
+          "kind": "import-statement",
+          "original": "../torrent-context.tsx"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "https:https://esm.sh/preact@10.29.7/hooks": {
+      "bytes": 134,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/preact@10.29.7/denonext/preact.mjs",
+          "kind": "import-statement",
+          "original": "/preact@10.29.7/denonext/preact.mjs"
+        },
+        {
+          "path": "https:https://esm.sh/preact@10.29.7/denonext/hooks.mjs",
+          "kind": "import-statement",
+          "original": "/preact@10.29.7/denonext/hooks.mjs"
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/example/src/components/player-panel.tsx": {
+      "bytes": 27471,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/preact@10.29.7/jsx-runtime",
+          "kind": "import-statement",
+          "original": "preact/jsx-runtime"
+        },
+        {
+          "path": "https:https://esm.sh/@preact/signals@1.3.1?deps=preact@10.29.7",
+          "kind": "import-statement",
+          "original": "@preact/signals"
+        },
+        {
+          "path": "https:https://esm.sh/preact@10.29.7/hooks",
+          "kind": "import-statement",
+          "original": "preact/hooks"
+        },
+        {
+          "path": "packages/example/src/torrent-context.tsx",
+          "kind": "import-statement",
+          "original": "../torrent-context.tsx"
+        },
+        {
+          "path": "packages/core/src/mod.ts",
+          "kind": "import-statement",
+          "original": "@vanaware/browsertorrent"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/example/src/components/debug-panel.tsx": {
+      "bytes": 5703,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/preact@10.29.7/jsx-runtime",
+          "kind": "import-statement",
+          "original": "preact/jsx-runtime"
+        },
+        {
+          "path": "https:https://esm.sh/@preact/signals@1.3.1?deps=preact@10.29.7",
+          "kind": "import-statement",
+          "original": "@preact/signals"
+        },
+        {
+          "path": "packages/example/src/torrent-context.tsx",
+          "kind": "import-statement",
+          "original": "../torrent-context.tsx"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/example/src/components/torrent-list.tsx": {
+      "bytes": 11821,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/preact@10.29.7/jsx-runtime",
+          "kind": "import-statement",
+          "original": "preact/jsx-runtime"
+        },
+        {
+          "path": "packages/example/src/torrent-context.tsx",
+          "kind": "import-statement",
+          "original": "../torrent-context.tsx"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/example/src/components/swarm-visualizer.tsx": {
+      "bytes": 8732,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/preact@10.29.7/jsx-runtime",
+          "kind": "import-statement",
+          "original": "preact/jsx-runtime"
+        },
+        {
+          "path": "packages/example/src/torrent-context.tsx",
+          "kind": "import-statement",
+          "original": "../torrent-context.tsx"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/example/src/app.tsx": {
+      "bytes": 25090,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/preact@10.29.7/jsx-runtime",
+          "kind": "import-statement",
+          "original": "preact/jsx-runtime"
+        },
+        {
+          "path": "https:https://esm.sh/@preact/signals@1.3.1?deps=preact@10.29.7",
+          "kind": "import-statement",
+          "original": "@preact/signals"
+        },
+        {
+          "path": "packages/example/src/components/seeder-panel.tsx",
+          "kind": "import-statement",
+          "original": "./components/seeder-panel.tsx"
+        },
+        {
+          "path": "packages/example/src/components/leecher-panel.tsx",
+          "kind": "import-statement",
+          "original": "./components/leecher-panel.tsx"
+        },
+        {
+          "path": "packages/example/src/components/player-panel.tsx",
+          "kind": "import-statement",
+          "original": "./components/player-panel.tsx"
+        },
+        {
+          "path": "packages/example/src/components/debug-panel.tsx",
+          "kind": "import-statement",
+          "original": "./components/debug-panel.tsx"
+        },
+        {
+          "path": "packages/example/src/components/torrent-list.tsx",
+          "kind": "import-statement",
+          "original": "./components/torrent-list.tsx"
+        },
+        {
+          "path": "packages/example/src/components/swarm-visualizer.tsx",
+          "kind": "import-statement",
+          "original": "./components/swarm-visualizer.tsx"
+        },
+        {
+          "path": "packages/example/src/torrent-context.tsx",
+          "kind": "import-statement",
+          "original": "./torrent-context.tsx"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/example/src/main.tsx": {
+      "bytes": 34489,
+      "imports": [
+        {
+          "path": "https:https://esm.sh/preact@10.29.7/jsx-runtime",
+          "kind": "import-statement",
+          "original": "preact/jsx-runtime"
+        },
+        {
+          "path": "https:https://esm.sh/preact@10.29.7",
+          "kind": "import-statement",
+          "original": "preact"
+        },
+        {
+          "path": "packages/example/src/app.tsx",
+          "kind": "import-statement",
+          "original": "./app.tsx"
+        },
+        {
+          "path": "packages/example/src/torrent-context.tsx",
+          "kind": "import-statement",
+          "original": "./torrent-context.tsx"
+        },
+        {
+          "path": "packages/core/src/mod.ts",
+          "kind": "import-statement",
+          "original": "../../core/src/mod.ts"
+        },
+        {
+          "path": "packages/core/src/core/torrent.ts",
+          "kind": "import-statement",
+          "original": "../../core/src/core/torrent.ts"
+        },
+        {
+          "path": "packages/core/src/network/swarm.ts",
+          "kind": "import-statement",
+          "original": "../../core/src/network/swarm.ts"
+        },
+        {
+          "path": "packages/core/src/network/peer.ts",
+          "kind": "import-statement",
+          "original": "../../core/src/network/peer.ts"
+        },
+        {
+          "path": "packages/core/src/network/tracker.ts",
+          "kind": "import-statement",
+          "original": "../../core/src/network/tracker.ts"
+        },
+        {
+          "path": "packages/core/src/mod.ts",
+          "kind": "import-statement",
+          "original": "@vanaware/browsertorrent"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    }
+  },
+  "outputs": {
+    "packages/server/build/dist/main.js.map": {
+      "imports": [],
+      "exports": [],
+      "inputs": {},
+      "bytes": 936991
+    },
+    "packages/server/build/dist/main.js": {
+      "imports": [],
+      "exports": [],
+      "entryPoint": "packages/example/src/main.tsx",
+      "inputs": {
+        "packages/core/src/utils/event-target.ts": {
+          "bytesInOutput": 1616
+        },
+        "packages/core/src/utils/encoding.ts": {
+          "bytesInOutput": 2458
+        },
+        "packages/core/src/utils/magnet.ts": {
+          "bytesInOutput": 5866
+        },
+        "packages/core/src/utils/bencode.ts": {
+          "bytesInOutput": 12262
+        },
+        "packages/core/src/utils/errors.ts": {
+          "bytesInOutput": 2129
+        },
+        "packages/core/src/utils/torrent-types.ts": {
+          "bytesInOutput": 1626
+        },
+        "packages/core/src/utils/metainfo-v2.ts": {
+          "bytesInOutput": 9304
+        },
+        "packages/core/src/utils/metainfo-parser.ts": {
+          "bytesInOutput": 9247
+        },
+        "packages/core/src/utils/metainfo-identity.ts": {
+          "bytesInOutput": 5252
+        },
+        "packages/core/src/utils/parse-torrent.ts": {
+          "bytesInOutput": 4620
+        },
+        "packages/core/src/core/bitfield.ts": {
+          "bytesInOutput": 3128
+        },
+        "packages/core/src/crypto/hasher.ts": {
+          "bytesInOutput": 539
+        },
+        "packages/core/src/utils/buffer.ts": {
+          "bytesInOutput": 839
+        },
+        "packages/core/src/core/constants.ts": {
+          "bytesInOutput": 2287
+        },
+        "packages/core/src/core/handshake.ts": {
+          "bytesInOutput": 3158
+        },
+        "packages/core/src/utils/net.ts": {
+          "bytesInOutput": 2699
+        },
+        "packages/core/src/core/message.ts": {
+          "bytesInOutput": 11108
+        },
+        "packages/core/src/core/extension-host.ts": {
+          "bytesInOutput": 9858
+        },
+        "packages/core/src/core/wire.ts": {
+          "bytesInOutput": 37361
+        },
+        "packages/core/src/core/piece.ts": {
+          "bytesInOutput": 1317
+        },
+        "packages/core/src/core/torrent.ts": {
+          "bytesInOutput": 30525
+        },
+        "packages/core/src/network/peer.ts": {
+          "bytesInOutput": 11204
+        },
+        "packages/core/src/utils/encode-util.ts": {
+          "bytesInOutput": 332
+        },
+        "packages/core/src/network/tracker.ts": {
+          "bytesInOutput": 18062
+        },
+        "packages/core/src/core/extension.ts": {
+          "bytesInOutput": 324
+        },
+        "packages/core/src/extensions/ut-metadata.ts": {
+          "bytesInOutput": 11315
+        },
+        "packages/core/src/network/swarm.ts": {
+          "bytesInOutput": 12263
+        },
+        "packages/core/src/crypto/random.ts": {
+          "bytesInOutput": 633
+        },
+        "packages/core/src/utils/peerid.ts": {
+          "bytesInOutput": 5555
+        },
+        "packages/core/src/storage/memory-chunk-store.ts": {
+          "bytesInOutput": 3558
+        },
+        "packages/core/src/storage/opfs-chunk-store.ts": {
+          "bytesInOutput": 6155
+        },
+        "packages/core/src/server/stream-manager.ts": {
+          "bytesInOutput": 3580
+        },
+        "packages/core/src/server/server.ts": {
+          "bytesInOutput": 13486
+        },
+        "packages/core/src/core/file.ts": {
+          "bytesInOutput": 14255
+        },
+        "packages/core/src/torrent-generator/types.ts": {
+          "bytesInOutput": 1094
+        },
+        "packages/core/src/torrent-generator/opfs-walker.ts": {
+          "bytesInOutput": 1405
+        },
+        "packages/core/src/torrent-generator/opfs-reader.ts": {
+          "bytesInOutput": 3983
+        },
+        "packages/core/src/torrent-generator/util.ts": {
+          "bytesInOutput": 4217
+        },
+        "packages/core/src/torrent-generator/generator.ts": {
+          "bytesInOutput": 3514
+        },
+        "packages/core/src/torrent-generator/mod.ts": {
+          "bytesInOutput": 736
+        },
+        "packages/core/src/extensions/ut-pex.ts": {
+          "bytesInOutput": 8636
+        },
+        "packages/core/src/mod.ts": {
+          "bytesInOutput": 23053
+        },
+        "https:https://esm.sh/preact@10.29.7/denonext/preact.mjs": {
+          "bytesInOutput": 16382
+        },
+        "https:https://esm.sh/preact@10.29.7/denonext/jsx-runtime.mjs": {
+          "bytesInOutput": 518
+        },
+        "https:https://esm.sh/preact@10.29.7/jsx-runtime": {
+          "bytesInOutput": 0
+        },
+        "https:https://esm.sh/preact@10.29.7": {
+          "bytesInOutput": 0
+        },
+        "https:https://esm.sh/@preact/signals-core@1.14.4/denonext/signals-core.mjs": {
+          "bytesInOutput": 6590
+        },
+        "https:https://esm.sh/@preact/signals-core@^1.7.0?target=denonext": {
+          "bytesInOutput": 0
+        },
+        "https:https://esm.sh/preact@10.29.7/denonext/hooks.mjs": {
+          "bytesInOutput": 2847
+        },
+        "https:https://esm.sh/@preact/signals@1.3.1/X-ZHByZWFjdEAxMC4yOS43/denonext/signals.mjs": {
+          "bytesInOutput": 3398
+        },
+        "https:https://esm.sh/@preact/signals@1.3.1?deps=preact@10.29.7": {
+          "bytesInOutput": 0
+        },
+        "packages/worker-db/src/utils/id.ts": {
+          "bytesInOutput": 1824
+        },
+        "packages/worker-db/src/ls.ts": {
+          "bytesInOutput": 7037
+        },
+        "packages/worker-db/src/mod-main.ts": {
+          "bytesInOutput": 0
+        },
+        "https:https://esm.sh/idb-keyval@6.2.1/denonext/idb-keyval.mjs": {
+          "bytesInOutput": 2035
+        },
+        "https:https://esm.sh/idb-keyval@6.2.1": {
+          "bytesInOutput": 0
+        },
+        "https:https://esm.sh/fflate@0.8.2/es2022/fflate.mjs": {
+          "bytesInOutput": 43091
+        },
+        "https:https://esm.sh/fflate@0.8.2?target=es2022": {
+          "bytesInOutput": 0
+        },
+        "packages/worker-db/src/db.ts": {
+          "bytesInOutput": 20958
+        },
+        "packages/worker-db/src/rpc.ts": {
+          "bytesInOutput": 10898
+        },
+        "packages/example/src/torrent-context.tsx": {
+          "bytesInOutput": 16315
+        },
+        "packages/example/src/components/seeder-panel.tsx": {
+          "bytesInOutput": 4897
+        },
+        "packages/example/src/components/leecher-panel.tsx": {
+          "bytesInOutput": 3848
+        },
+        "https:https://esm.sh/preact@10.29.7/hooks": {
+          "bytesInOutput": 0
+        },
+        "packages/example/src/components/player-panel.tsx": {
+          "bytesInOutput": 8695
+        },
+        "packages/example/src/components/debug-panel.tsx": {
+          "bytesInOutput": 2000
+        },
+        "packages/example/src/components/torrent-list.tsx": {
+          "bytesInOutput": 4201
+        },
+        "packages/example/src/components/swarm-visualizer.tsx": {
+          "bytesInOutput": 3869
+        },
+        "packages/example/src/app.tsx": {
+          "bytesInOutput": 10421
+        },
+        "packages/example/src/main.tsx": {
+          "bytesInOutput": 7945
+        }
+      },
+      "bytes": 485749
+    }
+  }
+}

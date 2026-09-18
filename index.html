@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BrowserTorrent</title>
+    <meta name="description"
+      content="A high-performance Deno-based PWA BitTorrent client with WebRTC P2P sharing and OPFS storage." />
+    <meta property="og:title" content="BrowserTorrent" />
+    <meta property="og:description"
+      content="A high-performance Deno-based PWA BitTorrent client with WebRTC P2P sharing and OPFS storage." />
+
+    <!-- BeerCSS v5 -->
+    <link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/beercss@5.0.3/dist/cdn/beer.min.css" />
+    <script type="module"
+      src="https://cdn.jsdelivr.net/npm/beercss@5.0.3/dist/cdn/beer.min.js"></script>
+
+    <!-- Material Dynamic Colors -->
+    <script type="module"
+      src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.4/dist/cdn/material-dynamic-colors.min.js"></script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+      rel="stylesheet" />
+
+    <!-- Original WebTorrent (v2.5.1 CDN) loaded as ES Module -->
+    <script type="module">
+    import WebTorrent from "./webtorrent.min.js";
+    window.WebTorrent = WebTorrent;
+    </script>
+
+    <!-- Debug Panel Styles -->
+    <style>
+    .debug-panel {
+      margin-top: 1rem;
+    }
+    .debug-panel nav {
+      cursor: pointer;
+      user-select: none;
+    }
+    .debug-log {
+      max-height: 300px;
+      overflow-y: auto;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 0.5rem;
+      border-radius: 0 0 12px 12px;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.75rem;
+      line-height: 1.4;
+    }
+    .debug-line {
+      padding: 2px 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .debug-line:hover {
+      background: #2d2d2d;
+    }
+    .debug-line code {
+      font-family: inherit;
+      color: #d4d4d4;
+      background: transparent;
+    }
+    </style>
+  </head>
+  <body class="light">
+    <div id="app"></div>
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>

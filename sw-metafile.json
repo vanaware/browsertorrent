@@ -1,0 +1,42 @@
+{
+  "inputs": {
+    "<define:__GENERATED_ASSETS__>": {
+      "bytes": 67,
+      "imports": []
+    },
+    "packages/service-worker/src/sw.ts": {
+      "bytes": 29816,
+      "imports": [
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ]
+    }
+  },
+  "outputs": {
+    "packages/server/build/dist/sw.js.map": {
+      "imports": [],
+      "exports": [],
+      "inputs": {},
+      "bytes": 14972
+    },
+    "packages/server/build/dist/sw.js": {
+      "imports": [],
+      "exports": [],
+      "entryPoint": "packages/service-worker/src/sw.ts",
+      "inputs": {
+        "packages/service-worker/src/sw.ts": {
+          "bytesInOutput": 6983
+        }
+      },
+      "bytes": 7221
+    }
+  }
+}
