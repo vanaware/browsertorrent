@@ -4,9 +4,25 @@
       "bytes": 67,
       "imports": []
     },
-    "packages/service-worker/src/sw.ts": {
-      "bytes": 29816,
+    "packages/core/src/version.ts": {
+      "bytes": 633,
       "imports": [
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/service-worker/cache.ts": {
+      "bytes": 8393,
+      "imports": [
+        {
+          "path": "packages/core/src/version.ts",
+          "kind": "import-statement",
+          "original": "../version.ts"
+        },
         {
           "path": "<define:__GENERATED_ASSETS__>",
           "kind": "import-statement",
@@ -17,7 +33,92 @@
           "kind": "import-statement",
           "external": true
         }
-      ]
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/service-worker/stream-handler.ts": {
+      "bytes": 26274,
+      "imports": [
+        {
+          "path": "packages/core/src/service-worker/cache.ts",
+          "kind": "import-statement",
+          "original": "./cache.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/service-worker/register.ts": {
+      "bytes": 5671,
+      "imports": [
+        {
+          "path": "packages/core/src/version.ts",
+          "kind": "import-statement",
+          "original": "../version.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/service-worker/mod.ts": {
+      "bytes": 1409,
+      "imports": [
+        {
+          "path": "packages/core/src/service-worker/stream-handler.ts",
+          "kind": "import-statement",
+          "original": "./stream-handler.ts"
+        },
+        {
+          "path": "packages/core/src/service-worker/register.ts",
+          "kind": "import-statement",
+          "original": "./register.ts"
+        },
+        {
+          "path": "packages/core/src/service-worker/cache.ts",
+          "kind": "import-statement",
+          "original": "./cache.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/service-worker/src/sw.ts": {
+      "bytes": 946,
+      "imports": [
+        {
+          "path": "packages/core/src/service-worker/mod.ts",
+          "kind": "import-statement",
+          "original": "../../core/src/service-worker/mod.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
     }
   },
   "outputs": {
@@ -25,18 +126,33 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 14972
+      "bytes": 18647
     },
     "packages/server/build/dist/sw.js": {
       "imports": [],
       "exports": [],
       "entryPoint": "packages/service-worker/src/sw.ts",
       "inputs": {
+        "<define:__GENERATED_ASSETS__>": {
+          "bytesInOutput": 110
+        },
+        "packages/core/src/version.ts": {
+          "bytesInOutput": 34
+        },
+        "packages/core/src/service-worker/cache.ts": {
+          "bytesInOutput": 2145
+        },
+        "packages/core/src/service-worker/stream-handler.ts": {
+          "bytesInOutput": 7249
+        },
+        "packages/core/src/service-worker/mod.ts": {
+          "bytesInOutput": 0
+        },
         "packages/service-worker/src/sw.ts": {
-          "bytesInOutput": 6983
+          "bytesInOutput": 30
         }
       },
-      "bytes": 7221
+      "bytes": 9974
     }
   }
 }

@@ -856,7 +856,7 @@
       "format": "esm"
     },
     "packages/core/src/utils/peerid.ts": {
-      "bytes": 25526,
+      "bytes": 25513,
       "imports": [
         {
           "path": "packages/core/src/crypto/random.ts",
@@ -1061,6 +1061,11 @@
       ],
       "format": "esm"
     },
+    "packages/core/src/version.ts": {
+      "bytes": 633,
+      "imports": [],
+      "format": "esm"
+    },
     "packages/core/src/extensions/ut-pex.ts": {
       "bytes": 32027,
       "imports": [
@@ -1082,8 +1087,77 @@
       ],
       "format": "esm"
     },
+    "packages/core/src/service-worker/cache.ts": {
+      "bytes": 8393,
+      "imports": [
+        {
+          "path": "packages/core/src/version.ts",
+          "kind": "import-statement",
+          "original": "../version.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/service-worker/stream-handler.ts": {
+      "bytes": 26274,
+      "imports": [
+        {
+          "path": "packages/core/src/service-worker/cache.ts",
+          "kind": "import-statement",
+          "original": "./cache.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/service-worker/register.ts": {
+      "bytes": 5671,
+      "imports": [
+        {
+          "path": "packages/core/src/version.ts",
+          "kind": "import-statement",
+          "original": "../version.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/service-worker/mod.ts": {
+      "bytes": 1409,
+      "imports": [
+        {
+          "path": "packages/core/src/service-worker/stream-handler.ts",
+          "kind": "import-statement",
+          "original": "./stream-handler.ts"
+        },
+        {
+          "path": "packages/core/src/service-worker/register.ts",
+          "kind": "import-statement",
+          "original": "./register.ts"
+        },
+        {
+          "path": "packages/core/src/service-worker/cache.ts",
+          "kind": "import-statement",
+          "original": "./cache.ts"
+        }
+      ],
+      "format": "esm"
+    },
     "packages/core/src/mod.ts": {
-      "bytes": 78671,
+      "bytes": 79789,
       "imports": [
         {
           "path": "packages/core/src/utils/event-target.ts",
@@ -1141,6 +1215,11 @@
           "original": "./torrent-generator/mod.ts"
         },
         {
+          "path": "packages/core/src/version.ts",
+          "kind": "import-statement",
+          "original": "./version.ts"
+        },
+        {
           "path": "packages/core/src/core/torrent.ts",
           "kind": "import-statement",
           "original": "./core/torrent.ts"
@@ -1154,6 +1233,11 @@
           "path": "packages/core/src/network/peer.ts",
           "kind": "import-statement",
           "original": "./network/peer.ts"
+        },
+        {
+          "path": "packages/core/src/network/tracker.ts",
+          "kind": "import-statement",
+          "original": "./network/tracker.ts"
         },
         {
           "path": "packages/core/src/core/wire.ts",
@@ -1204,6 +1288,11 @@
           "path": "packages/core/src/torrent-generator/mod.ts",
           "kind": "import-statement",
           "original": "./torrent-generator/mod.ts"
+        },
+        {
+          "path": "packages/core/src/service-worker/mod.ts",
+          "kind": "import-statement",
+          "original": "./service-worker/mod.ts"
         },
         {
           "path": "packages/core/src/torrent-generator/mod.ts",
@@ -1488,7 +1577,7 @@
       "format": "esm"
     },
     "packages/example/src/main.tsx": {
-      "bytes": 34489,
+      "bytes": 33541,
       "imports": [
         {
           "path": "https:https://esm.sh/preact@10.29.7/jsx-runtime",
@@ -1513,31 +1602,6 @@
         {
           "path": "packages/core/src/mod.ts",
           "kind": "import-statement",
-          "original": "../../core/src/mod.ts"
-        },
-        {
-          "path": "packages/core/src/core/torrent.ts",
-          "kind": "import-statement",
-          "original": "../../core/src/core/torrent.ts"
-        },
-        {
-          "path": "packages/core/src/network/swarm.ts",
-          "kind": "import-statement",
-          "original": "../../core/src/network/swarm.ts"
-        },
-        {
-          "path": "packages/core/src/network/peer.ts",
-          "kind": "import-statement",
-          "original": "../../core/src/network/peer.ts"
-        },
-        {
-          "path": "packages/core/src/network/tracker.ts",
-          "kind": "import-statement",
-          "original": "../../core/src/network/tracker.ts"
-        },
-        {
-          "path": "packages/core/src/mod.ts",
-          "kind": "import-statement",
           "original": "@vanaware/browsertorrent"
         },
         {
@@ -1554,7 +1618,7 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 936991
+      "bytes": 958690
     },
     "packages/server/build/dist/main.js": {
       "imports": [],
@@ -1646,7 +1710,7 @@
           "bytesInOutput": 633
         },
         "packages/core/src/utils/peerid.ts": {
-          "bytesInOutput": 5555
+          "bytesInOutput": 5550
         },
         "packages/core/src/storage/memory-chunk-store.ts": {
           "bytesInOutput": 3558
@@ -1681,11 +1745,26 @@
         "packages/core/src/torrent-generator/mod.ts": {
           "bytesInOutput": 736
         },
+        "packages/core/src/version.ts": {
+          "bytesInOutput": 161
+        },
         "packages/core/src/extensions/ut-pex.ts": {
           "bytesInOutput": 8636
         },
+        "packages/core/src/service-worker/cache.ts": {
+          "bytesInOutput": 2254
+        },
+        "packages/core/src/service-worker/stream-handler.ts": {
+          "bytesInOutput": 7401
+        },
+        "packages/core/src/service-worker/register.ts": {
+          "bytesInOutput": 1581
+        },
+        "packages/core/src/service-worker/mod.ts": {
+          "bytesInOutput": 146
+        },
         "packages/core/src/mod.ts": {
-          "bytesInOutput": 23053
+          "bytesInOutput": 23454
         },
         "https:https://esm.sh/preact@10.29.7/denonext/preact.mjs": {
           "bytesInOutput": 16382
@@ -1769,10 +1848,10 @@
           "bytesInOutput": 10421
         },
         "packages/example/src/main.tsx": {
-          "bytesInOutput": 7945
+          "bytesInOutput": 7873
         }
       },
-      "bytes": 485749
+      "bytes": 497843
     }
   }
 }

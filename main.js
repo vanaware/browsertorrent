@@ -1,4 +1,4 @@
-/* BrowserTorrent v0.0.102-mu72e0l8 */
+/* BrowserTorrent v0.0.106-mu74q2or */
 
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
@@ -6183,7 +6183,7 @@ var init_peerid = __esm({
       "BP": "BitTorrent Pro",
       "BR": "BitRocket",
       "BS": "BTSlave",
-      "BT": "mainline BitTorrent",
+      "BT": "BrowserTorrent",
       "BW": "BitWombat",
       "BX": "~Bittorrent X",
       "CD": "Enhanced CTorrent",
@@ -7981,6 +7981,15 @@ var init_mod = __esm({
   }
 });
 
+// packages/core/src/version.ts
+var VERSION, CORE_VERSION;
+var init_version = __esm({
+  "packages/core/src/version.ts"() {
+    VERSION = "0.0.106-mu74q2or";
+    CORE_VERSION = VERSION;
+  }
+});
+
 // packages/core/src/extensions/ut-pex.ts
 function encodePexUpdate(update) {
   const added4 = update.added.filter((peer) => peer.address.length === 4);
@@ -8207,6 +8216,353 @@ var init_ut_pex = __esm({
   }
 });
 
+// packages/core/src/service-worker/cache.ts
+function handleCacheInstall(event, assetsToCache) {
+  const assets = assetsToCache ?? (typeof __GENERATED_ASSETS__ !== "undefined" ? __GENERATED_ASSETS__ : []);
+  console.log("[SW-CACHE] Installing Service Worker cache...");
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => {
+    console.log("[SW-CACHE] Caching essential resources:", assets.length, "items");
+    return Promise.all(assets.map((url) => {
+      return cache.add(url).catch((err) => {
+        console.warn(`[SW-CACHE] Failed to cache resource: ${url}`, err);
+      });
+    }));
+  }).then(() => self.skipWaiting()));
+}
+function handleCacheActivate(event) {
+  console.log("[SW-CACHE] Activating Service Worker and cleaning old caches...");
+  event.waitUntil(caches.keys().then((cacheNames) => {
+    return Promise.all(cacheNames.map((cache) => {
+      if (cache !== CACHE_NAME && cache.startsWith("browsertorrent-")) {
+        console.log(`[SW-CACHE] Removing old cache: ${cache}`);
+        return caches.delete(cache);
+      }
+    }));
+  }).then(() => self.clients.claim()));
+}
+async function handleCacheFetch(event) {
+  if (event.request.method !== "GET") {
+    return void 0;
+  }
+  if (!event.request.url.startsWith(self.location.origin) || event.request.url.includes("/api/")) {
+    return void 0;
+  }
+  try {
+    const networkResponse = await fetch(event.request);
+    if (networkResponse.ok) {
+      const responseClone = networkResponse.clone();
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(event.request, responseClone);
+    }
+    return networkResponse;
+  } catch (_err) {
+    const cache = await caches.open(CACHE_NAME);
+    const cachedResponse = await cache.match(event.request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    return new Response("Resource unavailable offline.", {
+      status: 503,
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8"
+      }
+    });
+  }
+}
+var CACHE_NAME;
+var init_cache = __esm({
+  "packages/core/src/service-worker/cache.ts"() {
+    init_version();
+    CACHE_NAME = `browsertorrent-cache-v${VERSION}`;
+    __name(handleCacheInstall, "handleCacheInstall");
+    __name(handleCacheActivate, "handleCacheActivate");
+    __name(handleCacheFetch, "handleCacheFetch");
+  }
+});
+
+// packages/core/src/service-worker/stream-handler.ts
+function guessDestination(pathname) {
+  if (/\.(mp4|webm|mkv|avi|mov)$/i.test(pathname)) return "video";
+  if (/\.(mp3|m4a|ogg|wav)$/i.test(pathname)) return "audio";
+  if (/\.(jpe?g|png|gif|webp)$/i.test(pathname)) return "image";
+  return "document";
+}
+function getWebTorrentPrefix(scope) {
+  const baseScope = scope || (typeof self !== "undefined" && self.registration?.scope ? self.registration.scope : "/");
+  const pathname = new URL(baseScope, typeof self !== "undefined" ? self.location?.origin || "http://localhost" : "http://localhost").pathname;
+  return (pathname.endsWith("/") ? pathname : pathname + "/") + "webtorrent/";
+}
+function handleStream(req, url, pagePort, scope) {
+  return new Promise((resolve) => {
+    const chunkChannel = new MessageChannel();
+    const chunkPort1 = chunkChannel.port1;
+    const chunkPort2 = chunkChannel.port2;
+    const requestChannel = new MessageChannel();
+    const requestPort1 = requestChannel.port1;
+    const requestPort2 = requestChannel.port2;
+    const dest = guessDestination(url.pathname);
+    let bodyController = null;
+    let closed = false;
+    let pendingPullResolve = null;
+    let pendingPull = Promise.resolve();
+    chunkPort1.onmessage = (ev) => {
+      const chunk = ev.data;
+      if (chunk === null || chunk === false) {
+        console.log("[sw-stream] stream END");
+        closed = true;
+        if (pendingPullResolve) {
+          const r = pendingPullResolve;
+          pendingPullResolve = null;
+          pendingPull = Promise.resolve();
+          r();
+        }
+        if (bodyController) {
+          try {
+            bodyController.close();
+          } catch {
+          }
+        }
+        chunkPort1.close();
+        chunkPort2.close();
+        requestPort1.close();
+        requestPort2.close();
+        return;
+      }
+      if (!(chunk instanceof Uint8Array)) {
+        console.warn("[sw-stream] unexpected data on chunkPort1:", typeof chunk);
+        return;
+      }
+      console.log("[sw-stream] chunk received:", chunk.byteLength, "bytes");
+      if (bodyController) {
+        try {
+          bodyController.enqueue(chunk);
+        } catch (err) {
+          console.error("[sw-stream] enqueue error:", err);
+        }
+      }
+      if (pendingPullResolve) {
+        const r = pendingPullResolve;
+        pendingPullResolve = null;
+        pendingPull = Promise.resolve();
+        r();
+      }
+    };
+    chunkPort1.start?.();
+    requestPort2.onmessage = (ev) => {
+      const data = ev.data;
+      console.log("[sw-stream] requestPort2 received:", typeof data, data?.body);
+      if (data === null || data === void 0) {
+        chunkPort1.close();
+        chunkPort2.close();
+        requestPort1.close();
+        requestPort2.close();
+        resolve(new Response("Stream unavailable", {
+          status: 503
+        }));
+        return;
+      }
+      const metadata = data;
+      if (metadata.body !== "STREAM") {
+        chunkPort1.close();
+        chunkPort2.close();
+        requestPort1.close();
+        requestPort2.close();
+        resolve(new Response(String(metadata.body ?? ""), {
+          status: metadata.status ?? 200,
+          headers: new Headers(metadata.headers ?? {})
+        }));
+        return;
+      }
+      const headers = new Headers(metadata.headers ?? {});
+      function doPull(_controller) {
+        if (closed || pendingPullResolve !== null) return;
+        chunkPort1.postMessage(true);
+        pendingPull = new Promise((resolve2) => {
+          pendingPullResolve = resolve2;
+        });
+        const timeout = setTimeout(() => {
+          if (pendingPullResolve) {
+            console.warn("[sw-stream] chunk pull timeout \u2014 closing stream");
+            closed = true;
+            pendingPullResolve = null;
+            pendingPull = Promise.resolve();
+            if (bodyController) {
+              try {
+                bodyController.close();
+              } catch {
+              }
+            }
+            chunkPort1.close();
+            chunkPort2.close();
+            requestPort1.close();
+            requestPort2.close();
+          }
+        }, 1e4);
+        pendingPull = pendingPull.finally(() => clearTimeout(timeout));
+      }
+      __name(doPull, "doPull");
+      const bodyStream = new ReadableStream({
+        start(controller) {
+          bodyController = controller;
+          doPull(controller);
+        },
+        async pull(controller) {
+          if (pendingPullResolve) {
+            await pendingPull;
+          }
+          if (closed) {
+            try {
+              controller.close();
+            } catch {
+            }
+            return;
+          }
+          doPull(controller);
+        },
+        cancel() {
+          console.log("[sw-stream] stream cancel");
+          closed = true;
+          chunkPort1.postMessage(false);
+          chunkPort1.close();
+          chunkPort2.close();
+          requestPort1.close();
+          requestPort2.close();
+        }
+      });
+      resolve(new Response(bodyStream, {
+        status: metadata.status ?? 200,
+        headers
+      }));
+    };
+    requestPort2.start?.();
+    pagePort.postMessage({
+      type: "webtorrent-request",
+      url: url.pathname,
+      method: req.method,
+      headers: Object.fromEntries(req.headers.entries()),
+      scope,
+      destination: dest
+    }, [
+      chunkPort2,
+      requestPort1
+    ]);
+  });
+}
+function initStreamingServiceWorker(options = {}) {
+  const requestQueue = [];
+  let pagePort = null;
+  self.addEventListener("install", (e3) => {
+    if (options.cacheAssets !== false) {
+      handleCacheInstall(e3);
+    } else {
+      self.skipWaiting();
+    }
+  });
+  self.addEventListener("activate", (e3) => {
+    if (options.cacheAssets !== false) {
+      handleCacheActivate(e3);
+    } else {
+      e3.waitUntil(self.clients.claim());
+    }
+  });
+  self.addEventListener("message", (e3) => {
+    const { data } = e3;
+    if (data?.type === "PORT") {
+      pagePort = e3.ports[0];
+      console.log("[sw] pagePort received");
+      processQueue();
+    }
+  });
+  self.addEventListener("fetch", (e3) => {
+    const url = new URL(e3.request.url);
+    const prefix = options.prefix || getWebTorrentPrefix();
+    if (!url.pathname.startsWith(prefix)) {
+      if (options.cacheAssets !== false) {
+        const cachePromise = handleCacheFetch(e3);
+        e3.respondWith(cachePromise.then((resp) => resp || fetch(e3.request)));
+      }
+      return;
+    }
+    console.log("[sw] stream fetch intercepted:", url.pathname);
+    if (!pagePort) {
+      e3.respondWith(new Promise((resolve) => {
+        requestQueue.push({
+          resolve,
+          req: e3.request,
+          url
+        });
+      }));
+      return;
+    }
+    e3.respondWith(handleStream(e3.request, url, pagePort, self.registration.scope));
+  });
+  async function processQueue() {
+    while (requestQueue.length > 0 && pagePort) {
+      const item = requestQueue.shift();
+      const resp = await handleStream(item.req, item.url, pagePort, self.registration.scope);
+      item.resolve(resp);
+    }
+  }
+  __name(processQueue, "processQueue");
+}
+var init_stream_handler = __esm({
+  "packages/core/src/service-worker/stream-handler.ts"() {
+    init_cache();
+    __name(guessDestination, "guessDestination");
+    __name(getWebTorrentPrefix, "getWebTorrentPrefix");
+    __name(handleStream, "handleStream");
+    __name(initStreamingServiceWorker, "initStreamingServiceWorker");
+  }
+});
+
+// packages/core/src/service-worker/register.ts
+function isServiceWorkerSupported() {
+  return typeof navigator !== "undefined" && "serviceWorker" in navigator;
+}
+async function registerServiceWorker(options = {}) {
+  if (!isServiceWorkerSupported()) {
+    console.warn("[BrowserTorrent] Service Workers are not supported in this environment.");
+    return null;
+  }
+  let basePath = options.scope || (typeof globalThis !== "undefined" && globalThis.location ? globalThis.location.pathname : "/");
+  if (basePath.split("/").pop()?.includes(".")) {
+    basePath = basePath.substring(0, basePath.lastIndexOf("/") + 1);
+  } else if (!basePath.endsWith("/")) {
+    basePath += "/";
+  }
+  const ver = options.version || VERSION;
+  const scriptName = options.scriptUrl || `${basePath}sw.js`;
+  const finalUrl = scriptName.includes("?") ? `${scriptName}&v=${ver}` : `${scriptName}?v=${ver}`;
+  try {
+    const registration = await navigator.serviceWorker.register(finalUrl, {
+      scope: basePath
+    });
+    await navigator.serviceWorker.ready;
+    console.log(`[BrowserTorrent] Service Worker ready with scope: ${basePath}`);
+    return registration;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[BrowserTorrent] Failed to register Service Worker:", message);
+    throw new Error(`Failed to register Service Worker: ${message}`);
+  }
+}
+var init_register = __esm({
+  "packages/core/src/service-worker/register.ts"() {
+    init_version();
+    __name(isServiceWorkerSupported, "isServiceWorkerSupported");
+    __name(registerServiceWorker, "registerServiceWorker");
+  }
+});
+
+// packages/core/src/service-worker/mod.ts
+var init_mod2 = __esm({
+  "packages/core/src/service-worker/mod.ts"() {
+    init_stream_handler();
+    init_register();
+    init_cache();
+  }
+});
+
 // packages/core/src/mod.ts
 var mod_exports2 = {};
 __export(mod_exports2, {
@@ -8214,6 +8570,7 @@ __export(mod_exports2, {
   CORE_VERSION: () => CORE_VERSION,
   Client: () => Client,
   File: () => File,
+  HttpTracker: () => HttpTracker,
   OPFSMultiFileReader: () => OPFSMultiFileReader,
   Peer: () => Peer,
   PexPeerFlag: () => PexPeerFlag,
@@ -8223,8 +8580,10 @@ __export(mod_exports2, {
   Torrent: () => Torrent,
   UtMetadata: () => UtMetadata,
   UtPexExtension: () => UtPexExtension,
+  VERSION: () => VERSION,
   WebTorrentServer: () => WebTorrentServer,
   Wire: () => Wire,
+  WsTracker: () => WsTracker,
   buildPieceFiles: () => buildPieceFiles,
   buildStreamURL: () => buildStreamURL,
   calcPieceSize: () => calcPieceSize,
@@ -8237,15 +8596,21 @@ __export(mod_exports2, {
   generateTorrent: () => generateTorrent,
   getDefaultCreatedBy: () => getDefaultCreatedBy,
   getOPFSFileSize: () => getOPFSFileSize,
+  getWebTorrentPrefix: () => getWebTorrentPrefix,
+  guessDestination: () => guessDestination,
+  handleStream: () => handleStream,
+  initStreamingServiceWorker: () => initStreamingServiceWorker,
   isHiddenFile: () => isHiddenFile,
+  isServiceWorkerSupported: () => isServiceWorkerSupported,
   parseStreamURL: () => parseStreamURL,
   parseTorrent: () => parseTorrent,
+  registerServiceWorker: () => registerServiceWorker,
   sha1sum: () => sha1sum,
   streamManager: () => streamManager,
   walkOPFSDir: () => walkOPFSDir
 });
-var CORE_VERSION, _WEBRTC_SUPPORT, Client;
-var init_mod2 = __esm({
+var _WEBRTC_SUPPORT, Client;
+var init_mod3 = __esm({
   "packages/core/src/mod.ts"() {
     init_event_target();
     init_parse_torrent();
@@ -8258,9 +8623,11 @@ var init_mod2 = __esm({
     init_server();
     init_file();
     init_mod();
+    init_version();
     init_torrent();
     init_swarm();
     init_peer();
+    init_tracker();
     init_wire();
     init_file();
     init_piece();
@@ -8271,7 +8638,7 @@ var init_mod2 = __esm({
     init_server();
     init_stream_manager();
     init_mod();
-    CORE_VERSION = "0.0.0-placeholder";
+    init_mod2();
     _WEBRTC_SUPPORT = (() => {
       if (typeof globalThis === "undefined") return false;
       return typeof globalThis.RTCPeerConnection !== "undefined" || typeof globalThis.webkitRTCPeerConnection !== "undefined";
@@ -11751,7 +12118,7 @@ var db2 = Object.assign((dbName, storeName, prefix) => createScopedDb2(dbName, s
 var opfs = Object.assign((dbName, storeName, prefix, basePath = "") => createScopedOpfs2(dbName, storeName, prefix, basePath), globalOpfsAPI);
 
 // packages/example/src/torrent-context.tsx
-init_mod2();
+init_mod3();
 function nodeStreamToWebStream(nodeStream) {
   return new ReadableStream({
     start(controller) {
@@ -11828,7 +12195,7 @@ async function initClient() {
   }
   let wt2;
   if (engineSignal.value === "browsertorrent") {
-    const { Client: WT } = await Promise.resolve().then(() => (init_mod2(), mod_exports2));
+    const { Client: WT } = await Promise.resolve().then(() => (init_mod3(), mod_exports2));
     const opfsAvailable = navigator.storage?.getDirectory != null;
     dbg("initClient: creating BrowserTorrent client, OPFS available:", opfsAvailable);
     wt2 = new WT({
@@ -12515,7 +12882,7 @@ function LeecherPanel({ disabled }) {
 __name(LeecherPanel, "LeecherPanel");
 
 // packages/example/src/components/player-panel.tsx
-init_mod2();
+init_mod3();
 function dbg2(...args) {
   const msg = args.map((a3) => typeof a3 === "object" ? JSON.stringify(a3) : String(a3)).join(" ");
   const ts = (/* @__PURE__ */ new Date()).toISOString().split("T")[1].slice(0, 8);
@@ -13390,12 +13757,7 @@ function App() {
 __name(App, "App");
 
 // packages/example/src/main.tsx
-init_mod2();
-init_torrent();
-init_swarm();
-init_peer();
-init_tracker();
-init_mod2();
+init_mod3();
 window.BrowserTorrentTest = {
   Client,
   Torrent,
