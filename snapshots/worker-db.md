@@ -1,6 +1,6 @@
 > **INSTRUÇÃO PARA A IA:** 
-> O texto abaixo contém experimentos e código da área de @browsertorrent/workerdb
-> O projeto é o **BrowserTorrent ** estruturado em blocos. 
+> O texto abaixo contém experimentos e código da área de @vanaware/worker-db
+> O projeto é o **BrowserTorrent ** estruturado em bbrowsertorrents. 
 > Cada arquivo começa com um título indicando seu caminho relativo exato (ex: `## Arquivo: src/main.ts`).
 > Sempre que sugerir alterações, indique claramente qual arquivo deve ser modificado com base nesses caminhos e forneça o novo código completo do arquivo.
 
@@ -247,7 +247,7 @@ await build();
 
 ```json
 {
-  "name": "@browsertorrent/workerdb",
+  "name": "@vanaware/worker-db",
   // ----------------------------------------------------------------------
   // 🔧 Compiler Options específicos do pacote
   // ----------------------------------------------------------------------
@@ -285,9 +285,9 @@ await build();
   // 🎯 Exports via subpaths (Deno não suporta conditional exports)
   //
   // Uso no código fonte:
-  //   - Main Thread:  import { db, opfs, ls } from "@browsertorrent/workerdb";
-  //   - Service Worker: import { dbsw, opfssw } from "@browsertorrent/workerdb/sw";
-  //   - Web Worker:   import { dbsw, opfssw } from "@browsertorrent/workerdb/sw";
+  //   - Main Thread:  import { db, opfs, ls } from "@vanaware/worker-db";
+  //   - Service Worker: import { dbsw, opfssw } from "@vanaware/worker-db/sw";
+  //   - Web Worker:   import { dbsw, opfssw } from "@vanaware/worker-db/sw";
   // ----------------------------------------------------------------------
   "exports": {
     // Entry point padrão — Main Thread (browser)

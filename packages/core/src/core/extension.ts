@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/core/extension.ts
+// /browsertorrent/monorepo/webtorrent/src/core/extension.ts
 
 import { TypedEventTarget, } from "../utils/event-target.ts";
 import type { Wire, } from "./wire.ts";

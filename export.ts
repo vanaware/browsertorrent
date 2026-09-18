@@ -76,7 +76,7 @@ export const CONFIGURACOES: Record<ModoExportacao, ExportConfig> = {
     ],
     incluiVersao: true,
     instrucaoCustomizada:
-      "O texto abaixo contém o desenvolvimento principal de @browsertorrent/core",
+      "O texto abaixo contém o desenvolvimento principal de @vanaware/browsertorrent",
     default: true, // ✅ Roda por padrão
   },
   docs: {
@@ -182,7 +182,7 @@ export const CONFIGURACOES: Record<ModoExportacao, ExportConfig> = {
     ],
     incluiVersao: false,
     instrucaoCustomizada:
-      "O texto abaixo contém experimentos e código da área de @browsertorrent/workerdb",
+      "O texto abaixo contém experimentos e código da área de @vanaware/worker-db",
     default: true, // ✅ Roda por padrão
   },
   utils: {

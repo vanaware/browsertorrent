@@ -1,7 +1,7 @@
-// /loco/monorepo/webtorrent/src/utils/parse-torrent.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/parse-torrent.ts
 /**
  * Torrent identifier parsing — magnet URIs, raw info hashes and `.torrent`
- * buffers — producing the `ParsedTorrent` shape consumed by Loco.
+ * buffers — producing the `ParsedTorrent` shape consumed by BrowserTorrent.
  *
  * Fase 2 (Metadata & Discovery): a decodificação de buffers agora delega para
  * `metainfo-parser.ts` + `metainfo-identity.ts`:

@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/tests/bencode_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/bencode_test.ts
 
 import { assertEquals, assertThrows, } from "@std/assert";
 import {

@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/core/message.ts
+// /browsertorrent/monorepo/webtorrent/src/core/message.ts
 /**
  * Complete BitTorrent peer wire message codec.
  *

@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/core/file.ts
+// /browsertorrent/monorepo/webtorrent/src/core/file.ts
 
 import { TypedEventTarget, } from "../utils/event-target.ts";
 import { Piece, } from "./piece.ts";

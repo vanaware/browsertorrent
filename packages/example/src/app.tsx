@@ -8,14 +8,16 @@ import { LeecherPanel, } from "./components/leecher-panel.tsx";
 import { PlayerPanel, } from "./components/player-panel.tsx";
 import { DebugPanel, } from "./components/debug-panel.tsx";
 import { TorrentList, } from "./components/torrent-list.tsx";
+import { SwarmVisualizer } from "./components/swarm-visualizer.tsx";
 import {
   cleanup,
   debugSignal,
+  engineSignal,
   errorSignal,
   initClient,
   modeSignal,
   peersSignal,
-  engineSignal,
+  useLocalTrackerSignal,
 } from "./torrent-context.tsx";
 
 function dbg(...args: unknown[]) {
@@ -35,23 +37,25 @@ export function App() {
   const mode = modeSignal.value;
   const error = errorSignal.value;
 
-  const handleEngineChange = async (newEngine: "browsertorrent" | "webtorrent") => {
+  const handleEngineChange = async (
+    newEngine: "browsertorrent" | "webtorrent",
+  ) => {
     if (engineSignal.value === newEngine) return;
-    dbg(`Switching engine to: ${newEngine}`);
-    
+    dbg(`Switching engine to: ${newEngine}`,);
+
     // Se estiver ativo, limpa o atual e reinicializa
     const wasEnabled = wtEnabled.value;
     if (wasEnabled) {
-      dbg("Engine switch: cleaning up active client...");
+      dbg("Engine switch: cleaning up active client...",);
       cleanup();
     }
-    
+
     engineSignal.value = newEngine;
-    
+
     if (wasEnabled) {
-      dbg("Engine switch: re-initializing client with new engine...");
+      dbg("Engine switch: re-initializing client with new engine...",);
       await initClient();
-      dbg("Engine switch: new client ready");
+      dbg("Engine switch: new client ready",);
     }
   };
 
@@ -79,30 +83,54 @@ export function App() {
         </button>
         <label class="max">
           <h5 class="white-text">
-            SyntaxMesh
+            BrowserTorrent
           </h5>
         </label>
 
         <div class="row no-wrap white-text right-margin" style="gap: 16px;">
+          <div class="chip border white-text">
+            <i class="material-symbols small white-text">
+              settings
+            </i>
+            {engineSignal.value === "browsertorrent" ? "BrowserTorrent" : "Original WebTorrent"}
+          </div>
           <label class="radio">
             <input
               type="radio"
               name="engine"
               checked={engineSignal.value === "browsertorrent"}
-              onChange={() => handleEngineChange("browsertorrent")}
-            />
-            <span class="white-text">BrowserTorrent</span>
+              onChange={() => handleEngineChange("browsertorrent",)} />
+            <span class="white-text">
+              BT
+            </span>
           </label>
           <label class="radio">
             <input
               type="radio"
               name="engine"
               checked={engineSignal.value === "webtorrent"}
-              onChange={() => handleEngineChange("webtorrent")}
-            />
-            <span class="white-text">Original WebTorrent</span>
+              onChange={() => handleEngineChange("webtorrent",)} />
+            <span class="white-text">
+              WT
+            </span>
           </label>
         </div>
+
+        <label class="chip transparent white-text" title="Local Tracker (Fast Discovery)">
+          <i class="material-symbols small white-text">
+            lan
+          </i>
+          <div class="switch small">
+            <input
+              type="checkbox"
+              checked={useLocalTrackerSignal.value}
+              onChange={() => {
+                useLocalTrackerSignal.value = !useLocalTrackerSignal.value;
+                dbg(`Local tracker ${useLocalTrackerSignal.value ? "enabled" : "disabled"}`);
+              }} />
+            <span></span>
+          </div>
+        </label>
 
         <label class="chip transparent white-text">
           <i class="material-symbols small white-text">
@@ -149,19 +177,23 @@ export function App() {
                   Novo Torrent
                 </h5>
               </nav>
-              
+
               <div class="tabs">
                 <a class="active">
                   <i class="material-symbols">
                     upload
                   </i>
-                  <span>Seed</span>
+                  <span>
+                    Seed
+                  </span>
                 </a>
                 <a>
                   <i class="material-symbols">
                     download
                   </i>
-                  <span>Leech</span>
+                  <span>
+                    Leech
+                  </span>
                 </a>
               </div>
 
@@ -198,6 +230,8 @@ export function App() {
               </nav>
               <TorrentList />
             </article>
+
+            <SwarmVisualizer />
 
             <DebugPanel />
           </div>

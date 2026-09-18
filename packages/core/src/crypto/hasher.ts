@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/crypto/hasher.ts
+// /browsertorrent/monorepo/webtorrent/src/crypto/hasher.ts
 /**
  * Cryptographic hash helpers. One-shot SHA algorithms are backed by the
  * Web Crypto API (`crypto.subtle`); incremental SHA-1 is a bounded-memory

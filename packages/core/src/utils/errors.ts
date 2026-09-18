@@ -1,7 +1,7 @@
-// /loco/monorepo/webtorrent/src/utils/errors.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/errors.ts
 
 /**
- * Classes de erro customizadas para o Loco WebTorrent.
+ * Classes de erro customizadas para o BrowserTorrent WebTorrent.
  * Facilita debugging e tratamento de erros específicos.
  */
 

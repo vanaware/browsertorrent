@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/utils/metainfo-identity.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/metainfo-identity.ts
 /**
  * Torrent identity utilities — preserve exact bencoded `info` bytes for
  * faithful hash computation.

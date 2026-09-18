@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/storage/memory-chunk-store.ts
+// /browsertorrent/monorepo/webtorrent/src/storage/memory-chunk-store.ts
 
 import type { ChunkStore, } from "./opfs-chunk-store.ts";
 

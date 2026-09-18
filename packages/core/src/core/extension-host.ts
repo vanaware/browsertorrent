@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/core/extension-host.ts
+// /browsertorrent/monorepo/webtorrent/src/core/extension-host.ts
 /**
  * BEP 10 Extension Protocol host — negotiates, maps, and dispatches
  * extension messages for one peer connection.
@@ -207,9 +207,14 @@ export class ExtensionHost {
         fields.set(name, value,);
       }
     }
-    console.log("[ExtensionHost] sendHandshake fields:", JSON.stringify(Object.fromEntries(
-      [...fields.entries()].map(([k, v]) => [k, v instanceof Uint8Array ? `Uint8Array(${v.length})` : v])
-    )));
+    console.log(
+      "[ExtensionHost] sendHandshake fields:",
+      JSON.stringify(Object.fromEntries(
+        [...fields.entries(),].map((
+          [k, v,],
+        ) => [k, v instanceof Uint8Array ? `Uint8Array(${v.length})` : v,]),
+      ),),
+    );
     await this.#send(0, encode(fields,),);
   }
 

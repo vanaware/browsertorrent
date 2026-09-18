@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/tests/torrent-generator_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/torrent-generator_test.ts
 /**
  * Tests for the OPFS torrent generator.
  *
@@ -359,9 +359,9 @@ Deno.test("buildPieceFiles: file starting exactly at piece boundary needs no pad
 // getDefaultCreatedBy
 // ─────────────────────────────────────────────────────────────────────────────
 
-Deno.test("getDefaultCreatedBy: returns a loco-torrent-generator version string", () => {
+Deno.test("getDefaultCreatedBy: returns a browsertorrent-torrent-generator version string", () => {
   const result = getDefaultCreatedBy();
-  assertEquals(result.startsWith("loco-torrent-generator@",), true,);
+  assertEquals(result.startsWith("browsertorrent-torrent-generator@",), true,);
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/utils/bit-array.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/bit-array.ts
 /**
  * Compact bit array with explicit bit numbering (msb0 / lsb0).
  *

@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/utils/magnet.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/magnet.ts
 /**
  * Magnet link parsing and building with BitTorrent v1/v2 support.
  *

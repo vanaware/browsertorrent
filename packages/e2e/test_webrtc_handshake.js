@@ -39,7 +39,7 @@ const { spawn } = require('child_process');
 
     // Setup Seeder (Peer A)
     await pageA.evaluate(async () => {
-      const { Torrent, Swarm } = window.LocoTest;
+      const { Torrent, Swarm } = window.BrowserTorrentTest;
       window.testLogs = [];
       const log = (msg) => { console.log(msg); window.testLogs.push(msg); };
       
@@ -71,7 +71,7 @@ const { spawn } = require('child_process');
 
     // Setup Leecher (Peer B)
     await pageB.evaluate(async () => {
-      const { Swarm } = window.LocoTest;
+      const { Swarm } = window.BrowserTorrentTest;
       window.testLogs = [];
       const log = (msg) => { console.log(msg); window.testLogs.push(msg); };
       

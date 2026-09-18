@@ -1,11 +1,11 @@
-# Regras de conduta — @loco/webtorrent
+# Regras de conduta — @vanaware/browsertorrent
 
 > Contexto obrigatório para qualquer IA (Qwen Code) que analise, adapte ou
 > modifique este pacote. Leia este arquivo antes de propor mudanças.
 
 ## 1. Missão do pacote
 
-- `src/` é a implementação oficial do **Loco**, um cliente BitTorrent
+- `src/` é a implementação oficial do **BrowserTorrent**, um cliente BitTorrent
   **browser-first** (PWA). Tudo em `src/` deve funcionar no navegador.
 - `deno-torrent/` é a **fonte de referência de protocolo** (implementação
   rigorosa, orientada a Deno). Ela informa *o que* implementar e *quais
@@ -26,7 +26,7 @@
    Exceção: arquivos de teste (`tests/`) podem usar `Deno.test`.
 3. **A fachada é orientada a eventos.** `Wire`, `Torrent`, `Swarm`, `Peer` e
    as extensões emitem eventos via `TypedEventTarget` (`src/utils/`). Essa
-   fachada é estável e consumida pelo restante do Loco. A máquina de estados
+   fachada é estável e consumida pelo restante do BrowserTorrent. A máquina de estados
    do `deno-torrent` pode ser adotada como *internals*, mas os eventos
    públicos devem continuar existindo.
 4. **Utils locais, não imports do deno-torrent.** O bundle do browser não
@@ -129,9 +129,9 @@ Antes de propor qualquer adaptação de um módulo (ex.: `deno-torrent/magnet`,
 
 | Arquivo | Linhas | Browser? | vs src/utils/peerid.ts |
 |---|---|---|---|
-| `peerid.ts` | 204 | ✅ | `encode()`, `encodeAzStyle()`, `encodeShadowStyle()` — src/ só gera Loco hardcoded |
+| `peerid.ts` | 204 | ✅ | `encode()`, `encodeAzStyle()`, `encodeShadowStyle()` — src/ só gera BrowserTorrent hardcoded |
 | `util.ts` | 362 | ✅ | 16+ funções (validators, version converters, `randomStr`). src/ tem 4 funções simplificadas |
-| `enum.ts` | 121 | ✅ | `enum AZStyleClient`/`ShadowStyleClient`. src/ usa `Record`. **Nota:** src/ tem `"LO": "Loco"`, deno-torrent não |
+| `enum.ts` | 121 | ✅ | `enum AZStyleClient`/`ShadowStyleClient`. src/ usa `Record`. **Nota:** src/ tem `"LO": "BrowserTorrent"`, deno-torrent não |
 | `type.ts` | 11 | ✅ | `type Client`. src/ tem `ClientInfo` com campo `style` a mais |
 | `constant.ts` | 46 | ✅ | Char arrays para encoding |
 
@@ -351,12 +351,12 @@ Depende de: Fase 1 + Fase 2
 | 3.1 | BEP 6 Fast: `suggestPiece/haveAll/haveNone/rejectRequest/allowedFast` | `peerwire/message.ts` + `peer_wire.ts` | `src/core/wire.ts` + `message.ts` | Fast peers |
 | 3.2 | BEP 52 v2: `hashRequest/hashes/hashReject` | `peerwire/message.ts` + `peer_wire.ts` | `src/core/wire.ts` + `message.ts` | BitTorrent v2 |
 | 3.3 | `ut_metadata` melhorado: verificação SHA-1/256, pipelining, per-block timeout | `peerwire/ut_metadata.ts` | `src/extensions/ut-metadata.ts` | Integridade + performance |
-| 3.4 | `peerid` melhorado: `encode()` genérico, validators, version converters | `peerid/peerid.ts` + `util.ts` | `src/utils/peerid.ts` | Flexibilidade (manter `"LO": "Loco"`) |
+| 3.4 | `peerid` melhorado: `encode()` genérico, validators, version converters | `peerid/peerid.ts` + `util.ts` | `src/utils/peerid.ts` | Flexibilidade (manter `"LO": "BrowserTorrent"`) |
 | 3.5 | `Bitfield` com spare-bit validation (manter `grow`) | `peerwire/bitfield.ts` + `BitArray` | `src/core/bitfield.ts` | Conformidade |
 
 ### Fase 4 — Browser API (funcionalidades da webtorrent.min.js)
 
-> Funcionalidades da API pública do upstream WebTorrent que faltam no Loco.
+> Funcionalidades da API pública do upstream WebTorrent que faltam no BrowserTorrent.
 > Referência: `docs/webtorrent-api.md` + análise do bundle `webtorrent.min.js`.
 
 Depende de: Fase 1 + Fase 2
@@ -394,9 +394,9 @@ Depende de: Fase 1 + Fase 2
 | 5.6 | Barrel `mod.ts` + re-export em `src/mod.ts` | `src/torrent-generator/mod.ts` | ✅ |
 | 5.7 | Testes (37 testes, mock OPFS) | `tests/torrent-generator_test.ts` | ✅ |
 
-### Fase 6 — API Final @loco/webtorrent ✅ CONCLUÍDA
+### Fase 6 — API Final @vanaware/browsertorrent ✅ CONCLUÍDA
 
-> Completa a API pública do `webtorrent.min.js` no browser-first Loco.
+> Completa a API pública do `webtorrent.min.js` no browser-first BrowserTorrent.
 
 | # | Tarefa | Destino | Status |
 |---|---|---|---|
@@ -447,7 +447,7 @@ Depende de: Fase 1 + Fase 2
   arrayBuffer, blob, async iterator). `ParsedTorrentFile` é apenas dados —
   a transição para `src/core/file.ts` com acesso ao ChunkStore é essencial
   para media playback no browser.
-- **createServer via Service Worker.** O Loco já possui
+- **createServer via Service Worker.** O BrowserTorrent já possui
   `service-worker/src/sw/webtorrent.ts` com a ponte MessageChannel para
   streaming sob demanda. A integração com o pkg webtorrent será via
   `client.createServer({ controller: ServiceWorkerRegistration })`, que
@@ -470,7 +470,7 @@ Depende de: Fase 1 + Fase 2
 
 ### 9.1 Objetivo
 
-Demonstrar o Loco WebTorrent funcionando em navegador com streaming de vídeo P2P real:
+Demonstrar o BrowserTorrent WebTorrent funcionando em navegador com streaming de vídeo P2P real:
 - **Seeder (A):** compartilha um arquivo de vídeo
 - **Viewer (B):** assiste ao vídeo via streaming P2P
 - **Peer (C):** baixa o mesmo arquivo e participa do swarm (resiliência)
@@ -482,7 +482,7 @@ Demonstrar o Loco WebTorrent funcionando em navegador com streaming de vídeo P2
 | Runtime servidor | Deno (`deno serve` + `@std/http/file-server`) |
 | UI | Preact 10.x + Signals + BeerCSS 5.x (CDN) |
 | Bundler | `esbuild.ts` existente (raiz do repo) — **apenas adicionar target** |
-| Output | `@loco/webtorrent/build/dist/` |
+| Output | `@vanaware/browsertorrent/build/dist/` |
 | Imports UI | `https://esm.sh/preact@10.29.7`, `@preact/signals@1.3.1` |
 
 ### 9.3 Estrutura de diretórios

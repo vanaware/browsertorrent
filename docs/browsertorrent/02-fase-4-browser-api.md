@@ -1,7 +1,7 @@
 # Fase 4: Browser API (webtorrent.min.js parity)
 
 ## 🎯 Objetivo da Fase
-A Fase 4 reproduz a API pública do upstream `webtorrent.min.js` para o Loco, sem regressão do que já existia.  Cada item abaixo referencia a matriz de paridade do `QWEN.md` (§5, "webtorrent.min.js API → src/").
+A Fase 4 reproduz a API pública do upstream `webtorrent.min.js` para o BrowserTorrent, sem regressão do que já existia.  Cada item abaixo referencia a matriz de paridade do `QWEN.md` (§5, "webtorrent.min.js API → src/").
 
 ---
 
@@ -33,10 +33,10 @@ Substitui o `ParsedTorrentFile` estático por uma **classe viva** que acessa o `
 - `error` (CustomEvent<{ error: Error }>) — emitido em erro de leitura
 
 ### Decisões de Implementação
-1. **Leitura peça-a-peça**: `createReadStream` faz `pull` lazy no `ChunkStore` para cada bloco de `blockSize` (default 64 KiB).
+1. **Leitura peça-a-peça**: `createReadStream` faz `pull` lazy no `ChunkStore` para cada bbrowsertorrent de `blockSize` (default 64 KiB).
 2. **Range relativo**: `createReadStream({ start, end })` é relativo ao arquivo (`start=0` é o primeiro byte do arquivo, não do torrent).
 3. **Cross-piece reads**: `_readBlock` lida com bytes que cruzam fronteiras de peça, retornando a fatia exata pedida.
-4. **Backpressure real**: cada `pull` lê um bloco e o enfileira; o consumidor (ex: SW) controla o ritmo.
+4. **Backpressure real**: cada `pull` lê um bbrowsertorrent e o enfileira; o consumidor (ex: SW) controla o ritmo.
 5. **Eventos `stream`/`iterator`/`done`**: para integração com consumidores que precisam reagir ao ciclo de vida (ex: telemetria).
 
 ### Testes (30 testes, todos passando)

@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/core/bitfield.ts
+// /browsertorrent/monorepo/webtorrent/src/core/bitfield.ts
 
 import { BitfieldError, } from "../utils/errors.ts";
 

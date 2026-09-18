@@ -1,12 +1,12 @@
-# Fase 6 — API Final @loco/webtorrent: Proposta de Implementação
+# Fase 6 — API Final @vanaware/browsertorrent: Proposta de Implementação
 
-> **Contexto:** Análise comparativa detalhada entre `@loco/webtorrent` e `webtorrent.min.js`, identificando lacunas browser-aplicáveis e melhorias do `deno-torrent` a incorporar.
+> **Contexto:** Análise comparativa detalhada entre `@vanaware/browsertorrent` e `webtorrent.min.js`, identificando lacunas browser-aplicáveis e melhorias do `deno-torrent` a incorporar.
 
 ---
 
 ## 1. Resumo Executivo
 
-A implementação atual do `@loco/webtorrent` cobre **~75%** da API pública do `webtorrent.min.js`, com 568 testes passando. A análise identificou **22 lacunas browser-aplicáveis** no `webtorrent.min.js` e **15 melhorias** do `deno-torrent` ainda não portadas. Deste universo, a Fase 6 propõe implementar **13 capacidades de alta/média prioridade** que são viáveis no browser,afeitas de dependências Node/UDP, e que impactam diretamente a experiência do usuário do Loco PWA.
+A implementação atual do `@vanaware/browsertorrent` cobre **~75%** da API pública do `webtorrent.min.js`, com 568 testes passando. A análise identificou **22 lacunas browser-aplicáveis** no `webtorrent.min.js` e **15 melhorias** do `deno-torrent` ainda não portadas. Deste universo, a Fase 6 propõe implementar **13 capacidades de alta/média prioridade** que são viáveis no browser,afeitas de dependências Node/UDP, e que impactam diretamente a experiência do usuário do BrowserTorrent PWA.
 
 ---
 
@@ -192,7 +192,7 @@ get remotePort(): number
 | `blocklist` (IP set) | Sem range `net` module |
 | `path` (torrent save location) | Sem filesystem paths no browser |
 | `client.get(torrentId)` | Trivial; `client.torrents.get(infoHash)` já existe |
-| File advanced `stream` event com `req` callback | Sobrecarga desnecessária para o caso de uso do Loco |
+| File advanced `stream` event com `req` callback | Sobrecarga desnecessária para o caso de uso do BrowserTorrent |
 
 ---
 

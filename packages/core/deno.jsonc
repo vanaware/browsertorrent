@@ -1,5 +1,5 @@
 {
-  "name": "@browsertorrent/core",
+  "name": "@vanaware/browsertorrent",
   "version": "0.1.3-mtq0ufmu",
   "exports": "./src/mod.ts",
   "compilerOptions": {

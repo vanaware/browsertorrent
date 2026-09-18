@@ -7,7 +7,7 @@ Agora que possuímos um ecossistema P2P totalmente funcional e estritamente inte
 2. **Desenvolver o Gateway React/Preact**: Refinar o `TorrentProvider` em `packages/example/src/stores/` para servir como a cola entre a UI BeerCSS e as instâncias instanciadas do engine Core.
 3. **Fluxos de Download / Upload Visual**: Atualizar a UI principal (App.tsx) para permitir:
    - Fazer upload de um arquivo `.torrent` ou de dados via drag-and-drop.
-   - Listar downloads ativos, exibindo progresso de blocos e estatísticas de rede em tempo real.
+   - Listar downloads ativos, exibindo progresso de bbrowsertorrents e estatísticas de rede em tempo real.
    - Fornecer opção para stream via Service Worker (visualizar mídia).
 
 ## Tarefas (Checklist)

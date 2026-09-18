@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/utils/peerid.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/peerid.ts
 
 import { generateRandomString, } from "../crypto/random.ts";
 
@@ -9,7 +9,7 @@ export interface ClientInfo {
   style: "azureus" | "shadow" | "unknown";
 }
 
-export const LOCO_PEER_ID_PREFIX = "-LO0100-";
+export const BT_PEER_ID_PREFIX = "-BT0100-";
 
 const AZUREUS_CLIENTS: Record<string, string> = {
   "AG": "Ares",
@@ -53,7 +53,7 @@ const AZUREUS_CLIENTS: Record<string, string> = {
   "KT": "KTorrent",
   "LC": "LeechCraft",
   "LH": "LH-ABC",
-  "LO": "Loco", // 🔥 NOSSO CLIENTE
+  "LO": "BrowserTorrent", // 🔥 NOSSO CLIENTE
   "LP": "Lphant",
   "LT": "libtorrent (Rasterbar)",
   "lt": "libTorrent (Rakshasa)",
@@ -303,8 +303,8 @@ export function getPeerIdClientName(peerId: string | Uint8Array,): string {
   return info?.name || "Unknown Client";
 }
 
-export function generateLocoPeerId(): Uint8Array {
-  const prefix = LOCO_PEER_ID_PREFIX;
+export function generateBrowserTorrentPeerId(): Uint8Array {
+  const prefix = BT_PEER_ID_PREFIX;
   const randomPart = generateRandomString(20 - prefix.length,);
   const peerIdStr = prefix + randomPart;
 

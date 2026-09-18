@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/torrent-generator/util.ts
+// /browsertorrent/monorepo/webtorrent/src/torrent-generator/util.ts
 /**
  * Pure helper functions for the OPFS torrent generator.
  *
@@ -222,11 +222,11 @@ async function sha1sumAligned(
  * Returns the default `"created by"` string embedded in generated torrents.
  *
  * In the browser we cannot call `git describe --tags`.  The version is
- * hardcoded as `"loco-torrent-generator@1.0.0"` — callers can override via
+ * hardcoded as `"browsertorrent-torrent-generator@1.0.0"` — callers can override via
  * the `createdBy` option.
  *
  * @returns Creator identifier string.
  */
 export function getDefaultCreatedBy(): string {
-  return "loco-torrent-generator@1.0.0";
+  return "browsertorrent-torrent-generator@1.0.0";
 }

@@ -3,12 +3,12 @@
  */
 import { useSignal, } from "@preact/signals";
 import {
+  getTrackers,
   modeSignal,
-  PUBLIC_TRACKERS,
   seedFile,
   torrentSignal,
 } from "../torrent-context.tsx";
-import type { Torrent, } from "@loco/webtorrent";
+import type { Torrent, } from "@vanaware/browsertorrent";
 
 function formatSize(bytes: number,): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -22,7 +22,7 @@ function buildMagnetURI(torrent: Torrent,): string {
   const name = encodeURIComponent(torrent.name ?? "download",);
   const trackers: string[] = torrent.announce?.length
     ? torrent.announce
-    : PUBLIC_TRACKERS;
+    : getTrackers();
   const trs = trackers.map((t: string,) => `&tr=${encodeURIComponent(t,)}`)
     .join("",);
   return `magnet:?xt=urn:btih:${ih}&dn=${name}${trs}`;

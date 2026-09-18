@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/torrent-generator/types.ts
+// /browsertorrent/monorepo/webtorrent/src/torrent-generator/types.ts
 /**
  * Types for the OPFS-backed torrent generator.
  *

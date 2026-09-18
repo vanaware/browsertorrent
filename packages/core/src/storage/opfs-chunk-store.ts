@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/storage/opfs-chunk-store.ts
+// /browsertorrent/monorepo/webtorrent/src/storage/opfs-chunk-store.ts
 
 import { MemoryChunkStore, } from "./memory-chunk-store.ts";
 
@@ -76,7 +76,7 @@ export class OPFSChunkStore implements ChunkStore {
     }
 
     if (this.fallbackStore) {
-      this.fallbackStore.updateLength(chunkLength, length);
+      this.fallbackStore.updateLength(chunkLength, length,);
     }
   }
 

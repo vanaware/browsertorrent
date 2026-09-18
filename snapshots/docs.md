@@ -1,6 +1,6 @@
 > **INSTRUÇÃO PARA A IA:** 
 > O texto abaixo contém a DOCUMENTAÇÃO e diretrizes arquiteturais do projeto.
-> O projeto é o **BrowserTorrent ** estruturado em blocos. 
+> O projeto é o **BrowserTorrent ** estruturado em bbrowsertorrents. 
 > Cada arquivo começa com um título indicando seu caminho relativo exato (ex: `## Arquivo: src/main.ts`).
 > Sempre que sugerir alterações, indique claramente qual arquivo deve ser modificado com base nesses caminhos e forneça o novo código completo do arquivo.
 
@@ -59,25 +59,25 @@ deno 2.9.6
 
 ---
 
-## Arquivo: `docs/browsertorrent/00-api-loco-webtorrent.md`
+## Arquivo: `docs/browsertorrent/00-api-browsertorrent-webtorrent.md`
 
 ````md
-# /loco/monorepo/webtorrent/docs/00-api-loco-webtorrent.md
+# /browsertorrent/monorepo/webtorrent/docs/00-api-browsertorrent-webtorrent.md
 
-# API do `@loco/webtorrent` — Resumo consolidado
+# API do `@vanaware/browsertorrent` — Resumo consolidado
 
 > Documento vivo.  Reflete a API pública exposta via `src/mod.ts`.
-> Cada item referencia a fase e a fonte original (`webtorrent.min.js` ou inovação do Loco).
+> Cada item referencia a fase e a fonte original (`webtorrent.min.js` ou inovação do BrowserTorrent).
 
 ---
 
 ## 📦 Visão geral
 
-O `@loco/webtorrent` é um cliente BitTorrent **100 % browser-first** (Deno + Web APIs nativas, sem dependências de Node.js) que reproduz e estende a API do `webtorrent.min.js` original.  As extensões do Loco incluem:
+O `@vanaware/browsertorrent` é um cliente BitTorrent **100 % browser-first** (Deno + Web APIs nativas, sem dependências de Node.js) que reproduz e estende a API do `webtorrent.min.js` original.  As extensões do BrowserTorrent incluem:
 
 - Service Worker bridge com **backpressure real** (Fase 4.5) — substitui e melhora o `createServer` original.
 - Storage **OPFS-first** com fallback em memória (Fase 3) — persiste entre sessões sem IndexedDB.
-- Identidade oficial do Loco (`-LO0100-`) auto-gerada (Fase 3.4) — PeerId estável entre clientes Loco.
+- Identidade oficial do BrowserTorrent (`-BT0100-`) auto-gerada (Fase 3.4) — PeerId estável entre clientes BrowserTorrent.
 - Validators PeerId Azureus/Shadow completos (Fase 3.4) — reconhece qBittorrent, Transmission, BitTornado etc.
 - Bitfield com validação rigorosa de spare-bits (Fase 3.5) — mais seguro que a maioria dos clientes.
 - `File.streamTo(video)` assíncrono com revoke automático de URL (Fase 4.2).
@@ -90,7 +90,7 @@ O `@loco/webtorrent` é um cliente BitTorrent **100 % browser-first** (Deno + We
 ### Classe `WebTorrent`
 
 ```ts
-import { WebTorrent } from "@loco/webtorrent";
+import { WebTorrent } from "@vanaware/browsertorrent";
 
 const client = new WebTorrent({
   peerId?: Uint8Array | string;          // hex 40 chars ou Uint8Array(20)
@@ -225,7 +225,7 @@ const file = torrent.files[0]; // ou torrent.files.find(f => f.name.endsWith(".m
 ### Classe `WebTorrentServer` (Fase 4.5)
 
 ```ts
-import { createServer } from "@loco/webtorrent";
+import { createServer } from "@vanaware/browsertorrent";
 
 const reg = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
 await navigator.serviceWorker.ready;
@@ -256,7 +256,7 @@ import {
   streamManager,
   buildStreamURL,
   parseStreamURL,
-} from "@loco/webtorrent";
+} from "@vanaware/browsertorrent";
 ```
 
 | Função | Assinatura | Descrição |
@@ -275,7 +275,7 @@ import {
 ### `Bitfield` (`src/core/bitfield.ts`)
 
 ```ts
-import { Bitfield } from "@loco/webtorrent";
+import { Bitfield } from "@vanaware/browsertorrent";
 
 const bf = new Bitfield(1024);
 bf.set(42);
@@ -301,9 +301,9 @@ const bf2 = Bitfield.fromBytes(new Uint8Array([0b10101010]), 8);
 
 ```ts
 import {
-  generateLocoPeerId,
+  generateBrowserTorrentPeerId,
   decodePeerId,
-  LOCO_PEER_ID_PREFIX,
+  BT_PEER_ID_PREFIX,
   isAzStyle,
   isShadowStyle,
   isBase32Char,
@@ -314,12 +314,12 @@ import {
   encodeAzStyle,
   encodeShadowStyle,
   encodeGeneric,
-} from "@loco/webtorrent";
+} from "@vanaware/browsertorrent";
 ```
 
 | Função | Descrição |
 | --- | --- |
-| `generateLocoPeerId()` | Gera Peer ID oficial Loco (`-LO0100-…`). |
+| `generateBrowserTorrentPeerId()` | Gera Peer ID oficial BrowserTorrent (`-BT0100-…`). |
 | `decodePeerId(input)` | Decodifica qualquer Peer ID Azureus/Shadow em `ClientInfo`. |
 | `getPeerIdClientName(input)` | Nome legível do cliente (`qBittorrent`, `BitTornado`, …). |
 | `encodeAzStyle(code, version)` | Codifica estilo Azureus. |
@@ -334,7 +334,7 @@ import {
 ### `parseTorrent` (`src/utils/parse-torrent.ts`)
 
 ```ts
-import { parseTorrent } from "@loco/webtorrent";
+import { parseTorrent } from "@vanaware/browsertorrent";
 
 const parsed = await parseTorrent("magnet:?xt=urn:btih:…");
 const parsed2 = await parseTorrent(new Uint8Array([...])); // .torrent
@@ -432,14 +432,14 @@ Consulte `docs/04-fase-4-rede-e-protocolo.md` para o detalhamento arquitetural d
 ## Arquivo: `docs/browsertorrent/01-objetivo-e-apis-nativas.md`
 
 ```md
-# /loco/monorepo/webtorrent/docs/01-objetivo-e-apis-nativas.md
+# /browsertorrent/monorepo/webtorrent/docs/01-objetivo-e-apis-nativas.md
 
-# Objetivo do Pacote `@loco/webtorrent` e Mapeamento de APIs Nativas
+# Objetivo do Pacote `@vanaware/browsertorrent` e Mapeamento de APIs Nativas
 
 ## 🎯 Objetivo do Projeto
-O objetivo do pacote `@loco/webtorrent` é fornecer uma implementação **pura, estritamente tipada e livre de dependências do Node.js** do protocolo BitTorrent, projetada especificamente para rodar no ambiente de navegador (Browser/Deno). 
+O objetivo do pacote `@vanaware/browsertorrent` é fornecer uma implementação **pura, estritamente tipada e livre de dependências do Node.js** do protocolo BitTorrent, projetada especificamente para rodar no ambiente de navegador (Browser/Deno). 
 
-No contexto do **Loco PWA** (mensageiro descentralizado, offline-first e E2EE), este pacote permite:
+No contexto do **BrowserTorrent PWA** (mensageiro descentralizado, offline-first e E2EE), este pacote permite:
 1. **Compartilhamento descentralizado de arquivos** (ex: mídias, backups de chat) sem depender de servidores centrais de armazenamento.
 2. **Streaming progressivo** de arquivos diretamente no browser, utilizando APIs nativas de mídia.
 3. **Redução drástica do bundle size**, eliminando polyfills pesados como `Buffer`, `readable-stream`, `crypto-browserify` e `fs`.
@@ -655,7 +655,7 @@ A Fase 3 focará em:
 # Fase 4: Browser API (webtorrent.min.js parity)
 
 ## 🎯 Objetivo da Fase
-A Fase 4 reproduz a API pública do upstream `webtorrent.min.js` para o Loco, sem regressão do que já existia.  Cada item abaixo referencia a matriz de paridade do `QWEN.md` (§5, "webtorrent.min.js API → src/").
+A Fase 4 reproduz a API pública do upstream `webtorrent.min.js` para o BrowserTorrent, sem regressão do que já existia.  Cada item abaixo referencia a matriz de paridade do `QWEN.md` (§5, "webtorrent.min.js API → src/").
 
 ---
 
@@ -687,10 +687,10 @@ Substitui o `ParsedTorrentFile` estático por uma **classe viva** que acessa o `
 - `error` (CustomEvent<{ error: Error }>) — emitido em erro de leitura
 
 ### Decisões de Implementação
-1. **Leitura peça-a-peça**: `createReadStream` faz `pull` lazy no `ChunkStore` para cada bloco de `blockSize` (default 64 KiB).
+1. **Leitura peça-a-peça**: `createReadStream` faz `pull` lazy no `ChunkStore` para cada bbrowsertorrent de `blockSize` (default 64 KiB).
 2. **Range relativo**: `createReadStream({ start, end })` é relativo ao arquivo (`start=0` é o primeiro byte do arquivo, não do torrent).
 3. **Cross-piece reads**: `_readBlock` lida com bytes que cruzam fronteiras de peça, retornando a fatia exata pedida.
-4. **Backpressure real**: cada `pull` lê um bloco e o enfileira; o consumidor (ex: SW) controla o ritmo.
+4. **Backpressure real**: cada `pull` lê um bbrowsertorrent e o enfileira; o consumidor (ex: SW) controla o ritmo.
 5. **Eventos `stream`/`iterator`/`done`**: para integração com consumidores que precisam reagir ao ciclo de vida (ex: telemetria).
 
 ### Testes (30 testes, todos passando)
@@ -836,7 +836,7 @@ A tabela abaixo mostra os 4 primitivos Deno que foram substituídos:
 | `Deno.stat(path).size` | `FileSystemFileHandle.getFile().size` | `opfs-walker.ts` |
 | `Deno.open(path)` → `FsFile.read()` | `FileSystemFileHandle.getFile().slice(start, end).arrayBuffer()` | `opfs-reader.ts` |
 | `@std/fs/walk()` | `FileSystemDirectoryHandle.values()` (BFS) | `opfs-walker.ts` |
-| `git describe --tags` | hardcoded `"loco-torrent-generator@1.0.0"` | `util.ts` |
+| `git describe --tags` | hardcoded `"browsertorrent-torrent-generator@1.0.0"` | `util.ts` |
 
 ---
 
@@ -868,7 +868,7 @@ interface GeneratorOptions {
 **Exemplo de uso:**
 
 ```ts
-import { generateTorrent } from "@loco/webtorrent/torrent-generator";
+import { generateTorrent } from "@vanaware/browsertorrent/torrent-generator";
 
 // Obter handle do diretório OPFS
 const rootHandle = await navigator.storage.getDirectory();
@@ -931,7 +931,7 @@ enum PieceSizeEnum {
 | `buildPieceFiles(entries, pieceSize)` | ✅ | Constrói stream BEP-47 (com padding) |
 | `sha1sum(entries, pieceSize, alignPiece?)` | ❌ | SHA-1 streaming das peças |
 | `isHiddenFile(name)` | ✅ | Detecta arquivos ocultos |
-| `getDefaultCreatedBy()` | ✅ | `"loco-torrent-generator@1.0.0"` |
+| `getDefaultCreatedBy()` | ✅ | `"browsertorrent-torrent-generator@1.0.0"` |
 | `PieceSizeEnum` | ✅ | Enum de presets |
 
 ---
@@ -973,7 +973,7 @@ enum PieceSizeEnum {
    usam `buildMockDir()` — um builder recursivo de `FileSystemDirectoryHandle` mockados
    que simula `values()`, `getFileHandle()`, e navegação em sub-diretórios.
 
-2. **Versão gerada**: `loco-torrent-generator@1.0.0` é hardcoded porque `git describe`
+2. **Versão gerada**: `browsertorrent-torrent-generator@1.0.0` é hardcoded porque `git describe`
    não está disponível no browser.  Callers podem sobrescrever via `createdBy`.
 
 3. **SHA-1 via `crypto.subtle`**: usa a API Web Crypto em vez de libs externas,
@@ -994,7 +994,7 @@ enum PieceSizeEnum {
 ```md
 # Módulos e Funções Implementadas (Fases 1 a 5)
 
-Este documento cataloga todas as funções, classes e tipos que foram implementados, refatorados e validados por testes unitários no pacote `@loco/webtorrent`.
+Este documento cataloga todas as funções, classes e tipos que foram implementados, refatorados e validados por testes unitários no pacote `@vanaware/browsertorrent`.
 
 ---
 
@@ -1169,7 +1169,7 @@ Todos os módulos acima possuem suítes de testes correspondentes na pasta `/tes
 
 ## 🚀 Próximos Passos (Fase 6: API Pública)
 
-A próxima fase é criar a **API Pública Principal** (`src/mod.ts`), que une todos esses módulos em uma interface limpa e pronta para ser consumida pelo Loco PWA. A API deve ser compatível com o WebTorrent original, expondo métodos como:
+A próxima fase é criar a **API Pública Principal** (`src/mod.ts`), que une todos esses módulos em uma interface limpa e pronta para ser consumida pelo BrowserTorrent PWA. A API deve ser compatível com o WebTorrent original, expondo métodos como:
 - `client.add(torrentId, opts)` - Adiciona um torrent (Magnet URI ou .torrent)
 - `client.seed(input, opts)` - Compartilha um arquivo como seed
 - `client.createServer()` - Cria um servidor HTTP para streaming (usando Service Worker)
@@ -1182,7 +1182,7 @@ A próxima fase é criar a **API Pública Principal** (`src/mod.ts`), que une to
 ## Arquivo: `docs/browsertorrent/03-fase-3-nucleo-torrent.md`
 
 ```md
-# /loco/monorepo/webtorrent/docs/03-fase-3-nucleo-torrent.md
+# /browsertorrent/monorepo/webtorrent/docs/03-fase-3-nucleo-torrent.md
 
 # Fase 3: O Núcleo BitTorrent (Torrent & Bitfield)
 
@@ -1244,7 +1244,7 @@ Com o núcleo capaz de gerenciar estado e armazenamento, precisamos conectá-lo 
 ## Arquivo: `docs/browsertorrent/04-fase-4-rede-e-protocolo.md`
 
 ```md
-# /loco/monorepo/webtorrent/docs/04-fase-4-rede-e-protocolo.md
+# /browsertorrent/monorepo/webtorrent/docs/04-fase-4-rede-e-protocolo.md
 
 # Fase 4: Rede e Protocolo (Tracker, Wire, Service Worker Bridge)
 
@@ -1259,7 +1259,7 @@ Nesta fase, construímos os módulos responsáveis pela **descoberta de peers**,
 2. **Abstração de Transporte (`Transport`)**: O `Wire` (protocolo) e o `WebTorrentServer` (streaming) não devem saber se estão rodando sobre um `RTCDataChannel`, um mock de teste ou um `ServiceWorker` real. Eles recebem uma interface simples (`send`, `onMessage`, `close` / `postMessage`, `requestStream`), garantindo testabilidade unitária sem levantar servidores reais.
 3. **Parser de Stream (Acumulador de Buffer)**: Dados chegam em pedaços arbitrários (chunks) pela rede, especialmente no WebRTC, que pode fragmentar mensagens. O `Wire` mantém um `buffer` interno (`Uint8Array`) e acumula os chunks até ter o tamanho completo de uma mensagem.
 4. **Uso de `DataView` e Helpers Nativos**: Substituímos completamente o `Buffer` do Node.js. Usamos nossos helpers `readUInt32BE` e `writeUInt32BE` (baseados em `Uint8Array` e operações bitwise) para ler e escrever os cabeçalhos das mensagens de forma performática e nativa.
-5. **Streaming via Service Worker com backpressure**: A ponte com o `<video>` do DOM passa por um Service Worker que intercepta requisições `GET` para URLs virtuais do tipo `/webtorrent/<infoHash>/<idx>/<name>`. O main thread responde com `MessageChannel` em modo *pull* (cada `true` enviado pelo SW puxa o próximo bloco), garantindo backpressure real sem sobrecarregar a rede.
+5. **Streaming via Service Worker com backpressure**: A ponte com o `<video>` do DOM passa por um Service Worker que intercepta requisições `GET` para URLs virtuais do tipo `/webtorrent/<infoHash>/<idx>/<name>`. O main thread responde com `MessageChannel` em modo *pull* (cada `true` enviado pelo SW puxa o próximo bbrowsertorrent), garantindo backpressure real sem sobrecarregar a rede.
 
 ---
 
@@ -1289,7 +1289,7 @@ O Wire Protocol é a "língua" que os peers falam entre si, definida na BEP 3. E
 - **Mensagens Suportadas (BEP 3)**:
   - **Handshake**: Troca de `infoHash` (20 bytes), `peerId` (20 bytes) e extensões (8 bytes).
   - **Controle de Fluxo**: `choke`, `unchoke`, `interested`, `not-interested`.
-  - **Gerenciamento de Peças**: `have` (notificação de peça recebida), `bitfield` (mapa de todas as peças), `request` (pedido de bloco), `piece` (dados do bloco), `cancel`.
+  - **Gerenciamento de Peças**: `have` (notificação de peça recebida), `bitfield` (mapa de todas as peças), `request` (pedido de bbrowsertorrent), `piece` (dados do bbrowsertorrent), `cancel`.
   - **Extensões (BEP 10)**: `extended` (preparado para `ut_metadata`, `ut_pex`, etc.).
 - **Parser de Buffer Acumulador**:
   - O método `_onData(chunk)` acumula os dados recebidos em `this.buffer`.
@@ -1302,7 +1302,7 @@ O Wire Protocol é a "língua" que os peers falam entre si, definida na BEP 3. E
 
 ## 🌐 3. Service Worker Bridge — Streaming de arquivos (`src/server/`)
 
-Esta é a parte do Loco que substitui (e estende) o `createServer` do `webtorrent.min.js` original.  O objetivo é entregar bytes do `ChunkStore` para elementos `<video>`/`<audio>`/`<img>` do DOM **enquanto o download ainda está em andamento**, sem nunca precisar de um servidor Node.js ou de uma URL `http://` pré-conhecida.
+Esta é a parte do BrowserTorrent que substitui (e estende) o `createServer` do `webtorrent.min.js` original.  O objetivo é entregar bytes do `ChunkStore` para elementos `<video>`/`<audio>`/`<img>` do DOM **enquanto o download ainda está em andamento**, sem nunca precisar de um servidor Node.js ou de uma URL `http://` pré-conhecida.
 
 ### 3.1. Anatomia do problema
 
@@ -1313,7 +1313,7 @@ O `webtorrent.min.js` original tem um método `client.createServer({ controller 
 3. O main thread responde com `{ body: "STREAM" }` e passa a emitir bytes sob demanda no `port1` da `MessageChannel`.
 4. O SW encapsula esses bytes em um `ReadableStream` e devolve um `Response` ao `<video>`.  O `<video>` consome os bytes via MSE/`<source>` como se fosse um servidor HTTP normal.
 
-O Loco reproduz esse mesmo protocolo, mas com um diferencial: o transporte é **abstraído** numa interface `Transport`, o que permite testar todo o ciclo (incluindo backpressure, cancelamento e timeout) **sem subir um Service Worker real**.
+O BrowserTorrent reproduz esse mesmo protocolo, mas com um diferencial: o transporte é **abstraído** numa interface `Transport`, o que permite testar todo o ciclo (incluindo backpressure, cancelamento e timeout) **sem subir um Service Worker real**.
 
 ### 3.2. Módulos
 
@@ -1331,7 +1331,7 @@ O Loco reproduz esse mesmo protocolo, mas com um diferencial: o transporte é **
   - `sendReadyAck()` — posta `{ type: "WEBTORRENT_ACK" }` no SW.
   - `handleRequest(message, port)` — devolve um `Response` com `ReadableStream` para a URL requisitada, ou `404`/`503` conforme o caso.
   - `destroy()` — fecha o transporte e libera os ports.
-- **`buildFileStream(entry, port, transport)`**: cria o `ReadableStream<Uint8Array>` que materializa o arquivo em blocos de 16 KiB (configurável via `STREAM_BLOCK_SIZE`), aguardando `true` no `port` antes de emitir o próximo bloco (backpressure real).
+- **`buildFileStream(entry, port, transport)`**: cria o `ReadableStream<Uint8Array>` que materializa o arquivo em bbrowsertorrents de 16 KiB (configurável via `STREAM_BLOCK_SIZE`), aguardando `true` no `port` antes de emitir o próximo bbrowsertorrent (backpressure real).
 - **`readNextChunk(file, offset, length)`**: helper que será substituído pelo `createReadStream()` real quando a Fase 4.1 entregar o I/O direto do `ChunkStore`; por enquanto, varre o `Symbol.asyncIterator` do `File`.
 - **`guessContentType(name)`**: mapeia extensões comuns (mp4, webm, mp3, jpg, pdf, srt, vtt…) para MIME types apropriados; cai em `application/octet-stream` quando não reconhece.
 - **`createServer({ controller, scope, transport })`**: factory pública compatível com `webtorrent.min.js`.  Se `controller` é passado, usa o `createServiceWorkerTransport`; se `transport` é passado, usa o fornecido (testes); caso contrário, cai num `InProcessTransport` (modo self-test).
@@ -1355,7 +1355,7 @@ A classe `WebTorrent` agora expõe:
 
 ### 3.5. Vantagens sobre o `webtorrent.min.js` original
 
-| Aspecto | webtorrent.min.js | Loco (`@loco/webtorrent`) |
+| Aspecto | webtorrent.min.js | BrowserTorrent (`@vanaware/browsertorrent`) |
 | --- | --- | --- |
 | Acoplamento ao SW | Hard-coded em `webtorrent.min.js` | `Transport` injetável; testável sem SW |
 | Cancelamento | Sends `false` on port | Idem + `controller.cancel()` no `ReadableStream` |
@@ -1427,7 +1427,7 @@ Com a fundação do Tracker, Wire, Service Worker Bridge e Storage prontos e tes
 4. **Web Seeds (BEP 19)** — suporte a URLs HTTP/HTTPS como fonte adicional de peças.
 5. **Piece class** — expor `length` e `missing` para a UI exibir progresso por peça.
 6. **API de throttling** — `client.throttleDownload(bytesPerSec)` e `throttleUpload` para limitar banda agregada.
-7. **Seed** — permitir que o Loco compartilhe arquivos locais via `client.seed(file)`.
+7. **Seed** — permitir que o BrowserTorrent compartilhe arquivos locais via `client.seed(file)`.
 
 ---
 
@@ -1582,7 +1582,7 @@ O Swarm será a camada que conecta o **Tracker** (descoberta) com o **Torrent** 
 ## Arquivo: `docs/browsertorrent/05-fase-5-swarm-e-ut-metadata.md`
 
 ````md
-# /loco/monorepo/webtorrent/docs/05-fase-5-swarm-e-ut-metadata.md
+# /browsertorrent/monorepo/webtorrent/docs/05-fase-5-swarm-e-ut-metadata.md
 
 # Fase 5: Swarm Manager e Extensão ut_metadata
 
@@ -1661,7 +1661,7 @@ O Swarm é o "gerente de tráfego" do BitTorrent. Ele conecta o **Tracker** (que
 
 ## 🔗 2. Extensão ut_metadata (BEP 9)
 
-A extensão `ut_metadata` é essencial para o Loco, pois os usuários compartilharão **Magnet URIs** (que contêm apenas o `infoHash`), não arquivos `.torrent` completos. Esta extensão permite que um peer solicite o dicionário `info` de outro peer que já possui o torrent completo.
+A extensão `ut_metadata` é essencial para o BrowserTorrent, pois os usuários compartilharão **Magnet URIs** (que contêm apenas o `infoHash`), não arquivos `.torrent` completos. Esta extensão permite que um peer solicite o dicionário `info` de outro peer que já possui o torrent completo.
 
 ### Como Funciona (BEP 9)
 
@@ -1757,7 +1757,7 @@ Com o Swarm e o `ut_metadata` prontos, temos todas as peças do quebra-cabeça:
 - ✅ **Rede**: Tracker, Wire, Peer, Swarm
 - ✅ **Extensões**: ut_metadata
 
-A próxima fase é criar a **API Pública Principal** (`src/mod.ts`), que une todos esses módulos em uma interface limpa e pronta para ser consumida pelo Loco PWA. A API deve ser compatível com o WebTorrent original, expondo métodos como:
+A próxima fase é criar a **API Pública Principal** (`src/mod.ts`), que une todos esses módulos em uma interface limpa e pronta para ser consumida pelo BrowserTorrent PWA. A API deve ser compatível com o WebTorrent original, expondo métodos como:
 - `client.add(torrentId, opts)` - Adiciona um torrent (Magnet URI ou .torrent)
 - `client.seed(input, opts)` - Compartilha um arquivo como seed
 - `client.createServer()` - Cria um servidor HTTP para streaming (usando Service Worker)
@@ -1781,15 +1781,15 @@ A próxima fase é criar a **API Pública Principal** (`src/mod.ts`), que une to
 ## Arquivo: `docs/browsertorrent/06-fase-6-api-final.md`
 
 ````md
-# Fase 6 — API Final @loco/webtorrent: Proposta de Implementação
+# Fase 6 — API Final @vanaware/browsertorrent: Proposta de Implementação
 
-> **Contexto:** Análise comparativa detalhada entre `@loco/webtorrent` e `webtorrent.min.js`, identificando lacunas browser-aplicáveis e melhorias do `deno-torrent` a incorporar.
+> **Contexto:** Análise comparativa detalhada entre `@vanaware/browsertorrent` e `webtorrent.min.js`, identificando lacunas browser-aplicáveis e melhorias do `deno-torrent` a incorporar.
 
 ---
 
 ## 1. Resumo Executivo
 
-A implementação atual do `@loco/webtorrent` cobre **~75%** da API pública do `webtorrent.min.js`, com 568 testes passando. A análise identificou **22 lacunas browser-aplicáveis** no `webtorrent.min.js` e **15 melhorias** do `deno-torrent` ainda não portadas. Deste universo, a Fase 6 propõe implementar **13 capacidades de alta/média prioridade** que são viáveis no browser,afeitas de dependências Node/UDP, e que impactam diretamente a experiência do usuário do Loco PWA.
+A implementação atual do `@vanaware/browsertorrent` cobre **~75%** da API pública do `webtorrent.min.js`, com 568 testes passando. A análise identificou **22 lacunas browser-aplicáveis** no `webtorrent.min.js` e **15 melhorias** do `deno-torrent` ainda não portadas. Deste universo, a Fase 6 propõe implementar **13 capacidades de alta/média prioridade** que são viáveis no browser,afeitas de dependências Node/UDP, e que impactam diretamente a experiência do usuário do BrowserTorrent PWA.
 
 ---
 
@@ -1975,7 +1975,7 @@ get remotePort(): number
 | `blocklist` (IP set) | Sem range `net` module |
 | `path` (torrent save location) | Sem filesystem paths no browser |
 | `client.get(torrentId)` | Trivial; `client.torrents.get(infoHash)` já existe |
-| File advanced `stream` event com `req` callback | Sobrecarga desnecessária para o caso de uso do Loco |
+| File advanced `stream` event com `req` callback | Sobrecarga desnecessária para o caso de uso do BrowserTorrent |
 
 ---
 
@@ -2019,7 +2019,7 @@ get remotePort(): number
 # Fase 6: API Pública e Integração Final
 
 ## 🎯 Objetivo da Fase
-Nesta fase final, unificamos todos os módulos construídos (Parsing, Core, Network e Extensões) em uma **API Pública Principal** (`src/mod.ts`). O objetivo é expor uma interface limpa, reativa e compatível com a API original do WebTorrent, permitindo que a UI do Loco PWA (Preact + Signals) consuma o cliente de forma declarativa e segura.
+Nesta fase final, unificamos todos os módulos construídos (Parsing, Core, Network e Extensões) em uma **API Pública Principal** (`src/mod.ts`). O objetivo é expor uma interface limpa, reativa e compatível com a API original do WebTorrent, permitindo que a UI do BrowserTorrent PWA (Preact + Signals) consuma o cliente de forma declarativa e segura.
 
 Além disso, fechamos o ciclo crítico dos **Magnet URIs**, garantindo que o cliente possa iniciar um download "cego" e, dinamicamente, receber e processar os metadados (lista de arquivos, tamanhos, hashes) assim que a extensão `ut_metadata` os obtiver da rede.
 
@@ -2031,7 +2031,7 @@ A classe principal `WebTorrent` atua como o orquestrador de alto nível. Ela ger
 
 ```text
 ┌─────────────────────────────────────────────────────────────────┐
-│                     Loco PWA UI (Preact/Signals)                │
+│                     BrowserTorrent PWA UI (Preact/Signals)                │
 │  - Barra de progresso reativa                                   │
 │  - Lista de arquivos dinâmica                                   │
 │  - Botões de Play/Pause/Cancel                                  │
@@ -2130,11 +2130,11 @@ const client = new WebTorrent({
 
 ---
 
-## 💻 Exemplo de Integração com Loco PWA (Preact + Signals)
+## 💻 Exemplo de Integração com BrowserTorrent PWA (Preact + Signals)
 
 ```tsx
 import { signal, effect } from "@preact/signals";
-import { WebTorrent } from "@loco/webtorrent";
+import { WebTorrent } from "@vanaware/browsertorrent";
 
 // 1. Inicializa o cliente
 const client = new WebTorrent({ useOPFS: true });
@@ -2189,9 +2189,9 @@ function DownloadManager() {
 
 ## 🚀 Próximos Passos (Pós-Fundação)
 
-Com a fundação do WebTorrent 100% testada e documentada, os próximos passos para o Loco PWA são:
+Com a fundação do WebTorrent 100% testada e documentada, os próximos passos para o BrowserTorrent PWA são:
 
-1. **Método `seed()`**: Implementar a capacidade de o cliente Loco compartilhar arquivos locais (do OPFS ou da memória) com a rede, respondendo a requests de `ut_metadata` e `piece`.
+1. **Método `seed()`**: Implementar a capacidade de o cliente BrowserTorrent compartilhar arquivos locais (do OPFS ou da memória) com a rede, respondendo a requests de `ut_metadata` e `piece`.
 2. **Streaming via Service Worker**: Implementar um Service Worker que intercepta requisições HTTP para URLs virtuais (ex: `http://localhost/torrent/{infoHash}/{fileIndex}`) e utiliza `MediaSource Extensions (MSE)` ou `Response` streams para entregar os dados do `ChunkStore` em tempo real, permitindo reprodução de vídeo/áudio *enquanto* o download ocorre.
 3. **UI de Gerenciamento de Downloads**: Construir os componentes `beercss` para listar, pausar, retomar e excluir torrents, conectados aos Signals demonstrados acima.
 4. **Testes de Integração E2E**: Criar testes que simulam dois clientes WebTorrent no mesmo ambiente (usando mocks de WebRTC) trocando metadados e peças de forma autônoma.
@@ -2223,7 +2223,7 @@ Com a fundação do WebTorrent 100% testada e documentada, os próximos passos p
 ## Arquivo: `docs/browsertorrent/07-api-final.md`
 
 ````md
-# API Final @loco/webtorrent v1.0
+# API Final @vanaware/browsertorrent v1.0
 
 > **Status:** Snapshot pós-Fase 5.3, com roadmap de Fase 6 definido.
 > **Foco:** Browser-first, sem Node.js, sem pacotes npm. Stack 100% nativo (Web APIs, TypedEventTarget, OPFS, W3C Streams, Service Worker).
@@ -2233,7 +2233,7 @@ Com a fundação do WebTorrent 100% testada e documentada, os próximos passos p
 ## 1. Importação e Construtor
 
 ```typescript
-import { WebTorrent, generateTorrent, Torrent, File, Piece } from "@loco/webtorrent";
+import { WebTorrent, generateTorrent, Torrent, File, Piece } from "@vanaware/browsertorrent";
 
 const client = new WebTorrent({
   peerId: undefined,            // Uint8Array(20) ou hex string — opcional
@@ -2247,7 +2247,7 @@ const client = new WebTorrent({
 
 | Opção | Tipo | Default | Descrição |
 |---|---|---|---|
-| `peerId` | `Uint8Array \| string` | Loco-LO0100-prefixed | Peer ID de 20 bytes |
+| `peerId` | `Uint8Array \| string` | BrowserTorrent-BT0100-prefixed | Peer ID de 20 bytes |
 | `maxConns` | `number` | `55` | Limite de conexões WebRTC |
 | `port` | `number` | `6881` | Port hint (para peerwire) |
 | `useOPFS` | `boolean` | `true` | Usar OPFS ChunkStore |
@@ -2499,7 +2499,7 @@ const client = new WebTorrent({
 ## 9. Generator API (Fase 5.3)
 
 ```typescript
-import { generateTorrent, OPFSMultiFileReader, PieceSizeEnum } from "@loco/webtorrent";
+import { generateTorrent, OPFSMultiFileReader, PieceSizeEnum } from "@vanaware/browsertorrent";
 
 const torrent = await generateTorrent(
   dirHandle,                              // FileSystemDirectoryHandle
@@ -2530,7 +2530,7 @@ console.log(torrent.magnetURI); // magnet link
 | `buildPieceFiles(files, pieceSize)` | BEP-47 piece layout |
 | `calcPieceSize(totalLength)` | AUTO piece size |
 | `fileSizeSum(files)` | soma de tamanhos |
-| `getDefaultCreatedBy()` | "loco-torrent-generator@1.0.0" |
+| `getDefaultCreatedBy()` | "browsertorrent-torrent-generator@1.0.0" |
 | `isHiddenFile(name)` | começa com `.` |
 | `sha1sum(data)` | hash SHA-1 via `crypto.subtle` |
 | `PieceSizeEnum` | `AUTO` ou bytes |
@@ -2569,7 +2569,7 @@ new OPFSChunkStore({ chunkLength, length, rootDir: dir })
 | `sha256(data)` | `crypto/hasher.ts` | SHA-256 hex |
 | `randomBytes(n)` | `crypto/random.ts` | Uint8Array |
 | `generateId()` | `crypto/random.ts` | 40-char hex |
-| `generateLocoPeerId()` | `utils/peerid.ts` | `-LO0100-XXXXXXXXXX` |
+| `generateBrowserTorrentPeerId()` | `utils/peerid.ts` | `-BT0100-XXXXXXXXXX` |
 | `scrapeTracker(url, infoHashes, opts?)` | `network/tracker.ts` | BEP 48 scrape (completo) |
 | `parseRangeHeader(header, fileLength)` | `server/server.ts` | parse `bytes=N-M` → `{start,end}` |
 
@@ -2599,9 +2599,9 @@ new OPFSChunkStore({ chunkLength, length, rootDir: dir })
 ## Arquivo: `docs/browsertorrent/roadmap-futuro.md`
 
 ````md
-# Roadmap — Tracker WebSocket em Deno para `@loco/webtorrent`
+# Roadmap — Tracker WebSocket em Deno para `@vanaware/browsertorrent`
 
-> Documento de planejamento para a Fase 8 do `@loco/webtorrent`:
+> Documento de planejamento para a Fase 8 do `@vanaware/browsertorrent`:
 > construção de um **servidor tracker BitTorrent WebSocket** (BEP-15 / BEP-31),
 > escrito em Deno, que o cliente PWA pode usar para descoberta de peers
 > quando os trackers públicos (`tracker.fastcast.nz`, etc.) falham
@@ -2613,7 +2613,7 @@ new OPFSChunkStore({ chunkLength, length, rootDir: dir })
 
 ### 1.1 O problema atual
 
-- O cliente `@loco/webtorrent` (`src/network/tracker.ts`) implementa
+- O cliente `@vanaware/browsertorrent` (`src/network/tracker.ts`) implementa
   `WsTracker`, que fala o protocolo BEP-15 sobre WebSocket.
 - Em ambiente HTTPS, o navegador **bloqueia** conexões `ws://` (mixed content),
   e os trackers públicos via `wss://` (`wss://tracker.fastcast.nz/`,
@@ -2643,7 +2643,7 @@ que:
 
 ### 1.3 Por que Deno (e não Node)?
 
-- O resto do monorepo Loco já é Deno (`deno.jsonc`, `deno.lock`).
+- O resto do monorepo BrowserTorrent já é Deno (`deno.jsonc`, `deno.lock`).
 - `Deno.upgradeWebSocket()` é uma API de primeira classe para WebSockets
   com hijack de socket TCP — não há dependência de `ws` ou de polyfills.
 - TS nativo, sem etapa de build para o servidor.
@@ -2732,7 +2732,7 @@ monorepo/webtorrent/
 
 ```
                        ┌────────────────────────────────────┐
-                       │       @loco/webtorrent (browser)   │
+                       │       @vanaware/browsertorrent (browser)   │
                        │  src/network/tracker.ts            │
                        │  WsTracker ── wss://tracker.../ann │
                        └─────────────────┬──────────────────┘
@@ -2962,8 +2962,8 @@ monorepo/webtorrent/
 |---|---|---|---|
 | 8.7.1 | Subir o tracker em `ws://localhost:8001` | manual | `deno task start` |
 | 8.7.2 | Configurar `torrent-context.tsx` para usar `ws://localhost:8001/announce` | `example/torrent-context.tsx` | Substituir `wss://tracker.openbittorrent.com/announce` |
-| 8.7.3 | Rodar `deno task --config ~/github/loco/deno.jsonc build webtorrent` | manual | Confirmar 0 type errors |
-| 8.7.4 | Rodar `deno task --config ~/github/loco/monorepo/webtorrent/deno.jsonc server` | manual | Confirmar SW registra |
+| 8.7.3 | Rodar `deno task --config ~/github/browsertorrent/deno.jsonc build webtorrent` | manual | Confirmar 0 type errors |
+| 8.7.4 | Rodar `deno task --config ~/github/browsertorrent/monorepo/webtorrent/deno.jsonc server` | manual | Confirmar SW registra |
 | 8.7.5 | Abrir 2 abas com o mesmo magnet → verificar `peers.length > 0` | manual | Logs do tracker devem mostrar 2 announces + 1 offer forward |
 | 8.7.6 | Verificar download de peça (Piece → wire → storage) | manual | `torrent.progress > 0` na aba leech |
 
@@ -3041,7 +3041,7 @@ A Fase 8 está completa quando **todos** os itens abaixo forem verdade:
 - Múltiplas instâncias trocando swarms via gossip
 - Útil para deploy distribuído em múltiplas regiões
 
-### Fase 13 — `client.scrape` no `@loco/webtorrent` (BEP-48)
+### Fase 13 — `client.scrape` no `@vanaware/browsertorrent` (BEP-48)
 - Expor método em `src/mod.ts` para consultar `ws://tracker/announce` via WS
 - Já existe `scrapeTracker` em `src/network/tracker.ts` mas só para HTTP
 
@@ -3057,7 +3057,7 @@ A Fase 8 está completa quando **todos** os itens abaixo forem verdade:
 - **WebSocket API no Deno** — https://docs.deno.com/runtime/manual/runtime/web_platform_apis#websocket
 - **Deno Deploy WebSockets** — https://docs.deno.com/deploy/manual/runtime-broadcasts#websockets
 - **Upstream `webtorrent/bittorrent-tracker`** — referência de protocolo (em `monorepo/webtorrent/bittorrent-tracker/`)
-- **QWEN.md raiz** — regras de ouro do `@loco/webtorrent`
+- **QWEN.md raiz** — regras de ouro do `@vanaware/browsertorrent`
 
 ---
 
@@ -3176,14 +3176,14 @@ A Fase 8 está completa quando **todos** os itens abaixo forem verdade:
 ## Arquivo: `docs/browsertorrent/Regras-IA.md`
 
 ````md
-# Regras de conduta — @loco/webtorrent
+# Regras de conduta — @vanaware/browsertorrent
 
 > Contexto obrigatório para qualquer IA (Qwen Code) que analise, adapte ou
 > modifique este pacote. Leia este arquivo antes de propor mudanças.
 
 ## 1. Missão do pacote
 
-- `src/` é a implementação oficial do **Loco**, um cliente BitTorrent
+- `src/` é a implementação oficial do **BrowserTorrent**, um cliente BitTorrent
   **browser-first** (PWA). Tudo em `src/` deve funcionar no navegador.
 - `deno-torrent/` é a **fonte de referência de protocolo** (implementação
   rigorosa, orientada a Deno). Ela informa *o que* implementar e *quais
@@ -3204,7 +3204,7 @@ A Fase 8 está completa quando **todos** os itens abaixo forem verdade:
    Exceção: arquivos de teste (`tests/`) podem usar `Deno.test`.
 3. **A fachada é orientada a eventos.** `Wire`, `Torrent`, `Swarm`, `Peer` e
    as extensões emitem eventos via `TypedEventTarget` (`src/utils/`). Essa
-   fachada é estável e consumida pelo restante do Loco. A máquina de estados
+   fachada é estável e consumida pelo restante do BrowserTorrent. A máquina de estados
    do `deno-torrent` pode ser adotada como *internals*, mas os eventos
    públicos devem continuar existindo.
 4. **Utils locais, não imports do deno-torrent.** O bundle do browser não
@@ -3307,9 +3307,9 @@ Antes de propor qualquer adaptação de um módulo (ex.: `deno-torrent/magnet`,
 
 | Arquivo | Linhas | Browser? | vs src/utils/peerid.ts |
 |---|---|---|---|
-| `peerid.ts` | 204 | ✅ | `encode()`, `encodeAzStyle()`, `encodeShadowStyle()` — src/ só gera Loco hardcoded |
+| `peerid.ts` | 204 | ✅ | `encode()`, `encodeAzStyle()`, `encodeShadowStyle()` — src/ só gera BrowserTorrent hardcoded |
 | `util.ts` | 362 | ✅ | 16+ funções (validators, version converters, `randomStr`). src/ tem 4 funções simplificadas |
-| `enum.ts` | 121 | ✅ | `enum AZStyleClient`/`ShadowStyleClient`. src/ usa `Record`. **Nota:** src/ tem `"LO": "Loco"`, deno-torrent não |
+| `enum.ts` | 121 | ✅ | `enum AZStyleClient`/`ShadowStyleClient`. src/ usa `Record`. **Nota:** src/ tem `"LO": "BrowserTorrent"`, deno-torrent não |
 | `type.ts` | 11 | ✅ | `type Client`. src/ tem `ClientInfo` com campo `style` a mais |
 | `constant.ts` | 46 | ✅ | Char arrays para encoding |
 
@@ -3529,12 +3529,12 @@ Depende de: Fase 1 + Fase 2
 | 3.1 | BEP 6 Fast: `suggestPiece/haveAll/haveNone/rejectRequest/allowedFast` | `peerwire/message.ts` + `peer_wire.ts` | `src/core/wire.ts` + `message.ts` | Fast peers |
 | 3.2 | BEP 52 v2: `hashRequest/hashes/hashReject` | `peerwire/message.ts` + `peer_wire.ts` | `src/core/wire.ts` + `message.ts` | BitTorrent v2 |
 | 3.3 | `ut_metadata` melhorado: verificação SHA-1/256, pipelining, per-block timeout | `peerwire/ut_metadata.ts` | `src/extensions/ut-metadata.ts` | Integridade + performance |
-| 3.4 | `peerid` melhorado: `encode()` genérico, validators, version converters | `peerid/peerid.ts` + `util.ts` | `src/utils/peerid.ts` | Flexibilidade (manter `"LO": "Loco"`) |
+| 3.4 | `peerid` melhorado: `encode()` genérico, validators, version converters | `peerid/peerid.ts` + `util.ts` | `src/utils/peerid.ts` | Flexibilidade (manter `"LO": "BrowserTorrent"`) |
 | 3.5 | `Bitfield` com spare-bit validation (manter `grow`) | `peerwire/bitfield.ts` + `BitArray` | `src/core/bitfield.ts` | Conformidade |
 
 ### Fase 4 — Browser API (funcionalidades da webtorrent.min.js)
 
-> Funcionalidades da API pública do upstream WebTorrent que faltam no Loco.
+> Funcionalidades da API pública do upstream WebTorrent que faltam no BrowserTorrent.
 > Referência: `docs/webtorrent-api.md` + análise do bundle `webtorrent.min.js`.
 
 Depende de: Fase 1 + Fase 2
@@ -3572,9 +3572,9 @@ Depende de: Fase 1 + Fase 2
 | 5.6 | Barrel `mod.ts` + re-export em `src/mod.ts` | `src/torrent-generator/mod.ts` | ✅ |
 | 5.7 | Testes (37 testes, mock OPFS) | `tests/torrent-generator_test.ts` | ✅ |
 
-### Fase 6 — API Final @loco/webtorrent ✅ CONCLUÍDA
+### Fase 6 — API Final @vanaware/browsertorrent ✅ CONCLUÍDA
 
-> Completa a API pública do `webtorrent.min.js` no browser-first Loco.
+> Completa a API pública do `webtorrent.min.js` no browser-first BrowserTorrent.
 
 | # | Tarefa | Destino | Status |
 |---|---|---|---|
@@ -3625,7 +3625,7 @@ Depende de: Fase 1 + Fase 2
   arrayBuffer, blob, async iterator). `ParsedTorrentFile` é apenas dados —
   a transição para `src/core/file.ts` com acesso ao ChunkStore é essencial
   para media playback no browser.
-- **createServer via Service Worker.** O Loco já possui
+- **createServer via Service Worker.** O BrowserTorrent já possui
   `service-worker/src/sw/webtorrent.ts` com a ponte MessageChannel para
   streaming sob demanda. A integração com o pkg webtorrent será via
   `client.createServer({ controller: ServiceWorkerRegistration })`, que
@@ -3648,7 +3648,7 @@ Depende de: Fase 1 + Fase 2
 
 ### 9.1 Objetivo
 
-Demonstrar o Loco WebTorrent funcionando em navegador com streaming de vídeo P2P real:
+Demonstrar o BrowserTorrent WebTorrent funcionando em navegador com streaming de vídeo P2P real:
 - **Seeder (A):** compartilha um arquivo de vídeo
 - **Viewer (B):** assiste ao vídeo via streaming P2P
 - **Peer (C):** baixa o mesmo arquivo e participa do swarm (resiliência)
@@ -3660,7 +3660,7 @@ Demonstrar o Loco WebTorrent funcionando em navegador com streaming de vídeo P2
 | Runtime servidor | Deno (`deno serve` + `@std/http/file-server`) |
 | UI | Preact 10.x + Signals + BeerCSS 5.x (CDN) |
 | Bundler | `esbuild.ts` existente (raiz do repo) — **apenas adicionar target** |
-| Output | `@loco/webtorrent/build/dist/` |
+| Output | `@vanaware/browsertorrent/build/dist/` |
 | Imports UI | `https://esm.sh/preact@10.29.7`, `@preact/signals@1.3.1` |
 
 ### 9.3 Estrutura de diretórios

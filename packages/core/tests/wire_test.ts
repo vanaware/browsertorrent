@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/tests/wire_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/wire_test.ts
 
 import { assertEquals, assertThrows, } from "@std/assert";
 import { Transport, Wire, WireState, } from "../src/core/wire.ts";

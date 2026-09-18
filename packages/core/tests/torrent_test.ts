@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/tests/torrent_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/torrent_test.ts
 
 import { assertEquals, assertRejects, } from "@std/assert";
 import { Torrent, } from "../src/core/torrent.ts";
@@ -193,7 +193,7 @@ Deno.test("torrent: integration - setMetadata dynamically updates torrent state 
   mockPieceHashes.fill(1,);
 
   const infoDict = {
-    name: "loco-update-v2.zip",
+    name: "browsertorrent-update-v2.zip",
     length: 2048,
     "piece length": 1024,
     pieces: mockPieceHashes,
@@ -209,22 +209,22 @@ Deno.test("torrent: integration - setMetadata dynamically updates torrent state 
     }>,
   ) => {
     metadataEventEmitted = true;
-    assertEquals(e.detail.name, "loco-update-v2.zip",);
+    assertEquals(e.detail.name, "browsertorrent-update-v2.zip",);
     assertEquals(e.detail.length, 2048,);
     assertEquals(e.detail.files.length, 1,);
-    assertEquals(e.detail.files[0]!.name, "loco-update-v2.zip",);
+    assertEquals(e.detail.files[0]!.name, "browsertorrent-update-v2.zip",);
   },);
 
   const success = await torrent.setMetadata(infoBuffer,);
 
   assertEquals(success, true,);
   assertEquals(metadataEventEmitted, true,);
-  assertEquals(torrent.name, "loco-update-v2.zip",);
+  assertEquals(torrent.name, "browsertorrent-update-v2.zip",);
   assertEquals(torrent.length, 2048,);
   assertEquals(torrent.pieceLength, 1024,);
   assertEquals(torrent.numPieces, 2,);
   assertEquals(torrent.files.length, 1,);
-  assertEquals(torrent.files[0]!.path, "loco-update-v2.zip",);
+  assertEquals(torrent.files[0]!.path, "browsertorrent-update-v2.zip",);
   assertEquals(torrent.progress, 0,);
 });
 
@@ -384,7 +384,7 @@ Deno.test("torrent: created returns undefined when no creation date", async () =
 Deno.test("torrent: createdBy returns the creator string", async () => {
   const parsed: ParsedTorrent = {
     ...await createFakeParsedTorrent(),
-    createdBy: "loco-torrent-generator/1.0.0",
+    createdBy: "browsertorrent-torrent-generator/1.0.0",
   };
   const store = new MemoryChunkStore({
     chunkLength: parsed.pieceLength,
@@ -394,7 +394,7 @@ Deno.test("torrent: createdBy returns the creator string", async () => {
 
   await new Promise<void>((resolve,) => torrent.on("ready", () => resolve(),));
 
-  assertEquals(torrent.createdBy, "loco-torrent-generator/1.0.0",);
+  assertEquals(torrent.createdBy, "browsertorrent-torrent-generator/1.0.0",);
 });
 
 Deno.test("torrent: createdBy returns undefined when not set", async () => {

@@ -1,4 +1,4 @@
-# /loco/monorepo/webtorrent/docs/04-fase-4-rede-e-protocolo.md
+# /browsertorrent/monorepo/webtorrent/docs/04-fase-4-rede-e-protocolo.md
 
 # Fase 4: Rede e Protocolo (Tracker, Wire, Service Worker Bridge)
 
@@ -13,7 +13,7 @@ Nesta fase, construímos os módulos responsáveis pela **descoberta de peers**,
 2. **Abstração de Transporte (`Transport`)**: O `Wire` (protocolo) e o `WebTorrentServer` (streaming) não devem saber se estão rodando sobre um `RTCDataChannel`, um mock de teste ou um `ServiceWorker` real. Eles recebem uma interface simples (`send`, `onMessage`, `close` / `postMessage`, `requestStream`), garantindo testabilidade unitária sem levantar servidores reais.
 3. **Parser de Stream (Acumulador de Buffer)**: Dados chegam em pedaços arbitrários (chunks) pela rede, especialmente no WebRTC, que pode fragmentar mensagens. O `Wire` mantém um `buffer` interno (`Uint8Array`) e acumula os chunks até ter o tamanho completo de uma mensagem.
 4. **Uso de `DataView` e Helpers Nativos**: Substituímos completamente o `Buffer` do Node.js. Usamos nossos helpers `readUInt32BE` e `writeUInt32BE` (baseados em `Uint8Array` e operações bitwise) para ler e escrever os cabeçalhos das mensagens de forma performática e nativa.
-5. **Streaming via Service Worker com backpressure**: A ponte com o `<video>` do DOM passa por um Service Worker que intercepta requisições `GET` para URLs virtuais do tipo `/webtorrent/<infoHash>/<idx>/<name>`. O main thread responde com `MessageChannel` em modo *pull* (cada `true` enviado pelo SW puxa o próximo bloco), garantindo backpressure real sem sobrecarregar a rede.
+5. **Streaming via Service Worker com backpressure**: A ponte com o `<video>` do DOM passa por um Service Worker que intercepta requisições `GET` para URLs virtuais do tipo `/webtorrent/<infoHash>/<idx>/<name>`. O main thread responde com `MessageChannel` em modo *pull* (cada `true` enviado pelo SW puxa o próximo bbrowsertorrent), garantindo backpressure real sem sobrecarregar a rede.
 
 ---
 
@@ -43,7 +43,7 @@ O Wire Protocol é a "língua" que os peers falam entre si, definida na BEP 3. E
 - **Mensagens Suportadas (BEP 3)**:
   - **Handshake**: Troca de `infoHash` (20 bytes), `peerId` (20 bytes) e extensões (8 bytes).
   - **Controle de Fluxo**: `choke`, `unchoke`, `interested`, `not-interested`.
-  - **Gerenciamento de Peças**: `have` (notificação de peça recebida), `bitfield` (mapa de todas as peças), `request` (pedido de bloco), `piece` (dados do bloco), `cancel`.
+  - **Gerenciamento de Peças**: `have` (notificação de peça recebida), `bitfield` (mapa de todas as peças), `request` (pedido de bbrowsertorrent), `piece` (dados do bbrowsertorrent), `cancel`.
   - **Extensões (BEP 10)**: `extended` (preparado para `ut_metadata`, `ut_pex`, etc.).
 - **Parser de Buffer Acumulador**:
   - O método `_onData(chunk)` acumula os dados recebidos em `this.buffer`.
@@ -56,7 +56,7 @@ O Wire Protocol é a "língua" que os peers falam entre si, definida na BEP 3. E
 
 ## 🌐 3. Service Worker Bridge — Streaming de arquivos (`src/server/`)
 
-Esta é a parte do Loco que substitui (e estende) o `createServer` do `webtorrent.min.js` original.  O objetivo é entregar bytes do `ChunkStore` para elementos `<video>`/`<audio>`/`<img>` do DOM **enquanto o download ainda está em andamento**, sem nunca precisar de um servidor Node.js ou de uma URL `http://` pré-conhecida.
+Esta é a parte do BrowserTorrent que substitui (e estende) o `createServer` do `webtorrent.min.js` original.  O objetivo é entregar bytes do `ChunkStore` para elementos `<video>`/`<audio>`/`<img>` do DOM **enquanto o download ainda está em andamento**, sem nunca precisar de um servidor Node.js ou de uma URL `http://` pré-conhecida.
 
 ### 3.1. Anatomia do problema
 
@@ -67,7 +67,7 @@ O `webtorrent.min.js` original tem um método `client.createServer({ controller 
 3. O main thread responde com `{ body: "STREAM" }` e passa a emitir bytes sob demanda no `port1` da `MessageChannel`.
 4. O SW encapsula esses bytes em um `ReadableStream` e devolve um `Response` ao `<video>`.  O `<video>` consome os bytes via MSE/`<source>` como se fosse um servidor HTTP normal.
 
-O Loco reproduz esse mesmo protocolo, mas com um diferencial: o transporte é **abstraído** numa interface `Transport`, o que permite testar todo o ciclo (incluindo backpressure, cancelamento e timeout) **sem subir um Service Worker real**.
+O BrowserTorrent reproduz esse mesmo protocolo, mas com um diferencial: o transporte é **abstraído** numa interface `Transport`, o que permite testar todo o ciclo (incluindo backpressure, cancelamento e timeout) **sem subir um Service Worker real**.
 
 ### 3.2. Módulos
 
@@ -85,7 +85,7 @@ O Loco reproduz esse mesmo protocolo, mas com um diferencial: o transporte é **
   - `sendReadyAck()` — posta `{ type: "WEBTORRENT_ACK" }` no SW.
   - `handleRequest(message, port)` — devolve um `Response` com `ReadableStream` para a URL requisitada, ou `404`/`503` conforme o caso.
   - `destroy()` — fecha o transporte e libera os ports.
-- **`buildFileStream(entry, port, transport)`**: cria o `ReadableStream<Uint8Array>` que materializa o arquivo em blocos de 16 KiB (configurável via `STREAM_BLOCK_SIZE`), aguardando `true` no `port` antes de emitir o próximo bloco (backpressure real).
+- **`buildFileStream(entry, port, transport)`**: cria o `ReadableStream<Uint8Array>` que materializa o arquivo em bbrowsertorrents de 16 KiB (configurável via `STREAM_BLOCK_SIZE`), aguardando `true` no `port` antes de emitir o próximo bbrowsertorrent (backpressure real).
 - **`readNextChunk(file, offset, length)`**: helper que será substituído pelo `createReadStream()` real quando a Fase 4.1 entregar o I/O direto do `ChunkStore`; por enquanto, varre o `Symbol.asyncIterator` do `File`.
 - **`guessContentType(name)`**: mapeia extensões comuns (mp4, webm, mp3, jpg, pdf, srt, vtt…) para MIME types apropriados; cai em `application/octet-stream` quando não reconhece.
 - **`createServer({ controller, scope, transport })`**: factory pública compatível com `webtorrent.min.js`.  Se `controller` é passado, usa o `createServiceWorkerTransport`; se `transport` é passado, usa o fornecido (testes); caso contrário, cai num `InProcessTransport` (modo self-test).
@@ -109,7 +109,7 @@ A classe `WebTorrent` agora expõe:
 
 ### 3.5. Vantagens sobre o `webtorrent.min.js` original
 
-| Aspecto | webtorrent.min.js | Loco (`@loco/webtorrent`) |
+| Aspecto | webtorrent.min.js | BrowserTorrent (`@vanaware/browsertorrent`) |
 | --- | --- | --- |
 | Acoplamento ao SW | Hard-coded em `webtorrent.min.js` | `Transport` injetável; testável sem SW |
 | Cancelamento | Sends `false` on port | Idem + `controller.cancel()` no `ReadableStream` |
@@ -181,7 +181,7 @@ Com a fundação do Tracker, Wire, Service Worker Bridge e Storage prontos e tes
 4. **Web Seeds (BEP 19)** — suporte a URLs HTTP/HTTPS como fonte adicional de peças.
 5. **Piece class** — expor `length` e `missing` para a UI exibir progresso por peça.
 6. **API de throttling** — `client.throttleDownload(bytesPerSec)` e `throttleUpload` para limitar banda agregada.
-7. **Seed** — permitir que o Loco compartilhe arquivos locais via `client.seed(file)`.
+7. **Seed** — permitir que o BrowserTorrent compartilhe arquivos locais via `client.seed(file)`.
 
 ---
 

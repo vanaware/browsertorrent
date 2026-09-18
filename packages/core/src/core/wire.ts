@@ -1,8 +1,8 @@
-// /loco/monorepo/webtorrent/src/core/wire.ts
+// /browsertorrent/monorepo/webtorrent/src/core/wire.ts
 /**
  * BitTorrent peer wire protocol — event-driven facade with robust internals.
  *
- * Preserves the existing `WireEvents` API consumed by the rest of Loco, while
+ * Preserves the existing `WireEvents` API consumed by the rest of BrowserTorrent, while
  * adding the security, validation, and lifecycle management from deno-torrent's
  * `peer_wire.ts`:
  *
@@ -19,7 +19,7 @@
  * - ExtensionHost BEP 10 integration
  *
  * Adaptado de deno-torrent/peerwire/peer_wire.ts para o modelo
- * Transport síncrono + buffer do Loco.
+ * Transport síncrono + buffer do BrowserTorrent.
  */
 
 import { TypedEventTarget, } from "../utils/event-target.ts";

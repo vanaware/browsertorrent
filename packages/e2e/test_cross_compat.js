@@ -2,7 +2,7 @@ const { chromium } = require('@playwright/test');
 
 (async () => {
   console.log("===============================================================");
-  console.log("SYNTAXMESH DETAILED E2E CROSS-COMPATIBILITY TESTING MATRIX");
+  console.log("BROWSERTORRENT DETAILED E2E CROSS-COMPATIBILITY TESTING MATRIX");
   console.log("===============================================================");
 
   let browser;
@@ -79,7 +79,7 @@ const { chromium } = require('@playwright/test');
 
         let client;
         if (engine === 'browsertorrent') {
-          const { Client } = window.LocoTest;
+          const { Client } = window.BrowserTorrentTest;
           client = new Client({
             useOPFS: false,
             rtcConfig: localTracker ? { iceServers: [] } : undefined
@@ -140,7 +140,7 @@ const { chromium } = require('@playwright/test');
 
         let client;
         if (engine === 'browsertorrent') {
-          const { Client } = window.LocoTest;
+          const { Client } = window.BrowserTorrentTest;
           client = new Client({
             useOPFS: false,
             rtcConfig: localTracker ? { iceServers: [] } : undefined

@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/tests/mod_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/mod_test.ts
 
 import { assertEquals, assertRejects, } from "@std/assert";
 import { Client, } from "../src/mod.ts";

@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/server/server.ts
+// /browsertorrent/monorepo/webtorrent/src/server/server.ts
 
 import type { File, } from "../core/file.ts";
 import type { Torrent, } from "../core/torrent.ts";

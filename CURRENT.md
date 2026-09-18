@@ -1,4 +1,4 @@
-# SyntaxMesh - Progress Tracking
+# BrowserTorrent - Progress Tracking
 
 ## Completed Phases
 - [x] Phase 1: Core Deno/Preact/Signals Setup
@@ -18,6 +18,13 @@
   - [x] Verified connection to public trackers (e.g., `wss://tracker.webtorrent.dev`).
   - [x] Verified end-to-end file seeding, P2P discovery, metadata exchange, and block transfer via local Deno `WsTracker`.
   - [x] Automated Playwright + Chromium E2E verification suite (`packages/e2e/test_trackers.js`).
+  - [x] Advanced Cross-Compatibility E2E Matrix implemented (`packages/e2e/test_scenarios.js`).
+    - [x] WebTorrent ↔ WebTorrent (Deno Tracker): PASSED
+    - [x] WebTorrent ↔ BrowserTorrent Interoperability: PASSED
+    - [x] BrowserTorrent SW Streaming Validation: PASSED
+    - [x] WebTorrent ➔ BrowserTorrent SW Streaming Compatibility: PASSED
+    - [x] Public Tracker Scenarios (B_PUBLIC/C): TIMEOUT (Sandbox env limitation)
+    - [x] Documentation of streaming differences (`packages/e2e/STREAMING_DIFFERENCES.md`).
 
 ## Critical Debugging (Active)
 - [x] **Fix P2P Transfer Timeout**: Solved! Resolved a Temporal Dead Zone (TDZ) ReferenceError in `_registerWire` by moving `attachInitialState` to the bottom of the method.

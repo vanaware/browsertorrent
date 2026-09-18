@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/tests/swarm_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/swarm_test.ts
 
 import { assertEquals, } from "@std/assert";
 import { Swarm, } from "../src/network/swarm.ts";

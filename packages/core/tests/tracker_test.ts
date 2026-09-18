@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/tests/tracker_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/tracker_test.ts
 
 import { assertEquals, assertRejects, assertThrows, } from "@std/assert";
 import {
@@ -80,7 +80,7 @@ Deno.test("tracker: percentEncodeBytes encodes byte-a-byte", () => {
 Deno.test("tracker: buildAnnounceUrl preserves binary identity params", () => {
   const infoHash = new Uint8Array(20,);
   for (let i = 0; i < 20; i++) infoHash[i] = i * 13 % 256;
-  const peerId = new TextEncoder().encode("-LO0100-abcdefghijkl",);
+  const peerId = new TextEncoder().encode("-BT0100-abcdefghijkl",);
 
   const url = buildAnnounceUrl("http://tracker.example.com/announce", {
     infoHash,
@@ -356,7 +356,7 @@ Deno.test("tracker: parseHttpTrackerResponse rejects invalid responses", () => {
 Deno.test("tracker: HttpTracker.announce uses byte-exact URL and parses response", async () => {
   const infoHash = new Uint8Array(20,);
   for (let i = 0; i < 20; i++) infoHash[i] = 255 - i;
-  const peerId = new TextEncoder().encode("-LO0100-abcdefghijkl",);
+  const peerId = new TextEncoder().encode("-BT0100-abcdefghijkl",);
 
   let requestedUrl: URL | null = null;
   const originalFetch = globalThis.fetch;

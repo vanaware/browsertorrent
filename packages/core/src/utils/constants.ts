@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/utils/constants.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/constants.ts
 
 /**
  * Constantes do protocolo BitTorrent (BEP 3, BEP 10).

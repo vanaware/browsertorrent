@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/utils/torrent-types.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/torrent-types.ts
 /**
  * Shared type contracts for torrent parsing (BEP 3, BEP 12, BEP 19, BEP 47, BEP 52).
  *

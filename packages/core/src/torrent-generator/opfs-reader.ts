@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/torrent-generator/opfs-reader.ts
+// /browsertorrent/monorepo/webtorrent/src/torrent-generator/opfs-reader.ts
 /**
  * Sequential multi-file reader for OPFS file handles.
  *

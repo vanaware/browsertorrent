@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/tests/hasher_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/hasher_test.ts
 
 import { assertEquals, } from "@std/assert";
 import {

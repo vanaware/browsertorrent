@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/utils/buffer.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/buffer.ts
 /**
  * Helpers para manipulação de Uint8Array, substituindo o `Buffer` do Node.js.
  * Focado em performance e compatibilidade com o protocolo BitTorrent.

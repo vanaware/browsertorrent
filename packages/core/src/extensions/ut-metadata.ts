@@ -1,7 +1,12 @@
-// /loco/monorepo/webtorrent/src/extensions/ut-metadata.ts
+// /browsertorrent/monorepo/webtorrent/src/extensions/ut-metadata.ts
 
 import { Extension, } from "../core/extension.ts";
-import { BencodeDict, decode, decodePrefix, encode, } from "../utils/bencode.ts";
+import {
+  BencodeDict,
+  decode,
+  decodePrefix,
+  encode,
+} from "../utils/bencode.ts";
 import { Bitfield, } from "../core/bitfield.ts";
 import { sha1, sha256, } from "../crypto/hasher.ts";
 import type { Wire, } from "../core/wire.ts";
@@ -53,8 +58,14 @@ export class UtMetadata extends Extension {
     this._extensionId = context.host.localExtensions.get(this.name,) ?? null;
   }
 
-  public handshakeFields(): ReadonlyMap<string, import("../utils/bencode.ts").BencodeValue> {
-    const fields = new Map<string, import("../utils/bencode.ts").BencodeValue>();
+  public handshakeFields(): ReadonlyMap<
+    string,
+    import("../utils/bencode.ts").BencodeValue
+  > {
+    const fields = new Map<
+      string,
+      import("../utils/bencode.ts").BencodeValue
+    >();
     if (this._metadataSize !== null) {
       fields.set("metadata_size", this._metadataSize,);
     }
@@ -70,7 +81,15 @@ export class UtMetadata extends Extension {
   }
 
   public onExtendedHandshake(handshake: any,) {
-    console.log(`[UtMetadata] onExtendedHandshake: m=${JSON.stringify(handshake.m)}, extensionsSize=${handshake.extensions instanceof Map ? handshake.extensions.size : 'not Map'}, metadataSize=${handshake.metadataSize}`);
+    console.log(
+      `[UtMetadata] onExtendedHandshake: m=${
+        JSON.stringify(handshake.m,)
+      }, extensionsSize=${
+        handshake.extensions instanceof Map
+          ? handshake.extensions.size
+          : "not Map"
+      }, metadataSize=${handshake.metadataSize}`,
+    );
     let utMetadataId: number | undefined;
     let metadataSize: number | undefined;
 
@@ -88,7 +107,9 @@ export class UtMetadata extends Extension {
       }
       metadataSize = handshake.metadata_size ?? handshake.metadataSize;
     }
-    console.log(`[UtMetadata] onExtendedHandshake resolved: utMetadataId=${utMetadataId}, metadataSize=${metadataSize}`);
+    console.log(
+      `[UtMetadata] onExtendedHandshake resolved: utMetadataId=${utMetadataId}, metadataSize=${metadataSize}`,
+    );
 
     if (typeof utMetadataId === "number") {
       this._extensionId = utMetadataId;
@@ -136,7 +157,11 @@ export class UtMetadata extends Extension {
       dict = decoded as BencodeDict;
       trailer = remaining;
     } catch (err) {
-      console.warn("[UtMetadata] decodePrefix failed on incoming buffer (length " + buf.length + "):", err);
+      console.warn(
+        "[UtMetadata] decodePrefix failed on incoming buffer (length " +
+          buf.length + "):",
+        err,
+      );
       return;
     }
 
@@ -208,7 +233,11 @@ export class UtMetadata extends Extension {
   }
 
   private _send(dict: BencodeDict, trailer?: Uint8Array,) {
-    console.log(`[UtMetadata] _send: dict=${JSON.stringify(dict)}, trailerLength=${trailer ? trailer.length : 0}, extensionId=${this._extensionId}`);
+    console.log(
+      `[UtMetadata] _send: dict=${JSON.stringify(dict,)}, trailerLength=${
+        trailer ? trailer.length : 0
+      }, extensionId=${this._extensionId}`,
+    );
     let buf = encode(dict,);
     if (trailer) {
       const combined = new Uint8Array(buf.length + trailer.length,);
@@ -219,7 +248,9 @@ export class UtMetadata extends Extension {
     if (this._extensionId !== null) {
       this.wire.sendExtended(this._extensionId, buf,);
     } else {
-      console.warn(`[UtMetadata] _send NOT sending because _extensionId is null!`);
+      console.warn(
+        `[UtMetadata] _send NOT sending because _extensionId is null!`,
+      );
     }
   }
 
@@ -265,7 +296,9 @@ export class UtMetadata extends Extension {
   }
 
   private _onRequest(piece: number,) {
-    console.log(`[UtMetadata] _onRequest piece: ${piece}, metadataComplete: ${this._metadataComplete}, size: ${this._metadataSize}`);
+    console.log(
+      `[UtMetadata] _onRequest piece: ${piece}, metadataComplete: ${this._metadataComplete}, size: ${this._metadataSize}`,
+    );
     if (!this._metadataComplete || !this._metadataSize) {
       return this._reject(piece,);
     }
@@ -279,7 +312,9 @@ export class UtMetadata extends Extension {
   }
 
   private _onData(piece: number, buf: Uint8Array, totalSize?: number,) {
-    console.log(`[UtMetadata] _onData piece: ${piece}, buf.length: ${buf.length}, totalSize: ${totalSize}, fetching: ${this._fetching}, metaSize: ${this._metadataSize}`);
+    console.log(
+      `[UtMetadata] _onData piece: ${piece}, buf.length: ${buf.length}, totalSize: ${totalSize}, fetching: ${this._fetching}, metaSize: ${this._metadataSize}`,
+    );
     if (buf.length > PIECE_LENGTH || !this._fetching || !this._metadataSize) {
       return;
     }
@@ -388,7 +423,10 @@ export class UtMetadata extends Extension {
   private _verifyMetadataIntegrity(): boolean {
     if (!this.metadata) return false;
 
-    console.log(`[UtMetadata] _verifyMetadataIntegrity metadata.length: ${this.metadata.length}, first 20 bytes:`, Array.from(this.metadata.slice(0, 20)));
+    console.log(
+      `[UtMetadata] _verifyMetadataIntegrity metadata.length: ${this.metadata.length}, first 20 bytes:`,
+      Array.from(this.metadata.slice(0, 20,),),
+    );
     try {
       // Verificar se os dados são válidos bencode
       decode(this.metadata,);

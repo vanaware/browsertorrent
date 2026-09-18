@@ -1,6 +1,6 @@
 > **INSTRUÇÃO PARA A IA:** 
 > O texto abaixo contém os arquivos de CÓDIGO FONTE principais da aplicação exemplo (UI).
-> O projeto é o **BrowserTorrent [vdev] ** estruturado em blocos. 
+> O projeto é o **BrowserTorrent [vdev] ** estruturado em bbrowsertorrents. 
 > Cada arquivo começa com um título indicando seu caminho relativo exato (ex: `## Arquivo: src/main.ts`).
 > Sempre que sugerir alterações, indique claramente qual arquivo deve ser modificado com base nesses caminhos e forneça o novo código completo do arquivo.
 
@@ -338,7 +338,7 @@ import {
   upSpeedSignal,
   debugSignal,
 } from "../torrent-context.tsx";
-import { buildStreamURL, type File } from "@loco/webtorrent";
+import { buildStreamURL, type File } from "@vanaware/browsertorrent";
 
 function dbg(...args: unknown[]) {
   const msg = args.map((a) => (typeof a === "object" ? JSON.stringify(a) : String(a))).join(" ");
@@ -597,7 +597,7 @@ export function PlayerPanel() {
  */
 import { useSignal } from "@preact/signals";
 import { seedFile, torrentSignal, modeSignal, PUBLIC_TRACKERS } from "../torrent-context.tsx";
-import type { Torrent } from "@loco/webtorrent";
+import type { Torrent } from "@vanaware/browsertorrent";
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -764,7 +764,7 @@ import {
   modeSignal,
   errorSignal,
 } from "../torrent-context.tsx";
-import { buildStreamURL } from "@loco/webtorrent";
+import { buildStreamURL } from "@vanaware/browsertorrent";
 import { useEffect, useRef } from "preact/hooks";
 
 export function ViewerPanel() {
@@ -956,7 +956,7 @@ export function App() {
         </label>
 
         <label class="max center-align">
-          <h5 class="white-text">Loco WebTorrent</h5>
+          <h5 class="white-text">BrowserTorrent WebTorrent</h5>
         </label>
 
         {/* Toggle WebTorrent */}
@@ -1042,7 +1042,7 @@ export function App() {
 import { render } from "preact";
 import { App } from "./app.tsx";
 import { TorrentProvider } from "./torrent-context.tsx";
-import { streamManager, parseStreamURL, type WebTorrentServer } from "@loco/webtorrent";
+import { streamManager, parseStreamURL, type WebTorrentServer } from "@vanaware/browsertorrent";
 
 function waitForActivation(worker: ServiceWorker): Promise<void> {
   return new Promise((resolve) => {
@@ -1542,8 +1542,8 @@ export { TRACKER_CANDIDATES, testTracker, runTrackerDiagnostics };
 import { createContext } from "preact";
 import { signal } from "@preact/signals";
 import type { ComponentChildren } from "preact";
-import type { WebTorrent, Torrent, Wire } from "@loco/webtorrent";
-import type { WebTorrentServer } from "@loco/webtorrent";
+import type { WebTorrent, Torrent, Wire } from "@vanaware/browsertorrent";
+import type { WebTorrentServer } from "@vanaware/browsertorrent";
 
 // ─── Trackers públicos ─────────────────────────────────────────────────────────
 
@@ -1583,7 +1583,7 @@ export async function initClient(): Promise<WebTorrent> {
     return existing;
   }
 
-  const { WebTorrent: WT } = await import("@loco/webtorrent");
+  const { WebTorrent: WT } = await import("@vanaware/browsertorrent");
   const opfsAvailable = navigator.storage?.getDirectory != null;
   dbg("initClient: creating WebTorrent client, OPFS available:", opfsAvailable);
 
@@ -1914,7 +1914,7 @@ export function TorrentProvider({ children }: { children: ComponentChildren }) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Loco WebTorrent</title>
+  <title>BrowserTorrent WebTorrent</title>
 
   <!-- BeerCSS v5 -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/beercss@5.0.3/dist/cdn/beer.min.css" />

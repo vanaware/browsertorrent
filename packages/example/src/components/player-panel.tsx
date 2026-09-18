@@ -6,12 +6,13 @@ import { useEffect, useRef, } from "preact/hooks";
 import {
   debugSignal,
   downSpeedSignal,
+  getScope,
   modeSignal,
   peersSignal,
   torrentSignal,
   upSpeedSignal,
 } from "../torrent-context.tsx";
-import { buildStreamURL, type File, } from "@loco/webtorrent";
+import { buildStreamURL, type File, } from "@vanaware/browsertorrent";
 
 function dbg(...args: unknown[]) {
   const msg = args.map((
@@ -159,7 +160,7 @@ export function PlayerPanel() {
     if (!torrent || !isActive) return null;
     const file = torrent.files[0];
     if (!file) return null;
-    return buildStreamURL("/", torrent.infoHash, 0, file.name,);
+    return buildStreamURL(getScope(), torrent.infoHash, 0, file.name,);
   })();
 
   return (

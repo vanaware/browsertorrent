@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/torrent-generator/opfs-walker.ts
+// /browsertorrent/monorepo/webtorrent/src/torrent-generator/opfs-walker.ts
 /**
  * Recursively walks an OPFS directory handle, returning an ordered list
  * of files with their relative paths and sizes.

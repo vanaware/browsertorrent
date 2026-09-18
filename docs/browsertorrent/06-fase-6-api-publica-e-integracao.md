@@ -1,7 +1,7 @@
 # Fase 6: API Pública e Integração Final
 
 ## 🎯 Objetivo da Fase
-Nesta fase final, unificamos todos os módulos construídos (Parsing, Core, Network e Extensões) em uma **API Pública Principal** (`src/mod.ts`). O objetivo é expor uma interface limpa, reativa e compatível com a API original do WebTorrent, permitindo que a UI do Loco PWA (Preact + Signals) consuma o cliente de forma declarativa e segura.
+Nesta fase final, unificamos todos os módulos construídos (Parsing, Core, Network e Extensões) em uma **API Pública Principal** (`src/mod.ts`). O objetivo é expor uma interface limpa, reativa e compatível com a API original do WebTorrent, permitindo que a UI do BrowserTorrent PWA (Preact + Signals) consuma o cliente de forma declarativa e segura.
 
 Além disso, fechamos o ciclo crítico dos **Magnet URIs**, garantindo que o cliente possa iniciar um download "cego" e, dinamicamente, receber e processar os metadados (lista de arquivos, tamanhos, hashes) assim que a extensão `ut_metadata` os obtiver da rede.
 
@@ -13,7 +13,7 @@ A classe principal `WebTorrent` atua como o orquestrador de alto nível. Ela ger
 
 ```text
 ┌─────────────────────────────────────────────────────────────────┐
-│                     Loco PWA UI (Preact/Signals)                │
+│                     BrowserTorrent PWA UI (Preact/Signals)                │
 │  - Barra de progresso reativa                                   │
 │  - Lista de arquivos dinâmica                                   │
 │  - Botões de Play/Pause/Cancel                                  │
@@ -112,11 +112,11 @@ const client = new WebTorrent({
 
 ---
 
-## 💻 Exemplo de Integração com Loco PWA (Preact + Signals)
+## 💻 Exemplo de Integração com BrowserTorrent PWA (Preact + Signals)
 
 ```tsx
 import { signal, effect } from "@preact/signals";
-import { WebTorrent } from "@loco/webtorrent";
+import { WebTorrent } from "@vanaware/browsertorrent";
 
 // 1. Inicializa o cliente
 const client = new WebTorrent({ useOPFS: true });
@@ -171,9 +171,9 @@ function DownloadManager() {
 
 ## 🚀 Próximos Passos (Pós-Fundação)
 
-Com a fundação do WebTorrent 100% testada e documentada, os próximos passos para o Loco PWA são:
+Com a fundação do WebTorrent 100% testada e documentada, os próximos passos para o BrowserTorrent PWA são:
 
-1. **Método `seed()`**: Implementar a capacidade de o cliente Loco compartilhar arquivos locais (do OPFS ou da memória) com a rede, respondendo a requests de `ut_metadata` e `piece`.
+1. **Método `seed()`**: Implementar a capacidade de o cliente BrowserTorrent compartilhar arquivos locais (do OPFS ou da memória) com a rede, respondendo a requests de `ut_metadata` e `piece`.
 2. **Streaming via Service Worker**: Implementar um Service Worker que intercepta requisições HTTP para URLs virtuais (ex: `http://localhost/torrent/{infoHash}/{fileIndex}`) e utiliza `MediaSource Extensions (MSE)` ou `Response` streams para entregar os dados do `ChunkStore` em tempo real, permitindo reprodução de vídeo/áudio *enquanto* o download ocorre.
 3. **UI de Gerenciamento de Downloads**: Construir os componentes `beercss` para listar, pausar, retomar e excluir torrents, conectados aos Signals demonstrados acima.
 4. **Testes de Integração E2E**: Criar testes que simulam dois clientes WebTorrent no mesmo ambiente (usando mocks de WebRTC) trocando metadados e peças de forma autônoma.

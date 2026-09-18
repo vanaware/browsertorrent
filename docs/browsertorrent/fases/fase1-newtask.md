@@ -15,7 +15,7 @@
 ---
 
 
-## Fase 1 Completion: Features Remanescentes da antiga Fase 6 do @loco/webtorrent, incorporados na nova fase 1 do browsertorrent
+## Fase 1 Completion: Features Remanescentes da antiga Fase 6 do @vanaware/browsertorrent, incorporados na nova fase 1 do browsertorrent
 
 ### Status Atual da Documentação Fase 1 (de fase1.md)
 

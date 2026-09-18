@@ -2,13 +2,22 @@
  * torrent-list.tsx — Lista de torrents ativos e persistidos.
  */
 import {
+  getTrackers,
   modeSignal,
   removeTorrent,
   tickSignal,
-  torrentsSignal,
   torrentSignal,
+  torrentsSignal,
 } from "../torrent-context.tsx";
-import type { Torrent, } from "@loco/webtorrent";
+
+function buildMagnetURI(t: any): string {
+  const ih = t.infoHash;
+  const name = encodeURIComponent(t.name ?? "download");
+  const trackers: string[] = t.announce?.length ? t.announce : getTrackers();
+  const trs = trackers.map((track: string) => `&tr=${encodeURIComponent(track)}`).join("");
+  return `magnet:?xt=urn:btih:${ih}&dn=${name}${trs}`;
+}
+import type { Torrent, } from "@vanaware/browsertorrent";
 
 function formatSize(bytes: number,): string {
   if (bytes < 1024) return `${bytes} B`;
@@ -40,31 +49,48 @@ export function TorrentList() {
       {torrents.map((t,) => {
         const isActive = torrentSignal.value?.infoHash === t.infoHash;
         const progress = Math.round(t.progress * 100,);
-        
+
         return (
-          <div class={`row padding border round ${isActive ? "primary-container" : ""}`} key={t.infoHash}>
+          <div
+            class={`row padding border round ${
+              isActive ? "primary-container" : ""
+            }`}
+            key={t.infoHash}>
             <div class="max">
               <h6 class="no-margin">
                 {t.name || "Desconhecido"}
               </h6>
               <div class="secondary-text small-text">
-                {formatSize(t.length || 0)} • {t.infoHash.substring(0, 8)}...
+                {formatSize(t.length || 0,)} • {t.infoHash.substring(0, 8,)}...
               </div>
               <div class="field no-margin">
-                <progress value={progress} max="100"></progress>
+                <progress value={progress} max="100">
+                </progress>
                 <div class="secondary-text small-text right-align">
                   {progress}%
                 </div>
               </div>
             </div>
             <nav>
+              <button
+                type="button"
+                class="circle transparent"
+                onClick={() => {
+                  const magnet = buildMagnetURI(t);
+                  navigator.clipboard.writeText(magnet);
+                }}
+                title="Copiar Magnet">
+                <i class="material-symbols">link</i>
+              </button>
               {!isActive && (
                 <button
                   type="button"
                   class="circle transparent"
                   onClick={() => {
                     torrentSignal.value = t;
-                    modeSignal.value = t.progress === 1 ? "seeding" : "leeching";
+                    modeSignal.value = t.progress === 1
+                      ? "seeding"
+                      : "leeching";
                   }}>
                   <i class="material-symbols">
                     play_arrow
@@ -74,7 +100,7 @@ export function TorrentList() {
               <button
                 type="button"
                 class="circle transparent"
-                onClick={() => removeTorrent(t.infoHash)}>
+                onClick={() => removeTorrent(t.infoHash,)}>
                 <i class="material-symbols">
                   delete
                 </i>
@@ -82,7 +108,7 @@ export function TorrentList() {
             </nav>
           </div>
         );
-      })}
+      },)}
     </div>
   );
 }

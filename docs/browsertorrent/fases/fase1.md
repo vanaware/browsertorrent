@@ -1,4 +1,4 @@
-# API Final @browsertorrent/core v1.0
+# API Final @vanaware/browsertorrent v1.0
 
 > **Status:** Snapshot pós-Fase 5.3, com roadmap de Fase 6 definido.
 > **Foco:** Browser-first, sem Node.js, sem pacotes npm. Stack 100% nativo (Web APIs, TypedEventTarget, OPFS, W3C Streams, Service Worker).
@@ -8,7 +8,7 @@
 ## 1. Importação e Construtor
 
 ```typescript
-import { Client, generateTorrent, Torrent, File, Piece } from "@browsertorrent/core";
+import { Client, generateTorrent, Torrent, File, Piece } from "@vanaware/browsertorrent";
 
 const client = new Client({
   peerId: undefined,            // Uint8Array(20) ou hex string — opcional
@@ -276,7 +276,7 @@ const client = new Client({
 ## 9. Generator API (Fase 5.3)
 
 ```typescript
-import { generateTorrent, OPFSMultiFileReader, PieceSizeEnum } from "@browsertorrent/core";
+import { generateTorrent, OPFSMultiFileReader, PieceSizeEnum } from "@vanaware/browsertorrent";
 
 const torrent = await generateTorrent(
   dirHandle,                              // FileSystemDirectoryHandle
@@ -375,7 +375,7 @@ new OPFSChunkStore({ chunkLength, length, rootDir: dir })
 
 ## 13. Testes de Compatibilidade com WebTorrent Original
 
-> **Objetivo:** Garantir que o `@browsertorrent/core` tenha comportamento **100% compatível** com a API pública do `webtorrent.min.js` original para todas as funcionalidades browser-aplicáveis.
+> **Objetivo:** Garantir que o `@vanaware/browsertorrent` tenha comportamento **100% compatível** com a API pública do `webtorrent.min.js` original para todas as funcionalidades browser-aplicáveis.
 >
 > **Referência:** Código fonte do webtorrent original e do SW de exemplo original estão em `docs/webtorrent/`:
 > - `docs/webtorrent/webtorrent.min.js` — bundle completo do WebTorrent
@@ -415,7 +415,7 @@ Os testes de compatibilidade devem ser organizados em **3 camadas**:
   - `client.throttleDownload(rate)` limita velocidade
 
 #### Camada 3: Testes de Paridade com WebTorrent Original
-- **Objetivo:** Comparar diretamente o comportamento do `@browsertorrent/core` com o `webtorrent.min.js` original.
+- **Objetivo:** Comparar diretamente o comportamento do `@vanaware/browsertorrent` com o `webtorrent.min.js` original.
 - **Arquivo:** `tests/compatibility/parity-test.ts`
 - **Estratégia:**
   1. Carregar o `webtorrent.min.js` original (via `import` dinâmico ou script tag)
@@ -434,7 +434,7 @@ Os testes de compatibilidade devem ser organizados em **3 camadas**:
 
 ```typescript
 // tests/compatibility/parity-test.ts
-import { Client } from "@browsertorrent/core";
+import { Client } from "@vanaware/browsertorrent";
 import { assertEquals, assertStrictEquals } from "@std/assert";
 
 // Carregar webtorrent original
@@ -601,7 +601,7 @@ Deno.test("parity: Client vs WebTorrent - file.streamURL()", async () => {
 
 ### 13.6 Manutenção
 
-- Sempre que uma nova funcionalidade for adicionada ao `@browsertorrent/core`, adicionar testes correspondentes nas 3 camadas.
+- Sempre que uma nova funcionalidade for adicionada ao `@vanaware/browsertorrent`, adicionar testes correspondentes nas 3 camadas.
 - Sempre que o `webtorrent.min.js` upstream for atualizado, re-executar os testes de Camada 3 para garantir compatibilidade.
 - Manter a matriz de cobertura atualizada.
 
@@ -652,11 +652,11 @@ Depende de: Fase 1 + Fase 2
 | 3.1 | Bencode 6 (Fast): `suggestPiece/haveAll/haveNone/rejectRequest/allowedFast` | `peerwire/message.ts` + `peer_wire.ts` | `src/core/wire.ts` + `message.ts` | Fast peers |
 | 3.2 | Bencode 52 v2: `hashRequest/hashes/hashReject` | `peerwire/message.ts` + `peer_wire.ts` | `src/core/wire.ts` + `message.ts` | BitTorrent v2 |
 | 3.3 | `ut_metadata` melhorado: verificação SHA-1/256, SHA-1, per-block timeout | `peerwire/ut_metadata.ts` | `src/extensions/ut-metadata.ts` | Integridade + performance |
-| 3.4 | `peerid` melhorado: `encode()` genérico, validators, version converters | `peerid/peerid.ts` + `util.ts` | `src/utils/peerid.ts` | Flexibilidade (manter `"LO": "Loco"`) |
+| 3.4 | `peerid` melhorado: `encode()` genérico, validators, version converters | `peerid/peerid.ts` + `util.ts` | `src/utils/peerid.ts` | Flexibilidade (manter `"LO": "BrowserTorrent"`) |
 | 3.5 | `Bitfield` com spare-bit validation (manter `grow`) | `peerwire/bitfield.ts` + `BitArray` | `src/core/bitfield.ts` | Conformidade |
 
 ### Fase 4 — Browser API (funcionalidades da webtorrent.min.js)
-> Funcionalidades da API pública do upstream WebTorrent que faltam no Loco.
+> Funcionalidades da API pública do upstream WebTorrent que faltam no BrowserTorrent.
 > Referência: `docs/webtorrent-api.md` + análise do bundle `webtorrent.min.js`.
 
 Depende de: Fase 1 + Fase 2
@@ -692,8 +692,8 @@ Depende de: Fase 1 + Fase 2
 | 5.6 | Barrel `mod.ts` + re-export em `src/mod.ts` | `src/torrent-generator/mod.ts` | ✅ |
 | 5.7 | Testes (37 testes, mock OPFS) | `tests/torrent-generator_test.ts` | ✅ |
 
-### Fase 6 — API Final @browsertorrent/core ✅ CONCLUÍDA
-> Completa a API pública do `webtorrent.min.js` no browser-first Loco.
+### Fase 6 — API Final @vanaware/browsertorrent ✅ CONCLUÍDA
+> Completa a API pública do `webtorrent.min.js` no browser-first BrowserTorrent.
 
 | # | Tarefa | Destino | Status |
 |---|---|---|---|
@@ -746,7 +746,7 @@ Depende de: Fase 1 + Fase 2
 ## 9. Demonstração WebTorrent (v1.0)
 
 ### 9.1 Objetivo
-Demonstrar o Loco WebTorrent funcionando em navegador com:
+Demonstrar o BrowserTorrent WebTorrent funcionando em navegador com:
 - **Seeder (A):** compartilha um arquivo de vídeo
 - **Viewer (B):** assiste ao vídeo via streaming P2P
 - **Peer (C):** baixa o mesmo arquivo e participa do swarm (resiliência)
@@ -757,7 +757,7 @@ Demonstrar o Loco WebTorrent funcionando em navegador com:
 | Runtime | Deno (`deno serve` + `@std/http/file-server`) |
 | UI | Preact 10.x + Signals + BeerCSS 5.x (CDN) |
 | Bundler | `esbuild.ts` existente (raiz do repo) — **apenas adicionar target** |
-| Output | `@browsertorrent/core/build/dist/` |
+| Output | `@vanaware/browsertorrent/build/dist/` |
 | Imports UI | `https://esm.sh/preact@10.29.7`, `@preact/signals@1.3.1` |
 
 ### 9.3 Estrutura de diretórios
@@ -872,7 +872,7 @@ Sim, o **fase2.md** precisa de ajustes para refletir:
 
 + ## 13. Testes de Compatibilidade com WebTorrent Original
 + 
-+ > **Objetivo:** Garantir que o `@browsertorrent/core` tenha comportamento **100% compatível** com a API pública do `webtorrent.min.js` original para todas as funcionalidades browser-aplicáveis.
++ > **Objetivo:** Garantir que o `@vanaware/browsertorrent` tenha comportamento **100% compatível** com a API pública do `webtorrent.min.js` original para todas as funcionalidades browser-aplicáveis.
 + 
 + [ ... mesma estrutura do fase1.md ... ]
 ```
@@ -883,7 +883,7 @@ Sim, o **fase2.md** precisa de ajustes para refletir:
 
 ### Status Atual
 
-**Fase 1 — API Final @browsertorrent/core v1.0** ✅ **CONCLUÍDA**
+**Fase 1 — API Final @vanaware/browsertorrent v1.0** ✅ **CONCLUÍDA**
 
 ### Resumo de Progresso
 

@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/tests/parse-torrent_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/parse-torrent_test.ts
 
 // ... (mantenha todo o resto do arquivo igual)
 import { assertEquals, assertRejects, } from "@std/assert";
@@ -56,7 +56,7 @@ function createFakeTorrentBuffer(isMultiFile = false,): Uint8Array {
     ],
     "url-list": [TEXT_ENCODER.encode("https://webtorrent.io/torrents/",),],
     comment: TEXT_ENCODER.encode("Test torrent",),
-    "created by": TEXT_ENCODER.encode("Loco WebTorrent",),
+    "created by": TEXT_ENCODER.encode("BrowserTorrent WebTorrent",),
   };
 
   return encode(torrentObj,);

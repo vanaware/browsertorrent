@@ -1,6 +1,6 @@
-// /loco/monorepo/webtorrent/src/extensions/ut-pex.ts
+// /browsertorrent/monorepo/webtorrent/src/extensions/ut-pex.ts
 //
-// Implementação do BEP 11 (ut_pex - Peer Exchange) para o @loco/webtorrent.
+// Implementação do BEP 11 (ut_pex - Peer Exchange) para o @vanaware/browsertorrent.
 // Adaptado do deno-torrent para nosso ecossistema Browser/Deno.
 //
 // O ut_pex permite que peers compartilhem listas de outros peers diretamente,

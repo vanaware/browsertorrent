@@ -1,4 +1,4 @@
-# /loco/monorepo/webtorrent/docs/05-fase-5-swarm-e-ut-metadata.md
+# /browsertorrent/monorepo/webtorrent/docs/05-fase-5-swarm-e-ut-metadata.md
 
 # Fase 5: Swarm Manager e Extensão ut_metadata
 
@@ -77,7 +77,7 @@ O Swarm é o "gerente de tráfego" do BitTorrent. Ele conecta o **Tracker** (que
 
 ## 🔗 2. Extensão ut_metadata (BEP 9)
 
-A extensão `ut_metadata` é essencial para o Loco, pois os usuários compartilharão **Magnet URIs** (que contêm apenas o `infoHash`), não arquivos `.torrent` completos. Esta extensão permite que um peer solicite o dicionário `info` de outro peer que já possui o torrent completo.
+A extensão `ut_metadata` é essencial para o BrowserTorrent, pois os usuários compartilharão **Magnet URIs** (que contêm apenas o `infoHash`), não arquivos `.torrent` completos. Esta extensão permite que um peer solicite o dicionário `info` de outro peer que já possui o torrent completo.
 
 ### Como Funciona (BEP 9)
 
@@ -173,7 +173,7 @@ Com o Swarm e o `ut_metadata` prontos, temos todas as peças do quebra-cabeça:
 - ✅ **Rede**: Tracker, Wire, Peer, Swarm
 - ✅ **Extensões**: ut_metadata
 
-A próxima fase é criar a **API Pública Principal** (`src/mod.ts`), que une todos esses módulos em uma interface limpa e pronta para ser consumida pelo Loco PWA. A API deve ser compatível com o WebTorrent original, expondo métodos como:
+A próxima fase é criar a **API Pública Principal** (`src/mod.ts`), que une todos esses módulos em uma interface limpa e pronta para ser consumida pelo BrowserTorrent PWA. A API deve ser compatível com o WebTorrent original, expondo métodos como:
 - `client.add(torrentId, opts)` - Adiciona um torrent (Magnet URI ou .torrent)
 - `client.seed(input, opts)` - Compartilha um arquivo como seed
 - `client.createServer()` - Cria um servidor HTTP para streaming (usando Service Worker)

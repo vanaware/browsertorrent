@@ -1,6 +1,6 @@
-# Roadmap — Tracker WebSocket em Deno para `@loco/webtorrent`
+# Roadmap — Tracker WebSocket em Deno para `@vanaware/browsertorrent`
 
-> Documento de planejamento para a Fase 8 do `@loco/webtorrent`:
+> Documento de planejamento para a Fase 8 do `@vanaware/browsertorrent`:
 > construção de um **servidor tracker BitTorrent WebSocket** (BEP-15 / BEP-31),
 > escrito em Deno, que o cliente PWA pode usar para descoberta de peers
 > quando os trackers públicos (`tracker.fastcast.nz`, etc.) falham
@@ -12,7 +12,7 @@
 
 ### 1.1 O problema atual
 
-- O cliente `@loco/webtorrent` (`src/network/tracker.ts`) implementa
+- O cliente `@vanaware/browsertorrent` (`src/network/tracker.ts`) implementa
   `WsTracker`, que fala o protocolo BEP-15 sobre WebSocket.
 - Em ambiente HTTPS, o navegador **bloqueia** conexões `ws://` (mixed content),
   e os trackers públicos via `wss://` (`wss://tracker.fastcast.nz/`,
@@ -42,7 +42,7 @@ que:
 
 ### 1.3 Por que Deno (e não Node)?
 
-- O resto do monorepo Loco já é Deno (`deno.jsonc`, `deno.lock`).
+- O resto do monorepo BrowserTorrent já é Deno (`deno.jsonc`, `deno.lock`).
 - `Deno.upgradeWebSocket()` é uma API de primeira classe para WebSockets
   com hijack de socket TCP — não há dependência de `ws` ou de polyfills.
 - TS nativo, sem etapa de build para o servidor.
@@ -131,7 +131,7 @@ monorepo/webtorrent/
 
 ```
                        ┌────────────────────────────────────┐
-                       │       @loco/webtorrent (browser)   │
+                       │       @vanaware/browsertorrent (browser)   │
                        │  src/network/tracker.ts            │
                        │  WsTracker ── wss://tracker.../ann │
                        └─────────────────┬──────────────────┘
@@ -361,8 +361,8 @@ monorepo/webtorrent/
 |---|---|---|---|
 | 8.7.1 | Subir o tracker em `ws://localhost:8001` | manual | `deno task start` |
 | 8.7.2 | Configurar `torrent-context.tsx` para usar `ws://localhost:8001/announce` | `example/torrent-context.tsx` | Substituir `wss://tracker.openbittorrent.com/announce` |
-| 8.7.3 | Rodar `deno task --config ~/github/loco/deno.jsonc build webtorrent` | manual | Confirmar 0 type errors |
-| 8.7.4 | Rodar `deno task --config ~/github/loco/monorepo/webtorrent/deno.jsonc server` | manual | Confirmar SW registra |
+| 8.7.3 | Rodar `deno task --config ~/github/browsertorrent/deno.jsonc build webtorrent` | manual | Confirmar 0 type errors |
+| 8.7.4 | Rodar `deno task --config ~/github/browsertorrent/monorepo/webtorrent/deno.jsonc server` | manual | Confirmar SW registra |
 | 8.7.5 | Abrir 2 abas com o mesmo magnet → verificar `peers.length > 0` | manual | Logs do tracker devem mostrar 2 announces + 1 offer forward |
 | 8.7.6 | Verificar download de peça (Piece → wire → storage) | manual | `torrent.progress > 0` na aba leech |
 
@@ -440,7 +440,7 @@ A Fase 8 está completa quando **todos** os itens abaixo forem verdade:
 - Múltiplas instâncias trocando swarms via gossip
 - Útil para deploy distribuído em múltiplas regiões
 
-### Fase 13 — `client.scrape` no `@loco/webtorrent` (BEP-48)
+### Fase 13 — `client.scrape` no `@vanaware/browsertorrent` (BEP-48)
 - Expor método em `src/mod.ts` para consultar `ws://tracker/announce` via WS
 - Já existe `scrapeTracker` em `src/network/tracker.ts` mas só para HTTP
 
@@ -456,7 +456,7 @@ A Fase 8 está completa quando **todos** os itens abaixo forem verdade:
 - **WebSocket API no Deno** — https://docs.deno.com/runtime/manual/runtime/web_platform_apis#websocket
 - **Deno Deploy WebSockets** — https://docs.deno.com/deploy/manual/runtime-broadcasts#websockets
 - **Upstream `webtorrent/bittorrent-tracker`** — referência de protocolo (em `monorepo/webtorrent/bittorrent-tracker/`)
-- **QWEN.md raiz** — regras de ouro do `@loco/webtorrent`
+- **QWEN.md raiz** — regras de ouro do `@vanaware/browsertorrent`
 
 ---
 

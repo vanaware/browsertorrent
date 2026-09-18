@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/tests/metainfo-parser_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/metainfo-parser_test.ts
 
 import { assertEquals, assertRejects, } from "@std/assert";
 import { type BencodeValue, encode, } from "../src/utils/bencode.ts";
@@ -35,7 +35,7 @@ function v1Buffer(kind: "single" | "multi",): Uint8Array {
     "announce-list": [
       ["udp://tracker.example.com:6969",],
     ],
-    "created by": "loco-test",
+    "created by": "browsertorrent-test",
     "creation date": 1700000000,
   },);
 }

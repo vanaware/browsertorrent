@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/utils/net.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/net.ts
 /**
  * Network address, port, and compact-peer utilities.
  *

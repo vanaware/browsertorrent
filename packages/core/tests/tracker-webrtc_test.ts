@@ -95,7 +95,7 @@ Deno.test("WsTracker: emits peer event when receiving offer", async () => {
       peerId: new Uint8Array(20,).fill(2,),
     },);
 
-    const announcePromise = tracker.announce().catch(() => {});
+    const announcePromise = tracker.announce().catch(() => {},);
     await new Promise((resolve,) => setTimeout(resolve, 50,));
 
     const mockWs = tracker["ws"] as unknown as MockWebSocket;

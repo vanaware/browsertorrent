@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/network/peer.ts
+// /browsertorrent/monorepo/webtorrent/src/network/peer.ts
 
 import { TypedEventTarget, } from "../utils/event-target.ts";
 import { Transport, Wire, } from "../core/wire.ts";
@@ -40,7 +40,7 @@ export interface PeerOptions {
   /** Endereço do peer (usado para stats `remoteAddress`/`remotePort`). */
   addr?: string;
   /** Callback opcional chamado logo após a instanciação do Wire (antes do handshake) */
-  onWire?: (wire: Wire) => void;
+  onWire?: (wire: Wire,) => void;
 }
 
 // ============================================================================
@@ -120,7 +120,11 @@ export class Peer extends TypedEventTarget<PeerEvents> {
 
     try {
       if ("type" in data && (data.type === "offer" || data.type === "answer")) {
-        console.log(`[Peer ${this.opts.initiator ? 'initiator' : 'receiver'}] signal() received ${data.type}`);
+        console.log(
+          `[Peer ${
+            this.opts.initiator ? "initiator" : "receiver"
+          }] signal() received ${data.type}`,
+        );
         await this.pc!.setRemoteDescription(data,);
 
         // Se recebemos uma offer e não somos o iniciador, geramos uma answer
@@ -130,7 +134,7 @@ export class Peer extends TypedEventTarget<PeerEvents> {
           // Safety timeout: emit answer if gathering is slow or STUN is unreachable
           this._iceGatherTimeoutId = setTimeout(() => {
             this._emitLocalSignal();
-          }, 5000) as unknown as number;
+          }, 5000,) as unknown as number;
         }
       } else if ("candidate" in data && data.candidate) {
         await this.pc!.addIceCandidate(data,);
@@ -187,18 +191,20 @@ export class Peer extends TypedEventTarget<PeerEvents> {
     if (this.pc.localDescription) {
       this._signalEmitted = true;
       if (this._iceGatherTimeoutId !== null) {
-        clearTimeout(this._iceGatherTimeoutId);
+        clearTimeout(this._iceGatherTimeoutId,);
         this._iceGatherTimeoutId = null;
       }
       console.log(
-        `[Peer ${this.opts.initiator ? 'initiator' : 'receiver'}] Emitting local signal, type: ${this.pc.localDescription.type}, sdp has candidate:`,
-        this.pc.localDescription.sdp.includes("a=candidate"),
+        `[Peer ${
+          this.opts.initiator ? "initiator" : "receiver"
+        }] Emitting local signal, type: ${this.pc.localDescription.type}, sdp has candidate:`,
+        this.pc.localDescription.sdp.includes("a=candidate",),
       );
       this.emit(
         "signal",
         new CustomEvent("signal", {
-          detail: { data: this.pc.localDescription },
-        }),
+          detail: { data: this.pc.localDescription, },
+        },),
       );
     }
   }
@@ -213,23 +219,42 @@ export class Peer extends TypedEventTarget<PeerEvents> {
     };
 
     // Necessário para acelerar o processo se todos os candidatos terminarem antes
-    this.pc!.onicecandidate = (event) => {
+    this.pc!.onicecandidate = (event,) => {
       if (event.candidate && event.candidate.candidate) {
-        this._gatheredCandidates.push(event.candidate.candidate);
-        console.log(`[Peer ${this.opts.initiator ? 'initiator' : 'receiver'}] gathered candidate:`, event.candidate.candidate);
+        this._gatheredCandidates.push(event.candidate.candidate,);
+        console.log(
+          `[Peer ${
+            this.opts.initiator ? "initiator" : "receiver"
+          }] gathered candidate:`,
+          event.candidate.candidate,
+        );
       } else if (!event.candidate) {
-        console.log(`[Peer ${this.opts.initiator ? 'initiator' : 'receiver'}] end of candidates (null)`);
+        console.log(
+          `[Peer ${
+            this.opts.initiator ? "initiator" : "receiver"
+          }] end of candidates (null)`,
+        );
         this._emitLocalSignal();
       }
     };
 
     this.pc!.oniceconnectionstatechange = () => {
-      console.log(`[Peer ${this.opts.initiator ? 'initiator' : 'receiver'}] iceConnectionState:`, this.pc?.iceConnectionState);
+      console.log(
+        `[Peer ${
+          this.opts.initiator ? "initiator" : "receiver"
+        }] iceConnectionState:`,
+        this.pc?.iceConnectionState,
+      );
     };
 
     this.pc!.onconnectionstatechange = () => {
       const state = this.pc!.connectionState;
-      console.log(`[Peer ${this.opts.initiator ? 'initiator' : 'receiver'}] connectionState:`, state);
+      console.log(
+        `[Peer ${
+          this.opts.initiator ? "initiator" : "receiver"
+        }] connectionState:`,
+        state,
+      );
       if (state === "failed" || state === "closed") {
         this._onError(new Error(`WebRTC connection ${state}`,),);
       }
@@ -238,7 +263,10 @@ export class Peer extends TypedEventTarget<PeerEvents> {
     // Se não somos o iniciador, esperamos o outro peer criar o DataChannel
     if (!this.opts.initiator) {
       this.pc!.ondatachannel = (event,) => {
-        console.log(`[Peer receiver] Received remote datachannel:`, event.channel.label);
+        console.log(
+          `[Peer receiver] Received remote datachannel:`,
+          event.channel.label,
+        );
         this._setupData(event.channel,);
       };
     }
@@ -258,7 +286,7 @@ export class Peer extends TypedEventTarget<PeerEvents> {
       // Fallback: emit offer after 5000ms if STUN gathering is slow or blocked
       this._iceGatherTimeoutId = setTimeout(() => {
         this._emitLocalSignal();
-      }, 5000) as unknown as number;
+      }, 5000,) as unknown as number;
     } catch (err) {
       this._onError(err instanceof Error ? err : new Error(String(err,),),);
     }
@@ -269,7 +297,11 @@ export class Peer extends TypedEventTarget<PeerEvents> {
     this.channel.binaryType = "arraybuffer";
 
     this.channel.onopen = () => {
-      console.log(`[Peer ${this.opts.initiator ? 'initiator' : 'receiver'}] DataChannel OPEN!`);
+      console.log(
+        `[Peer ${
+          this.opts.initiator ? "initiator" : "receiver"
+        }] DataChannel OPEN!`,
+      );
       this._clearConnectTimeout();
       this.connected = true;
       this.emit("connect",);
@@ -404,7 +436,7 @@ export class Peer extends TypedEventTarget<PeerEvents> {
 
   private _clearTimeouts(): void {
     if (this._iceGatherTimeoutId !== null) {
-      clearTimeout(this._iceGatherTimeoutId);
+      clearTimeout(this._iceGatherTimeoutId,);
       this._iceGatherTimeoutId = null;
     }
     this._clearConnectTimeout();

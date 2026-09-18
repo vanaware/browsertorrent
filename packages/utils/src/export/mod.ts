@@ -52,7 +52,7 @@ function normalizarPrefixo(caminho: string,): string {
 
 /**
  * Calcula a quantidade mínima de crases necessárias para envolver um texto
- * em um bloco de código markdown, evitando conflitos com crases dentro do texto.
+ * em um bbrowsertorrent de código markdown, evitando conflitos com crases dentro do texto.
  *
  * Exemplo:
  * - Texto sem crases → "```"
@@ -205,7 +205,7 @@ export function gerarCabecalho(
 
   return `> **INSTRUÇÃO PARA A IA:** 
 > ${config.instrucaoCustomizada}
-> O projeto é o **BrowserTorrent ${versaoDisplay}** estruturado em blocos. 
+> O projeto é o **BrowserTorrent ${versaoDisplay}** estruturado em bbrowsertorrents. 
 > Cada arquivo começa com um título indicando seu caminho relativo exato (ex: \`## Arquivo: src/main.ts\`).
 > Sempre que sugerir alterações, indique claramente qual arquivo deve ser modificado com base nesses caminhos e forneça o novo código completo do arquivo.
 

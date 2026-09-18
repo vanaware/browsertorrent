@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/tests/extension-host_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/extension-host_test.ts
 
 import { assertEquals, assertRejects, assertThrows, } from "@std/assert";
 import {
@@ -152,7 +152,7 @@ Deno.test("ExtensionHost: setHandshakeField with undefined removes field", () =>
 });
 
 Deno.test("ExtensionHost: constructor sets client/port/reqq fields", () => {
-  const { host, sent, } = createMockHost({ client: "Loco/1.0", port: 6881, },);
+  const { host, sent, } = createMockHost({ client: "BrowserTorrent/1.0", port: 6881, },);
   host.use(new TestExtension(),);
   host.sendHandshake();
   // The sent handshake should include v and p
@@ -163,7 +163,7 @@ Deno.test("ExtensionHost: constructor sets client/port/reqq fields", () => {
     string,
     BencodeValue
   >;
-  assertEquals(decoded.get("v",), "Loco/1.0",);
+  assertEquals(decoded.get("v",), "BrowserTorrent/1.0",);
   assertEquals(decoded.get("p",), 6881,);
 });
 

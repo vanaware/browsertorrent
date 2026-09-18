@@ -14,10 +14,10 @@ O teste `packages/e2e/test_trackers.js` (Teste 3) falha consistentemente com "P2
 6. **Infraestrutura**: O ambiente pode exigir `npx playwright install chromium` periodicamente para rodar os testes E2E se o cache for perdido.
 
 ## Hipóteses Atuais
-- **Ausência de Unchoke Automático**: O Seeder recebe o sinal de `INTERESTED` do Leecher, mas não há lógica no `torrent.ts` ou `wire.ts` que automaticamente responda com `UNCHOKE`. No protocolo BitTorrent, o Leecher não pode pedir blocos enquanto estiver "choked" pelo Seeder.
+- **Ausência de Unchoke Automático**: O Seeder recebe o sinal de `INTERESTED` do Leecher, mas não há lógica no `torrent.ts` ou `wire.ts` que automaticamente responda com `UNCHOKE`. No protocolo BitTorrent, o Leecher não pode pedir bbrowsertorrents enquanto estiver "choked" pelo Seeder.
 - **Raça na Sincronização de Metadados**: O `syncRemotePieces` pode estar sendo chamado antes de `this.numPieces` ser atualizado, ou o evento `metadata` não está sendo capturado por todos os wires ativos.
 - **Choke State Inconsistente**: O Seeder pode achar que já enviou o unchoke, mas o Leecher pode ter reiniciado o wire ou ignorado a mensagem inicial se não estivesse pronto.
-- **Validação de Peças**: Se o `ChunkStore` não estiver salvando os blocos corretamente ou se a verificação de hash (`_verifyPiece`) estiver falhando silenciosamente, o progresso permanece em 0%.
+- **Validação de Peças**: Se o `ChunkStore` não estiver salvando os bbrowsertorrents corretamente ou se a verificação de hash (`_verifyPiece`) estiver falhando silenciosamente, o progresso permanece em 0%.
 - **Event Loop no Torrent**: A lógica de `requestBlocks` pode estar parando prematuramente se o estado do `wire` mudar (ex: `peerChoking` voltando para true).
 
 ## Mudanças Realizadas
@@ -33,7 +33,7 @@ O teste `packages/e2e/test_trackers.js` (Teste 3) falha consistentemente com "P2
 ### Descobertas Recentes
 - **Unchoke-on-Interested Implementado**: O Seeder agora responde automaticamente com `UNCHOKE` ao receber `INTERESTED`. Os logs confirmam que o intercâmbio de mensagens `UNCHOKE` está ocorrendo em ambos os sentidos.
 - **Race de Metadados Mitigada**: Adicionada lógica para chamar `syncRemotePieces()` imediatamente se o metadado já estiver disponível quando o wire é registrado.
-- **Stall em 0%**: Mesmo com `metadataReceived: true` e wires em estado `unchoked`, o leecher reporta `bitfield: 0` nos diagnósticos do teste e não emite requisições de blocos (`REQUEST`).
+- **Stall em 0%**: Mesmo com `metadataReceived: true` e wires em estado `unchoked`, o leecher reporta `bitfield: 0` nos diagnósticos do teste e não emite requisições de bbrowsertorrents (`REQUEST`).
 
 ### Hipótese Atual: Falha na Sincronização do Bitfield Remoto
 O `bitfield` do torrent no Leecher não está sendo populado corretamente após a recepção do metadado. 
@@ -62,7 +62,7 @@ Vou adicionar logs de depuração em pontos estratégicos do `Torrent.ts` para c
 - **Causa Raiz**: Adicionamos monitoramento de erros de página via evento `pageerror` do Playwright e descobrimos que o browser lançava silenciosamente:
   `[Leecher B Page Error] ReferenceError: Cannot access 'updateInterest' before initialization`
   
-  No método `_registerWire` de `Torrent.ts`, o bloco de inicialização inicializava e executava `attachInitialState()` na linha 500. No entanto, as funções declaradas via `const` (como `requestBlocks` na linha 532 e `updateInterest` na linha 572) só eram declaradas mais abaixo.
+  No método `_registerWire` de `Torrent.ts`, o bbrowsertorrent de inicialização inicializava e executava `attachInitialState()` na linha 500. No entanto, as funções declaradas via `const` (como `requestBlocks` na linha 532 e `updateInterest` na linha 572) só eram declaradas mais abaixo.
   Como `attachInitialState()` chamava imediatamente `sendInitialState()` (se o wire já estivesse conectado) que por sua vez chamava `updateInterest()`, ocorria a violação da Temporal Dead Zone (TDZ) do JavaScript. O erro abortava silenciosamente o processamento do wire, impedindo o fluxo de requisição e download de peças.
 
 - **Solução**: 

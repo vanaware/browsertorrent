@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/utils/encode-util.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/encode-util.ts
 
 /**
  * Converte um Uint8Array em uma string onde cada caractere representa um byte.

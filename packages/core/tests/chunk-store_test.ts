@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/tests/chunk-store_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/chunk-store_test.ts
 
 import { assertEquals, assertRejects, } from "@std/assert";
 import { MemoryChunkStore, } from "../src/storage/memory-chunk-store.ts";

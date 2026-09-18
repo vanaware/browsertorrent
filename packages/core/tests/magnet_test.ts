@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/tests/magnet_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/magnet_test.ts
 
 import { assertEquals, assertThrows, } from "@std/assert";
 import {

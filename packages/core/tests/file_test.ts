@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/tests/file_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/file_test.ts
 
 import { assertEquals, assertRejects, assertThrows, } from "@std/assert";
 import { File, } from "../src/core/file.ts";
@@ -436,14 +436,14 @@ Deno.test("file: streamURL returns valid SW URL with all fields", () => {
     name: "movie.mp4",
     infoHash: "a".repeat(40,),
     fileIndex: 2,
-    scope: "/loco/",
+    scope: "/browsertorrent/",
   },);
 
   const url = file.streamURL();
   assertEquals(url.includes("a".repeat(40,),), true,);
   assertEquals(url.includes("/2/",), true,);
   assertEquals(url.includes("movie.mp4",), true,);
-  assertEquals(url.startsWith("/loco/webtorrent/",), true,);
+  assertEquals(url.startsWith("/browsertorrent/webtorrent/",), true,);
 });
 
 Deno.test("file: streamURL uses default scope", () => {

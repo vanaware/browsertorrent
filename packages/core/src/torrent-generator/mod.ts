@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/torrent-generator/mod.ts
+// /browsertorrent/monorepo/webtorrent/src/torrent-generator/mod.ts
 /**
  * Public surface of the OPFS-backed torrent generator.
  */

@@ -45,14 +45,14 @@ const MAX_QUEUED_PEERS = 200;
 export class Swarm extends TypedEventTarget<SwarmEvents> {
   public readonly infoHash: Uint8Array;
   public readonly peerId: Uint8Array;
-  public peers = new Map<string, Peer>();
+  public peers: Map<string, Peer> = new Map<string, Peer>();
   private queue: QueuedPeer[] = [];
   private trackers: Tracker[] = [];
   public maxConns: number;
   public wrtc?: typeof RTCPeerConnection;
   public rtcConfig?: RTCConfiguration;
   private metadata?: Uint8Array;
-  private pendingOffers = new Map<string, Peer>(); // offer_id -> Peer (initiator)
+  private pendingOffers: Map<string, Peer> = new Map<string, Peer>(); // offer_id -> Peer (initiator)
 
   public torrent: {
     emit?: (type: string, event: Event | CustomEvent,) => boolean;
@@ -126,7 +126,10 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
         let offers: TrackerOffer[] = [];
 
         // Gera ofertas apenas para WsTrackers
-        if (tracker.constructor.name === "WsTracker" || (tracker as any).url?.startsWith?.("ws")) {
+        if (
+          tracker.constructor.name === "WsTracker" ||
+          (tracker as any).url?.startsWith?.("ws",)
+        ) {
           offers = await this._generateOffers(
             Math.min(this.maxConns - this.peers.size, 5,),
           );
@@ -156,7 +159,7 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
       wrtc: this.wrtc,
       addr,
       config: this.rtcConfig,
-      onWire: (wire: Wire) => {
+      onWire: (wire: Wire,) => {
         utMetadata = new UtMetadata(wire, { metadata: this.metadata, },);
         try {
           wire.use(utMetadata,);

@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/utils/bencode.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/bencode.ts
 /**
  * Bencode codec with resource limits, typed errors, and optional Map support.
  *
@@ -143,7 +143,7 @@ export function decode(
 export function decodePrefix(
   data: Uint8Array,
   options: DecodeOptions = {},
-): [BencodeValue, Uint8Array] {
+): [BencodeValue, Uint8Array,] {
   const maxBytes = options.maxBytes ?? _defaultMaxBytes;
   const maxDepth = options.maxDepth ?? _defaultMaxDepth;
 

@@ -1,11 +1,11 @@
-# /loco/monorepo/webtorrent/docs/01-objetivo-e-apis-nativas.md
+# /browsertorrent/monorepo/webtorrent/docs/01-objetivo-e-apis-nativas.md
 
-# Objetivo do Pacote `@loco/webtorrent` e Mapeamento de APIs Nativas
+# Objetivo do Pacote `@vanaware/browsertorrent` e Mapeamento de APIs Nativas
 
 ## 🎯 Objetivo do Projeto
-O objetivo do pacote `@loco/webtorrent` é fornecer uma implementação **pura, estritamente tipada e livre de dependências do Node.js** do protocolo BitTorrent, projetada especificamente para rodar no ambiente de navegador (Browser/Deno). 
+O objetivo do pacote `@vanaware/browsertorrent` é fornecer uma implementação **pura, estritamente tipada e livre de dependências do Node.js** do protocolo BitTorrent, projetada especificamente para rodar no ambiente de navegador (Browser/Deno). 
 
-No contexto do **Loco PWA** (mensageiro descentralizado, offline-first e E2EE), este pacote permite:
+No contexto do **BrowserTorrent PWA** (mensageiro descentralizado, offline-first e E2EE), este pacote permite:
 1. **Compartilhamento descentralizado de arquivos** (ex: mídias, backups de chat) sem depender de servidores centrais de armazenamento.
 2. **Streaming progressivo** de arquivos diretamente no browser, utilizando APIs nativas de mídia.
 3. **Redução drástica do bundle size**, eliminando polyfills pesados como `Buffer`, `readable-stream`, `crypto-browserify` e `fs`.

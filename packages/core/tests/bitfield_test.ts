@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/tests/bitfield_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/bitfield_test.ts
 
 import { assertEquals, assertThrows, } from "@std/assert";
 import { Bitfield, } from "../src/core/bitfield.ts";

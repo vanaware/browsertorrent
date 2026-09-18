@@ -10,7 +10,7 @@ import {
   serverSignal,
   torrentSignal,
 } from "../torrent-context.tsx";
-import { buildStreamURL, } from "@loco/webtorrent";
+import { buildStreamURL, } from "@vanaware/browsertorrent";
 import { useEffect, useRef, } from "preact/hooks";
 
 export function ViewerPanel() {

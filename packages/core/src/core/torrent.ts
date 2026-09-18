@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/core/torrent.ts
+// /browsertorrent/monorepo/webtorrent/src/core/torrent.ts
 
 import { TypedEventTarget, } from "../utils/event-target.ts";
 import { ParsedTorrent, ParsedTorrentFile, } from "../utils/parse-torrent.ts";
@@ -436,28 +436,35 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     // ── 1. Enviar Bitfield inicial e Unchoke após Handshake ────────────────
     let initialStateSent = false;
     const sendInitialState = () => {
-      console.log(`[Torrent] sendInitialState: ready=${this.ready}, numPieces=${this.numPieces}`);
+      console.log(
+        `[Torrent] sendInitialState: ready=${this.ready}, numPieces=${this.numPieces}`,
+      );
       if (!initialStateSent) {
         initialStateSent = true;
         if (this.numPieces > 0) {
           try {
-            console.log("[Torrent] Sending initial bitfield to peer...");
+            console.log("[Torrent] Sending initial bitfield to peer...",);
             wire.sendBitfield(this.bitfield.toBuffer(),);
           } catch (err) {
             console.warn("[Torrent] Erro ao enviar bitfield inicial:", err,);
           }
         } else {
           try {
-            console.log("[Torrent] No metadata yet, sending empty bitfield/availability...");
-            wire.sendBitfield(new Uint8Array(0),);
+            console.log(
+              "[Torrent] No metadata yet, sending empty bitfield/availability...",
+            );
+            wire.sendBitfield(new Uint8Array(0,),);
           } catch (err) {
-            console.warn("[Torrent] Erro ao enviar availability inicial sem metadata:", err,);
+            console.warn(
+              "[Torrent] Erro ao enviar availability inicial sem metadata:",
+              err,
+            );
           }
         }
       }
       // Desafogar o peer remoto para permitir requisições
       try {
-        console.log("[Torrent] Sending UNCHOKE to peer");
+        console.log("[Torrent] Sending UNCHOKE to peer",);
         wire.sendUnchoke();
       } catch (err) {
         console.warn("[Torrent] Erro ao enviar unchoke inicial:", err,);
@@ -473,11 +480,13 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
       }
     };
 
-    // ── 2. Responder a requisições de blocos ────────────────────────────────
+    // ── 2. Responder a requisições de bbrowsertorrents ────────────────────────────────
     wire.on("request", async (e: any,) => {
       const { index, offset, length, } = e.detail;
       const piece = await this.getPiece(index,);
-      console.log(`[Torrent] received wire 'request' index=${index}, offset=${offset}, length=${length}, pieceFound=${!!piece}`);
+      console.log(
+        `[Torrent] received wire 'request' index=${index}, offset=${offset}, length=${length}, pieceFound=${!!piece}`,
+      );
       if (piece && offset + length <= piece.length) {
         const block = piece.subarray(offset, offset + length,);
         wire.sendPiece(index, offset, block,);
@@ -505,11 +514,15 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
 
     const requestBlocks = () => {
       if (wire.isDestroyed || wire.peerChoking || this.done) {
-        console.log(`[Torrent] requestBlocks exit early: isDestroyed=${wire.isDestroyed}, peerChoking=${wire.peerChoking}, done=${this.done}`);
+        console.log(
+          `[Torrent] requestBlocks exit early: isDestroyed=${wire.isDestroyed}, peerChoking=${wire.peerChoking}, done=${this.done}`,
+        );
         return;
       }
       if (activePiece) {
-        console.log(`[Torrent] requestBlocks exit: already have activePiece ${activePiece.index}`);
+        console.log(
+          `[Torrent] requestBlocks exit: already have activePiece ${activePiece.index}`,
+        );
         return;
       }
 
@@ -535,7 +548,9 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
         pendingOffsets: new Set(),
       };
 
-      console.log(`[Torrent] Requesting piece ${targetPieceIndex}, length ${pLen} from wire`);
+      console.log(
+        `[Torrent] Requesting piece ${targetPieceIndex}, length ${pLen} from wire`,
+      );
       for (let offset = 0; offset < pLen; offset += BLOCK_SIZE) {
         const len = Math.min(BLOCK_SIZE, pLen - offset,);
         activePiece.pendingOffsets.add(offset,);
@@ -552,7 +567,9 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
           break;
         }
       }
-      console.log(`[Torrent] updateInterest: interesting=${hasInterestingPiece}, amInterested=${wire.amInterested}, peerChoking=${wire.peerChoking}`);
+      console.log(
+        `[Torrent] updateInterest: interesting=${hasInterestingPiece}, amInterested=${wire.amInterested}, peerChoking=${wire.peerChoking}`,
+      );
       if (hasInterestingPiece && !wire.amInterested) {
         wire.amInterested = true;
         wire.sendInterested();
@@ -565,7 +582,9 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     wire.on("bitfield", (e: any,) => {
       const bf: Uint8Array = e.detail.bitfield;
       savedBitfield = bf;
-      console.log(`[Torrent] wire.on('bitfield') received: length=${bf.length}`);
+      console.log(
+        `[Torrent] wire.on('bitfield') received: length=${bf.length}`,
+      );
       for (let i = 0; i < bf.length * 8; i++) {
         const byteIdx = Math.floor(i / 8,);
         const bitIdx = 7 - (i % 8);
@@ -577,19 +596,26 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     },);
 
     const syncRemotePieces = () => {
-      console.log(`[Torrent] syncRemotePieces: isHaveAll=${isHaveAll}, hasBitfield=${!!savedBitfield}, numPieces=${this.numPieces}`);
+      console.log(
+        `[Torrent] syncRemotePieces: isHaveAll=${isHaveAll}, hasBitfield=${!!savedBitfield}, numPieces=${this.numPieces}`,
+      );
       if (isHaveAll) {
         for (let i = 0; i < this.numPieces; i++) remotePieces.add(i,);
       } else if (savedBitfield) {
         for (let i = 0; i < savedBitfield.length * 8; i++) {
           const byteIdx = Math.floor(i / 8,);
           const bitIdx = 7 - (i % 8);
-          if (byteIdx < savedBitfield.length && (savedBitfield[byteIdx]! & (1 << bitIdx))) {
+          if (
+            byteIdx < savedBitfield.length &&
+            (savedBitfield[byteIdx]! & (1 << bitIdx))
+          ) {
             remotePieces.add(i,);
           }
         }
       }
-      console.log(`[Torrent] syncRemotePieces completed: remotePieces.size=${remotePieces.size}`);
+      console.log(
+        `[Torrent] syncRemotePieces completed: remotePieces.size=${remotePieces.size}`,
+      );
       updateInterest();
     };
 
@@ -598,19 +624,21 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
 
     // 🔥 CORREÇÃO: Se já temos metadados, sincroniza imediatamente para este wire
     if (this._metadataReceived || this.ready) {
-      console.log("[Torrent] Metadata already available, syncing remote pieces for new wire immediately");
+      console.log(
+        "[Torrent] Metadata already available, syncing remote pieces for new wire immediately",
+      );
       syncRemotePieces();
     }
 
     wire.on("have", (e: any,) => {
       const index = e.detail.index;
-      console.log(`[Torrent] wire.on('have') received index=${index}`);
+      console.log(`[Torrent] wire.on('have') received index=${index}`,);
       remotePieces.add(index,);
       updateInterest();
     },);
 
     wire.on("haveAll", () => {
-      console.log("[Torrent] wire.on('haveAll') received");
+      console.log("[Torrent] wire.on('haveAll') received",);
       isHaveAll = true;
       for (let i = 0; i < this.numPieces; i++) remotePieces.add(i,);
       updateInterest();
@@ -619,14 +647,14 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     wire.on("unchoke", () => {
       updateInterest();
     },);
-    
+
     wire.on("interested", () => {
       try {
         wire.sendUnchoke();
       } catch (err) {
-        console.warn("[Torrent] Error sending unchoke on interested:", err);
+        console.warn("[Torrent] Error sending unchoke on interested:", err,);
       }
-    });
+    },);
 
     wire.on("piece", async (e: any,) => {
       const { index, offset, block, } = e.detail;
@@ -662,13 +690,15 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
   // ==========================================================================
 
   async setMetadata(infoBuffer: Uint8Array,): Promise<boolean> {
-    console.log(`[Torrent] setMetadata start, infoBuffer length: ${infoBuffer?.length}`);
+    console.log(
+      `[Torrent] setMetadata start, infoBuffer length: ${infoBuffer?.length}`,
+    );
     if (this._metadataReceived) return false;
 
     try {
-      console.log("[Torrent] setMetadata: decoding infoBuffer...");
+      console.log("[Torrent] setMetadata: decoding infoBuffer...",);
       const info = decode(infoBuffer,) as BencodeDict;
-      console.log("[Torrent] setMetadata: bencode decoded successfully.");
+      console.log("[Torrent] setMetadata: bencode decoded successfully.",);
 
       const pieceLength = info["piece length"] as number;
       const piecesRaw = info["pieces"];
@@ -716,14 +746,20 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
       this._rawFiles = newFiles;
       this.expectedPieces = newExpectedPieces;
 
-      console.log(`[Torrent] setMetadata: pieceLength=${pieceLength}, totalLength=${totalLength}, numPieces=${newExpectedPieces.length}`);
+      console.log(
+        `[Torrent] setMetadata: pieceLength=${pieceLength}, totalLength=${totalLength}, numPieces=${newExpectedPieces.length}`,
+      );
 
       if (
         this._store &&
-        typeof (this._store as unknown as { updateLength?: (c: number, l: number) => void }).updateLength === "function"
+        typeof (this._store as unknown as {
+            updateLength?: (c: number, l: number,) => void;
+          }).updateLength === "function"
       ) {
-        console.log("[Torrent] setMetadata: updating store length...");
-        (this._store as unknown as { updateLength: (c: number, l: number) => void }).updateLength(pieceLength, totalLength);
+        console.log("[Torrent] setMetadata: updating store length...",);
+        (this._store as unknown as {
+          updateLength: (c: number, l: number,) => void;
+        }).updateLength(pieceLength, totalLength,);
       }
 
       const nameRaw = info["name"];
@@ -743,7 +779,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
       },);
       this._metadataReceived = true;
 
-      console.log("[Torrent] setMetadata: emitting metadata event...");
+      console.log("[Torrent] setMetadata: emitting metadata event...",);
       this.emit(
         "metadata",
         new CustomEvent("metadata", {
@@ -751,16 +787,16 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
         },),
       );
 
-      console.log("[Torrent] setMetadata: verifying existing pieces...");
+      console.log("[Torrent] setMetadata: verifying existing pieces...",);
       await this._verifyExistingPieces();
-      console.log("[Torrent] setMetadata: existing pieces verified.");
+      console.log("[Torrent] setMetadata: existing pieces verified.",);
       this._ready = true;
-      console.log("[Torrent] setMetadata: emitting ready event...");
+      console.log("[Torrent] setMetadata: emitting ready event...",);
       this.emit("ready",);
-      console.log("[Torrent] setMetadata: completed successfully!");
+      console.log("[Torrent] setMetadata: completed successfully!",);
       return true;
     } catch (err) {
-      console.error("[Torrent] setMetadata error:", err);
+      console.error("[Torrent] setMetadata error:", err,);
       this._onError(err instanceof Error ? err : new Error(String(err,),),);
       return false;
     }
@@ -867,7 +903,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
       }
       return true;
     } catch (err) {
-      console.error("[Torrent] Error in receivePiece:", err);
+      console.error("[Torrent] Error in receivePiece:", err,);
       return false;
     }
   }

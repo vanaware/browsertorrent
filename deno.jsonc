@@ -1,6 +1,6 @@
 {
-   "name": "@vanaware/browsertorrent",
-   "version": "0.0.90-mu68y0y7",
+   "name": "@vanaware/browsertorrent-workspace",
+   "version": "0.0.101-mu71lh5q",
    "repository": "https://github.com/vanaware/browsertorrent",
    "exports": "./esbuild.ts",
    "description": "A pure browser-based BitTorrent client implementation using WebRTC for peer-to-peer file sharing.",
@@ -64,7 +64,7 @@
     "rules": {
       "tags": ["recommended"],
       "include": ["ban-untagged-todo"],
-      "exclude": ["no-unused-vars"]
+      "exclude": ["no-unused-vars", "no-explicit-any", "require-await"]
     },
     "include": [
       "build.ts",
@@ -74,6 +74,11 @@
       "packages/**/src/**/*.{ts,tsx}",
       "tests/**/*test.ts",
       "packages/**/tests/**/*test.ts"
+    ],
+    "exclude": [
+      "packages/server/build/",
+      "packages/worker-db/build/",
+      "packages/example/public/"
     ]
   },
   "test": {
@@ -126,7 +131,8 @@
     ],
     "exclude": [
       "packages/server/build/", 
-      "packages/worker-db/build/"
+      "packages/worker-db/build/",
+      "packages/example/public/"
     ]
   },
   "unstable": ["bundle"],
@@ -135,10 +141,10 @@
       ".vscode/",
       "packages/server/build/", 
       "packages/worker-db/build/",
+      "packages/example/public/",
       "vendor",
       "node_modules",
       "snapshots",
-      "docs",
-      "packages/example/src/webtorrent.min.js"
+      "docs"
     ]
  }

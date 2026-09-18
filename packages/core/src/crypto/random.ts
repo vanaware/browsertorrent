@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/crypto/random.ts
+// /browsertorrent/monorepo/webtorrent/src/crypto/random.ts
 /**
  * Geração de bytes aleatórios criptograficamente seguros.
  * Substitui o `randombytes` do Node.js.

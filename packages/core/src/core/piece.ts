@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/core/piece.ts
+// /browsertorrent/monorepo/webtorrent/src/core/piece.ts
 
 /**
  * Represents a single piece within a torrent.

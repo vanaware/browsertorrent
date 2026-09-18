@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/utils/event-target.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/event-target.ts
 
 /**
  * Substituto tipado para o `EventEmitter` do Node.js.

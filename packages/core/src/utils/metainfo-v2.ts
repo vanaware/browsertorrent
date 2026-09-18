@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/utils/metainfo-v2.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/metainfo-v2.ts
 /**
  * BEP-52 v2 file tree validation and piece layer verification.
  *

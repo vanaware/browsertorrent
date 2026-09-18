@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/tests/utils_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/utils_test.ts
 import { assertEquals, assertThrows, } from "@std/assert";
 import {
   alloc,

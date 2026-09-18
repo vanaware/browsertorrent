@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/utils/metainfo-parser.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/metainfo-parser.ts
 /**
  * Rigorous `.torrent` metainfo parser (BEP 3, 12, 19, 47, 52).
  *

@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/core/constants.ts
+// /browsertorrent/monorepo/webtorrent/src/core/constants.ts
 /**
  * BitTorrent peer wire protocol constants, message IDs, and limits.
  *

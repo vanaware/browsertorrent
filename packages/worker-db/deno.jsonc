@@ -1,5 +1,5 @@
 {
-  "name": "@browsertorrent/workerdb",
+  "name": "@vanaware/worker-db",
   // ----------------------------------------------------------------------
   // 🔧 Compiler Options específicos do pacote
   // ----------------------------------------------------------------------
@@ -44,9 +44,9 @@
   // 🎯 Exports via subpaths (Deno não suporta conditional exports)
   //
   // Uso no código fonte:
-  //   - Main Thread:  import { db, opfs, ls } from "@browsertorrent/workerdb";
-  //   - Service Worker: import { dbsw, opfssw } from "@browsertorrent/workerdb/sw";
-  //   - Web Worker:   import { dbsw, opfssw } from "@browsertorrent/workerdb/sw";
+  //   - Main Thread:  import { db, opfs, ls } from "@vanaware/worker-db";
+  //   - Service Worker: import { dbsw, opfssw } from "@vanaware/worker-db/sw";
+  //   - Web Worker:   import { dbsw, opfssw } from "@vanaware/worker-db/sw";
   // ----------------------------------------------------------------------
   "exports": {
     // Entry point padrão — Main Thread (browser)

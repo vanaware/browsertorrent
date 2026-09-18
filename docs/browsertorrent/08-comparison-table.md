@@ -1,4 +1,4 @@
-# Comparação de Arquitetura: Original WebTorrent vs BrowserTorrent (Ours)
+# Arquitetura e Comparação: WebTorrent vs BrowserTorrent
 
 > 🏆 **REGRA DE OURO (GOLDEN RULE): Interoperabilidade Estrita**
 > Nosso código **DEVE ser 100% interoperável** com o ecossistema original do WebTorrent. Isso significa que:
@@ -10,7 +10,7 @@
 
 ## 1. Tabela Comparativa Geral
 
-| Funcionalidade / Camada | Original WebTorrent (`webtorrent`) | BrowserTorrent (`@loco/webtorrent`) | Compatibilidade |
+| Funcionalidade / Camada | Original WebTorrent (`webtorrent`) | BrowserTorrent (`@vanaware/browsertorrent`) | Compatibilidade |
 |---|---|---|:---:|
 | **Runtime Base** | Node.js + Browserify/Webpack polyfills (`buffer`, `events`, `stream`) | Pure Deno & Standard Web APIs (`Uint8Array`, `EventTarget`, W3C Streams) | 🟢 100% Interoperável |
 | **Sinalização WebRTC** | `bittorrent-tracker` WebSocket JSON protocol | `WsTracker` (Client & Server) com payload nativo de offers/answers | 🟢 100% Compatível |

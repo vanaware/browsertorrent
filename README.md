@@ -1,4 +1,4 @@
-# BrowserTorrent (SyntaxMesh)
+# BrowserTorrent
 
 A modern, browser-native BitTorrent client and PWA built in TypeScript with Deno, WebRTC, OPFS (Origin Private File System), and BeerCSS.
 
@@ -33,3 +33,7 @@ deno task test
 # Run E2E Playwright validation
 node packages/e2e/test_trackers.js
 ```
+
+## How to Use
+
+To use BrowserTorrent in your own application directly from GitHub, check out our **[GitHub Import Guide](./docs/browsertorrent/IMPORT_GUIDE.md)**.

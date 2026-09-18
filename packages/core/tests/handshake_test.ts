@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/tests/handshake_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/handshake_test.ts
 
 import { assertEquals, assertThrows, } from "@std/assert";
 import {
@@ -28,7 +28,7 @@ Deno.test("handshake: encode produces 68 bytes", () => {
 
 Deno.test("handshake: encode with string peerId", () => {
   const infoHash = new Uint8Array(20,).fill(0x01,);
-  const peerId = "-LO0100-123456789012"; // exactly 20 bytes
+  const peerId = "-BT0100-123456789012"; // exactly 20 bytes
   const bytes = encodeHandshake({ infoHash, peerId, },);
   assertEquals(bytes.length, HANDSHAKE_LENGTH,);
   assertEquals(

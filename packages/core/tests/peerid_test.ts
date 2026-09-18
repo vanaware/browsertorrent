@@ -1,36 +1,36 @@
-// /loco/monorepo/webtorrent/tests/peerid_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/peerid_test.ts
 
 import { assertEquals, } from "@std/assert";
 import {
   decodePeerId,
-  generateLocoPeerId,
+  generateBrowserTorrentPeerId,
   getPeerIdClientName,
   isAzStyle,
   isShadowStyle,
-  LOCO_PEER_ID_PREFIX,
+  BT_PEER_ID_PREFIX,
 } from "../src/utils/peerid.ts";
 
 import { generateRandomString, } from "../src/crypto/random.ts";
 
-Deno.test("peerid: LOCO_PEER_ID_PREFIX is correct length", () => {
-  assertEquals(LOCO_PEER_ID_PREFIX, "-LO0100-",);
-  assertEquals(LOCO_PEER_ID_PREFIX.length, 8,);
+Deno.test("peerid: BT_PEER_ID_PREFIX is correct length", () => {
+  assertEquals(BT_PEER_ID_PREFIX, "-BT0100-",);
+  assertEquals(BT_PEER_ID_PREFIX.length, 8,);
 });
 
-Deno.test("peerid: generateLocoPeerId returns exactly 20 bytes", () => {
-  const peerId = generateLocoPeerId();
+Deno.test("peerid: generateBrowserTorrentPeerId returns exactly 20 bytes", () => {
+  const peerId = generateBrowserTorrentPeerId();
   assertEquals(peerId.length, 20,);
 
   const str = new TextDecoder().decode(peerId,);
-  assertEquals(str.startsWith(LOCO_PEER_ID_PREFIX,), true,);
+  assertEquals(str.startsWith(BT_PEER_ID_PREFIX,), true,);
 });
 
-Deno.test("peerid: decodePeerId correctly parses Loco PeerId", () => {
-  const peerId = generateLocoPeerId();
+Deno.test("peerid: decodePeerId correctly parses BrowserTorrent PeerId", () => {
+  const peerId = generateBrowserTorrentPeerId();
   const clientInfo = decodePeerId(peerId,);
 
   assertEquals(clientInfo?.code, "LO",);
-  assertEquals(clientInfo?.name, "Loco",);
+  assertEquals(clientInfo?.name, "BrowserTorrent",);
   // "0100" -> major: 0, minor: 1, patch: parseInt("00") -> "0"
   assertEquals(clientInfo?.version, "0.1.0",);
   assertEquals(clientInfo?.style, "azureus",);

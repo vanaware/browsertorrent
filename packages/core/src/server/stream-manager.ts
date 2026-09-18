@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/server/stream-manager.ts
+// /browsertorrent/monorepo/webtorrent/src/server/stream-manager.ts
 
 import type { File, } from "../core/file.ts";
 

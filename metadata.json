@@ -1,5 +1,5 @@
 {
-  "name": "SyntaxMesh",
+  "name": "BrowserTorrent",
   "description": "A high-performance Deno-based PWA BitTorrent client with WebRTC P2P sharing and OPFS storage.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

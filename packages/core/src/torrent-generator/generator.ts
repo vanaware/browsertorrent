@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/torrent-generator/generator.ts
+// /browsertorrent/monorepo/webtorrent/src/torrent-generator/generator.ts
 /**
  * OPFS-backed BitTorrent `.torrent` file generator.
  *
@@ -47,7 +47,7 @@ import {
  *
  * @example Multi-file torrent from an OPFS directory
  * ```ts
- * import { generateTorrent } from "@loco/webtorrent/torrent-generator";
+ * import { generateTorrent } from "@vanaware/browsertorrent/torrent-generator";
  *
  * const rootHandle = await navigator.storage.getDirectory();
  * // ... populate rootHandle with files ...

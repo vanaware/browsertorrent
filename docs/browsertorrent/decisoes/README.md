@@ -1,6 +1,6 @@
 # Decisões Arquitetônicas (ADR)
 
-Este diretório armazena **Architecture Decision Records (ADRs)** — decisões técnicas importantes que afetam a arquitetura, design ou processo do SyntaxMesh.
+Este diretório armazena **Architecture Decision Records (ADRs)** — decisões técnicas importantes que afetam a arquitetura, design ou processo do BrowserTorrent.
 
 ## Quando criar um ADR
 

@@ -2,7 +2,7 @@ const { chromium } = require('@playwright/test');
 
 (async () => {
   console.log("===============================================================");
-  console.log("SYNTAXMESH E2E VALIDATION SUITE (PLAYWRIGHT + CHROMIUM)");
+  console.log("BROWSERTORRENT E2E VALIDATION SUITE (PLAYWRIGHT + CHROMIUM)");
   console.log("===============================================================");
   
   let browser;
@@ -31,7 +31,7 @@ const { chromium } = require('@playwright/test');
     await pagePublic.waitForLoadState('networkidle');
     
     const publicSuccess = await pagePublic.evaluate(async () => {
-      const { WsTracker } = window.LocoTest;
+      const { WsTracker } = window.BrowserTorrentTest;
       return new Promise((resolve) => {
         console.log("Connecting WsTracker to wss://tracker.webtorrent.dev...");
         const infoHash = new Uint8Array(20).fill(99);
@@ -175,12 +175,12 @@ const { chromium } = require('@playwright/test');
     await pageA.waitForLoadState('networkidle');
     await pageB.waitForLoadState('networkidle');
 
-    const TEST_PAYLOAD = "SYNTAXMESH_TEST_DATA_STREAM_" + Date.now() + "_VERIFIED_P2P_PAYLOAD_BLOCK";
+    const TEST_PAYLOAD = "BROWSERTORRENT_TEST_DATA_STREAM_" + Date.now() + "_VERIFIED_P2P_PAYLOAD_BLOCK";
 
     // Start Seeder (Peer A)
     const seederResult = await pageA.evaluate(async (testPayload) => {
       await navigator.mediaDevices.getUserMedia({ audio: true }).catch(() => {});
-      const { Client } = window.LocoTest;
+      const { Client } = window.BrowserTorrentTest;
       
       console.log("Starting Client A (Seeder)...");
       const clientA = new Client({
@@ -217,7 +217,7 @@ const { chromium } = require('@playwright/test');
     // Start Leecher (Peer B)
     await pageB.evaluate(async (meta) => {
       await navigator.mediaDevices.getUserMedia({ audio: true }).catch(() => {});
-      const { Client } = window.LocoTest;
+      const { Client } = window.BrowserTorrentTest;
       
       console.log("Starting Client B (Leecher)...");
       const clientB = new Client({
@@ -302,7 +302,7 @@ const { chromium } = require('@playwright/test');
 
     const PUBLIC_PAYLOAD = "PUBLIC_TRACKER_TEST_" + Date.now();
     const publicSeedResult = await pagePublicA.evaluate(async (payload) => {
-      const { Client } = window.LocoTest;
+      const { Client } = window.BrowserTorrentTest;
       const client = new Client({ useOPFS: true });
       window.publicClientA = client;
 
@@ -328,7 +328,7 @@ const { chromium } = require('@playwright/test');
     console.log("Seeding on public tracker with infoHash:", publicSeedResult.infoHash);
 
     await pagePublicB.evaluate(async (meta) => {
-      const { Client } = window.LocoTest;
+      const { Client } = window.BrowserTorrentTest;
       const client = new Client({ useOPFS: true });
       window.publicClientB = client;
       window.publicDone = false;

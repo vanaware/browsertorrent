@@ -6,38 +6,41 @@
 import { createContext, } from "preact";
 import { signal, } from "@preact/signals";
 import type { ComponentChildren, } from "preact";
-import type { Client, Torrent, Wire, } from "@loco/webtorrent";
-import type { WebTorrentServer, } from "@loco/webtorrent";
-import { db, } from "@loco/worker-db";
-import { streamManager, } from "@loco/webtorrent";
+import type { Client, Torrent, Wire, } from "@vanaware/browsertorrent";
+import type { WebTorrentServer, } from "@vanaware/browsertorrent";
+import { db, } from "@vanaware/worker-db";
+import { streamManager, } from "@vanaware/browsertorrent";
 
 // Helper para converter stream Node (usado no WebTorrent original do browser) em Web ReadableStream
 // deno-lint-ignore no-explicit-any
-function nodeStreamToWebStream(nodeStream: any): ReadableStream<Uint8Array> {
+function nodeStreamToWebStream(nodeStream: any,): ReadableStream<Uint8Array> {
   return new ReadableStream<Uint8Array>({
-    start(controller) {
+    start(controller,) {
       // deno-lint-ignore no-explicit-any
-      nodeStream.on("data", (chunk: any) => {
-        const buf = typeof chunk === "string" ? new TextEncoder().encode(chunk) : new Uint8Array(chunk);
-        controller.enqueue(buf);
-      });
+      nodeStream.on("data", (chunk: any,) => {
+        const buf = typeof chunk === "string"
+          ? new TextEncoder().encode(chunk,)
+          : new Uint8Array(chunk,);
+        controller.enqueue(buf,);
+      },);
       nodeStream.on("end", () => {
         controller.close();
-      });
+      },);
       // deno-lint-ignore no-explicit-any
-      nodeStream.on("error", (err: any) => {
-        controller.error(err);
-      });
+      nodeStream.on("error", (err: any,) => {
+        controller.error(err,);
+      },);
     },
     cancel() {
       if (typeof nodeStream.destroy === "function") {
         nodeStream.destroy();
       }
-    }
-  });
+    },
+  },);
 }
 
-// ─── Trackers públicos ─────────────────────────────────────────────────────────
+// ─── Trackers ─────────────────────────────────────────────────────────
+export const LOCAL_TRACKER = "ws://127.0.0.1:3000/tracker";
 
 export const PUBLIC_TRACKERS = [
   "wss://tracker.webtorrent.dev:443",
@@ -45,19 +48,37 @@ export const PUBLIC_TRACKERS = [
   "wss://open.ftorrent.com:443",
 ];
 
+export function getTrackers(): string[] {
+  if (useLocalTrackerSignal.value) {
+    return [LOCAL_TRACKER, ...PUBLIC_TRACKERS];
+  }
+  return PUBLIC_TRACKERS;
+}
+
 // ─── Estado global (signals) ─────────────────────────────────────────────────
 
-export const engineSignal = signal<"browsertorrent" | "webtorrent">("browsertorrent");
+export const engineSignal = signal<"browsertorrent" | "webtorrent">(
+  "browsertorrent",
+);
+export const useLocalTrackerSignal = signal<boolean>(true);
+
+export function getScope() {
+  if (typeof globalThis.window === "undefined") return "/";
+  // GH Pages support: detect base path from location
+  const path = globalThis.window.location.pathname;
+  return path.endsWith("/") ? "./" : "./" + path.split("/").pop() + "/";
+}
+
 // deno-lint-ignore no-explicit-any
 export const clientSignal = signal<any | null>(null,);
 // deno-lint-ignore no-explicit-any
 export const serverSignal = signal<any | null>(null,);
 // deno-lint-ignore no-explicit-any
-export const torrentsSignal = signal<any[]>([]);
+export const torrentsSignal = signal<any[]>([],);
 // deno-lint-ignore no-explicit-any
 export const torrentSignal = signal<any | null>(null,);
 // deno-lint-ignore no-explicit-any
-export const peersSignal = signal<any[]>([]);
+export const peersSignal = signal<any[]>([],);
 export const downSpeedSignal = signal(0,);
 export const upSpeedSignal = signal(0,);
 export const tickSignal = signal(0,);
@@ -90,7 +111,7 @@ export async function initClient(): Promise<any> {
 
   let wt;
   if (engineSignal.value === "browsertorrent") {
-    const { Client: WT, } = await import("@loco/webtorrent");
+    const { Client: WT, } = await import("@vanaware/browsertorrent");
     const opfsAvailable = navigator.storage?.getDirectory != null;
     dbg(
       "initClient: creating BrowserTorrent client, OPFS available:",
@@ -113,11 +134,11 @@ export async function initClient(): Promise<any> {
       },
     },);
   } else {
-    dbg("initClient: creating original WebTorrent client...");
+    dbg("initClient: creating original WebTorrent client...",);
     // deno-lint-ignore no-explicit-any
     const WT = (window as any).WebTorrent;
     if (!WT) {
-      throw new Error("original WebTorrent library not loaded from CDN!");
+      throw new Error("original WebTorrent library not loaded from CDN!",);
     }
     wt = new WT({
       maxConns: 55,
@@ -133,11 +154,11 @@ export async function initClient(): Promise<any> {
           ],
         },
       },
-    });
+    },);
   }
 
   // deno-lint-ignore no-explicit-any
-  wt.on("error", (e: any) => {
+  wt.on("error", (e: any,) => {
     const msg = e?.detail?.message ?? e?.message ?? String(e,);
     dbg("CLIENT ERROR:", msg,);
     errorSignal.value = msg;
@@ -145,7 +166,7 @@ export async function initClient(): Promise<any> {
 
   // Log all torrent events for debugging
   // deno-lint-ignore no-explicit-any
-  wt.on("torrent", (e: any) => {
+  wt.on("torrent", (e: any,) => {
     const t = e?.detail ?? e;
     dbg("wt.torrent event:", t.infoHash,);
     if (!torrentsSignal.value.find((x,) => x.infoHash === t.infoHash)) {
@@ -169,11 +190,11 @@ export async function initClient(): Promise<any> {
       dbg(`initClient: resuming torrent ${item.magnetURI}`,);
       if (engineSignal.value === "browsertorrent") {
         // deno-lint-ignore no-explicit-any
-        wt.add(item.magnetURI,).catch((err: any) => {
+        wt.add(item.magnetURI,).catch((err: any,) => {
           dbg(`initClient: error resuming torrent:`, err,);
         },);
       } else {
-        wt.add(item.magnetURI);
+        wt.add(item.magnetURI,);
       }
     }
   } catch (err) {
@@ -210,10 +231,11 @@ export async function seedFile(file: File,): Promise<void> {
   }
 
   try {
-    dbg("seedFile: calling wt.seed() with trackers:", PUBLIC_TRACKERS,);
+    const trackers = getTrackers();
+    dbg("seedFile: calling wt.seed() with trackers:", trackers,);
     const torrent = await wt.seed(file, {
       name: file.name,
-      announce: PUBLIC_TRACKERS,
+      announce: trackers,
     },);
     dbg("seedFile: wt.seed() returned",);
     dbg(
@@ -263,35 +285,35 @@ export async function seedFile(file: File,): Promise<void> {
 
       if (engineSignal.value === "webtorrent") {
         // deno-lint-ignore no-explicit-any
-        torrent.files.forEach((file: any, idx: number) => {
+        torrent.files.forEach((file: any, idx: number,) => {
           const compatibleFile = {
             name: file.name,
             length: file.length,
-            createReadStream(opts?: { start?: number; end?: number }) {
-              const nodeStream = file.createReadStream(opts);
-              return nodeStreamToWebStream(nodeStream);
-            }
+            createReadStream(opts?: { start?: number; end?: number },) {
+              const nodeStream = file.createReadStream(opts,);
+              return nodeStreamToWebStream(nodeStream,);
+            },
           };
           // deno-lint-ignore no-explicit-any
-          streamManager.register(torrent.infoHash, idx, compatibleFile as any);
-        });
-        dbg("Original WebTorrent files registered in streamManager manually.");
+          streamManager.register(torrent.infoHash, idx, compatibleFile as any,);
+        },);
+        dbg("Original WebTorrent files registered in streamManager manually.",);
       }
     };
 
-    torrent.on("ready", onReady);
+    torrent.on("ready", onReady,);
     if (torrent.ready) {
       onReady();
     }
 
     // deno-lint-ignore no-explicit-any
-    torrent.on("error", (e: any) => {
+    torrent.on("error", (e: any,) => {
       const msg = e?.detail?.message ?? e?.message ?? String(e,);
       dbg("EVENT: torrent error:", msg,);
     },);
 
     // deno-lint-ignore no-explicit-any
-    torrent.on("wire", (e: any) => {
+    torrent.on("wire", (e: any,) => {
       const wire = e?.detail?.wire ?? e;
       const addr = e?.detail?.addr ?? wire?.remoteAddress ?? "unknown";
       dbg("EVENT: wire/peer CONNECTED from:", addr,);
@@ -308,7 +330,7 @@ export async function seedFile(file: File,): Promise<void> {
     },);
 
     // deno-lint-ignore no-explicit-any
-    torrent.on("warning", (e: any) => {
+    torrent.on("warning", (e: any,) => {
       const msg = e?.detail?.message ?? e?.message ?? String(e,);
       dbg("EVENT: warning:", msg,);
     },);
@@ -317,7 +339,9 @@ export async function seedFile(file: File,): Promise<void> {
     const swarmInterval = setInterval(() => {
       const swarm = torrent.swarm;
       if (swarm) {
-        const peers = swarm.peers ? [...swarm.peers.keys(),] : (torrent.wires || []);
+        const peers = swarm.peers
+          ? [...swarm.peers.keys(),]
+          : (torrent.wires || []);
         dbg(
           "SWARM STATUS: peers:",
           peers.length,
@@ -326,7 +350,7 @@ export async function seedFile(file: File,): Promise<void> {
         );
         if (peers.length > 0) {
           // deno-lint-ignore no-explicit-any
-          dbg("  peer addrs:", peers.map((p: any) => p.remoteAddress || p),);
+          dbg("  peer addrs:", peers.map((p: any,) => p.remoteAddress || p),);
         }
       }
     }, 5000,);
@@ -386,8 +410,11 @@ export async function addTorrent(torrentId: string,): Promise<void> {
   }
 
   try {
-    dbg("addTorrent: calling wt.add('" + torrentId + "')",);
-    const torrent = await wt.add(torrentId,);
+    const trackers = getTrackers();
+    dbg("addTorrent: calling wt.add('" + torrentId + "') with trackers:", trackers,);
+    const torrent = await wt.add(torrentId, {
+      announce: trackers,
+    });
     dbg("addTorrent: wt.add() returned",);
     dbg(
       "  torrent.infoHash:",
@@ -435,35 +462,35 @@ export async function addTorrent(torrentId: string,): Promise<void> {
 
       if (engineSignal.value === "webtorrent") {
         // deno-lint-ignore no-explicit-any
-        torrent.files.forEach((file: any, idx: number) => {
+        torrent.files.forEach((file: any, idx: number,) => {
           const compatibleFile = {
             name: file.name,
             length: file.length,
-            createReadStream(opts?: { start?: number; end?: number }) {
-              const nodeStream = file.createReadStream(opts);
-              return nodeStreamToWebStream(nodeStream);
-            }
+            createReadStream(opts?: { start?: number; end?: number },) {
+              const nodeStream = file.createReadStream(opts,);
+              return nodeStreamToWebStream(nodeStream,);
+            },
           };
           // deno-lint-ignore no-explicit-any
-          streamManager.register(torrent.infoHash, idx, compatibleFile as any);
-        });
-        dbg("Original WebTorrent files registered in streamManager manually.");
+          streamManager.register(torrent.infoHash, idx, compatibleFile as any,);
+        },);
+        dbg("Original WebTorrent files registered in streamManager manually.",);
       }
     };
 
-    torrent.on("ready", onReady);
+    torrent.on("ready", onReady,);
     if (torrent.ready) {
       onReady();
     }
 
     // deno-lint-ignore no-explicit-any
-    torrent.on("error", (e: any) => {
+    torrent.on("error", (e: any,) => {
       const msg = e?.detail?.message ?? e?.message ?? String(e,);
       dbg("EVENT: torrent error:", msg,);
     },);
 
     // deno-lint-ignore no-explicit-any
-    torrent.on("wire", (e: any) => {
+    torrent.on("wire", (e: any,) => {
       const wire = e?.detail?.wire ?? e;
       const addr = e?.detail?.addr ?? wire?.remoteAddress ?? "unknown";
       dbg("EVENT: wire/peer connected from:", addr,);
@@ -477,13 +504,13 @@ export async function addTorrent(torrentId: string,): Promise<void> {
     },);
 
     // deno-lint-ignore no-explicit-any
-    torrent.on("warning", (e: any) => {
+    torrent.on("warning", (e: any,) => {
       const msg = e?.detail?.message ?? e?.message ?? String(e,);
       dbg("EVENT: warning:", msg,);
     },);
 
     // deno-lint-ignore no-explicit-any
-    torrent.on("download", (e: any) => {
+    torrent.on("download", (e: any,) => {
       const bytesNum = typeof e === "number" ? e : (e?.detail?.bytes ?? 0);
       dbg(
         "EVENT: download:",
@@ -508,7 +535,9 @@ export async function addTorrent(torrentId: string,): Promise<void> {
     const swarmInterval = setInterval(() => {
       const swarm = torrent.swarm;
       if (swarm) {
-        const peers = swarm.peers ? [...swarm.peers.keys(),] : (torrent.wires || []);
+        const peers = swarm.peers
+          ? [...swarm.peers.keys(),]
+          : (torrent.wires || []);
         dbg(
           "SWARM STATUS: peers:",
           peers.length,
@@ -518,7 +547,7 @@ export async function addTorrent(torrentId: string,): Promise<void> {
         dbg("  downloaded:", torrent.downloaded, "of", torrent.length,);
         if (peers.length > 0) {
           // deno-lint-ignore no-explicit-any
-          dbg("  peer addrs:", peers.map((p: any) => p.remoteAddress || p),);
+          dbg("  peer addrs:", peers.map((p: any,) => p.remoteAddress || p),);
         }
       }
     }, 5000,);
@@ -565,7 +594,7 @@ export async function removeTorrent(infoHash: string,): Promise<void> {
   }
   await torrentsDb.delete(infoHash,);
   if (engineSignal.value === "webtorrent") {
-    streamManager.unregisterTorrent(infoHash);
+    streamManager.unregisterTorrent(infoHash,);
   }
   dbg("removeTorrent: done",);
 }

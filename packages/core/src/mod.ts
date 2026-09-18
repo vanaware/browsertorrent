@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/mod.ts
+// /browsertorrent/monorepo/webtorrent/src/mod.ts
 import { TypedEventTarget, } from "./utils/event-target.ts";
 import {
   type ParsedTorrent,
@@ -7,7 +7,7 @@ import {
 } from "./utils/parse-torrent.ts";
 import { Torrent, } from "./core/torrent.ts";
 import { Swarm, } from "./network/swarm.ts";
-import { generateLocoPeerId, } from "./utils/peerid.ts";
+import { generateBrowserTorrentPeerId, } from "./utils/peerid.ts";
 import { OPFSChunkStore, } from "./storage/opfs-chunk-store.ts";
 import { type ChunkStore, } from "./storage/opfs-chunk-store.ts";
 import { MemoryChunkStore, } from "./storage/memory-chunk-store.ts";
@@ -173,7 +173,7 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
         peerIdBuffer = opts.peerId;
       }
     } else {
-      peerIdBuffer = generateLocoPeerId();
+      peerIdBuffer = generateBrowserTorrentPeerId();
     }
 
     this.peerIdBuffer = peerIdBuffer;
@@ -410,7 +410,10 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
 
     swarm.on("metadata", async (e: any,) => {
       const metadataBuffer = e.detail?.metadata || e.metadata || e;
-      console.log("[Client] swarm metadata event fired, size:", metadataBuffer?.length);
+      console.log(
+        "[Client] swarm metadata event fired, size:",
+        metadataBuffer?.length,
+      );
       if (metadataBuffer instanceof Uint8Array) {
         await torrent.setMetadata(metadataBuffer,);
       }
@@ -757,7 +760,8 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
     } else if (item instanceof Uint8Array) {
       // Ensure non-shared ArrayBuffer for OPFS compatibility.
       data = item.buffer instanceof ArrayBuffer &&
-          !(typeof SharedArrayBuffer !== "undefined" && item.buffer instanceof SharedArrayBuffer)
+          !(typeof SharedArrayBuffer !== "undefined" &&
+            item.buffer instanceof SharedArrayBuffer)
         ? item
         : new Uint8Array(item,);
       name = "file";
@@ -767,7 +771,8 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
       name = String(item.name,);
       data = item.data instanceof Uint8Array
         ? (item.data.buffer instanceof ArrayBuffer &&
-            !(typeof SharedArrayBuffer !== "undefined" && item.data.buffer instanceof SharedArrayBuffer)
+            !(typeof SharedArrayBuffer !== "undefined" &&
+              item.data.buffer instanceof SharedArrayBuffer)
           ? item.data
           : new Uint8Array(item.data,))
         : new Uint8Array(item.data as ArrayBuffer,);
@@ -785,7 +790,7 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
       throw new Error("OPFS not available: cannot seed from this environment",);
     }
     const root = await navigator.storage.getDirectory();
-    return await root.getDirectoryHandle("loco-seed", { create: true, },);
+    return await root.getDirectoryHandle("browsertorrent-seed", { create: true, },);
   }
 
   async remove(infoHash: string, destroyStore = false,): Promise<void> {
@@ -880,8 +885,8 @@ export { Piece, } from "./core/piece.ts";
 export { parseTorrent, } from "./utils/parse-torrent.ts";
 export {
   decodePeerId,
-  generateLocoPeerId,
-  LOCO_PEER_ID_PREFIX,
+  generateBrowserTorrentPeerId,
+  BT_PEER_ID_PREFIX,
 } from "./utils/peerid.ts";
 export { UtMetadata, } from "./extensions/ut-metadata.ts";
 export {

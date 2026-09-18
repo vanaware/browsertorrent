@@ -1,11 +1,11 @@
-// /loco/monorepo/webtorrent/src/network/tracker.ts
+// /browsertorrent/monorepo/webtorrent/src/network/tracker.ts
 /**
  * BitTorrent tracker clients (HTTP + WebSocket).
  *
  * Adaptado de deno-torrent/torrent-tracker/ (http.ts, compact.ts, types.ts,
  * request.ts). Browser-first: `fetch`-based, sem transporte UDP.
  *
- * Mudanças em relação à versão anterior do Loco:
+ * Mudanças em relação à versão anterior do BrowserTorrent:
  * - `info_hash`/`peer_id` agora usam percent-encoding byte-a-byte (BEP 3).
  *   A versão anterior usava `URLSearchParams` com binary string, que corrompia
  *   bytes > 0x7F ao re-encodar como UTF-8.
@@ -499,7 +499,7 @@ export class HttpTracker extends TypedEventTarget<TrackerEvents>
     try {
       const response = await fetch(url, {
         signal: this.abortController.signal,
-        headers: { "User-Agent": "Loco-WebTorrent/0.1.0", },
+        headers: { "User-Agent": "BrowserTorrent-WebTorrent/0.1.0", },
       },);
 
       if (!response.ok) {
@@ -609,7 +609,7 @@ export async function scrapeTracker(
   try {
     const response = await fetch(url.toString(), {
       signal: controller.signal,
-      headers: { "User-Agent": "Loco-WebTorrent/0.1.0", },
+      headers: { "User-Agent": "BrowserTorrent-WebTorrent/0.1.0", },
     },);
 
     if (!response.ok) {

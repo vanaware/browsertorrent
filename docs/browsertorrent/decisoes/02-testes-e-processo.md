@@ -42,7 +42,7 @@ deno test -P
 
 ## Regra de desenvolvimento incremental
 
-Não implementar grandes blocos de código de uma única vez.
+Não implementar grandes bbrowsertorrents de código de uma única vez.
 
 Cada fase deverá ser dividida em pequenas tarefas.
 

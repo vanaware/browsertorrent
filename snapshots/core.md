@@ -1,6 +1,6 @@
 > **INSTRUÇÃO PARA A IA:** 
-> O texto abaixo contém o desenvolvimento principal de @browsertorrent/core
-> O projeto é o **BrowserTorrent [vdev] ** estruturado em blocos. 
+> O texto abaixo contém o desenvolvimento principal de @vanaware/browsertorrent
+> O projeto é o **BrowserTorrent [vdev] ** estruturado em bbrowsertorrents. 
 > Cada arquivo começa com um título indicando seu caminho relativo exato (ex: `## Arquivo: src/main.ts`).
 > Sempre que sugerir alterações, indique claramente qual arquivo deve ser modificado com base nesses caminhos e forneça o novo código completo do arquivo.
 
@@ -15,7 +15,7 @@ Gerado automaticamente em: 9/12/2026, 8:09:18 PM
 ## Arquivo: `packages/core/tests/bencode_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/bencode_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/bencode_test.ts
 
 import { assertEquals, assertThrows } from "@std/assert";
 import {
@@ -303,7 +303,7 @@ Deno.test("bencode: roundtrip with Map and binary keys", () => {
 ## Arquivo: `packages/core/tests/bit-array_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/bit-array_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/bit-array_test.ts
 
 import { assertEquals, assertThrows } from "@std/assert";
 import { BitArray, type BitOrder } from "../src/utils/bit-array.ts";
@@ -474,7 +474,7 @@ Deno.test("BitArray: bytes getter returns copy", () => {
 ## Arquivo: `packages/core/tests/bitfield_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/bitfield_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/bitfield_test.ts
 
 import { assertEquals, assertThrows } from "@std/assert";
 import { Bitfield } from "../src/core/bitfield.ts";
@@ -944,7 +944,7 @@ Deno.test("InvalidByteCountError — carries operation, count, maximum", () => {
 ## Arquivo: `packages/core/tests/chunk-store_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/chunk-store_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/chunk-store_test.ts
 
 import { assertEquals, assertRejects } from "@std/assert";
 import { MemoryChunkStore } from "../src/storage/memory-chunk-store.ts";
@@ -1270,7 +1270,7 @@ Deno.test("isSha1: wrong length", () => {
 ## Arquivo: `packages/core/tests/errors_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/errors_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/errors_test.ts
 
 import { assertEquals } from "@std/assert";
 import {
@@ -1363,7 +1363,7 @@ Deno.test("RequestRejectedError — custom code overrides default", () => {
 ## Arquivo: `packages/core/tests/extension-host_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/extension-host_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/extension-host_test.ts
 
 import { assertEquals, assertRejects, assertThrows } from "@std/assert";
 import {
@@ -1514,7 +1514,7 @@ Deno.test("ExtensionHost: setHandshakeField with undefined removes field", () =>
 });
 
 Deno.test("ExtensionHost: constructor sets client/port/reqq fields", () => {
-  const { host, sent } = createMockHost({ client: "Loco/1.0", port: 6881 });
+  const { host, sent } = createMockHost({ client: "BrowserTorrent/1.0", port: 6881 });
   host.use(new TestExtension());
   host.sendHandshake();
   // The sent handshake should include v and p
@@ -1522,7 +1522,7 @@ Deno.test("ExtensionHost: constructor sets client/port/reqq fields", () => {
   const [id, payload] = sent[0]!;
   assertEquals(id, 0); // extended handshake ID = 0
   const decoded = decode(payload, { useMap: true }) as Map<string, any>;
-  assertEquals(decoded.get("v"), "Loco/1.0");
+  assertEquals(decoded.get("v"), "BrowserTorrent/1.0");
   assertEquals(decoded.get("p"), 6881);
 });
 
@@ -1833,7 +1833,7 @@ Deno.test("ExtensionHost: constructor rejects invalid maxPayloadLength", () => {
 ## Arquivo: `packages/core/tests/file_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/file_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/file_test.ts
 
 import { assertEquals, assertRejects, assertThrows } from "@std/assert";
 import { File } from "../src/core/file.ts";
@@ -2208,14 +2208,14 @@ Deno.test("file: streamURL returns valid SW URL with all fields", () => {
     name: "movie.mp4",
     infoHash: "a".repeat(40),
     fileIndex: 2,
-    scope: "/loco/",
+    scope: "/browsertorrent/",
   });
 
   const url = file.streamURL();
   assertEquals(url.includes("a".repeat(40)), true);
   assertEquals(url.includes("/2/"), true);
   assertEquals(url.includes("movie.mp4"), true);
-  assertEquals(url.startsWith("/loco/webtorrent/"), true);
+  assertEquals(url.startsWith("/browsertorrent/webtorrent/"), true);
 });
 
 Deno.test("file: streamURL uses default scope", () => {
@@ -2561,7 +2561,7 @@ Deno.test("file: arrayBuffer throws RangeError for invalid range", async () => {
 ## Arquivo: `packages/core/tests/handshake_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/handshake_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/handshake_test.ts
 
 import { assertEquals, assertThrows } from "@std/assert";
 import {
@@ -2591,7 +2591,7 @@ Deno.test("handshake: encode produces 68 bytes", () => {
 
 Deno.test("handshake: encode with string peerId", () => {
   const infoHash = new Uint8Array(20).fill(0x01);
-  const peerId = "-LO0100-123456789012"; // exactly 20 bytes
+  const peerId = "-BT0100-123456789012"; // exactly 20 bytes
   const bytes = encodeHandshake({ infoHash, peerId });
   assertEquals(bytes.length, HANDSHAKE_LENGTH);
   assertEquals(
@@ -2815,7 +2815,7 @@ Deno.test("handshake: peerId at bytes 48-67", () => {
 ## Arquivo: `packages/core/tests/hasher_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/hasher_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/hasher_test.ts
 
 import { assertEquals } from "@std/assert";
 import {
@@ -3037,7 +3037,7 @@ Deno.test("md5: returns correct hash for longer input", () => {
 ## Arquivo: `packages/core/tests/magnet_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/magnet_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/magnet_test.ts
 
 import { assertEquals, assertThrows } from "@std/assert";
 import {
@@ -3375,7 +3375,7 @@ function encodeHexFromBytes(bytes: Uint8Array): string {
 ## Arquivo: `packages/core/tests/message_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/message_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/message_test.ts
 
 import { assertEquals, assertThrows } from "@std/assert";
 import {
@@ -3837,7 +3837,7 @@ Deno.test("message: request encodes with correct structure", () => {
 ## Arquivo: `packages/core/tests/metainfo-parser_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/metainfo-parser_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/metainfo-parser_test.ts
 
 import { assertEquals, assertRejects } from "@std/assert";
 import { encode, type BencodeValue } from "../src/utils/bencode.ts";
@@ -3876,7 +3876,7 @@ function v1Buffer(kind: "single" | "multi"): Uint8Array {
     "announce-list": [
       ["udp://tracker.example.com:6969"],
     ],
-    "created by": "loco-test",
+    "created by": "browsertorrent-test",
     "creation date": 1700000000,
   });
 }
@@ -4030,7 +4030,7 @@ Deno.test("metainfo-parser: enforces maxBytes limit", async () => {
 ## Arquivo: `packages/core/tests/mod_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/mod_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/mod_test.ts
 
 import { assertEquals, assertRejects } from "@std/assert";
 import { WebTorrent } from "../src/mod.ts";
@@ -4369,7 +4369,7 @@ Deno.test("webtorrent: 'add' and 'remove' fire on torrent lifecycle", async () =
 ## Arquivo: `packages/core/tests/net_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/net_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/net_test.ts
 
 import { assertEquals } from "@std/assert";
 import {
@@ -4614,7 +4614,7 @@ Deno.test("deduplicatePeers: preserves first occurrence order", () => {
 ## Arquivo: `packages/core/tests/parse-torrent_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/parse-torrent_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/parse-torrent_test.ts
 
 // ... (mantenha todo o resto do arquivo igual)
 import { assertEquals, assertRejects } from "@std/assert";
@@ -4660,7 +4660,7 @@ function createFakeTorrentBuffer(isMultiFile = false): Uint8Array {
     ],
     "url-list": [TEXT_ENCODER.encode("https://webtorrent.io/torrents/")],
     comment: TEXT_ENCODER.encode("Test torrent"),
-    "created by": TEXT_ENCODER.encode("Loco WebTorrent"),
+    "created by": TEXT_ENCODER.encode("BrowserTorrent WebTorrent"),
   };
 
   return encode(torrentObj);
@@ -4743,7 +4743,7 @@ Deno.test("parse-torrent: returns same object if already parsed", async () => {
 ## Arquivo: `packages/core/tests/peer_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/peer_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/peer_test.ts
 
 import { assertEquals, assertExists } from "@std/assert";
 import { Peer } from "../src/network/peer.ts";
@@ -4966,13 +4966,13 @@ Deno.test("peer: emits error on connection failure", async () => {
 ## Arquivo: `packages/core/tests/peerid_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/peerid_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/peerid_test.ts
 
 import { assertEquals } from "@std/assert";
 import {
   decodePeerId,
-  generateLocoPeerId,
-  LOCO_PEER_ID_PREFIX,
+  generateBrowserTorrentPeerId,
+  BT_PEER_ID_PREFIX,
   isAzStyle,
   isShadowStyle,
   getPeerIdClientName,
@@ -4980,25 +4980,25 @@ import {
 
 import { generateRandomString } from "../src/crypto/random.ts";
 
-Deno.test("peerid: LOCO_PEER_ID_PREFIX is correct length", () => {
-  assertEquals(LOCO_PEER_ID_PREFIX, "-LO0100-");
-  assertEquals(LOCO_PEER_ID_PREFIX.length, 8);
+Deno.test("peerid: BT_PEER_ID_PREFIX is correct length", () => {
+  assertEquals(BT_PEER_ID_PREFIX, "-BT0100-");
+  assertEquals(BT_PEER_ID_PREFIX.length, 8);
 });
 
-Deno.test("peerid: generateLocoPeerId returns exactly 20 bytes", () => {
-  const peerId = generateLocoPeerId();
+Deno.test("peerid: generateBrowserTorrentPeerId returns exactly 20 bytes", () => {
+  const peerId = generateBrowserTorrentPeerId();
   assertEquals(peerId.length, 20);
   
   const str = new TextDecoder().decode(peerId);
-  assertEquals(str.startsWith(LOCO_PEER_ID_PREFIX), true);
+  assertEquals(str.startsWith(BT_PEER_ID_PREFIX), true);
 });
 
-Deno.test("peerid: decodePeerId correctly parses Loco PeerId", () => {
-  const peerId = generateLocoPeerId();
+Deno.test("peerid: decodePeerId correctly parses BrowserTorrent PeerId", () => {
+  const peerId = generateBrowserTorrentPeerId();
   const clientInfo = decodePeerId(peerId);
   
   assertEquals(clientInfo?.code, "LO");
-  assertEquals(clientInfo?.name, "Loco");
+  assertEquals(clientInfo?.name, "BrowserTorrent");
   // "0100" -> major: 0, minor: 1, patch: parseInt("00") -> "0"
   assertEquals(clientInfo?.version, "0.1.0");
   assertEquals(clientInfo?.style, "azureus");
@@ -5080,7 +5080,7 @@ Deno.test("peerid: decodePeerId handles short input gracefully", () => {
 ## Arquivo: `packages/core/tests/piece_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/piece_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/piece_test.ts
 
 import { assertEquals } from "@std/assert";
 import { Piece } from "../src/core/piece.ts";
@@ -5131,7 +5131,7 @@ Deno.test("piece: toString describes piece state", () => {
 ## Arquivo: `packages/core/tests/server_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/server_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/server_test.ts
 
 import { assertEquals, assertRejects, assertThrows } from "@std/assert";
 import {
@@ -5777,7 +5777,7 @@ Deno.test('SimpleBuffer — reset clears all data', () => {
 ## Arquivo: `packages/core/tests/stream-manager_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/stream-manager_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/stream-manager_test.ts
 
 import { assertEquals, assertThrows } from "@std/assert";
 import {
@@ -5924,7 +5924,7 @@ Deno.test("parseStreamURL: normalizes infoHash to lowercase", () => {
 ## Arquivo: `packages/core/tests/swarm_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/swarm_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/swarm_test.ts
 
 import { assertEquals } from "@std/assert";
 import { Swarm } from "../src/network/swarm.ts";
@@ -6082,7 +6082,7 @@ Deno.test("swarm: duplicate peers are rejected", () => {
 ## Arquivo: `packages/core/tests/torrent-generator_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/torrent-generator_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/torrent-generator_test.ts
 /**
  * Tests for the OPFS torrent generator.
  *
@@ -6386,9 +6386,9 @@ Deno.test("buildPieceFiles: file starting exactly at piece boundary needs no pad
 // getDefaultCreatedBy
 // ─────────────────────────────────────────────────────────────────────────────
 
-Deno.test("getDefaultCreatedBy: returns a loco-torrent-generator version string", () => {
+Deno.test("getDefaultCreatedBy: returns a browsertorrent-torrent-generator version string", () => {
   const result = getDefaultCreatedBy();
-  assertEquals(result.startsWith("loco-torrent-generator@"), true);
+  assertEquals(result.startsWith("browsertorrent-torrent-generator@"), true);
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -6780,7 +6780,7 @@ Deno.test("generateTorrent: created-by and creation-date are present", async () 
 ## Arquivo: `packages/core/tests/torrent_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/torrent_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/torrent_test.ts
 
 import { assertEquals, assertRejects } from "@std/assert";
 import { Torrent } from "../src/core/torrent.ts";
@@ -6953,7 +6953,7 @@ Deno.test("torrent: integration - setMetadata dynamically updates torrent state 
   mockPieceHashes.fill(1);
   
   const infoDict = {
-    name: "loco-update-v2.zip",
+    name: "browsertorrent-update-v2.zip",
     length: 2048,
     "piece length": 1024,
     pieces: mockPieceHashes,
@@ -6963,22 +6963,22 @@ Deno.test("torrent: integration - setMetadata dynamically updates torrent state 
   let metadataEventEmitted = false;
   torrent.on("metadata", (e: any) => {
     metadataEventEmitted = true;
-    assertEquals(e.detail.name, "loco-update-v2.zip");
+    assertEquals(e.detail.name, "browsertorrent-update-v2.zip");
     assertEquals(e.detail.length, 2048);
     assertEquals(e.detail.files.length, 1);
-    assertEquals(e.detail.files[0].name, "loco-update-v2.zip");
+    assertEquals(e.detail.files[0].name, "browsertorrent-update-v2.zip");
   });
 
   const success = await torrent.setMetadata(infoBuffer);
 
   assertEquals(success, true);
   assertEquals(metadataEventEmitted, true);
-  assertEquals(torrent.name, "loco-update-v2.zip");
+  assertEquals(torrent.name, "browsertorrent-update-v2.zip");
   assertEquals(torrent.length, 2048);
   assertEquals(torrent.pieceLength, 1024);
   assertEquals(torrent.numPieces, 2);
   assertEquals(torrent.files.length, 1);
-  assertEquals(torrent.files[0]!.path, "loco-update-v2.zip");
+  assertEquals(torrent.files[0]!.path, "browsertorrent-update-v2.zip");
   assertEquals(torrent.progress, 0);
 });
 
@@ -7123,14 +7123,14 @@ Deno.test("torrent: created returns undefined when no creation date", async () =
 Deno.test("torrent: createdBy returns the creator string", async () => {
   const parsed: ParsedTorrent = {
     ...await createFakeParsedTorrent(),
-    createdBy: "loco-torrent-generator/1.0.0",
+    createdBy: "browsertorrent-torrent-generator/1.0.0",
   };
   const store = new MemoryChunkStore({ chunkLength: parsed.pieceLength, length: parsed.length });
   const torrent = new Torrent(parsed, { store });
 
   await new Promise<void>((resolve) => torrent.on("ready", () => resolve()));
 
-  assertEquals(torrent.createdBy, "loco-torrent-generator/1.0.0");
+  assertEquals(torrent.createdBy, "browsertorrent-torrent-generator/1.0.0");
 });
 
 Deno.test("torrent: createdBy returns undefined when not set", async () => {
@@ -7318,7 +7318,7 @@ Deno.test("torrent: rescanFiles() does not double-count pieces", async () => {
 ## Arquivo: `packages/core/tests/tracker_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/tracker_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/tracker_test.ts
 
 import {
   assertEquals,
@@ -7395,7 +7395,7 @@ Deno.test("tracker: percentEncodeBytes encodes byte-a-byte", () => {
 Deno.test("tracker: buildAnnounceUrl preserves binary identity params", () => {
   const infoHash = new Uint8Array(20);
   for (let i = 0; i < 20; i++) infoHash[i] = i * 13 % 256;
-  const peerId = new TextEncoder().encode("-LO0100-abcdefghijkl");
+  const peerId = new TextEncoder().encode("-BT0100-abcdefghijkl");
 
   const url = buildAnnounceUrl("http://tracker.example.com/announce", {
     infoHash,
@@ -7629,7 +7629,7 @@ Deno.test("tracker: parseHttpTrackerResponse rejects invalid responses", () => {
 Deno.test("tracker: HttpTracker.announce uses byte-exact URL and parses response", async () => {
   const infoHash = new Uint8Array(20);
   for (let i = 0; i < 20; i++) infoHash[i] = 255 - i;
-  const peerId = new TextEncoder().encode("-LO0100-abcdefghijkl");
+  const peerId = new TextEncoder().encode("-BT0100-abcdefghijkl");
 
   let requestedUrl: URL | null = null;
   const originalFetch = globalThis.fetch;
@@ -7908,7 +7908,7 @@ Deno.test("scrapeTracker: encodes info_hash params as percent-encoded bytes", as
 ## Arquivo: `packages/core/tests/ut-metadata_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/ut-metadata_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/ut-metadata_test.ts
 
 import { assertEquals } from "@std/assert";
 import { UtMetadata } from "../src/extensions/ut-metadata.ts";
@@ -7979,7 +7979,7 @@ Deno.test("ut-metadata: setMetadata marks as complete", () => {
 ## Arquivo: `packages/core/tests/ut-pex_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/ut-pex_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/ut-pex_test.ts
 //
 // Testes para a extensão ut_pex (BEP 11 - Peer Exchange)
 
@@ -8297,7 +8297,7 @@ Deno.test("ut_pex: UtPexExtension lida com payload inválido gracefully", () => 
 ## Arquivo: `packages/core/tests/utils_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/utils_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/utils_test.ts
 import { assertEquals, assertThrows } from "@std/assert";
 import {
   alloc,
@@ -8364,7 +8364,7 @@ Deno.test("crypto: generateId returns 40 char hex string", () => {
 ## Arquivo: `packages/core/tests/wire_test.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/tests/wire_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/wire_test.ts
 
 import { assertEquals, assertThrows } from "@std/assert";
 import { Wire, Transport, WireState } from "../src/core/wire.ts";
@@ -9338,7 +9338,7 @@ Deno.test("wire: type is readonly getter — always returns 'webrtc'", () => {
 ## Arquivo: `packages/core/src/core/bitfield.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/core/bitfield.ts
+// /browsertorrent/monorepo/webtorrent/src/core/bitfield.ts
 
 import { BitfieldError } from "../utils/errors.ts";
 
@@ -9455,7 +9455,7 @@ export class Bitfield {
 ## Arquivo: `packages/core/src/core/constants.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/core/constants.ts
+// /browsertorrent/monorepo/webtorrent/src/core/constants.ts
 /**
  * BitTorrent peer wire protocol constants, message IDs, and limits.
  *
@@ -9534,7 +9534,7 @@ export enum HandshakeExtension {
 ## Arquivo: `packages/core/src/core/extension-host.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/core/extension-host.ts
+// /browsertorrent/monorepo/webtorrent/src/core/extension-host.ts
 /**
  * BEP 10 Extension Protocol host — negotiates, maps, and dispatches
  * extension messages for one peer connection.
@@ -9913,7 +9913,7 @@ function findNameById(
 ## Arquivo: `packages/core/src/core/extension.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/core/extension.ts
+// /browsertorrent/monorepo/webtorrent/src/core/extension.ts
 
 import { TypedEventTarget } from "../utils/event-target.ts";
 
@@ -9953,7 +9953,7 @@ export abstract class Extension extends TypedEventTarget<ExtensionEvents> {
 ## Arquivo: `packages/core/src/core/file.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/core/file.ts
+// /browsertorrent/monorepo/webtorrent/src/core/file.ts
 
 import { TypedEventTarget } from "../utils/event-target.ts";
 import { Piece } from "./piece.ts";
@@ -10481,7 +10481,7 @@ export class File extends TypedEventTarget<FileEvents> {
 ## Arquivo: `packages/core/src/core/handshake.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/core/handshake.ts
+// /browsertorrent/monorepo/webtorrent/src/core/handshake.ts
 /**
  * BitTorrent peer wire handshake codec with named reserved-bit extensions.
  *
@@ -10633,7 +10633,7 @@ function assertTwentyBytes(name: string, bytes: Uint8Array): void {
 ## Arquivo: `packages/core/src/core/message.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/core/message.ts
+// /browsertorrent/monorepo/webtorrent/src/core/message.ts
 /**
  * Complete BitTorrent peer wire message codec.
  *
@@ -11163,7 +11163,7 @@ function assertLength(name: string, body: Uint8Array, expected: number): void {
 ## Arquivo: `packages/core/src/core/piece.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/core/piece.ts
+// /browsertorrent/monorepo/webtorrent/src/core/piece.ts
 
 /**
  * Represents a single piece within a torrent.
@@ -11219,7 +11219,7 @@ export class Piece {
 ## Arquivo: `packages/core/src/core/torrent.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/core/torrent.ts
+// /browsertorrent/monorepo/webtorrent/src/core/torrent.ts
 
 import { TypedEventTarget } from "../utils/event-target.ts";
 import { ParsedTorrent, ParsedTorrentFile } from "../utils/parse-torrent.ts";
@@ -11809,11 +11809,11 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
 ## Arquivo: `packages/core/src/core/wire.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/core/wire.ts
+// /browsertorrent/monorepo/webtorrent/src/core/wire.ts
 /**
  * BitTorrent peer wire protocol — event-driven facade with robust internals.
  *
- * Preserves the existing `WireEvents` API consumed by the rest of Loco, while
+ * Preserves the existing `WireEvents` API consumed by the rest of BrowserTorrent, while
  * adding the security, validation, and lifecycle management from deno-torrent's
  * `peer_wire.ts`:
  *
@@ -11830,7 +11830,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
  * - ExtensionHost BEP 10 integration
  *
  * Adaptado de deno-torrent/peerwire/peer_wire.ts para o modelo
- * Transport síncrono + buffer do Loco.
+ * Transport síncrono + buffer do BrowserTorrent.
  */
 
 import { TypedEventTarget } from "../utils/event-target.ts";
@@ -13029,7 +13029,7 @@ function nonNegativeOption(name: string, value: number | undefined, fallback: nu
 ## Arquivo: `packages/core/src/crypto/hasher.ts`
 
 ````ts
-// /loco/monorepo/webtorrent/src/crypto/hasher.ts
+// /browsertorrent/monorepo/webtorrent/src/crypto/hasher.ts
 /**
  * Cryptographic hash helpers. One-shot SHA algorithms are backed by the
  * Web Crypto API (`crypto.subtle`); incremental SHA-1 is a bounded-memory
@@ -13363,7 +13363,7 @@ export function sha1Sync(_data: Uint8Array): string {
 ## Arquivo: `packages/core/src/crypto/random.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/crypto/random.ts
+// /browsertorrent/monorepo/webtorrent/src/crypto/random.ts
 /**
  * Geração de bytes aleatórios criptograficamente seguros.
  * Substitui o `randombytes` do Node.js.
@@ -13412,7 +13412,7 @@ export function generateRandomString(length: number): string {
 ## Arquivo: `packages/core/src/extensions/ut-metadata.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/extensions/ut-metadata.ts
+// /browsertorrent/monorepo/webtorrent/src/extensions/ut-metadata.ts
 
 import { Extension } from "../core/extension.ts";
 import { encode, decode, BencodeDict } from "../utils/bencode.ts";
@@ -13749,9 +13749,9 @@ export class UtMetadata extends Extension {
 ## Arquivo: `packages/core/src/extensions/ut-pex.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/extensions/ut-pex.ts
+// /browsertorrent/monorepo/webtorrent/src/extensions/ut-pex.ts
 //
-// Implementação do BEP 11 (ut_pex - Peer Exchange) para o @loco/webtorrent.
+// Implementação do BEP 11 (ut_pex - Peer Exchange) para o @vanaware/browsertorrent.
 // Adaptado do deno-torrent para nosso ecossistema Browser/Deno.
 //
 // O ut_pex permite que peers compartilhem listas de outros peers diretamente,
@@ -14059,12 +14059,12 @@ function optionalBytes(
 ## Arquivo: `packages/core/src/mod.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/mod.ts
+// /browsertorrent/monorepo/webtorrent/src/mod.ts
 import { TypedEventTarget } from "./utils/event-target.ts";
 import { parseTorrent, type ParsedTorrent } from "./utils/parse-torrent.ts";
 import { Torrent } from "./core/torrent.ts";
 import { Swarm } from "./network/swarm.ts";
-import { generateLocoPeerId } from "./utils/peerid.ts";
+import { generateBrowserTorrentPeerId } from "./utils/peerid.ts";
 import { OPFSChunkStore } from "./storage/opfs-chunk-store.ts";
 import { MemoryChunkStore } from "./storage/memory-chunk-store.ts";
 import { encode, decode } from "./utils/bencode.ts";
@@ -14212,7 +14212,7 @@ export class WebTorrent extends TypedEventTarget<WebTorrentEvents> {
         peerIdBuffer = opts.peerId;
       }
     } else {
-      peerIdBuffer = generateLocoPeerId();
+      peerIdBuffer = generateBrowserTorrentPeerId();
     }
 
     this.peerIdBuffer = peerIdBuffer;
@@ -14700,7 +14700,7 @@ export class WebTorrent extends TypedEventTarget<WebTorrentEvents> {
       throw new Error("OPFS not available: cannot seed from this environment");
     }
     const root = await navigator.storage.getDirectory();
-    return await root.getDirectoryHandle("loco-seed", { create: true });
+    return await root.getDirectoryHandle("browsertorrent-seed", { create: true });
   }
 
   async remove(infoHash: string, destroyStore = false): Promise<void> {
@@ -14784,7 +14784,7 @@ export { Wire } from "./core/wire.ts";
 export { File } from "./core/file.ts";
 export { Piece } from "./core/piece.ts";
 export { parseTorrent } from "./utils/parse-torrent.ts";
-export { decodePeerId, generateLocoPeerId, LOCO_PEER_ID_PREFIX } from "./utils/peerid.ts";
+export { decodePeerId, generateBrowserTorrentPeerId, BT_PEER_ID_PREFIX } from "./utils/peerid.ts";
 export { UtMetadata } from "./extensions/ut-metadata.ts";
 export { UtPexExtension, encodePexUpdate, decodePexUpdate, PexPeerFlag } from "./extensions/ut-pex.ts";
 export type { ParsedTorrent } from "./utils/parse-torrent.ts";
@@ -14821,7 +14821,7 @@ export type {
 ## Arquivo: `packages/core/src/network/peer.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/network/peer.ts
+// /browsertorrent/monorepo/webtorrent/src/network/peer.ts
 
 import { TypedEventTarget } from "../utils/event-target.ts";
 import { Wire, Transport } from "../core/wire.ts";
@@ -15160,7 +15160,7 @@ export class Peer extends TypedEventTarget<PeerEvents> {
 ## Arquivo: `packages/core/src/network/swarm.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/network/swarm.ts
+// /browsertorrent/monorepo/webtorrent/src/network/swarm.ts
 
 import { TypedEventTarget } from "../utils/event-target.ts";
 import { Peer } from "./peer.ts";
@@ -15517,14 +15517,14 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
 ## Arquivo: `packages/core/src/network/tracker.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/network/tracker.ts
+// /browsertorrent/monorepo/webtorrent/src/network/tracker.ts
 /**
  * BitTorrent tracker clients (HTTP + WebSocket).
  *
  * Adaptado de deno-torrent/torrent-tracker/ (http.ts, compact.ts, types.ts,
  * request.ts). Browser-first: `fetch`-based, sem transporte UDP.
  *
- * Mudanças em relação à versão anterior do Loco:
+ * Mudanças em relação à versão anterior do BrowserTorrent:
  * - `info_hash`/`peer_id` agora usam percent-encoding byte-a-byte (BEP 3).
  *   A versão anterior usava `URLSearchParams` com binary string, que corrompia
  *   bytes > 0x7F ao re-encodar como UTF-8.
@@ -15912,7 +15912,7 @@ export class HttpTracker implements Tracker {
     try {
       const response = await fetch(url, {
         signal: this.abortController.signal,
-        headers: { "User-Agent": "Loco-WebTorrent/0.1.0" },
+        headers: { "User-Agent": "BrowserTorrent-WebTorrent/0.1.0" },
       });
 
       if (!response.ok) {
@@ -16008,7 +16008,7 @@ export async function scrapeTracker(
   try {
     const response = await fetch(url.toString(), {
       signal: controller.signal,
-      headers: { "User-Agent": "Loco-WebTorrent/0.1.0" },
+      headers: { "User-Agent": "BrowserTorrent-WebTorrent/0.1.0" },
     });
 
     if (!response.ok) {
@@ -16175,7 +16175,7 @@ export function createTracker(announceUrl: string, opts: TrackerOptions): Tracke
 ## Arquivo: `packages/core/src/server/server.ts`
 
 ````ts
-// /loco/monorepo/webtorrent/src/server/server.ts
+// /browsertorrent/monorepo/webtorrent/src/server/server.ts
 
 import type { File } from "../core/file.ts";
 import type { Torrent } from "../core/torrent.ts";
@@ -16868,7 +16868,7 @@ export function unregisterTorrentFiles(infoHash: string): void {
 ## Arquivo: `packages/core/src/server/stream-manager.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/server/stream-manager.ts
+// /browsertorrent/monorepo/webtorrent/src/server/stream-manager.ts
 
 import type { File } from "../core/file.ts";
 
@@ -17048,7 +17048,7 @@ export function parseStreamURL(url: string, scope: string): ParsedStreamURL | nu
 ## Arquivo: `packages/core/src/storage/memory-chunk-store.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/storage/memory-chunk-store.ts
+// /browsertorrent/monorepo/webtorrent/src/storage/memory-chunk-store.ts
 
 import type { ChunkStore } from "./opfs-chunk-store.ts";
 
@@ -17172,7 +17172,7 @@ export class MemoryChunkStore implements ChunkStore {
 ## Arquivo: `packages/core/src/storage/opfs-chunk-store.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/storage/opfs-chunk-store.ts
+// /browsertorrent/monorepo/webtorrent/src/storage/opfs-chunk-store.ts
 
 import { MemoryChunkStore } from "./memory-chunk-store.ts";
 
@@ -17367,7 +17367,7 @@ export class OPFSChunkStore implements ChunkStore {
 ## Arquivo: `packages/core/src/torrent-generator/generator.ts`
 
 ````ts
-// /loco/monorepo/webtorrent/src/torrent-generator/generator.ts
+// /browsertorrent/monorepo/webtorrent/src/torrent-generator/generator.ts
 /**
  * OPFS-backed BitTorrent `.torrent` file generator.
  *
@@ -17411,7 +17411,7 @@ import {
  *
  * @example Multi-file torrent from an OPFS directory
  * ```ts
- * import { generateTorrent } from "@loco/webtorrent/torrent-generator";
+ * import { generateTorrent } from "@vanaware/browsertorrent/torrent-generator";
  *
  * const rootHandle = await navigator.storage.getDirectory();
  * // ... populate rootHandle with files ...
@@ -17561,7 +17561,7 @@ function inferRootName(entries: OPFSFileEntry[]): string {
 ## Arquivo: `packages/core/src/torrent-generator/mod.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/torrent-generator/mod.ts
+// /browsertorrent/monorepo/webtorrent/src/torrent-generator/mod.ts
 /**
  * Public surface of the OPFS-backed torrent generator.
  */
@@ -17595,7 +17595,7 @@ export type {
 ## Arquivo: `packages/core/src/torrent-generator/opfs-reader.ts`
 
 ````ts
-// /loco/monorepo/webtorrent/src/torrent-generator/opfs-reader.ts
+// /browsertorrent/monorepo/webtorrent/src/torrent-generator/opfs-reader.ts
 /**
  * Sequential multi-file reader for OPFS file handles.
  *
@@ -17760,7 +17760,7 @@ export class OPFSMultiFileReader {
 ## Arquivo: `packages/core/src/torrent-generator/opfs-walker.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/torrent-generator/opfs-walker.ts
+// /browsertorrent/monorepo/webtorrent/src/torrent-generator/opfs-walker.ts
 /**
  * Recursively walks an OPFS directory handle, returning an ordered list
  * of files with their relative paths and sizes.
@@ -17854,7 +17854,7 @@ export async function walkOPFSDir(
 ## Arquivo: `packages/core/src/torrent-generator/types.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/torrent-generator/types.ts
+// /browsertorrent/monorepo/webtorrent/src/torrent-generator/types.ts
 /**
  * Types for the OPFS-backed torrent generator.
  *
@@ -17972,7 +17972,7 @@ export type { BencodeValue };
 ## Arquivo: `packages/core/src/torrent-generator/util.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/torrent-generator/util.ts
+// /browsertorrent/monorepo/webtorrent/src/torrent-generator/util.ts
 /**
  * Pure helper functions for the OPFS torrent generator.
  *
@@ -18185,13 +18185,13 @@ async function sha1sumAligned(files: OPFSFileEntry[], pieceSize: number): Promis
  * Returns the default `"created by"` string embedded in generated torrents.
  *
  * In the browser we cannot call `git describe --tags`.  The version is
- * hardcoded as `"loco-torrent-generator@1.0.0"` — callers can override via
+ * hardcoded as `"browsertorrent-torrent-generator@1.0.0"` — callers can override via
  * the `createdBy` option.
  *
  * @returns Creator identifier string.
  */
 export function getDefaultCreatedBy(): string {
-  return "loco-torrent-generator@1.0.0";
+  return "browsertorrent-torrent-generator@1.0.0";
 }
 
 ```
@@ -18201,7 +18201,7 @@ export function getDefaultCreatedBy(): string {
 ## Arquivo: `packages/core/src/utils/bencode.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/utils/bencode.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/bencode.ts
 /**
  * Bencode codec with resource limits, typed errors, and optional Map support.
  *
@@ -18702,7 +18702,7 @@ class _ByteWriter {
 ## Arquivo: `packages/core/src/utils/bit-array.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/utils/bit-array.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/bit-array.ts
 /**
  * Compact bit array with explicit bit numbering (msb0 / lsb0).
  *
@@ -18926,7 +18926,7 @@ export class BitArray {
 ## Arquivo: `packages/core/src/utils/bitfield.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/core/bitfield.ts
+// /browsertorrent/monorepo/webtorrent/src/core/bitfield.ts
 
 import { BitfieldError } from "../utils/errors.ts";
 
@@ -19056,7 +19056,7 @@ export class Bitfield {
 ## Arquivo: `packages/core/src/utils/buffer.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/utils/buffer.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/buffer.ts
 /**
  * Helpers para manipulação de Uint8Array, substituindo o `Buffer` do Node.js.
  * Focado em performance e compatibilidade com o protocolo BitTorrent.
@@ -19433,7 +19433,7 @@ export async function writeAll(
 ## Arquivo: `packages/core/src/utils/constants.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/utils/constants.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/constants.ts
 
 /**
  * Constantes do protocolo BitTorrent (BEP 3, BEP 10).
@@ -19496,7 +19496,7 @@ export const PSTR_BUFFER = new TextEncoder().encode(PSTR);
 ## Arquivo: `packages/core/src/utils/encode-util.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/utils/encode-util.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/encode-util.ts
 
 /**
  * Converte um Uint8Array em uma string onde cada caractere representa um byte.
@@ -19704,10 +19704,10 @@ export function isSha1(data: Uint8Array): boolean {
 ## Arquivo: `packages/core/src/utils/errors.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/utils/errors.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/errors.ts
 
 /**
- * Classes de erro customizadas para o Loco WebTorrent.
+ * Classes de erro customizadas para o BrowserTorrent WebTorrent.
  * Facilita debugging e tratamento de erros específicos.
  */
 
@@ -19808,7 +19808,7 @@ export class RequestRejectedError extends PeerWireError {
 ## Arquivo: `packages/core/src/utils/event-target.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/utils/event-target.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/event-target.ts
 
 /**
  * Substituto tipado para o `EventEmitter` do Node.js.
@@ -19886,7 +19886,7 @@ export class TypedEventTarget<Events extends EventMap> extends EventTarget {
 ## Arquivo: `packages/core/src/utils/magnet.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/utils/magnet.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/magnet.ts
 /**
  * Magnet link parsing and building with BitTorrent v1/v2 support.
  *
@@ -20344,7 +20344,7 @@ function safeDecodeURIComponent(value: string): string {
 ## Arquivo: `packages/core/src/utils/metainfo-identity.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/utils/metainfo-identity.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/metainfo-identity.ts
 /**
  * Torrent identity utilities — preserve exact bencoded `info` bytes for
  * faithful hash computation.
@@ -20649,7 +20649,7 @@ function equalsAscii(bytes: Uint8Array, value: string): boolean {
 ## Arquivo: `packages/core/src/utils/metainfo-parser.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/utils/metainfo-parser.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/metainfo-parser.ts
 /**
  * Rigorous `.torrent` metainfo parser (BEP 3, 12, 19, 47, 52).
  *
@@ -21032,7 +21032,7 @@ function binaryBytes(value: unknown): Uint8Array {
 ## Arquivo: `packages/core/src/utils/metainfo-v2.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/utils/metainfo-v2.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/metainfo-v2.ts
 /**
  * BEP-52 v2 file tree validation and piece layer verification.
  *
@@ -21404,7 +21404,7 @@ function toHex(bytes: Uint8Array): string {
 ## Arquivo: `packages/core/src/utils/net.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/utils/net.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/net.ts
 /**
  * Network address, port, and compact-peer utilities.
  *
@@ -21683,10 +21683,10 @@ export function deduplicatePeers(
 ## Arquivo: `packages/core/src/utils/parse-torrent.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/utils/parse-torrent.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/parse-torrent.ts
 /**
  * Torrent identifier parsing — magnet URIs, raw info hashes and `.torrent`
- * buffers — producing the `ParsedTorrent` shape consumed by Loco.
+ * buffers — producing the `ParsedTorrent` shape consumed by BrowserTorrent.
  *
  * Fase 2 (Metadata & Discovery): a decodificação de buffers agora delega para
  * `metainfo-parser.ts` + `metainfo-identity.ts`:
@@ -21919,7 +21919,7 @@ function toHex(bytes: Uint8Array): string {
 ## Arquivo: `packages/core/src/utils/peerid.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/utils/peerid.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/peerid.ts
 
 import { generateRandomString } from "../crypto/random.ts";
 
@@ -21930,7 +21930,7 @@ export interface ClientInfo {
   style: "azureus" | "shadow" | "unknown";
 }
 
-export const LOCO_PEER_ID_PREFIX = "-LO0100-";
+export const BT_PEER_ID_PREFIX = "-BT0100-";
 
 const AZUREUS_CLIENTS: Record<string, string> = {
   "AG": "Ares",
@@ -21974,7 +21974,7 @@ const AZUREUS_CLIENTS: Record<string, string> = {
   "KT": "KTorrent",
   "LC": "LeechCraft",
   "LH": "LH-ABC",
-  "LO": "Loco", // 🔥 NOSSO CLIENTE
+  "LO": "BrowserTorrent", // 🔥 NOSSO CLIENTE
   "LP": "Lphant",
   "LT": "libtorrent (Rasterbar)",
   "lt": "libTorrent (Rakshasa)",
@@ -22207,8 +22207,8 @@ export function getPeerIdClientName(peerId: string | Uint8Array): string {
   return info?.name || "Unknown Client";
 }
 
-export function generateLocoPeerId(): Uint8Array {
-  const prefix = LOCO_PEER_ID_PREFIX;
+export function generateBrowserTorrentPeerId(): Uint8Array {
+  const prefix = BT_PEER_ID_PREFIX;
   const randomPart = generateRandomString(20 - prefix.length);
   const peerIdStr = prefix + randomPart;
 
@@ -22417,7 +22417,7 @@ export class SimpleBuffer {
 ## Arquivo: `packages/core/src/utils/torrent-types.ts`
 
 ```ts
-// /loco/monorepo/webtorrent/src/utils/torrent-types.ts
+// /browsertorrent/monorepo/webtorrent/src/utils/torrent-types.ts
 /**
  * Shared type contracts for torrent parsing (BEP 3, BEP 12, BEP 19, BEP 47, BEP 52).
  *
@@ -22609,7 +22609,7 @@ export function validateTorrentFilePaths(
 
 ```json
 {
-  "name": "@browsertorrent/core",
+  "name": "@vanaware/browsertorrent",
   "version": "0.1.3-mtq0ufmu",
   "exports": "./src/mod.ts",
   "compilerOptions": {

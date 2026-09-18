@@ -1,19 +1,19 @@
-# /loco/monorepo/webtorrent/docs/00-api-loco-webtorrent.md
+# /docs/browsertorrent/00-api-browsertorrent.md
 
-# API do `@loco/webtorrent` — Resumo consolidado
+# API do `@vanaware/browsertorrent` — Resumo consolidado
 
 > Documento vivo.  Reflete a API pública exposta via `src/mod.ts`.
-> Cada item referencia a fase e a fonte original (`webtorrent.min.js` ou inovação do Loco).
+> Cada item referencia a fase e a fonte original (`webtorrent.min.js` ou inovação do BrowserTorrent).
 
 ---
 
 ## 📦 Visão geral
 
-O `@loco/webtorrent` é um cliente BitTorrent **100 % browser-first** (Deno + Web APIs nativas, sem dependências de Node.js) que reproduz e estende a API do `webtorrent.min.js` original.  As extensões do Loco incluem:
+O `@vanaware/browsertorrent` é um cliente BitTorrent **100 % browser-first** (Deno + Web APIs nativas, sem dependências de Node.js) que reproduz e estende a API do `webtorrent.min.js` original.  As extensões do BrowserTorrent incluem:
 
 - Service Worker bridge com **backpressure real** (Fase 4.5) — substitui e melhora o `createServer` original.
 - Storage **OPFS-first** com fallback em memória (Fase 3) — persiste entre sessões sem IndexedDB.
-- Identidade oficial do Loco (`-LO0100-`) auto-gerada (Fase 3.4) — PeerId estável entre clientes Loco.
+- Identidade oficial do BrowserTorrent (`-BT0100-`) auto-gerada (Fase 3.4) — PeerId estável entre clientes BrowserTorrent.
 - Validators PeerId Azureus/Shadow completos (Fase 3.4) — reconhece qBittorrent, Transmission, BitTornado etc.
 - Bitfield com validação rigorosa de spare-bits (Fase 3.5) — mais seguro que a maioria dos clientes.
 - `File.streamTo(video)` assíncrono com revoke automático de URL (Fase 4.2).
@@ -26,7 +26,7 @@ O `@loco/webtorrent` é um cliente BitTorrent **100 % browser-first** (Deno + We
 ### Classe `WebTorrent`
 
 ```ts
-import { WebTorrent } from "@loco/webtorrent";
+import { WebTorrent } from "@vanaware/browsertorrent";
 
 const client = new WebTorrent({
   peerId?: Uint8Array | string;          // hex 40 chars ou Uint8Array(20)
@@ -161,7 +161,7 @@ const file = torrent.files[0]; // ou torrent.files.find(f => f.name.endsWith(".m
 ### Classe `WebTorrentServer` (Fase 4.5)
 
 ```ts
-import { createServer } from "@loco/webtorrent";
+import { createServer } from "@vanaware/browsertorrent";
 
 const reg = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
 await navigator.serviceWorker.ready;
@@ -192,7 +192,7 @@ import {
   streamManager,
   buildStreamURL,
   parseStreamURL,
-} from "@loco/webtorrent";
+} from "@vanaware/browsertorrent";
 ```
 
 | Função | Assinatura | Descrição |
@@ -211,7 +211,7 @@ import {
 ### `Bitfield` (`src/core/bitfield.ts`)
 
 ```ts
-import { Bitfield } from "@loco/webtorrent";
+import { Bitfield } from "@vanaware/browsertorrent";
 
 const bf = new Bitfield(1024);
 bf.set(42);
@@ -237,9 +237,9 @@ const bf2 = Bitfield.fromBytes(new Uint8Array([0b10101010]), 8);
 
 ```ts
 import {
-  generateLocoPeerId,
+  generateBrowserTorrentPeerId,
   decodePeerId,
-  LOCO_PEER_ID_PREFIX,
+  BT_PEER_ID_PREFIX,
   isAzStyle,
   isShadowStyle,
   isBase32Char,
@@ -250,12 +250,12 @@ import {
   encodeAzStyle,
   encodeShadowStyle,
   encodeGeneric,
-} from "@loco/webtorrent";
+} from "@vanaware/browsertorrent";
 ```
 
 | Função | Descrição |
 | --- | --- |
-| `generateLocoPeerId()` | Gera Peer ID oficial Loco (`-LO0100-…`). |
+| `generateBrowserTorrentPeerId()` | Gera Peer ID oficial BrowserTorrent (`-BT0100-…`). |
 | `decodePeerId(input)` | Decodifica qualquer Peer ID Azureus/Shadow em `ClientInfo`. |
 | `getPeerIdClientName(input)` | Nome legível do cliente (`qBittorrent`, `BitTornado`, …). |
 | `encodeAzStyle(code, version)` | Codifica estilo Azureus. |
@@ -270,7 +270,7 @@ import {
 ### `parseTorrent` (`src/utils/parse-torrent.ts`)
 
 ```ts
-import { parseTorrent } from "@loco/webtorrent";
+import { parseTorrent } from "@vanaware/browsertorrent";
 
 const parsed = await parseTorrent("magnet:?xt=urn:btih:…");
 const parsed2 = await parseTorrent(new Uint8Array([...])); // .torrent

@@ -31,7 +31,7 @@ A tabela abaixo mostra os 4 primitivos Deno que foram substituídos:
 | `Deno.stat(path).size` | `FileSystemFileHandle.getFile().size` | `opfs-walker.ts` |
 | `Deno.open(path)` → `FsFile.read()` | `FileSystemFileHandle.getFile().slice(start, end).arrayBuffer()` | `opfs-reader.ts` |
 | `@std/fs/walk()` | `FileSystemDirectoryHandle.values()` (BFS) | `opfs-walker.ts` |
-| `git describe --tags` | hardcoded `"loco-torrent-generator@1.0.0"` | `util.ts` |
+| `git describe --tags` | hardcoded `"browsertorrent-torrent-generator@1.0.0"` | `util.ts` |
 
 ---
 
@@ -63,7 +63,7 @@ interface GeneratorOptions {
 **Exemplo de uso:**
 
 ```ts
-import { generateTorrent } from "@loco/webtorrent/torrent-generator";
+import { generateTorrent } from "@vanaware/browsertorrent/torrent-generator";
 
 // Obter handle do diretório OPFS
 const rootHandle = await navigator.storage.getDirectory();
@@ -126,7 +126,7 @@ enum PieceSizeEnum {
 | `buildPieceFiles(entries, pieceSize)` | ✅ | Constrói stream BEP-47 (com padding) |
 | `sha1sum(entries, pieceSize, alignPiece?)` | ❌ | SHA-1 streaming das peças |
 | `isHiddenFile(name)` | ✅ | Detecta arquivos ocultos |
-| `getDefaultCreatedBy()` | ✅ | `"loco-torrent-generator@1.0.0"` |
+| `getDefaultCreatedBy()` | ✅ | `"browsertorrent-torrent-generator@1.0.0"` |
 | `PieceSizeEnum` | ✅ | Enum de presets |
 
 ---
@@ -168,7 +168,7 @@ enum PieceSizeEnum {
    usam `buildMockDir()` — um builder recursivo de `FileSystemDirectoryHandle` mockados
    que simula `values()`, `getFileHandle()`, e navegação em sub-diretórios.
 
-2. **Versão gerada**: `loco-torrent-generator@1.0.0` é hardcoded porque `git describe`
+2. **Versão gerada**: `browsertorrent-torrent-generator@1.0.0` é hardcoded porque `git describe`
    não está disponível no browser.  Callers podem sobrescrever via `createdBy`.
 
 3. **SHA-1 via `crypto.subtle`**: usa a API Web Crypto em vez de libs externas,

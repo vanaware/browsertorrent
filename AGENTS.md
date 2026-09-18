@@ -1,6 +1,6 @@
-# Project Guidelines: SyntaxMesh (Deno PWA)
+# Project Guidelines: BrowserTorrent (Deno PWA)
 
-Welcome to the SyntaxMesh project! This file (`AGENTS.md`) is automatically injected into the AI's system instructions. You MUST strictly adhere to the following architectural rules and constraints when modifying or extending this codebase.
+Welcome to the BrowserTorrent project! This file (`AGENTS.md`) is automatically injected into the AI's system instructions. You MUST strictly adhere to the following architectural rules and constraints when modifying or extending this codebase.
 
 ## 1. Runtime & Environment (Pure Deno)
 - **Deno Only**: This project runs entirely on Deno. 

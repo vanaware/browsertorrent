@@ -1,4 +1,4 @@
-# API Final @loco/webtorrent v1.0
+# API Final @vanaware/browsertorrent v1.0
 
 > **Status:** Snapshot pós-Fase 5.3, com roadmap de Fase 6 definido.
 > **Foco:** Browser-first, sem Node.js, sem pacotes npm. Stack 100% nativo (Web APIs, TypedEventTarget, OPFS, W3C Streams, Service Worker).
@@ -8,7 +8,7 @@
 ## 1. Importação e Construtor
 
 ```typescript
-import { WebTorrent, generateTorrent, Torrent, File, Piece } from "@loco/webtorrent";
+import { WebTorrent, generateTorrent, Torrent, File, Piece } from "@vanaware/browsertorrent";
 
 const client = new WebTorrent({
   peerId: undefined,            // Uint8Array(20) ou hex string — opcional
@@ -22,7 +22,7 @@ const client = new WebTorrent({
 
 | Opção | Tipo | Default | Descrição |
 |---|---|---|---|
-| `peerId` | `Uint8Array \| string` | Loco-LO0100-prefixed | Peer ID de 20 bytes |
+| `peerId` | `Uint8Array \| string` | BrowserTorrent-BT0100-prefixed | Peer ID de 20 bytes |
 | `maxConns` | `number` | `55` | Limite de conexões WebRTC |
 | `port` | `number` | `6881` | Port hint (para peerwire) |
 | `useOPFS` | `boolean` | `true` | Usar OPFS ChunkStore |
@@ -274,7 +274,7 @@ const client = new WebTorrent({
 ## 9. Generator API (Fase 5.3)
 
 ```typescript
-import { generateTorrent, OPFSMultiFileReader, PieceSizeEnum } from "@loco/webtorrent";
+import { generateTorrent, OPFSMultiFileReader, PieceSizeEnum } from "@vanaware/browsertorrent";
 
 const torrent = await generateTorrent(
   dirHandle,                              // FileSystemDirectoryHandle
@@ -305,7 +305,7 @@ console.log(torrent.magnetURI); // magnet link
 | `buildPieceFiles(files, pieceSize)` | BEP-47 piece layout |
 | `calcPieceSize(totalLength)` | AUTO piece size |
 | `fileSizeSum(files)` | soma de tamanhos |
-| `getDefaultCreatedBy()` | "loco-torrent-generator@1.0.0" |
+| `getDefaultCreatedBy()` | "browsertorrent-torrent-generator@1.0.0" |
 | `isHiddenFile(name)` | começa com `.` |
 | `sha1sum(data)` | hash SHA-1 via `crypto.subtle` |
 | `PieceSizeEnum` | `AUTO` ou bytes |
@@ -344,7 +344,7 @@ new OPFSChunkStore({ chunkLength, length, rootDir: dir })
 | `sha256(data)` | `crypto/hasher.ts` | SHA-256 hex |
 | `randomBytes(n)` | `crypto/random.ts` | Uint8Array |
 | `generateId()` | `crypto/random.ts` | 40-char hex |
-| `generateLocoPeerId()` | `utils/peerid.ts` | `-LO0100-XXXXXXXXXX` |
+| `generateBrowserTorrentPeerId()` | `utils/peerid.ts` | `-BT0100-XXXXXXXXXX` |
 | `scrapeTracker(url, infoHashes, opts?)` | `network/tracker.ts` | BEP 48 scrape (completo) |
 | `parseRangeHeader(header, fileLength)` | `server/server.ts` | parse `bytes=N-M` → `{start,end}` |
 

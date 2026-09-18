@@ -21,14 +21,23 @@
  *   7. SW enqueue → repeat until null → close
  */
 /// <reference lib="dom" />
-const SW_SCOPE = "/";
-
 declare const self: ServiceWorkerGlobalScope;
 
 // ─── Estado ──────────────────────────────────────────────────────────
 
 const requestQueue: Array<{ resolve: (r: Response,) => void; url: URL }> = [];
 let pagePort: MessagePort | null = null;
+
+function getScope() {
+  return self.registration.scope;
+}
+
+function getWebTorrentPrefix() {
+  const scope = getScope();
+  const base = new URL(scope).pathname;
+  // Garante que termina com / e adiciona webtorrent/
+  return (base.endsWith("/") ? base : base + "/") + "webtorrent/";
+}
 
 // ─── Registro ─────────────────────────────────────────────────────────
 
@@ -55,8 +64,11 @@ self.addEventListener("message", (e: ExtendableMessageEvent,) => {
 
 self.addEventListener("fetch", (e: FetchEvent,) => {
   const url = new URL(e.request.url,);
-  if (!url.pathname.startsWith("/webtorrent/",)) return;
-  console.log("[sw] fetch intercepted:", url.pathname,);
+  const prefix = getWebTorrentPrefix();
+  
+  if (!url.pathname.startsWith(prefix)) return;
+  console.log("[sw] fetch intercepted:", url.pathname, "prefix:", prefix);
+  
   if (!pagePort) {
     e.respondWith(
       new Promise<Response>((resolve,) => {
@@ -282,7 +294,7 @@ function handleStream(req: Request, url: URL,): Promise<Response> {
         url: url.pathname,
         method: req.method,
         headers: Object.fromEntries(req.headers.entries(),),
-        scope: SW_SCOPE,
+        scope: getScope(),
         destination: dest,
       },
       [chunkPort2, requestPort1,], // main recebe ambas as portas

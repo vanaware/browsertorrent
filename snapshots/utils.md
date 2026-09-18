@@ -1,6 +1,6 @@
 > **INSTRUÇÃO PARA A IA:** 
 > O texto abaixo contém experimentos e código da área de @browsertorrent/utils
-> O projeto é o **BrowserTorrent ** estruturado em blocos. 
+> O projeto é o **BrowserTorrent ** estruturado em bbrowsertorrents. 
 > Cada arquivo começa com um título indicando seu caminho relativo exato (ex: `## Arquivo: src/main.ts`).
 > Sempre que sugerir alterações, indique claramente qual arquivo deve ser modificado com base nesses caminhos e forneça o novo código completo do arquivo.
 
@@ -2208,7 +2208,7 @@ function normalizarPrefixo(caminho: string,): string {
 
 /**
  * Calcula a quantidade mínima de crases necessárias para envolver um texto
- * em um bloco de código markdown, evitando conflitos com crases dentro do texto.
+ * em um bbrowsertorrent de código markdown, evitando conflitos com crases dentro do texto.
  *
  * Exemplo:
  * - Texto sem crases → "```"
@@ -2357,7 +2357,7 @@ export function gerarCabecalho(
 
   return `> **INSTRUÇÃO PARA A IA:** 
 > ${config.instrucaoCustomizada}
-> O projeto é o **BrowserTorrent ${versaoDisplay}** estruturado em blocos. 
+> O projeto é o **BrowserTorrent ${versaoDisplay}** estruturado em bbrowsertorrents. 
 > Cada arquivo começa com um título indicando seu caminho relativo exato (ex: \`## Arquivo: src/main.ts\`).
 > Sempre que sugerir alterações, indique claramente qual arquivo deve ser modificado com base nesses caminhos e forneça o novo código completo do arquivo.
 
@@ -5555,7 +5555,7 @@ export const CONFIGURACOES: Record<ModoExportacao, ExportConfig> = {
     ],
     incluiVersao: true,
     instrucaoCustomizada:
-      "O texto abaixo contém o desenvolvimento principal de @browsertorrent/core",
+      "O texto abaixo contém o desenvolvimento principal de @vanaware/browsertorrent",
     default: true, // ✅ Roda por padrão
   },
   docs: {
@@ -5660,7 +5660,7 @@ export const CONFIGURACOES: Record<ModoExportacao, ExportConfig> = {
     ],
     incluiVersao: false,
     instrucaoCustomizada:
-      "O texto abaixo contém experimentos e código da área de @browsertorrent/workerdb",
+      "O texto abaixo contém experimentos e código da área de @vanaware/worker-db",
     default: true, // ✅ Roda por padrão
   },
   utils: {

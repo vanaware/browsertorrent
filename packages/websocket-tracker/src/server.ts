@@ -411,9 +411,13 @@ export class WebSocketTracker {
 
       if (message.to_peer_id) {
         // Targeted offer
-        console.log(`[TRACKER] Targeted offer from ${peer.peerId} to ${message.to_peer_id}`);
+        console.log(
+          `[TRACKER] Targeted offer from ${peer.peerId} to ${message.to_peer_id}`,
+        );
         for (const offer of message.offers) {
-          const targetPeer = Array.from(this.peers.values()).find(p => p.peerId === message.to_peer_id);
+          const targetPeer = Array.from(this.peers.values(),).find((p,) =>
+            p.peerId === message.to_peer_id
+          );
           if (targetPeer && targetPeer.ws.readyState === WebSocket.OPEN) {
             targetPeer.ws.send(JSON.stringify({
               action: "announce",
@@ -436,9 +440,13 @@ export class WebSocketTracker {
         const availablePeers = Array.from(peerIds,)
           .filter((id,) => id !== peer.id)
           .map((id,) => this.peers.get(id,))
-          .filter((p,) => p && p.ws.readyState === WebSocket.OPEN && p.peerId !== peer.peerId) as Peer[];
+          .filter((p,) =>
+            p && p.ws.readyState === WebSocket.OPEN && p.peerId !== peer.peerId
+          ) as Peer[];
 
-        console.log(`[TRACKER] Distributing ${message.offers.length} offers from ${peer.peerId} to ${availablePeers.length} peers in ${infoHash}`);
+        console.log(
+          `[TRACKER] Distributing ${message.offers.length} offers from ${peer.peerId} to ${availablePeers.length} peers in ${infoHash}`,
+        );
 
         // Distribute one offer per peer
         for (
@@ -470,8 +478,12 @@ export class WebSocketTracker {
         return;
       }
 
-      console.log(`[TRACKER] Routing answer from ${peer.peerId} to ${message.to_peer_id}`);
-      const targetPeer = Array.from(this.peers.values()).find(p => p.peerId === message.to_peer_id);
+      console.log(
+        `[TRACKER] Routing answer from ${peer.peerId} to ${message.to_peer_id}`,
+      );
+      const targetPeer = Array.from(this.peers.values(),).find((p,) =>
+        p.peerId === message.to_peer_id
+      );
       if (targetPeer && targetPeer.ws.readyState === WebSocket.OPEN) {
         targetPeer.ws.send(JSON.stringify({
           action: "announce",

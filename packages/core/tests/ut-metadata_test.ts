@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/tests/ut-metadata_test.ts
+// /browsertorrent/monorepo/webtorrent/tests/ut-metadata_test.ts
 
 import { assertEquals, } from "@std/assert";
 import { UtMetadata, } from "../src/extensions/ut-metadata.ts";

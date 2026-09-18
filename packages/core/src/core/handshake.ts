@@ -1,4 +1,4 @@
-// /loco/monorepo/webtorrent/src/core/handshake.ts
+// /browsertorrent/monorepo/webtorrent/src/core/handshake.ts
 /**
  * BitTorrent peer wire handshake codec with named reserved-bit extensions.
  *

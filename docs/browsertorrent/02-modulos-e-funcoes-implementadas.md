@@ -1,6 +1,6 @@
 # Módulos e Funções Implementadas (Fases 1 a 5)
 
-Este documento cataloga todas as funções, classes e tipos que foram implementados, refatorados e validados por testes unitários no pacote `@loco/webtorrent`.
+Este documento cataloga todas as funções, classes e tipos que foram implementados, refatorados e validados por testes unitários no pacote `@vanaware/browsertorrent`.
 
 ---
 
@@ -175,7 +175,7 @@ Todos os módulos acima possuem suítes de testes correspondentes na pasta `/tes
 
 ## 🚀 Próximos Passos (Fase 6: API Pública)
 
-A próxima fase é criar a **API Pública Principal** (`src/mod.ts`), que une todos esses módulos em uma interface limpa e pronta para ser consumida pelo Loco PWA. A API deve ser compatível com o WebTorrent original, expondo métodos como:
+A próxima fase é criar a **API Pública Principal** (`src/mod.ts`), que une todos esses módulos em uma interface limpa e pronta para ser consumida pelo BrowserTorrent PWA. A API deve ser compatível com o WebTorrent original, expondo métodos como:
 - `client.add(torrentId, opts)` - Adiciona um torrent (Magnet URI ou .torrent)
 - `client.seed(input, opts)` - Compartilha um arquivo como seed
 - `client.createServer()` - Cria um servidor HTTP para streaming (usando Service Worker)
