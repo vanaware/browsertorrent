@@ -70,6 +70,7 @@ export class UtMetadata extends Extension {
   }
 
   public onExtendedHandshake(handshake: any,) {
+    console.log(`[UtMetadata] onExtendedHandshake: m=${JSON.stringify(handshake.m)}, extensionsSize=${handshake.extensions instanceof Map ? handshake.extensions.size : 'not Map'}, metadataSize=${handshake.metadataSize}`);
     let utMetadataId: number | undefined;
     let metadataSize: number | undefined;
 
@@ -87,6 +88,7 @@ export class UtMetadata extends Extension {
       }
       metadataSize = handshake.metadata_size ?? handshake.metadataSize;
     }
+    console.log(`[UtMetadata] onExtendedHandshake resolved: utMetadataId=${utMetadataId}, metadataSize=${metadataSize}`);
 
     if (typeof utMetadataId === "number") {
       this._extensionId = utMetadataId;
@@ -206,6 +208,7 @@ export class UtMetadata extends Extension {
   }
 
   private _send(dict: BencodeDict, trailer?: Uint8Array,) {
+    console.log(`[UtMetadata] _send: dict=${JSON.stringify(dict)}, trailerLength=${trailer ? trailer.length : 0}, extensionId=${this._extensionId}`);
     let buf = encode(dict,);
     if (trailer) {
       const combined = new Uint8Array(buf.length + trailer.length,);
@@ -215,6 +218,8 @@ export class UtMetadata extends Extension {
     }
     if (this._extensionId !== null) {
       this.wire.sendExtended(this._extensionId, buf,);
+    } else {
+      console.warn(`[UtMetadata] _send NOT sending because _extensionId is null!`);
     }
   }
 
@@ -260,6 +265,7 @@ export class UtMetadata extends Extension {
   }
 
   private _onRequest(piece: number,) {
+    console.log(`[UtMetadata] _onRequest piece: ${piece}, metadataComplete: ${this._metadataComplete}, size: ${this._metadataSize}`);
     if (!this._metadataComplete || !this._metadataSize) {
       return this._reject(piece,);
     }

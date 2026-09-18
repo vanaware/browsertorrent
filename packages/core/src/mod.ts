@@ -392,7 +392,7 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
     const swarm = new Swarm({
       infoHash: parsed.infoHashBuffer,
       peerId: this.peerIdBuffer,
-      announce: announceList.length > 0 ? announceList : undefined,
+      announce: announceList,
       maxConns: this.opts.maxConns,
       port: this.opts.port,
       rtcConfig: this.opts.rtcConfig,

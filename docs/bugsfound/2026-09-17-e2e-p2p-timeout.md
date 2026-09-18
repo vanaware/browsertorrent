@@ -56,3 +56,19 @@ Vou adicionar logs de depuração em pontos estratégicos do `Torrent.ts` para c
 - **Ação**: Desabilitado OPFS no script E2E.
 - **Objetivo**: Isolar se o problema é o protocolo P2P ou a persistência em disco.
 - **Logs**: Capturando saída detalhada para analisar o fluxo de handshakes.
+
+---
+### Update 17:20 - SOLUCIONADO! (Causa Raiz: Temporal Dead Zone / TDZ ReferenceError)
+- **Causa Raiz**: Adicionamos monitoramento de erros de página via evento `pageerror` do Playwright e descobrimos que o browser lançava silenciosamente:
+  `[Leecher B Page Error] ReferenceError: Cannot access 'updateInterest' before initialization`
+  
+  No método `_registerWire` de `Torrent.ts`, o bloco de inicialização inicializava e executava `attachInitialState()` na linha 500. No entanto, as funções declaradas via `const` (como `requestBlocks` na linha 532 e `updateInterest` na linha 572) só eram declaradas mais abaixo.
+  Como `attachInitialState()` chamava imediatamente `sendInitialState()` (se o wire já estivesse conectado) que por sua vez chamava `updateInterest()`, ocorria a violação da Temporal Dead Zone (TDZ) do JavaScript. O erro abortava silenciosamente o processamento do wire, impedindo o fluxo de requisição e download de peças.
+
+- **Solução**: 
+  1. Adicionamos suporte completo a logging de `pageerror` no Playwright para capturar exceções não tratadas no browser.
+  2. Movemos a chamada de `attachInitialState()` para o final absoluto de `_registerWire`, garantindo que todas as variáveis e funções (`updateInterest`, `requestBlocks`, `syncRemotePieces`, handlers de eventos do wire) estejam completamente declaradas e inicializadas antes do estado inicial começar a ser processado.
+
+- **Resultado**: 
+  Todos os testes do Playwright (`packages/e2e/test_trackers.js`), incluindo o Teste 3 (transferência de arquivos P2P com tracker local) e o Teste 4 (sinalização via tracker público), passaram com **100% de sucesso**. O arquivo foi transferido e verificado byte-a-byte instantaneamente.
+  O arquivo `CURRENT.md` e os arquivos temporários não utilizados foram limpos. O projeto está verde e estável!

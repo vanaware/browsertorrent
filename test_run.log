@@ -1,0 +1,628 @@
+===============================================================
+SYNTAXMESH DETAILED E2E CROSS-COMPATIBILITY TESTING MATRIX
+===============================================================
+
+---------------------------------------------------------------
+RUNNING CASE_2: BrowserTorrent ↔ BrowserTorrent (Local Deno Tracker)
+  Seeder: [browsertorrent] | Leecher: [browsertorrent]
+  Trackers: ws://127.0.0.1:3000/tracker
+---------------------------------------------------------------
+[browsertorrent Seeder A] [main] SW Registered: http://127.0.0.1:3000/
+[browsertorrent Seeder A] [main] SW MessageChannel established (after activation)
+[browsertorrent Seeder A] [PLAYER 09:25:02] effect: torrent: undefined files: undefined video: false
+[browsertorrent Seeder A] [PLAYER 09:25:02] effect: no torrent or no files, waiting...
+[browsertorrent Leecher B] [main] SW Registered: http://127.0.0.1:3000/
+[browsertorrent Leecher B] [main] SW MessageChannel established (after activation)
+[browsertorrent Leecher B] [PLAYER 09:25:02] effect: torrent: undefined files: undefined video: false
+[browsertorrent Leecher B] [PLAYER 09:25:02] effect: no torrent or no files, waiting...
+[browsertorrent Seeder A] Seeding payload: "TEST_CASE_2_browsertorrent_TO_browsertorrent_1789723503413" using browsertorrent...
+[browsertorrent Seeder A] [seed] store available: true put? function entry? true pieceLength: 16384
+[browsertorrent Seeder A] [seed] Populating chunk store with 1 files
+[browsertorrent Seeder A] [_populateChunkStore] Starting with 1 files, pieceLength: 16384
+[browsertorrent Seeder A] [_populateChunkStore] Reading file: test-compat-file.txt size: 58
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:4152245224 1 udp 2122260223 127.0.0.1 28444 typ host generation 0 ufrag N6An network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:758332852 1 udp 2122260223 127.0.0.1 63229 typ host generation 0 ufrag 6YRF network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:4073357148 1 udp 2122260223 127.0.0.1 17049 typ host generation 0 ufrag H0C2 network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:2678388894 1 udp 2122260223 127.0.0.1 21932 typ host generation 0 ufrag 5Bxt network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:4229400518 1 udp 2122260223 127.0.0.1 30492 typ host generation 0 ufrag SSKd network-id 1 network-cost 50
+[browsertorrent Seeder A] [_populateChunkStore] Wrote final piece 0 size: 58
+[browsertorrent Seeder A] [_populateChunkStore] Done. Total pieces: 1 bytes written: 58
+[browsertorrent Seeder A] [seed] Chunk store populated and verified successfully
+Seeder ready. Magnet URI: magnet:?xt=urn:btih:c7d4580eba0bbebb2a3ed99f36cf4fb602bf4e50&dn=test-compat-file.txt&tr=ws%3A%2F%2F127.0.0.1%3A3000%2Ftracker
+[browsertorrent Leecher B] Adding magnet using browsertorrent...
+Waiting for connection and data transfer...
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:962492060 1 udp 2122260223 127.0.0.1 63037 typ host generation 0 ufrag 0wkb network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:2084543084 1 udp 2122260223 127.0.0.1 60117 typ host generation 0 ufrag jUbQ network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:2544649246 1 udp 2122260223 127.0.0.1 63590 typ host generation 0 ufrag G/0Q network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:3678722511 1 udp 2122260223 127.0.0.1 58748 typ host generation 0 ufrag 6/6Z network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:3194632867 1 udp 2122260223 127.0.0.1 46198 typ host generation 0 ufrag nKxW network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:2310134128 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag N6An network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:3550079264 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag 6YRF network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:2349178308 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag H0C2 network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:1628318730 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag 5Bxt network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:45962066 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag SSKd network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer initiator] end of candidates (null)
+[browsertorrent Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer initiator] end of candidates (null)
+[browsertorrent Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer initiator] end of candidates (null)
+[browsertorrent Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer initiator] end of candidates (null)
+[browsertorrent Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:1200722948 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag 0wkb network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:49314036 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag jUbQ network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:1762037898 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag G/0Q network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:636357979 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag 6/6Z network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:3232094267 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag nKxW network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Seeder A] [Peer receiver] signal() received offer
+[browsertorrent Seeder A] [Peer receiver] iceConnectionState: checking
+[browsertorrent Seeder A] [Peer receiver] gathered candidate: candidate:2372719718 1 udp 2122260223 127.0.0.1 27045 typ host generation 0 ufrag kAHZ network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer receiver] connectionState: connecting
+[browsertorrent Seeder A] [Peer receiver] iceConnectionState: connected
+[browsertorrent Seeder A] [Peer receiver] Emitting local signal, type: answer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer receiver] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] iceConnectionState: checking
+[browsertorrent Leecher B] [Peer initiator] signal() received answer
+[browsertorrent Leecher B] [Peer initiator] connectionState: connecting
+[browsertorrent Leecher B] [Peer initiator] iceConnectionState: connected
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:1277716804 1 udp 2122260223 127.0.0.1 55244 typ host generation 0 ufrag j9fN network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer receiver] connectionState: connected
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:1181164686 1 udp 2122260223 127.0.0.1 28507 typ host generation 0 ufrag mn/7 network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:543215314 1 udp 2122260223 127.0.0.1 47372 typ host generation 0 ufrag zuBh network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:932346910 1 udp 2122260223 127.0.0.1 18458 typ host generation 0 ufrag p5D5 network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:2456312601 1 udp 2122260223 127.0.0.1 20372 typ host generation 0 ufrag WLUD network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] connectionState: connected
+[browsertorrent Leecher B] [Peer initiator] DataChannel OPEN!
+[browsertorrent Seeder A] [Peer receiver] Received remote datachannel: webtorrent
+[browsertorrent Seeder A] [Peer receiver] DataChannel OPEN!
+[browsertorrent Seeder A] [ExtensionHost] sendHandshake fields: {"reqq":250,"m":{},"metadata_size":96}
+[browsertorrent Seeder A] [Torrent] Metadata already available, syncing remote pieces for new wire immediately
+[browsertorrent Seeder A] [Torrent] syncRemotePieces: isHaveAll=false, hasBitfield=false, numPieces=1
+[browsertorrent Seeder A] [Torrent] syncRemotePieces completed: remotePieces.size=0
+[browsertorrent Seeder A] [Torrent] sendInitialState: ready=true, numPieces=1
+[browsertorrent Seeder A] [Torrent] Sending initial bitfield to peer...
+[browsertorrent Seeder A] [Torrent] Sending UNCHOKE to peer
+[browsertorrent Leecher B] [ExtensionHost] sendHandshake fields: {"reqq":250,"m":{}}
+[browsertorrent Leecher B] [Torrent] Metadata already available, syncing remote pieces for new wire immediately
+[browsertorrent Leecher B] [Torrent] syncRemotePieces: isHaveAll=false, hasBitfield=false, numPieces=0
+[browsertorrent Leecher B] [Torrent] syncRemotePieces completed: remotePieces.size=0
+[browsertorrent Leecher B] [Torrent] updateInterest: interesting=false, amInterested=false, peerChoking=true
+[browsertorrent Leecher B] [Torrent] sendInitialState: ready=true, numPieces=0
+[browsertorrent Leecher B] [Torrent] No metadata yet, sending empty bitfield/availability...
+[browsertorrent Leecher B] [Torrent] Sending UNCHOKE to peer
+[browsertorrent Leecher B] [Torrent] updateInterest: interesting=false, amInterested=false, peerChoking=true
+[browsertorrent Seeder A] [UtMetadata] onExtendedHandshake: m=undefined, extensionsSize=1, metadataSize=undefined
+[browsertorrent Seeder A] [UtMetadata] onExtendedHandshake resolved: utMetadataId=1, metadataSize=undefined
+[browsertorrent Seeder A] [Torrent] wire.on('bitfield') received: length=0
+[browsertorrent Leecher B] [UtMetadata] onExtendedHandshake: m=undefined, extensionsSize=1, metadataSize=96
+[browsertorrent Leecher B] [UtMetadata] onExtendedHandshake resolved: utMetadataId=1, metadataSize=96
+[browsertorrent Leecher B] [UtMetadata] _send: dict={"msg_type":0,"piece":0}, trailerLength=0, extensionId=1
+[browsertorrent Leecher B] [Torrent] wire.on('bitfield') received: length=1
+[browsertorrent Leecher B] [Torrent] updateInterest: interesting=false, amInterested=false, peerChoking=true
+[browsertorrent Leecher B] [Torrent] updateInterest: interesting=false, amInterested=false, peerChoking=false
+[browsertorrent Seeder A] [UtMetadata] _onRequest piece: 0, metadataComplete: true, size: 96
+[browsertorrent Seeder A] [UtMetadata] _send: dict={"msg_type":1,"piece":0,"total_size":96}, trailerLength=96, extensionId=1
+[browsertorrent Leecher B] [UtMetadata] _onData piece: 0, buf.length: 96, totalSize: 96, fetching: true, metaSize: 96
+[browsertorrent Leecher B] [UtMetadata] _verifyMetadataIntegrity metadata.length: 96, first 20 bytes: [100, 54, 58, 108, 101, 110, 103, 116, 104, 105, 53, 56, 101, 52, 58, 110, 97, 109, 101, 50]
+[browsertorrent Leecher B] [Client] swarm metadata event fired, size: 96
+[browsertorrent Leecher B] [Torrent] setMetadata start, infoBuffer length: 96
+[browsertorrent Leecher B] [Torrent] setMetadata: decoding infoBuffer...
+[browsertorrent Leecher B] [Torrent] setMetadata: bencode decoded successfully.
+[browsertorrent Leecher B] [Torrent] setMetadata: pieceLength=16384, totalLength=58, numPieces=1
+[browsertorrent Leecher B] [Torrent] setMetadata: updating store length...
+[browsertorrent Leecher B] [Torrent] setMetadata: emitting metadata event...
+[browsertorrent Leecher B] [Torrent] syncRemotePieces: isHaveAll=false, hasBitfield=true, numPieces=1
+[browsertorrent Leecher B] [Torrent] syncRemotePieces completed: remotePieces.size=1
+[browsertorrent Leecher B] [Torrent] updateInterest: interesting=true, amInterested=false, peerChoking=false
+[browsertorrent Leecher B] [Torrent] Requesting piece 0, length 58 from wire
+[browsertorrent Leecher B] [Torrent] setMetadata: verifying existing pieces...
+[browsertorrent Leecher B] [Torrent] setMetadata: existing pieces verified.
+[browsertorrent Leecher B] [Torrent] setMetadata: emitting ready event...
+[browsertorrent Leecher B] [Torrent] syncRemotePieces: isHaveAll=false, hasBitfield=true, numPieces=1
+[browsertorrent Leecher B] [Torrent] syncRemotePieces completed: remotePieces.size=1
+[browsertorrent Leecher B] [Torrent] updateInterest: interesting=true, amInterested=true, peerChoking=false
+[browsertorrent Leecher B] [Torrent] requestBlocks exit: already have activePiece 0
+[browsertorrent Leecher B] [Torrent] setMetadata: completed successfully!
+[browsertorrent Seeder A] [Torrent] received wire 'request' index=0, offset=0, length=58, pieceFound=true
+[browsertorrent Leecher B] [Torrent] updateInterest: interesting=true, amInterested=true, peerChoking=false
+[browsertorrent Leecher B] [Torrent] requestBlocks exit: already have activePiece 0
+[browsertorrent Leecher B] 🎉 BrowserTorrent reported DONE!
+[browsertorrent Leecher B] [Torrent] requestBlocks exit early: isDestroyed=false, peerChoking=false, done=true
+[browsertorrent Seeder A] [Torrent] wire.on('have') received index=0
+[browsertorrent Seeder A] [Torrent] wire.on('have') received index=0
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:2994912720 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag j9fN network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:950584854 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag mn/7 network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:1588538442 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag zuBh network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:1230872198 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag p5D5 network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:1824690061 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag WLUD network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+✅ SUCCESS! File transferred and verified byte-for-byte: "TEST_CASE_2_browsertorrent_TO_browsertorrent_1789723503413"
+
+---------------------------------------------------------------
+RUNNING CASE_4A_LOCAL: BrowserTorrent ➔ Original WebTorrent (Local Deno Tracker)
+  Seeder: [browsertorrent] | Leecher: [webtorrent]
+  Trackers: ws://127.0.0.1:3000/tracker
+---------------------------------------------------------------
+[browsertorrent Seeder A] [main] SW Registered: http://127.0.0.1:3000/
+[browsertorrent Seeder A] [main] SW MessageChannel established (after activation)
+[browsertorrent Seeder A] [PLAYER 09:25:05] effect: torrent: undefined files: undefined video: false
+[browsertorrent Seeder A] [PLAYER 09:25:05] effect: no torrent or no files, waiting...
+[webtorrent Leecher B] [main] SW Registered: http://127.0.0.1:3000/
+[webtorrent Leecher B] [main] SW MessageChannel established (after activation)
+[webtorrent Leecher B] [PLAYER 09:25:05] effect: torrent: undefined files: undefined video: false
+[webtorrent Leecher B] [PLAYER 09:25:05] effect: no torrent or no files, waiting...
+[browsertorrent Seeder A] Seeding payload: "TEST_CASE_4A_LOCAL_browsertorrent_TO_webtorrent_1789723506123" using browsertorrent...
+[browsertorrent Seeder A] [seed] store available: true put? function entry? true pieceLength: 16384
+[browsertorrent Seeder A] [seed] Populating chunk store with 1 files
+[browsertorrent Seeder A] [_populateChunkStore] Starting with 1 files, pieceLength: 16384
+[browsertorrent Seeder A] [_populateChunkStore] Reading file: test-compat-file.txt size: 61
+[browsertorrent Seeder A] [_populateChunkStore] Wrote final piece 0 size: 61
+[browsertorrent Seeder A] [_populateChunkStore] Done. Total pieces: 1 bytes written: 61
+[browsertorrent Seeder A] [seed] Chunk store populated and verified successfully
+Seeder ready. Magnet URI: magnet:?xt=urn:btih:2c3e0037693044e4342c8fbb6169775717708a02&dn=test-compat-file.txt&tr=ws%3A%2F%2F127.0.0.1%3A3000%2Ftracker
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:1103328718 1 udp 2122260223 127.0.0.1 19781 typ host generation 0 ufrag mq6o network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:1918926044 1 udp 2122260223 127.0.0.1 47223 typ host generation 0 ufrag AXN9 network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:1485294786 1 udp 2122260223 127.0.0.1 44191 typ host generation 0 ufrag CqKP network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:3039989130 1 udp 2122260223 127.0.0.1 53043 typ host generation 0 ufrag ZCmU network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:3971068718 1 udp 2122260223 127.0.0.1 62944 typ host generation 0 ufrag twOr network-id 1 network-cost 50
+[webtorrent Leecher B] %cwebtorrent %c[2d57573] new webtorrent (peerId %s, nodeId %s, port %s)%c +0ms color: #CC0000 color: inherit 2d5757303330302d3145674a5647725543532f50 9f0783fd565e0316a6b429a4d8b5166121a56d38 0 color: #CC0000
+[webtorrent Leecher B] Adding magnet using webtorrent...
+[webtorrent Leecher B] %cwebtorrent %c[2d57573] add%c +1ms color: #CC0000 color: inherit color: #CC0000
+[webtorrent Leecher B] %cwebtorrent:torrent %c[2d57573] [unknown infohash] new torrent%c +0ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Leecher B] %cwebtorrent %c[2d57573] listening%c +1ms color: #CC0000 color: inherit color: #CC0000
+[webtorrent Leecher B] %cbittorrent-tracker:client %cnew client %s%c +0ms color: #CCCC33 color: inherit 2c3e0037693044e4342c8fbb6169775717708a02 color: #CCCC33
+[webtorrent Leecher B] %cbittorrent-tracker:websocket-tracker %cnew websocket tracker %s%c +0ms color: #FF6600 color: inherit ws://127.0.0.1:3000/tracker color: #FF6600
+[webtorrent Leecher B] %cbittorrent-tracker:client %csetInterval %d%c +2ms color: #CCCC33 color: inherit 900000 color: #CCCC33
+[webtorrent Leecher B] %cbittorrent-tracker:client %csend `start` %o%c +0ms color: #CCCC33 color: inherit {numwant: 50, uploaded: 0, downloaded: 0, left: NaN, event: started} color: #CCCC33
+Waiting for connection and data transfer...
+[webtorrent Leecher B] %cbittorrent-tracker:websocket-tracker %cgenerating %s offers%c +8ms color: #FF6600 color: inherit 5 color: #FF6600
+[webtorrent Leecher B] %cbittorrent-tracker:websocket-tracker %ccreating peer (from _generateOffers)%c +1ms color: #FF6600 color: inherit color: #FF6600
+[webtorrent Leecher B] %csimple-peer %c[ae6c280] new peer %o%c +0ms color: #0099FF color: inherit {allowHalfOpen: false, trickle: false, config: Object, wrtc: undefined, initiator: true} color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[ae6c280] initial negotiation%c +8ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[ae6c280] _needsNegotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %cbittorrent-tracker:websocket-tracker %ccreating peer (from _generateOffers)%c +9ms color: #FF6600 color: inherit color: #FF6600
+[webtorrent Leecher B] %csimple-peer %c[9719be5] new peer %o%c +1ms color: #0099FF color: inherit {allowHalfOpen: false, trickle: false, config: Object, wrtc: undefined, initiator: true} color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[9719be5] initial negotiation%c +1ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[9719be5] _needsNegotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %cbittorrent-tracker:websocket-tracker %ccreating peer (from _generateOffers)%c +1ms color: #FF6600 color: inherit color: #FF6600
+[webtorrent Leecher B] %csimple-peer %c[328b323] new peer %o%c +0ms color: #0099FF color: inherit {allowHalfOpen: false, trickle: false, config: Object, wrtc: undefined, initiator: true} color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[328b323] initial negotiation%c +2ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[328b323] _needsNegotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %cbittorrent-tracker:websocket-tracker %ccreating peer (from _generateOffers)%c +2ms color: #FF6600 color: inherit color: #FF6600
+[webtorrent Leecher B] %csimple-peer %c[c854091] new peer %o%c +0ms color: #0099FF color: inherit {allowHalfOpen: false, trickle: false, config: Object, wrtc: undefined, initiator: true} color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[c854091] initial negotiation%c +1ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[c854091] _needsNegotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %cbittorrent-tracker:websocket-tracker %ccreating peer (from _generateOffers)%c +1ms color: #FF6600 color: inherit color: #FF6600
+[webtorrent Leecher B] %csimple-peer %c[37663e2] new peer %o%c +0ms color: #0099FF color: inherit {allowHalfOpen: false, trickle: false, config: Object, wrtc: undefined, initiator: true} color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[37663e2] initial negotiation%c +1ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[37663e2] _needsNegotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[ae6c280] starting batched negotiation%c +1ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[ae6c280] start negotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[9719be5] starting batched negotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[9719be5] start negotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[328b323] starting batched negotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[328b323] start negotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[c854091] starting batched negotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[c854091] start negotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[37663e2] starting batched negotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[37663e2] start negotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[ae6c280] signalingStateChange %s%c +5ms color: #0099FF color: inherit have-local-offer color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[ae6c280] createOffer success%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[9719be5] signalingStateChange %s%c +0ms color: #0099FF color: inherit have-local-offer color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[9719be5] createOffer success%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[328b323] signalingStateChange %s%c +0ms color: #0099FF color: inherit have-local-offer color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[328b323] createOffer success%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[c854091] signalingStateChange %s%c +0ms color: #0099FF color: inherit have-local-offer color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[c854091] createOffer success%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[37663e2] signalingStateChange %s%c +0ms color: #0099FF color: inherit have-local-offer color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[37663e2] createOffer success%c +1ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[ae6c280] iceStateChange (connection: %s) (gathering: %s)%c +0ms color: #0099FF color: inherit new gathering color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[9719be5] iceStateChange (connection: %s) (gathering: %s)%c +1ms color: #0099FF color: inherit new gathering color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[328b323] iceStateChange (connection: %s) (gathering: %s)%c +0ms color: #0099FF color: inherit new gathering color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[c854091] iceStateChange (connection: %s) (gathering: %s)%c +0ms color: #0099FF color: inherit new gathering color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[37663e2] iceStateChange (connection: %s) (gathering: %s)%c +0ms color: #0099FF color: inherit new gathering color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[ae6c280] started iceComplete timeout%c +2ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[9719be5] started iceComplete timeout%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[328b323] started iceComplete timeout%c +1ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[c854091] started iceComplete timeout%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[37663e2] started iceComplete timeout%c +0ms color: #0099FF color: inherit color: #0099FF
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:1057789782 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag mq6o network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:2362091592 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag AXN9 network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:642264666 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag CqKP network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:3422383890 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag ZCmU network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:303785914 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag twOr network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer initiator] end of candidates (null)
+[browsertorrent Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer initiator] end of candidates (null)
+[browsertorrent Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer initiator] end of candidates (null)
+[browsertorrent Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer initiator] end of candidates (null)
+[browsertorrent Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer initiator] end of candidates (null)
+[webtorrent Leecher B] %csimple-peer %c[ae6c280] iceStateChange (connection: %s) (gathering: %s)%c +119ms color: #0099FF color: inherit new complete color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[ae6c280] signal%c +1ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[9719be5] iceStateChange (connection: %s) (gathering: %s)%c +0ms color: #0099FF color: inherit new complete color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[9719be5] signal%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[328b323] iceStateChange (connection: %s) (gathering: %s)%c +0ms color: #0099FF color: inherit new complete color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[328b323] signal%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[c854091] iceStateChange (connection: %s) (gathering: %s)%c +0ms color: #0099FF color: inherit new complete color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[c854091] signal%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[37663e2] iceStateChange (connection: %s) (gathering: %s)%c +0ms color: #0099FF color: inherit new complete color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[37663e2] signal%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %cbittorrent-tracker:websocket-tracker %cgenerated %s offers%c +133ms color: #FF6600 color: inherit 5 color: #FF6600
+[webtorrent Leecher B] %cbittorrent-tracker:websocket-tracker %csend %s%c +0ms color: #FF6600 color: inherit {"numwant":5,"uploaded":0,"downloaded":0,"left":null,"event":"started","action":"announce","info_hash":",>\u00007i0Dä4,»aiwW\u0017p\u0002","peer_id":"-WW0300-1EgJVGrUCS/P","offers":[{"offer":{"type":"offer","sdp":"v=0\r\no=- 4356908066262709845 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 55689 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:3473698620 1 udp 2122260223 127.0.0.1 55689 typ host generation 0 network-id 1 network-cost 50\r\na=candidate:2982383012 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 network-id 1 network-cost 50\r\na=ice-ufrag:SIpc\r\na=ice-pwd:zMxlV03QqS/Dy8+28WSx+bKe\r\na=fingerprint:sha-256 C3:C0:7E:43:0D:BA:13:0C:EB:9A:CB:45:28:FB:9C:65:7C:56:01:5B:10:E9:DE:7B:5A:E6:55:43:84:AC:96:09\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n"},"offer_id":"«cçÛ+i,±¨æ,}$£\u0016+\u0010ÉB"},{"offer":{"type":"offer","sdp":"v=0\r\no=- 5830660191880795972 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 48035 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:811904221 1 udp 2122260223 127.0.0.1 48035 typ host generation 0 network-id 1 network-cost 50\r\na=candidate:3469637705 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 network-id 1 network-cost 50\r\na=ice-ufrag:fMj3\r\na=ice-pwd:0I5/vqEfJ//tmCNfNYGF9/4A\r\na=fingerprint:sha-256 FC:50:52:F1:8D:E7:2E:18:B2:FC:98:4D:57:08:6F:04:B1:48:D4:CB:0E:A5:76:AB:F4:9A:C3:F4:3C:49:FC:11\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n"},"offer_id":"áößG\u0017#í¦hW¾GÚpáO"},{"offer":{"type":"offer","sdp":"v=0\r\no=- 580751439330885186 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 32710 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:2130628499 1 udp 2122260223 127.0.0.1 32710 typ host generation 0 network-id 1 network-cost 50\r\na=candidate:3222795 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 network-id 1 network-cost 50\r\na=ice-ufrag:nWbr\r\na=ice-pwd:LpS764djZeUtGFJfAN2vefdT\r\na=fingerprint:sha-256 71:D2:AC:43:52:F2:61:EA:D3:A7:B3:BE:E2:0D:7E:0A:35:90:9D:60:0D:6C:2B:82:CD:42:29:6F:9A:F5:04:37\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n"},"offer_id":"bû\u001fòÝ±ÔÃ2_ç0×\r&v7"},{"offer":{"type":"offer","sdp":"v=0\r\no=- 4301689763290549429 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 43913 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:317816790 1 udp 2122260223 127.0.0.1 43913 typ host generation 0 network-id 1 network-cost 50\r\na=candidate:1819237083 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 network-id 1 network-cost 50\r\na=ice-ufrag:7E4H\r\na=ice-pwd:iEussofeVndbUk0GLpqA6rHs\r\na=fingerprint:sha-256 6A:0D:A7:FC:4F:F7:0B:01:4C:E3:92:9F:FA:79:9E:23:F1:9F:01:13:FC:C3:9B:D8:CC:3F:46:97:86:28:D3:B8\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n"},"offer_id":"YPè:'4þør\u000epù\b©`ÞÎ"},{"offer":{"type":"offer","sdp":"v=0\r\no=- 7491563222465750161 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 22781 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:1558985987 1 udp 2122260223 127.0.0.1 22781 typ host generation 0 network-id 1 network-cost 50\r\na=candidate:2722556311 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 network-id 1 network-cost 50\r\na=ice-ufrag:Rimv\r\na=ice-pwd:ka00APipAEzT0cQbga+OvGaz\r\na=fingerprint:sha-256 0B:21:03:5C:E1:B2:18:5E:B9:1A:03:13:C7:EA:83:17:94:37:33:EB:A8:79:D4:FB:C8:EF:BD:68:B2:8B:52:A3\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n"},"offer_id":"¤{maÑUÎ*-d6,Plp\u0012"}]} color: #FF6600
+[webtorrent Leecher B] %cbittorrent-tracker:websocket-tracker %creceived %s from %s for %s%c +3ms color: #FF6600 color: inherit {"action":"announce","interval":120,"info_hash":",>\u00007i0Dä4,»aiwW\u0017p\u0002","complete":0,"incomplete":0,"peers":[{"peer_id":"-LO0100-}Os.R5=%H:Jo","ip":"127.0.0.1"}]} ws://127.0.0.1:3000/tracker 2c3e0037693044e4342c8fbb6169775717708a02 color: #FF6600
+[browsertorrent Seeder A] [Peer receiver] signal() received offer
+[browsertorrent Seeder A] [Peer receiver] iceConnectionState: checking
+[browsertorrent Seeder A] [Peer receiver] gathered candidate: candidate:1693702696 1 udp 2122260223 127.0.0.1 19975 typ host generation 0 ufrag XQeE network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer receiver] connectionState: connecting
+[webtorrent Leecher B] %csimple-peer %c[ae6c280] iceStateChange (connection: %s) (gathering: %s)%c +10ms color: #0099FF color: inherit checking complete color: #0099FF
+[browsertorrent Seeder A] [Peer receiver] iceConnectionState: connected
+[browsertorrent Seeder A] [Peer receiver] Emitting local signal, type: answer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer receiver] end of candidates (null)
+[webtorrent Leecher B] %cbittorrent-tracker:websocket-tracker %creceived %s from %s for %s%c +10ms color: #FF6600 color: inherit {"action":"announce","info_hash":",>\u00007i0Dä4,»aiwW\u0017p\u0002","offer_id":"«cçÛ+i,±¨æ,}$£\u0016+\u0010ÉB","answer":{"type":"answer","sdp":"v=0\r\no=- 1775142140567734309 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 19975 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:1693702696 1 udp 2122260223 127.0.0.1 19975 typ host generation 0 network-id 1 network-cost 50\r\na=ice-ufrag:XQeE\r\na=ice-pwd:vlVgHtIJ3q9r5z8HjY03Ew6b\r\na=ice-options:trickle\r\na=fingerprint:sha-256 0D:51:66:8B:FB:F3:C0:0C:14:0F:B4:A4:0F:60:CC:37:73:AD:B8:0E:FB:E1:61:F0:AB:C4:C0:53:08:E8:D0:26\r\na=setup:active\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n"},"peer_id":"-LO0100-}Os.R5=%H:Jo","from_peer_id":"-LO0100-}Os.R5=%H:Jo","to_peer_id":"-WW0300-1EgJVGrUCS/P"} ws://127.0.0.1:3000/tracker 2c3e0037693044e4342c8fbb6169775717708a02 color: #FF6600
+[webtorrent Leecher B] %cwebtorrent:torrent %c[2d57573] [2c3e003] peer %s discovered via %s%c +170ms color: #9900CC color: inherit [object Object] tracker color: #9900CC
+[webtorrent Leecher B] %cwebtorrent:torrent %c[2d57573] [2c3e003] add peer %s%c +1ms color: #9900CC color: inherit 2d4c4f303130302d7d4f732e52353d25483a4a6f color: #9900CC
+[webtorrent Leecher B] %cwebtorrent:peer %cnew %s Peer %s%c +0ms color: #CC3366 color: inherit webrtc 2d4c4f303130302d7d4f732e52353d25483a4a6f color: #CC3366
+[webtorrent Leecher B] %csimple-peer %c[ae6c280] signal()%c +5ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[ae6c280] flushing sender queue%c +3ms color: #0099FF color: inherit color: #0099FF []
+[webtorrent Leecher B] %csimple-peer %c[ae6c280] negotiated%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[ae6c280] signalingStateChange %s%c +0ms color: #0099FF color: inherit stable color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[ae6c280] iceStateChange (connection: %s) (gathering: %s)%c +2ms color: #0099FF color: inherit connected complete color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[ae6c280] maybeReady pc %s channel %s%c +1ms color: #0099FF color: inherit true false color: #0099FF
+[browsertorrent Seeder A] [Peer receiver] connectionState: connected
+[browsertorrent Seeder A] [Peer receiver] Received remote datachannel: 451d9e15ecd4870b6e977013fe8aaf2ff8e6e1c5
+[browsertorrent Seeder A] [Peer receiver] DataChannel OPEN!
+[webtorrent Leecher B] %csimple-peer %c[ae6c280] on channel open%c +6ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[ae6c280] maybeReady pc %s channel %s%c +0ms color: #0099FF color: inherit true true color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[ae6c280] connect local: %s:%s remote: %s:%s%c +1ms color: #0099FF color: inherit 127.0.0.1 55689 127.0.0.1 19975 color: #0099FF
+[webtorrent Leecher B] %csimple-peer %c[ae6c280] connect%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Leecher B] %cwebtorrent:peer %cPeer %s connected%c +13ms color: #CC3366 color: inherit 2d4c4f303130302d7d4f732e52353d25483a4a6f color: #CC3366
+[webtorrent Leecher B] %cbittorrent-protocol %c[5b7cffac] new wire%c +0ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Leecher B] %cbittorrent-protocol %c[5b7cffac] type:%c +0ms color: #9900CC color: inherit color: #9900CC webrtc
+[webtorrent Leecher B] %cbittorrent-protocol %c[5b7cffac] handshake i=%s p=%s exts=%o%c +1ms color: #9900CC color: inherit 2c3e0037693044e4342c8fbb6169775717708a02 2d5757303330302d3145674a5647725543532f50 {dht: false, fast: true} color: #9900CC
+[webtorrent Leecher B] %cbittorrent-protocol %c[5b7cffac] got handshake i=%s p=%s exts=%o%c +2ms color: #9900CC color: inherit 2c3e0037693044e4342c8fbb6169775717708a02 2d4c4f303130302d7d4f732e52353d25483a4a6f {dht: false, fast: true, extended: true} color: #9900CC
+[webtorrent Leecher B] %cbittorrent-protocol %c[5b7cffac] fast extension is enabled%c +0ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Leecher B] %cwebtorrent:peer %cPeer %s got handshake %s%c +4ms color: #CC3366 color: inherit 2d4c4f303130302d7d4f732e52353d25483a4a6f 2c3e0037693044e4342c8fbb6169775717708a02 color: #CC3366
+[webtorrent Leecher B] %cwebtorrent:torrent %c[2d57573] [2c3e003] got wire %s (%s)%c +18ms color: #9900CC color: inherit 5b7cffac 127.0.0.1:19975 color: #9900CC
+[webtorrent Leecher B] %cbittorrent-protocol %c[5b7cffac] setTimeout ms=%d unref=%s%c +1ms color: #9900CC color: inherit 30000 true color: #9900CC
+[webtorrent Leecher B] %cbittorrent-protocol %c[5b7cffac] setKeepAlive %s%c +0ms color: #9900CC color: inherit true color: #9900CC
+[webtorrent Leecher B] %cbittorrent-protocol %c[5b7cffac] use extension.name=%s%c +1ms color: #9900CC color: inherit ut_metadata color: #9900CC
+[webtorrent Leecher B] %cbittorrent-protocol %c[5b7cffac] use extension.name=%s%c +0ms color: #9900CC color: inherit lt_donthave color: #9900CC
+[webtorrent Leecher B] %cbittorrent-protocol %c[5b7cffac] extended ext=%s%c +0ms color: #9900CC color: inherit 0 color: #9900CC
+[browsertorrent Seeder A] [ExtensionHost] sendHandshake fields: {"reqq":250,"m":{},"metadata_size":96}
+[browsertorrent Seeder A] [Torrent] Metadata already available, syncing remote pieces for new wire immediately
+[browsertorrent Seeder A] [Torrent] syncRemotePieces: isHaveAll=false, hasBitfield=false, numPieces=1
+[browsertorrent Seeder A] [Torrent] syncRemotePieces completed: remotePieces.size=0
+[browsertorrent Seeder A] [Torrent] sendInitialState: ready=true, numPieces=1
+[browsertorrent Seeder A] [Torrent] Sending initial bitfield to peer...
+[browsertorrent Seeder A] [Torrent] Sending UNCHOKE to peer
+[browsertorrent Seeder A] [UtMetadata] onExtendedHandshake: m=undefined, extensionsSize=2, metadataSize=undefined
+[browsertorrent Seeder A] [UtMetadata] onExtendedHandshake resolved: utMetadataId=1, metadataSize=undefined
+[webtorrent Leecher B] %cbittorrent-protocol %c[5b7cffac] extended ext=%s%c +10ms color: #9900CC color: inherit ut_metadata color: #9900CC
+[webtorrent Leecher B] %cbittorrent-protocol %c[5b7cffac] got extended handshake%c +0ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Leecher B] %cbittorrent-protocol %c[5b7cffac] got bitfield%c +1ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Leecher B] %cbittorrent-protocol %c[5b7cffac] got unchoke%c +0ms color: #9900CC color: inherit color: #9900CC
+[browsertorrent Seeder A] [UtMetadata] _onRequest piece: 0, metadataComplete: true, size: 96
+[browsertorrent Seeder A] [UtMetadata] _send: dict={"msg_type":1,"piece":0,"total_size":96}, trailerLength=96, extensionId=1
+[webtorrent Leecher B] %cbittorrent-protocol %c[5b7cffac] got extended message ext=%s%c +3ms color: #9900CC color: inherit ut_metadata color: #9900CC
+[webtorrent Leecher B] %cwebtorrent:torrent %c[2d57573] [2c3e003] got metadata via ut_metadata%c +16ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Leecher B] %cwebtorrent:torrent %c[2d57573] [2c3e003] got metadata%c +0ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Leecher B] %cwebtorrent:torrent %c[2d57573] [2c3e003] select %s-%s (priority %s)%c +2ms color: #9900CC color: inherit 0 0 0 color: #9900CC
+[webtorrent Leecher B] %cwebtorrent:torrent %c[2d57573] [2c3e003] verifying existing torrent data%c +1ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Leecher B] %cwebtorrent:torrent %c[2d57573] [2c3e003] select %s-%s (priority %s)%c +6ms color: #9900CC color: inherit 0 0 0 color: #9900CC
+[webtorrent Leecher B] %cwebtorrent:torrent %c[2d57573] [2c3e003] piece invalid %s%c +0ms color: #9900CC color: inherit 0 color: #9900CC
+[webtorrent Leecher B] %cwebtorrent:torrent %c[2d57573] [2c3e003] done verifying%c +0ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Leecher B] %cwebtorrent:torrent %c[2d57573] [2c3e003] on store%c +1ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Leecher B] %cbittorrent-protocol %c[5b7cffac] interested%c +11ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Leecher B] %cbittorrent-protocol %c[5b7cffac] have-none%c +0ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Leecher B] %cbittorrent-protocol %c[5b7cffac] request index=%d offset=%d length=%d%c +1ms color: #9900CC color: inherit 0 0 61 color: #9900CC
+[browsertorrent Seeder A] [Torrent] received wire 'request' index=0, offset=0, length=61, pieceFound=true
+[webtorrent Leecher B] %cbittorrent-protocol %c[5b7cffac] got unchoke%c +4ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Leecher B] %cbittorrent-protocol %c[5b7cffac] got piece index=%d offset=%d%c +1ms color: #9900CC color: inherit 0 0 color: #9900CC
+[webtorrent Leecher B] %cwebtorrent:torrent %c[2d57573] [2c3e003] got piece %s (offset: %s length: %s) from %s%c +6ms color: #9900CC color: inherit 0 0 61 127.0.0.1:19975 color: #9900CC
+[webtorrent Leecher B] %cwebtorrent:torrent %c[2d57573] [2c3e003] piece verified %s%c +0ms color: #9900CC color: inherit 0 color: #9900CC
+[webtorrent Leecher B] %cbittorrent-protocol %c[5b7cffac] have %d%c +8ms color: #9900CC color: inherit 0 color: #9900CC
+[webtorrent Leecher B] %cwebtorrent:torrent %c[2d57573] [2c3e003] file done: test-compat-file.txt%c +8ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Leecher B] %cwebtorrent:torrent %c[2d57573] [2c3e003] torrent done: 2c3e0037693044e4342c8fbb6169775717708a02%c +0ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Leecher B] 🎉 WebTorrent reported DONE! Reading buffer...
+[webtorrent Leecher B] %cbittorrent-tracker:client %csend `complete` %o%c +226ms color: #CCCC33 color: inherit {numwant: 50, uploaded: 173, downloaded: 61, left: 0, event: completed} color: #CCCC33
+[webtorrent Leecher B] %cbittorrent-tracker:websocket-tracker %csend %s%c +60ms color: #FF6600 color: inherit {"numwant":50,"uploaded":173,"downloaded":61,"left":0,"event":"completed","action":"announce","info_hash":",>\u00007i0Dä4,»aiwW\u0017p\u0002","peer_id":"-WW0300-1EgJVGrUCS/P"} color: #FF6600
+[webtorrent Leecher B] %cbittorrent-protocol %c[5b7cffac] uninterested%c +1ms color: #9900CC color: inherit color: #9900CC
+[browsertorrent Seeder A] [Torrent] wire.on('have') received index=0
+[webtorrent Leecher B] %cbittorrent-tracker:websocket-tracker %creceived %s from %s for %s%c +3ms color: #FF6600 color: inherit {"action":"announce","interval":120,"info_hash":",>\u00007i0Dä4,»aiwW\u0017p\u0002","complete":1,"incomplete":0,"peers":[{"peer_id":"-LO0100-}Os.R5=%H:Jo","ip":"127.0.0.1"}]} ws://127.0.0.1:3000/tracker 2c3e0037693044e4342c8fbb6169775717708a02 color: #FF6600
+✅ SUCCESS! File transferred and verified byte-for-byte: "TEST_CASE_4A_LOCAL_browsertorrent_TO_webtorrent_1789723506123"
+
+---------------------------------------------------------------
+RUNNING CASE_4B_LOCAL: Original WebTorrent ➔ BrowserTorrent (Local Deno Tracker)
+  Seeder: [webtorrent] | Leecher: [browsertorrent]
+  Trackers: ws://127.0.0.1:3000/tracker
+---------------------------------------------------------------
+[webtorrent Seeder A] [main] SW Registered: http://127.0.0.1:3000/
+[webtorrent Seeder A] [main] SW MessageChannel established (after activation)
+[webtorrent Seeder A] [PLAYER 09:25:07] effect: torrent: undefined files: undefined video: false
+[webtorrent Seeder A] [PLAYER 09:25:07] effect: no torrent or no files, waiting...
+[browsertorrent Leecher B] [main] SW Registered: http://127.0.0.1:3000/
+[browsertorrent Leecher B] [main] SW MessageChannel established (after activation)
+[browsertorrent Leecher B] [PLAYER 09:25:07] effect: torrent: undefined files: undefined video: false
+[browsertorrent Leecher B] [PLAYER 09:25:07] effect: no torrent or no files, waiting...
+[webtorrent Seeder A] %cwebtorrent %c[2d57573] new webtorrent (peerId %s, nodeId %s, port %s)%c +0ms color: #CC0000 color: inherit 2d5757303330302d76534766337675554b756157 54c11b61dee3de0bbb5f74de2cf7b5722692153d 0 color: #CC0000
+[webtorrent Seeder A] Seeding payload: "TEST_CASE_4B_LOCAL_webtorrent_TO_browsertorrent_1789723508835" using webtorrent...
+[webtorrent Seeder A] %cwebtorrent %c[2d57573] seed%c +2ms color: #CC0000 color: inherit color: #CC0000
+[webtorrent Seeder A] %cwebtorrent %c[2d57573] add%c +0ms color: #CC0000 color: inherit color: #CC0000
+[webtorrent Seeder A] %cwebtorrent:torrent %c[2d57573] [unknown infohash] new torrent%c +0ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Seeder A] %cwebtorrent %c[2d57573] listening%c +1ms color: #CC0000 color: inherit color: #CC0000
+[webtorrent Seeder A] %cwebtorrent:torrent %c[2d57573] [ba44967] got metadata%c +8ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Seeder A] %cwebtorrent:torrent %c[2d57573] [ba44967] select %s-%s (priority %s)%c +2ms color: #9900CC color: inherit 0 0 0 color: #9900CC
+[webtorrent Seeder A] %cwebtorrent:torrent %c[2d57573] [ba44967] on store%c +0ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Seeder A] %cbittorrent-tracker:client %cnew client %s%c +0ms color: #CCCC33 color: inherit ba44967ab2dcc72f19df5450abbc8506d2d8c6a3 color: #CCCC33
+[webtorrent Seeder A] %cbittorrent-tracker:websocket-tracker %cnew websocket tracker %s%c +0ms color: #FF6600 color: inherit ws://127.0.0.1:3000/tracker color: #FF6600
+[webtorrent Seeder A] %cbittorrent-tracker:client %csetInterval %d%c +2ms color: #CCCC33 color: inherit 900000 color: #CCCC33
+[webtorrent Seeder A] %cbittorrent-tracker:client %csend `start` %o%c +0ms color: #CCCC33 color: inherit {numwant: 50, uploaded: 0, downloaded: 61, left: 0, event: started} color: #CCCC33
+[webtorrent Seeder A] %cwebtorrent:torrent %c[2d57573] [ba44967] file done: test-compat-file.txt%c +4ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Seeder A] %cwebtorrent:torrent %c[2d57573] [ba44967] torrent done: ba44967ab2dcc72f19df5450abbc8506d2d8c6a3%c +0ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Seeder A] %cbittorrent-tracker:client %csend `complete` %o%c +1ms color: #CCCC33 color: inherit {numwant: 50, uploaded: 0, downloaded: 61, left: 0, event: completed} color: #CCCC33
+Seeder ready. Magnet URI: magnet:?xt=urn:btih:ba44967ab2dcc72f19df5450abbc8506d2d8c6a3&dn=test-compat-file.txt&tr=ws%3A%2F%2F127.0.0.1%3A3000%2Ftracker
+[webtorrent Seeder A] %cbittorrent-tracker:websocket-tracker %cgenerating %s offers%c +10ms color: #FF6600 color: inherit 5 color: #FF6600
+[webtorrent Seeder A] %cbittorrent-tracker:websocket-tracker %ccreating peer (from _generateOffers)%c +0ms color: #FF6600 color: inherit color: #FF6600
+[webtorrent Seeder A] %csimple-peer %c[1905162] new peer %o%c +0ms color: #0099FF color: inherit {allowHalfOpen: false, trickle: false, config: Object, wrtc: undefined, initiator: true} color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[1905162] initial negotiation%c +5ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[1905162] _needsNegotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %cbittorrent-tracker:websocket-tracker %ccreating peer (from _generateOffers)%c +6ms color: #FF6600 color: inherit color: #FF6600
+[webtorrent Seeder A] %csimple-peer %c[1b944ff] new peer %o%c +0ms color: #0099FF color: inherit {allowHalfOpen: false, trickle: false, config: Object, wrtc: undefined, initiator: true} color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[1b944ff] initial negotiation%c +3ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[1b944ff] _needsNegotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %cbittorrent-tracker:websocket-tracker %ccreating peer (from _generateOffers)%c +3ms color: #FF6600 color: inherit color: #FF6600
+[webtorrent Seeder A] %csimple-peer %c[e3f6010] new peer %o%c +0ms color: #0099FF color: inherit {allowHalfOpen: false, trickle: false, config: Object, wrtc: undefined, initiator: true} color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[e3f6010] initial negotiation%c +6ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[e3f6010] _needsNegotiation%c +1ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %cbittorrent-tracker:websocket-tracker %ccreating peer (from _generateOffers)%c +7ms color: #FF6600 color: inherit color: #FF6600
+[webtorrent Seeder A] %csimple-peer %c[c37a223] new peer %o%c +0ms color: #0099FF color: inherit {allowHalfOpen: false, trickle: false, config: Object, wrtc: undefined, initiator: true} color: #0099FF
+[browsertorrent Leecher B] Adding magnet using browsertorrent...
+[webtorrent Seeder A] %csimple-peer %c[c37a223] initial negotiation%c +8ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[c37a223] _needsNegotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %cbittorrent-tracker:websocket-tracker %ccreating peer (from _generateOffers)%c +8ms color: #FF6600 color: inherit color: #FF6600
+[webtorrent Seeder A] %csimple-peer %c[995361c] new peer %o%c +1ms color: #0099FF color: inherit {allowHalfOpen: false, trickle: false, config: Object, wrtc: undefined, initiator: true} color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[995361c] initial negotiation%c +3ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[995361c] _needsNegotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %cbittorrent-tracker:websocket-tracker %csend %s%c +4ms color: #FF6600 color: inherit {"numwant":50,"uploaded":0,"downloaded":61,"left":0,"event":"completed","action":"announce","info_hash":"ºDz²ÜÇ/\u0019ßTP«¼\u0006ÒØÆ£","peer_id":"-WW0300-vSGf3vuUKuaW"} color: #FF6600
+[webtorrent Seeder A] %csimple-peer %c[1905162] starting batched negotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[1905162] start negotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[1b944ff] starting batched negotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[1b944ff] start negotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[e3f6010] starting batched negotiation%c +1ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[e3f6010] start negotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[c37a223] starting batched negotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[c37a223] start negotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[995361c] starting batched negotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[995361c] start negotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+Waiting for connection and data transfer...
+[webtorrent Seeder A] %cbittorrent-tracker:websocket-tracker %creceived %s from %s for %s%c +6ms color: #FF6600 color: inherit {"action":"announce","interval":120,"info_hash":"ºDz²ÜÇ/\u0019ßTP«¼\u0006ÒØÆ£","complete":1,"incomplete":0,"peers":[]} ws://127.0.0.1:3000/tracker ba44967ab2dcc72f19df5450abbc8506d2d8c6a3 color: #FF6600
+[webtorrent Seeder A] %csimple-peer %c[1905162] signalingStateChange %s%c +21ms color: #0099FF color: inherit have-local-offer color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[1905162] createOffer success%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[1b944ff] signalingStateChange %s%c +0ms color: #0099FF color: inherit have-local-offer color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[1b944ff] createOffer success%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[e3f6010] signalingStateChange %s%c +0ms color: #0099FF color: inherit have-local-offer color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[e3f6010] createOffer success%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[c37a223] signalingStateChange %s%c +0ms color: #0099FF color: inherit have-local-offer color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[c37a223] createOffer success%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[995361c] signalingStateChange %s%c +0ms color: #0099FF color: inherit have-local-offer color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[995361c] createOffer success%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[1905162] iceStateChange (connection: %s) (gathering: %s)%c +1ms color: #0099FF color: inherit new gathering color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[1b944ff] iceStateChange (connection: %s) (gathering: %s)%c +0ms color: #0099FF color: inherit new gathering color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[e3f6010] iceStateChange (connection: %s) (gathering: %s)%c +0ms color: #0099FF color: inherit new gathering color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[c37a223] iceStateChange (connection: %s) (gathering: %s)%c +0ms color: #0099FF color: inherit new gathering color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[995361c] iceStateChange (connection: %s) (gathering: %s)%c +0ms color: #0099FF color: inherit new gathering color: #0099FF
+[webtorrent Seeder A] %cwebtorrent %c[2d57573] on seed%c +75ms color: #CC0000 color: inherit color: #CC0000
+[webtorrent Seeder A] %csimple-peer %c[1905162] started iceComplete timeout%c +8ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[1b944ff] started iceComplete timeout%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[e3f6010] started iceComplete timeout%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[c37a223] started iceComplete timeout%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[995361c] started iceComplete timeout%c +1ms color: #0099FF color: inherit color: #0099FF
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:1193103963 1 udp 2122260223 127.0.0.1 63882 typ host generation 0 ufrag Dwei network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:1994461245 1 udp 2122260223 127.0.0.1 57100 typ host generation 0 ufrag cgLA network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:1410644180 1 udp 2122260223 127.0.0.1 20691 typ host generation 0 ufrag zFiy network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:597832498 1 udp 2122260223 127.0.0.1 20971 typ host generation 0 ufrag m0gh network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:2344101592 1 udp 2122260223 127.0.0.1 17468 typ host generation 0 ufrag teWl network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:3115812559 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag Dwei network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:137294501 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag cgLA network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:2864606272 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag zFiy network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:1567478186 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag m0gh network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:4118266944 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag teWl network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[webtorrent Seeder A] %cbittorrent-tracker:websocket-tracker %creceived %s from %s for %s%c +148ms color: #FF6600 color: inherit {"action":"announce","info_hash":"ºDz²ÜÇ/\u0019ßTP«¼\u0006ÒØÆ£","offer_id":"86ce69fce6daa7d58be95bacc2b1b3f7bbeeefcf","offer":{"type":"offer","sdp":"v=0\r\no=- 378459546216872718 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 63882 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:1193103963 1 udp 2122260223 127.0.0.1 63882 typ host generation 0 network-id 1 network-cost 50\r\na=candidate:3115812559 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 network-id 1 network-cost 50\r\na=ice-ufrag:Dwei\r\na=ice-pwd:sYXN/pALnTzjeBt7+AQTGVr0\r\na=ice-options:trickle\r\na=fingerprint:sha-256 8D:62:43:E9:75:85:CB:A1:A0:76:C0:9E:5F:DC:29:95:14:2D:E5:E0:AC:70:C6:B8:A5:4D:CB:8C:38:78:19:87\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n"},"peer_id":"-LO0100-DxM&rYL3hQ8q","from_peer_id":"-LO0100-DxM&rYL3hQ8q"} ws://127.0.0.1:3000/tracker ba44967ab2dcc72f19df5450abbc8506d2d8c6a3 color: #FF6600
+[webtorrent Seeder A] %cbittorrent-tracker:websocket-tracker %ccreating peer (from remote offer)%c +0ms color: #FF6600 color: inherit color: #FF6600
+[webtorrent Seeder A] %csimple-peer %c[2bdb75d] new peer %o%c +122ms color: #0099FF color: inherit {allowHalfOpen: false, trickle: false, config: Object, wrtc: undefined} color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[2bdb75d] initial negotiation%c +2ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[2bdb75d] _needsNegotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %cwebtorrent:torrent %c[2d57573] [ba44967] peer %s discovered via %s%c +191ms color: #9900CC color: inherit [object Object] tracker color: #9900CC
+[webtorrent Seeder A] %cwebtorrent:torrent %c[2d57573] [ba44967] add peer %s%c +1ms color: #9900CC color: inherit 2d4c4f303130302d44784d2672594c3368513871 color: #9900CC
+[webtorrent Seeder A] %cwebtorrent:peer %cnew %s Peer %s%c +0ms color: #CC3366 color: inherit webrtc 2d4c4f303130302d44784d2672594c3368513871 color: #CC3366
+[webtorrent Seeder A] %csimple-peer %c[2bdb75d] signal()%c +1ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[2bdb75d] non-initiator initial negotiation request discarded%c +1ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[2bdb75d] signalingStateChange %s%c +3ms color: #0099FF color: inherit have-remote-offer color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[1905162] iceStateChange (connection: %s) (gathering: %s)%c +1ms color: #0099FF color: inherit new complete color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[1905162] signal%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[1b944ff] iceStateChange (connection: %s) (gathering: %s)%c +0ms color: #0099FF color: inherit new complete color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[1b944ff] signal%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[e3f6010] iceStateChange (connection: %s) (gathering: %s)%c +0ms color: #0099FF color: inherit new complete color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[e3f6010] signal%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[c37a223] iceStateChange (connection: %s) (gathering: %s)%c +0ms color: #0099FF color: inherit new complete color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[c37a223] signal%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[995361c] iceStateChange (connection: %s) (gathering: %s)%c +0ms color: #0099FF color: inherit new complete color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[995361c] signal%c +1ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %cbittorrent-tracker:websocket-tracker %cgenerated %s offers%c +9ms color: #FF6600 color: inherit 5 color: #FF6600
+[webtorrent Seeder A] %cbittorrent-tracker:websocket-tracker %csend %s%c +0ms color: #FF6600 color: inherit {"numwant":5,"uploaded":0,"downloaded":61,"left":0,"event":"started","action":"announce","info_hash":"ºDz²ÜÇ/\u0019ßTP«¼\u0006ÒØÆ£","peer_id":"-WW0300-vSGf3vuUKuaW","offers":[{"offer":{"type":"offer","sdp":"v=0\r\no=- 3859528080038018306 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 49697 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:786780383 1 udp 2122260223 127.0.0.1 49697 typ host generation 0 network-id 1 network-cost 50\r\na=candidate:3494872139 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 network-id 1 network-cost 50\r\na=ice-ufrag:gemC\r\na=ice-pwd:e8yy7kRGYW/mmsSaQJd8rawz\r\na=fingerprint:sha-256 BD:38:42:DA:F5:92:59:14:08:31:3D:27:F1:89:6A:47:18:0F:33:EE:B5:CF:8E:F9:5E:BE:12:37:AA:3C:B2:F1\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n"},"offer_id":"ã9¸ø\u0019;çy\u001c%.Ødá"},{"offer":{"type":"offer","sdp":"v=0\r\no=- 7029688118498520392 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 39927 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:1993674847 1 udp 2122260223 127.0.0.1 39927 typ host generation 0 network-id 1 network-cost 50\r\na=candidate:2290074827 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 network-id 1 network-cost 50\r\na=ice-ufrag:dBbo\r\na=ice-pwd:sAGLamo5uHs4hh8NRdrwoTvJ\r\na=fingerprint:sha-256 41:CA:35:2A:03:DE:99:53:4B:C8:5D:5B:54:53:46:D9:2B:40:FC:C2:47:EB:C8:95:B2:91:10:30:E0:EB:C6:F1\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n"},"offer_id":"7ûýJ\u000eY\u0014®ñ:ìÆÄfc&hî"},{"offer":{"type":"offer","sdp":"v=0\r\no=- 4278732818581893397 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 37710 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:4243145003 1 udp 2122260223 127.0.0.1 37710 typ host generation 0 network-id 1 network-cost 50\r\na=candidate:37983679 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 network-id 1 network-cost 50\r\na=ice-ufrag:vNV/\r\na=ice-pwd:Rioirkpgg/8RQTaJ08Z3Uq0y\r\na=fingerprint:sha-256 59:18:B0:D7:AD:79:F0:C2:89:16:67:FB:92:0A:41:81:3B:2D:31:F7:DF:D5:FE:D2:F4:B8:E3:11:17:C7:FA:D5\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n"},"offer_id":"\u0013\u001d­\u0018þdÜé¡Í=¸D\\$à\u0019"},{"offer":{"type":"offer","sdp":"v=0\r\no=- 8951747562343912721 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 40717 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:3546687914 1 udp 2122260223 127.0.0.1 40717 typ host generation 0 network-id 1 network-cost 50\r\na=candidate:768408894 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 network-id 1 network-cost 50\r\na=ice-ufrag:mLsI\r\na=ice-pwd:L9R0OugA73bc7Z3rlG4DaisV\r\na=fingerprint:sha-256 FD:6E:74:7E:F1:45:F9:25:C2:11:21:72:8B:2A:C5:14:5A:98:0F:CB:64:F9:56:6C:CC:58:9C:50:36:BE:76:9A\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n"},"offer_id":"¸teñ¬f=1ò¹^¤öÃ\u000f\u0014i"},{"offer":{"type":"offer","sdp":"v=0\r\no=- 4082675427073234542 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 59186 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:649570942 1 udp 2122260223 127.0.0.1 59186 typ host generation 0 network-id 1 network-cost 50\r\na=candidate:1484277990 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 network-id 1 network-cost 50\r\na=ice-ufrag:2AdB\r\na=ice-pwd:StnQp7+qMc8i5eND1Nmi6boq\r\na=fingerprint:sha-256 C3:17:B2:B8:78:71:0E:7D:E0:84:3E:9A:CB:4C:86:E7:40:D4:2B:13:74:06:39:2C:D9:66:A5:1B:50:A6:7C:54\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n"},"offer_id":"2¥WÖ\u0017\fLLºùå:âfp%ò"}]} color: #FF6600
+[webtorrent Seeder A] %csimple-peer %c[2bdb75d] flushing sender queue%c +5ms color: #0099FF color: inherit color: #0099FF []
+[webtorrent Seeder A] %csimple-peer %c[2bdb75d] negotiated%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[2bdb75d] signalingStateChange %s%c +0ms color: #0099FF color: inherit stable color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[2bdb75d] iceStateChange (connection: %s) (gathering: %s)%c +0ms color: #0099FF color: inherit new gathering color: #0099FF
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:70321598 1 udp 2122260223 127.0.0.1 61032 typ host generation 0 ufrag T5wx network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:806666792 1 udp 2122260223 127.0.0.1 59216 typ host generation 0 ufrag nGgT network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:4124814113 1 udp 2122260223 127.0.0.1 49440 typ host generation 0 ufrag 4NVA network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:1956667907 1 udp 2122260223 127.0.0.1 49570 typ host generation 0 ufrag Hs6E network-id 1 network-cost 50
+[webtorrent Seeder A] %cbittorrent-tracker:websocket-tracker %creceived %s from %s for %s%c +9ms color: #FF6600 color: inherit {"action":"announce","interval":120,"info_hash":"ºDz²ÜÇ/\u0019ßTP«¼\u0006ÒØÆ£","complete":1,"incomplete":0,"peers":[{"peer_id":"-LO0100-DxM&rYL3hQ8q","ip":"127.0.0.1"}]} ws://127.0.0.1:3000/tracker ba44967ab2dcc72f19df5450abbc8506d2d8c6a3 color: #FF6600
+[webtorrent Seeder A] %csimple-peer %c[2bdb75d] iceStateChange (connection: %s) (gathering: %s)%c +4ms color: #0099FF color: inherit checking gathering color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[2bdb75d] started iceComplete timeout%c +2ms color: #0099FF color: inherit color: #0099FF
+[browsertorrent Leecher B] [Peer receiver] signal() received offer
+[browsertorrent Leecher B] [Peer initiator] iceConnectionState: checking
+[browsertorrent Leecher B] [Peer initiator] connectionState: connecting
+[webtorrent Seeder A] %csimple-peer %c[2bdb75d] iceStateChange (connection: %s) (gathering: %s)%c +14ms color: #0099FF color: inherit connected gathering color: #0099FF
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:540339196 1 udp 2122260223 127.0.0.1 16398 typ host generation 0 ufrag pExF network-id 1 network-cost 50
+[webtorrent Seeder A] %csimple-peer %c[2bdb75d] maybeReady pc %s channel %s%c +1ms color: #0099FF color: inherit true false color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[2bdb75d] iceStateChange (connection: %s) (gathering: %s)%c +1ms color: #0099FF color: inherit connected complete color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[2bdb75d] maybeReady pc %s channel %s%c +0ms color: #0099FF color: inherit true false color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[2bdb75d] signal%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %cbittorrent-tracker:websocket-tracker %csend %s%c +18ms color: #FF6600 color: inherit {"action":"announce","info_hash":"ºDz²ÜÇ/\u0019ßTP«¼\u0006ÒØÆ£","peer_id":"-WW0300-vSGf3vuUKuaW","to_peer_id":"-LO0100-DxM&rYL3hQ8q","answer":{"type":"answer","sdp":"v=0\r\no=- 6849216362665804268 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 53544 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:137086775 1 udp 2122260223 127.0.0.1 53544 typ host generation 0 network-id 1 network-cost 50\r\na=ice-ufrag:XRmc\r\na=ice-pwd:srG5fQJLnVbnPiMtlr4AEbz0\r\na=fingerprint:sha-256 32:B2:18:CD:EF:25:ED:41:14:D4:C9:5A:CF:C3:EF:4B:D0:B1:B5:BC:0C:2F:BF:27:53:04:4D:A8:A7:D5:01:C5\r\na=setup:active\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n"},"offer_id":"86ce69fce6daa7d58be95bacc2b1b3f7bbeeefcf"} color: #FF6600
+[browsertorrent Leecher B] [Peer initiator] signal() received answer
+[browsertorrent Leecher B] [Peer receiver] iceConnectionState: checking
+[webtorrent Seeder A] %cbittorrent-tracker:websocket-tracker %creceived %s from %s for %s%c +4ms color: #FF6600 color: inherit {"action":"announce","interval":120,"info_hash":"ºDz²ÜÇ/\u0019ßTP«¼\u0006ÒØÆ£","complete":1,"incomplete":0,"peers":[{"peer_id":"-LO0100-DxM&rYL3hQ8q","ip":"127.0.0.1"}]} ws://127.0.0.1:3000/tracker ba44967ab2dcc72f19df5450abbc8506d2d8c6a3 color: #FF6600
+[browsertorrent Leecher B] [Peer receiver] gathered candidate: candidate:3766370351 1 udp 2122260223 127.0.0.1 59355 typ host generation 0 ufrag K1vr network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer receiver] connectionState: connecting
+[webtorrent Seeder A] %csimple-peer %c[1905162] iceStateChange (connection: %s) (gathering: %s)%c +9ms color: #0099FF color: inherit checking complete color: #0099FF
+[browsertorrent Leecher B] [Peer receiver] iceConnectionState: connected
+[browsertorrent Leecher B] [Peer receiver] Emitting local signal, type: answer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer receiver] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] iceConnectionState: connected
+[webtorrent Seeder A] %cbittorrent-tracker:websocket-tracker %creceived %s from %s for %s%c +10ms color: #FF6600 color: inherit {"action":"announce","info_hash":"ºDz²ÜÇ/\u0019ßTP«¼\u0006ÒØÆ£","offer_id":"ã9¸ø\u0019;çy\u001c%.Ødá","answer":{"type":"answer","sdp":"v=0\r\no=- 7723927592060104439 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 59355 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:3766370351 1 udp 2122260223 127.0.0.1 59355 typ host generation 0 network-id 1 network-cost 50\r\na=ice-ufrag:K1vr\r\na=ice-pwd:CM84ftukNwdRqLk19CB5IM93\r\na=ice-options:trickle\r\na=fingerprint:sha-256 4A:6D:DD:0E:7E:DF:F6:5D:58:5C:40:F8:8D:D4:74:7D:F6:A3:6E:F6:0B:D1:91:36:E4:A0:5C:56:42:25:B3:DE\r\na=setup:active\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n"},"peer_id":"-LO0100-DxM&rYL3hQ8q","from_peer_id":"-LO0100-DxM&rYL3hQ8q","to_peer_id":"-WW0300-vSGf3vuUKuaW"} ws://127.0.0.1:3000/tracker ba44967ab2dcc72f19df5450abbc8506d2d8c6a3 color: #FF6600
+[webtorrent Seeder A] %cwebtorrent:torrent %c[2d57573] [ba44967] peer %s discovered via %s%c +47ms color: #9900CC color: inherit [object Object] tracker color: #9900CC
+[webtorrent Seeder A] %cwebtorrent:torrent %c[2d57573] [ba44967] ignoring peer: duplicate (%s)%c +0ms color: #9900CC color: inherit 2d4c4f303130302d44784d2672594c3368513871 color: #9900CC
+[webtorrent Seeder A] %csimple-peer %c[1905162] signal()%c +5ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[1905162] destroying (error: %s)%c +1ms color: #0099FF color: inherit undefined color: #0099FF
+[browsertorrent Leecher B] [Peer initiator] connectionState: connected
+[browsertorrent Leecher B] [Peer initiator] DataChannel OPEN!
+[webtorrent Seeder A] %csimple-peer %c[2bdb75d] on channel open%c +5ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[2bdb75d] maybeReady pc %s channel %s%c +0ms color: #0099FF color: inherit true true color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[2bdb75d] connect local: %s:%s remote: %s:%s%c +2ms color: #0099FF color: inherit 127.0.0.1 53544 127.0.0.1 63882 color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[2bdb75d] connect%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %cwebtorrent:peer %cPeer %s connected%c +56ms color: #CC3366 color: inherit 2d4c4f303130302d44784d2672594c3368513871 color: #CC3366
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] new wire%c +0ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] type:%c +0ms color: #9900CC color: inherit color: #9900CC webrtc
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] handshake i=%s p=%s exts=%o%c +1ms color: #9900CC color: inherit ba44967ab2dcc72f19df5450abbc8506d2d8c6a3 2d5757303330302d76534766337675554b756157 {dht: false, fast: true} color: #9900CC
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] got handshake i=%s p=%s exts=%o%c +2ms color: #9900CC color: inherit ba44967ab2dcc72f19df5450abbc8506d2d8c6a3 2d4c4f303130302d44784d2672594c3368513871 {dht: false, fast: true, extended: true} color: #9900CC
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] fast extension is enabled%c +0ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Seeder A] %cwebtorrent:peer %cPeer %s got handshake %s%c +4ms color: #CC3366 color: inherit 2d4c4f303130302d44784d2672594c3368513871 ba44967ab2dcc72f19df5450abbc8506d2d8c6a3 color: #CC3366
+[webtorrent Seeder A] %cwebtorrent:torrent %c[2d57573] [ba44967] got wire %s (%s)%c +13ms color: #9900CC color: inherit c5d73149 127.0.0.1:63882 color: #9900CC
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] setTimeout ms=%d unref=%s%c +1ms color: #9900CC color: inherit 30000 true color: #9900CC
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] setKeepAlive %s%c +0ms color: #9900CC color: inherit true color: #9900CC
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] use extension.name=%s%c +0ms color: #9900CC color: inherit ut_metadata color: #9900CC
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] use extension.name=%s%c +1ms color: #9900CC color: inherit lt_donthave color: #9900CC
+[browsertorrent Leecher B] [ExtensionHost] sendHandshake fields: {"reqq":250,"m":{}}
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] extended ext=%s%c +0ms color: #9900CC color: inherit 0 color: #9900CC
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] have-all%c +1ms color: #9900CC color: inherit color: #9900CC
+[browsertorrent Leecher B] [Torrent] Metadata already available, syncing remote pieces for new wire immediately
+[browsertorrent Leecher B] [Torrent] syncRemotePieces: isHaveAll=false, hasBitfield=false, numPieces=0
+[browsertorrent Leecher B] [Torrent] syncRemotePieces completed: remotePieces.size=0
+[browsertorrent Leecher B] [Torrent] updateInterest: interesting=false, amInterested=false, peerChoking=true
+[browsertorrent Leecher B] [Torrent] sendInitialState: ready=true, numPieces=0
+[browsertorrent Leecher B] [Torrent] No metadata yet, sending empty bitfield/availability...
+[webtorrent Seeder A] %cwebtorrent:torrent %c[2d57573] [ba44967] ut_metadata warning: %s%c +5ms color: #9900CC color: inherit Peer does not have metadata color: #9900CC
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] got extended handshake%c +3ms color: #9900CC color: inherit color: #9900CC
+[browsertorrent Leecher B] [Torrent] Sending UNCHOKE to peer
+[browsertorrent Leecher B] [Torrent] updateInterest: interesting=false, amInterested=false, peerChoking=true
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] got bitfield%c +2ms color: #9900CC color: inherit color: #9900CC
+[browsertorrent Leecher B] [UtMetadata] onExtendedHandshake: m=undefined, extensionsSize=2, metadataSize=96
+[browsertorrent Leecher B] [UtMetadata] onExtendedHandshake resolved: utMetadataId=1, metadataSize=96
+[browsertorrent Leecher B] [UtMetadata] _send: dict={"msg_type":0,"piece":0}, trailerLength=0, extensionId=1
+[browsertorrent Leecher B] [Torrent] wire.on('haveAll') received
+[browsertorrent Leecher B] [Torrent] updateInterest: interesting=false, amInterested=false, peerChoking=true
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] got unchoke%c +2ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] extended ext=%s%c +1ms color: #9900CC color: inherit ut_metadata color: #9900CC
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] got extended message ext=%s%c +0ms color: #9900CC color: inherit ut_metadata color: #9900CC
+[browsertorrent Leecher B] [UtMetadata] _onData piece: 0, buf.length: 96, totalSize: 96, fetching: true, metaSize: 96
+[browsertorrent Leecher B] [UtMetadata] _verifyMetadataIntegrity metadata.length: 96, first 20 bytes: [100, 54, 58, 108, 101, 110, 103, 116, 104, 105, 54, 49, 101, 52, 58, 110, 97, 109, 101, 50]
+[browsertorrent Leecher B] [Client] swarm metadata event fired, size: 96
+[browsertorrent Leecher B] [Torrent] setMetadata start, infoBuffer length: 96
+[browsertorrent Leecher B] [Torrent] setMetadata: decoding infoBuffer...
+[browsertorrent Leecher B] [Torrent] setMetadata: bencode decoded successfully.
+[browsertorrent Leecher B] [Torrent] setMetadata: pieceLength=16384, totalLength=61, numPieces=1
+[browsertorrent Leecher B] [Torrent] setMetadata: updating store length...
+[browsertorrent Leecher B] [Torrent] setMetadata: emitting metadata event...
+[browsertorrent Leecher B] [Torrent] syncRemotePieces: isHaveAll=true, hasBitfield=false, numPieces=1
+[browsertorrent Leecher B] [Torrent] syncRemotePieces completed: remotePieces.size=1
+[browsertorrent Leecher B] [Torrent] updateInterest: interesting=true, amInterested=false, peerChoking=true
+[browsertorrent Leecher B] [Torrent] setMetadata: verifying existing pieces...
+[browsertorrent Leecher B] [Torrent] setMetadata: existing pieces verified.
+[browsertorrent Leecher B] [Torrent] setMetadata: emitting ready event...
+[browsertorrent Leecher B] [Torrent] syncRemotePieces: isHaveAll=true, hasBitfield=false, numPieces=1
+[browsertorrent Leecher B] [Torrent] syncRemotePieces completed: remotePieces.size=1
+[browsertorrent Leecher B] [Torrent] updateInterest: interesting=true, amInterested=true, peerChoking=true
+[browsertorrent Leecher B] [Torrent] setMetadata: completed successfully!
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] got interested%c +6ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] unchoke%c +0ms color: #9900CC color: inherit color: #9900CC
+[browsertorrent Leecher B] [Torrent] updateInterest: interesting=true, amInterested=true, peerChoking=false
+[browsertorrent Leecher B] [Torrent] Requesting piece 0, length 61 from wire
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] got request index=%d offset=%d length=%d%c +6ms color: #9900CC color: inherit 0 0 61 color: #9900CC
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] piece index=%d offset=%d%c +22ms color: #9900CC color: inherit 0 0 color: #9900CC
+[browsertorrent Leecher B] 🎉 BrowserTorrent reported DONE!
+[browsertorrent Leecher B] [Torrent] requestBlocks exit early: isDestroyed=false, peerChoking=false, done=true
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] got have %d%c +4ms color: #9900CC color: inherit 0 color: #9900CC
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] choke%c +0ms color: #9900CC color: inherit color: #9900CC
+[webtorrent Seeder A] %cbittorrent-protocol %c[c5d73149] got have %d%c +0ms color: #9900CC color: inherit 0 color: #9900CC
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:4204515626 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag T5wx network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:1322983600 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag nGgT network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:191987637 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag 4NVA network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:175079579 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag Hs6E network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:3734912872 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag pExF network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[webtorrent Seeder A] %cbittorrent-tracker:websocket-tracker %creceived %s from %s for %s%c +101ms color: #FF6600 color: inherit {"action":"announce","info_hash":"ºDz²ÜÇ/\u0019ßTP«¼\u0006ÒØÆ£","offer_id":"60921cd5942f7354a9a7d4bbc1ef42f49aac971c","offer":{"type":"offer","sdp":"v=0\r\no=- 883534405561117121 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE 0\r\na=extmap-allow-mixed\r\na=msid-semantic: WMS\r\nm=application 61032 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 127.0.0.1\r\na=candidate:70321598 1 udp 2122260223 127.0.0.1 61032 typ host generation 0 network-id 1 network-cost 50\r\na=candidate:4204515626 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 network-id 1 network-cost 50\r\na=ice-ufrag:T5wx\r\na=ice-pwd:Zf+sfTqQ7oZ5h+D+c2EA71Gz\r\na=ice-options:trickle\r\na=fingerprint:sha-256 52:67:5D:5A:A5:94:F5:D1:57:12:EF:49:D8:E3:2A:24:FD:B9:D5:17:3B:F7:22:6C:91:2C:A8:D2:B7:41:1A:46\r\na=setup:actpass\r\na=mid:0\r\na=sctp-port:5000\r\na=max-message-size:262144\r\n"},"peer_id":"-LO0100-DxM&rYL3hQ8q","from_peer_id":"-LO0100-DxM&rYL3hQ8q"} ws://127.0.0.1:3000/tracker ba44967ab2dcc72f19df5450abbc8506d2d8c6a3 color: #FF6600
+[webtorrent Seeder A] %cbittorrent-tracker:websocket-tracker %ccreating peer (from remote offer)%c +0ms color: #FF6600 color: inherit color: #FF6600
+[webtorrent Seeder A] %csimple-peer %c[da1baea] new peer %o%c +93ms color: #0099FF color: inherit {allowHalfOpen: false, trickle: false, config: Object, wrtc: undefined} color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[da1baea] initial negotiation%c +4ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[da1baea] _needsNegotiation%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %cwebtorrent:torrent %c[2d57573] [ba44967] peer %s discovered via %s%c +88ms color: #9900CC color: inherit [object Object] tracker color: #9900CC
+[webtorrent Seeder A] %cwebtorrent:torrent %c[2d57573] [ba44967] ignoring peer: duplicate (%s)%c +0ms color: #9900CC color: inherit 2d4c4f303130302d44784d2672594c3368513871 color: #9900CC
+[webtorrent Seeder A] %csimple-peer %c[da1baea] signal()%c +1ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[da1baea] non-initiator initial negotiation request discarded%c +0ms color: #0099FF color: inherit color: #0099FF
+[webtorrent Seeder A] %csimple-peer %c[da1baea] destroying (error: %s)%c +0ms color: #0099FF color: inherit undefined color: #0099FF
+✅ SUCCESS! File transferred and verified byte-for-byte: "TEST_CASE_4B_LOCAL_webtorrent_TO_browsertorrent_1789723508835"
+
+===============================================================
+CROSS-COMPATIBILITY TESTING MATRIX RESULTS SUMMARY
+===============================================================
+[PASSED ✅] CASE_2
+[PASSED ✅] CASE_4A_LOCAL
+[PASSED ✅] CASE_4B_LOCAL
+
+Overall Score: 3/3 tests passed.

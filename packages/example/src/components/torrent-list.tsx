@@ -60,6 +60,7 @@ export function TorrentList() {
             <nav>
               {!isActive && (
                 <button
+                  type="button"
                   class="circle transparent"
                   onClick={() => {
                     torrentSignal.value = t;
@@ -71,6 +72,7 @@ export function TorrentList() {
                 </button>
               )}
               <button
+                type="button"
                 class="circle transparent"
                 onClick={() => removeTorrent(t.infoHash)}>
                 <i class="material-symbols">

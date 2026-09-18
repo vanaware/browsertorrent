@@ -114,11 +114,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
 
     const numPieces = parsedTorrent.pieces.length;
     this.bitfield = new Bitfield(numPieces,);
-    if (opts.skipVerify && numPieces > 0) {
-      for (let i = 0; i < numPieces; i++) {
-        this.bitfield.set(i,);
-      }
-    }
+
     this.expectedPieces = parsedTorrent.pieces;
     this._selected = new Bitfield(numPieces,);
     this._critical = new Bitfield(numPieces,);
@@ -444,38 +440,18 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
       if (!initialStateSent) {
         initialStateSent = true;
         if (this.numPieces > 0) {
-          if (this.bitfield.count() === this.numPieces) {
-            try {
-              console.log("[Torrent] Seeder detected, sending HAVE_ALL");
-              wire.sendHaveAll();
-            } catch {
-              wire.sendBitfield(this.bitfield.toBuffer(),);
-            }
-          } else if (this.bitfield.count() === 0) {
-            try {
-              console.log("[Torrent] Leecher detected, sending HAVE_NONE");
-              wire.sendHaveNone();
-            } catch {
-              wire.sendBitfield(this.bitfield.toBuffer(),);
-            }
-          } else {
-            try {
-              console.log("[Torrent] Partial leecher detected, sending bitfield");
-              wire.sendBitfield(this.bitfield.toBuffer(),);
-            } catch (err) {
-              console.warn("[Torrent] Erro ao enviar bitfield inicial:", err,);
-            }
+          try {
+            console.log("[Torrent] Sending initial bitfield to peer...");
+            wire.sendBitfield(this.bitfield.toBuffer(),);
+          } catch (err) {
+            console.warn("[Torrent] Erro ao enviar bitfield inicial:", err,);
           }
         } else {
           try {
-            console.log("[Torrent] No metadata yet, sending HAVE_NONE");
-            wire.sendHaveNone();
-          } catch {
-            try {
-              wire.sendBitfield(new Uint8Array(0),);
-            } catch (err) {
-              console.warn("[Torrent] Erro ao enviar availability inicial sem metadata:", err,);
-            }
+            console.log("[Torrent] No metadata yet, sending empty bitfield/availability...");
+            wire.sendBitfield(new Uint8Array(0),);
+          } catch (err) {
+            console.warn("[Torrent] Erro ao enviar availability inicial sem metadata:", err,);
           }
         }
       }
@@ -496,8 +472,6 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
         wire.once("handshake", sendInitialState,);
       }
     };
-
-    attachInitialState();
 
     // ── 2. Responder a requisições de blocos ────────────────────────────────
     wire.on("request", async (e: any,) => {
@@ -679,6 +653,8 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
         requestBlocks();
       }
     },);
+
+    attachInitialState();
   }
 
   // ==========================================================================
@@ -690,7 +666,9 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     if (this._metadataReceived) return false;
 
     try {
+      console.log("[Torrent] setMetadata: decoding infoBuffer...");
       const info = decode(infoBuffer,) as BencodeDict;
+      console.log("[Torrent] setMetadata: bencode decoded successfully.");
 
       const pieceLength = info["piece length"] as number;
       const piecesRaw = info["pieces"];
@@ -738,10 +716,13 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
       this._rawFiles = newFiles;
       this.expectedPieces = newExpectedPieces;
 
+      console.log(`[Torrent] setMetadata: pieceLength=${pieceLength}, totalLength=${totalLength}, numPieces=${newExpectedPieces.length}`);
+
       if (
         this._store &&
         typeof (this._store as unknown as { updateLength?: (c: number, l: number) => void }).updateLength === "function"
       ) {
+        console.log("[Torrent] setMetadata: updating store length...");
         (this._store as unknown as { updateLength: (c: number, l: number) => void }).updateLength(pieceLength, totalLength);
       }
 
@@ -762,6 +743,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
       },);
       this._metadataReceived = true;
 
+      console.log("[Torrent] setMetadata: emitting metadata event...");
       this.emit(
         "metadata",
         new CustomEvent("metadata", {
@@ -769,9 +751,13 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
         },),
       );
 
+      console.log("[Torrent] setMetadata: verifying existing pieces...");
       await this._verifyExistingPieces();
+      console.log("[Torrent] setMetadata: existing pieces verified.");
       this._ready = true;
+      console.log("[Torrent] setMetadata: emitting ready event...");
       this.emit("ready",);
+      console.log("[Torrent] setMetadata: completed successfully!");
       return true;
     } catch (err) {
       console.error("[Torrent] setMetadata error:", err);
@@ -788,10 +774,6 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     try {
       if (!skipVerify && this.numPieces > 0) {
         await this._verifyExistingPieces();
-      } else if (skipVerify && this.numPieces > 0) {
-        for (let i = 0; i < this.numPieces; i++) {
-          this.bitfield.set(i,);
-        }
       }
       this._ready = true;
       this._lastSpeedSample = Date.now();
@@ -802,6 +784,13 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
   }
 
   private async _verifyExistingPieces(): Promise<void> {
+    this._downloaded = 0;
+    this.bitfield = new Bitfield(this.numPieces,);
+    for (let i = 0; i < this._pieces.length; i++) {
+      const piece = this._pieces[i];
+      if (piece) piece.hash = undefined;
+    }
+
     for (let i = 0; i < this.numPieces; i++) {
       try {
         const opts = i === this.numPieces - 1
@@ -877,7 +866,8 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
         this.emit("done",);
       }
       return true;
-    } catch {
+    } catch (err) {
+      console.error("[Torrent] Error in receivePiece:", err);
       return false;
     }
   }

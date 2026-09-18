@@ -9,6 +9,33 @@ import type { ComponentChildren, } from "preact";
 import type { Client, Torrent, Wire, } from "@loco/webtorrent";
 import type { WebTorrentServer, } from "@loco/webtorrent";
 import { db, } from "@loco/worker-db";
+import { streamManager, } from "@loco/webtorrent";
+
+// Helper para converter stream Node (usado no WebTorrent original do browser) em Web ReadableStream
+// deno-lint-ignore no-explicit-any
+function nodeStreamToWebStream(nodeStream: any): ReadableStream<Uint8Array> {
+  return new ReadableStream<Uint8Array>({
+    start(controller) {
+      // deno-lint-ignore no-explicit-any
+      nodeStream.on("data", (chunk: any) => {
+        const buf = typeof chunk === "string" ? new TextEncoder().encode(chunk) : new Uint8Array(chunk);
+        controller.enqueue(buf);
+      });
+      nodeStream.on("end", () => {
+        controller.close();
+      });
+      // deno-lint-ignore no-explicit-any
+      nodeStream.on("error", (err: any) => {
+        controller.error(err);
+      });
+    },
+    cancel() {
+      if (typeof nodeStream.destroy === "function") {
+        nodeStream.destroy();
+      }
+    }
+  });
+}
 
 // ─── Trackers públicos ─────────────────────────────────────────────────────────
 
@@ -20,11 +47,17 @@ export const PUBLIC_TRACKERS = [
 
 // ─── Estado global (signals) ─────────────────────────────────────────────────
 
-export const clientSignal = signal<Client | null>(null,);
-export const serverSignal = signal<WebTorrentServer | null>(null,);
-export const torrentsSignal = signal<Torrent[]>([]);
-export const torrentSignal = signal<Torrent | null>(null,);
-export const peersSignal = signal<Wire[]>([],);
+export const engineSignal = signal<"browsertorrent" | "webtorrent">("browsertorrent");
+// deno-lint-ignore no-explicit-any
+export const clientSignal = signal<any | null>(null,);
+// deno-lint-ignore no-explicit-any
+export const serverSignal = signal<any | null>(null,);
+// deno-lint-ignore no-explicit-any
+export const torrentsSignal = signal<any[]>([]);
+// deno-lint-ignore no-explicit-any
+export const torrentSignal = signal<any | null>(null,);
+// deno-lint-ignore no-explicit-any
+export const peersSignal = signal<any[]>([]);
 export const downSpeedSignal = signal(0,);
 export const upSpeedSignal = signal(0,);
 export const tickSignal = signal(0,);
@@ -47,48 +80,74 @@ function dbg(...args: unknown[]) {
 
 const torrentsDb = db("browsertorrent", "torrents",);
 
-export async function initClient(): Promise<Client> {
+// deno-lint-ignore no-explicit-any
+export async function initClient(): Promise<any> {
   const existing = clientSignal.value;
   if (existing) {
     dbg("initClient: reusing existing client",);
     return existing;
   }
 
-  const { Client: WT, } = await import("@loco/webtorrent");
-  const opfsAvailable = navigator.storage?.getDirectory != null;
-  dbg(
-    "initClient: creating WebTorrent client, OPFS available:",
-    opfsAvailable,
-  );
+  let wt;
+  if (engineSignal.value === "browsertorrent") {
+    const { Client: WT, } = await import("@loco/webtorrent");
+    const opfsAvailable = navigator.storage?.getDirectory != null;
+    dbg(
+      "initClient: creating BrowserTorrent client, OPFS available:",
+      opfsAvailable,
+    );
 
-  const wt = new WT({
-    peerId: undefined,
-    maxConns: 55,
-    useOPFS: opfsAvailable,
-    rtcConfig: {
-      iceServers: [
-        {
-          urls: [
-            "stun:stun.l.google.com:19302",
-            "stun:global.stun.twilio.com:3478",
+    wt = new WT({
+      peerId: undefined,
+      maxConns: 55,
+      useOPFS: opfsAvailable,
+      rtcConfig: {
+        iceServers: [
+          {
+            urls: [
+              "stun:stun.l.google.com:19302",
+              "stun:global.stun.twilio.com:3478",
+            ],
+          },
+        ],
+      },
+    },);
+  } else {
+    dbg("initClient: creating original WebTorrent client...");
+    // deno-lint-ignore no-explicit-any
+    const WT = (window as any).WebTorrent;
+    if (!WT) {
+      throw new Error("original WebTorrent library not loaded from CDN!");
+    }
+    wt = new WT({
+      maxConns: 55,
+      tracker: {
+        rtcConfig: {
+          iceServers: [
+            {
+              urls: [
+                "stun:stun.l.google.com:19302",
+                "stun:global.stun.twilio.com:3478",
+              ],
+            },
           ],
         },
-      ],
-    },
-  },);
+      },
+    });
+  }
 
-  wt.on("error", (e: Event,) => {
-    const ce = e as CustomEvent<Error>;
-    const msg = ce.detail?.message ?? String(e,);
+  // deno-lint-ignore no-explicit-any
+  wt.on("error", (e: any) => {
+    const msg = e?.detail?.message ?? e?.message ?? String(e,);
     dbg("CLIENT ERROR:", msg,);
     errorSignal.value = msg;
   },);
 
   // Log all torrent events for debugging
-  wt.on("torrent", (e: Event,) => {
-    const ce = e as CustomEvent<Torrent>;
-    dbg("wt.torrent event:", ce.detail?.infoHash,);
-    const t = ce.detail;
+  // deno-lint-ignore no-explicit-any
+  wt.on("torrent", (e: any) => {
+    const t = e?.detail ?? e;
+    dbg("wt.torrent event:", t.infoHash,);
     if (!torrentsSignal.value.find((x,) => x.infoHash === t.infoHash)) {
       torrentsSignal.value = [...torrentsSignal.value, t,];
     }
@@ -108,9 +167,14 @@ export async function initClient(): Promise<Client> {
     dbg(`initClient: found ${saved.length} torrents in DB`,);
     for (const item of saved) {
       dbg(`initClient: resuming torrent ${item.magnetURI}`,);
-      wt.add(item.magnetURI,).catch((err,) => {
-        dbg(`initClient: error resuming torrent:`, err,);
-      },);
+      if (engineSignal.value === "browsertorrent") {
+        // deno-lint-ignore no-explicit-any
+        wt.add(item.magnetURI,).catch((err: any) => {
+          dbg(`initClient: error resuming torrent:`, err,);
+        },);
+      } else {
+        wt.add(item.magnetURI);
+      }
     }
   } catch (err) {
     dbg("initClient: error loading torrents from DB", err,);
@@ -132,22 +196,24 @@ export async function seedFile(file: File,): Promise<void> {
 
   let server = serverSignal.value;
 
-  if (!server) {
-    dbg("seedFile: creating server...",);
-    server = wt.createServer({ scope: "/", },);
-    dbg("seedFile: server created, calling sendReadyAck...",);
-    await server.sendReadyAck();
-    dbg("seedFile: server ready, storing in serverSignal",);
-    serverSignal.value = server;
-  } else {
-    dbg("seedFile: reusing existing server",);
+  if (engineSignal.value === "browsertorrent") {
+    if (!server) {
+      dbg("seedFile: creating server...",);
+      server = wt.createServer({ scope: "/", },);
+      dbg("seedFile: server created, calling sendReadyAck...",);
+      await server.sendReadyAck();
+      dbg("seedFile: server ready, storing in serverSignal",);
+      serverSignal.value = server;
+    } else {
+      dbg("seedFile: reusing existing server",);
+    }
   }
 
   try {
     dbg("seedFile: calling wt.seed() with trackers:", PUBLIC_TRACKERS,);
     const torrent = await wt.seed(file, {
       name: file.name,
-      trackers: PUBLIC_TRACKERS,
+      announce: PUBLIC_TRACKERS,
     },);
     dbg("seedFile: wt.seed() returned",);
     dbg(
@@ -161,17 +227,6 @@ export async function seedFile(file: File,): Promise<void> {
     dbg("  torrent.magnetURI:", torrent.magnetURI,);
     dbg("  torrent.files.length:", torrent.files?.length,);
     dbg("  torrent.announce:", torrent.announce,);
-    const store = (torrent as unknown as { store: unknown }).store;
-    dbg(
-      "  torrent.store:",
-      store ? "available" : "NULL",
-      "type:",
-      store?.constructor?.name,
-    );
-    dbg(
-      "  torrent.pieceLength:",
-      (torrent as unknown as { pieceLength: number }).pieceLength,
-    );
 
     torrentSignal.value = torrent;
     modeSignal.value = "seeding";
@@ -199,53 +254,70 @@ export async function seedFile(file: File,): Promise<void> {
       );
     },);
 
-    torrent.on("ready", () => {
+    const onReady = () => {
       dbg("EVENT: torrent ready!",);
       dbg("  infoHash:", torrent.infoHash,);
       dbg("  name:", torrent.name,);
       dbg("  files:", torrent.files?.length,);
       dbg("  server:", serverSignal.value ? "available" : "NULL",);
+
+      if (engineSignal.value === "webtorrent") {
+        // deno-lint-ignore no-explicit-any
+        torrent.files.forEach((file: any, idx: number) => {
+          const compatibleFile = {
+            name: file.name,
+            length: file.length,
+            createReadStream(opts?: { start?: number; end?: number }) {
+              const nodeStream = file.createReadStream(opts);
+              return nodeStreamToWebStream(nodeStream);
+            }
+          };
+          // deno-lint-ignore no-explicit-any
+          streamManager.register(torrent.infoHash, idx, compatibleFile as any);
+        });
+        dbg("Original WebTorrent files registered in streamManager manually.");
+      }
+    };
+
+    torrent.on("ready", onReady);
+    if (torrent.ready) {
+      onReady();
+    }
+
+    // deno-lint-ignore no-explicit-any
+    torrent.on("error", (e: any) => {
+      const msg = e?.detail?.message ?? e?.message ?? String(e,);
+      dbg("EVENT: torrent error:", msg,);
     },);
 
-    torrent.on("error", (e: Event,) => {
-      const ce = e as CustomEvent<Error>;
-      dbg("EVENT: torrent error:", ce.detail?.message ?? String(e,),);
-    },);
-
-    torrent.on("wire", (e: CustomEvent<{ wire: Wire; addr: string }>,) => {
-      dbg("EVENT: wire/peer CONNECTED from:", e.detail.addr,);
-      const swarm = (torrent as unknown as {
-        swarm: { peers: Map<string, { wire: Wire }> };
-      }).swarm;
-      const wires = [...(swarm?.peers.values() ?? []),]
-        .map((p,) => p.wire)
-        .filter((w: Wire | null,): w is Wire => w !== null);
+    // deno-lint-ignore no-explicit-any
+    torrent.on("wire", (e: any) => {
+      const wire = e?.detail?.wire ?? e;
+      const addr = e?.detail?.addr ?? wire?.remoteAddress ?? "unknown";
+      dbg("EVENT: wire/peer CONNECTED from:", addr,);
+      const wires = torrent.wires || [];
       dbg("  total peers:", wires.length,);
       peersSignal.value = wires;
-      e.detail.wire.on("close", () => {
-        dbg("EVENT: wire/peer disconnected from:", e.detail.addr,);
-        const updated = [...(swarm?.peers.values() ?? []),]
-          .map((p: unknown,) => (p as { wire: Wire }).wire)
-          .filter((w: Wire | null,): w is Wire => w !== null);
-        peersSignal.value = updated;
+      wire.on("close", () => {
+        dbg("EVENT: wire/peer disconnected from:", addr,);
+        peersSignal.value = torrent.wires || [];
       },);
-      e.detail.wire.on("handshake", () => {
-        dbg("EVENT: wire handshake complete with:", e.detail.addr,);
+      wire.on("handshake", () => {
+        dbg("EVENT: wire handshake complete with:", addr,);
       },);
     },);
 
-    torrent.on("warning", (e: Event,) => {
-      const ce = e as CustomEvent<Error>;
-      dbg("EVENT: warning:", ce.detail?.message ?? String(e,),);
+    // deno-lint-ignore no-explicit-any
+    torrent.on("warning", (e: any) => {
+      const msg = e?.detail?.message ?? e?.message ?? String(e,);
+      dbg("EVENT: warning:", msg,);
     },);
 
     // Log swarm state periodically for debugging
     const swarmInterval = setInterval(() => {
-      const swarm = (torrent as unknown as {
-        swarm: { peers: Map<string, { wire: Wire }> };
-      }).swarm;
+      const swarm = torrent.swarm;
       if (swarm) {
-        const peers = swarm.peers ? [...swarm.peers.keys(),] : [];
+        const peers = swarm.peers ? [...swarm.peers.keys(),] : (torrent.wires || []);
         dbg(
           "SWARM STATUS: peers:",
           peers.length,
@@ -253,7 +325,8 @@ export async function seedFile(file: File,): Promise<void> {
           torrent.infoHash,
         );
         if (peers.length > 0) {
-          dbg("  peer addrs:", peers,);
+          // deno-lint-ignore no-explicit-any
+          dbg("  peer addrs:", peers.map((p: any) => p.remoteAddress || p),);
         }
       }
     }, 5000,);
@@ -264,24 +337,19 @@ export async function seedFile(file: File,): Promise<void> {
     dbg("  Swarm listening — waiting for peers to connect...",);
 
     // Log tracker connection attempts via client events
-    (wt as unknown as {
-      on: (event: string, listener: (...args: unknown[]) => void,) => void;
-    }).on("trackerAnnounce", (...args: unknown[]) => {
+    wt.on("trackerAnnounce", (...args: unknown[]) => {
       const tracker = args[1] as string;
       dbg("EVENT: client trackerAnnounce to:", tracker,);
     },);
-    (wt as unknown as {
-      on: (event: string, listener: (...args: unknown[]) => void,) => void;
-    }).on("trackerWarning", (...args: unknown[]) => {
+    wt.on("trackerWarning", (...args: unknown[]) => {
       const tracker = args[1] as string;
       dbg("EVENT: client trackerWarning from:", tracker,);
     },);
-    (wt as unknown as {
-      on: (event: string, listener: (...args: unknown[]) => void,) => void;
-    }).on("trackerError", (...args: unknown[]) => {
-      const e = args[0] as Event;
-      const ce = e as CustomEvent<Error>;
-      dbg("EVENT: client trackerError:", ce.detail?.message ?? String(e,),);
+    wt.on("trackerError", (...args: unknown[]) => {
+      // deno-lint-ignore no-explicit-any
+      const e = args[0] as any;
+      const msg = e?.detail?.message ?? e?.message ?? String(e,);
+      dbg("EVENT: client trackerError:", msg,);
     },);
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e,);
@@ -304,15 +372,17 @@ export async function addTorrent(torrentId: string,): Promise<void> {
 
   let server = serverSignal.value;
 
-  if (!server) {
-    dbg("addTorrent: creating server...",);
-    server = wt.createServer({ scope: "/", },);
-    dbg("addTorrent: server created, calling sendReadyAck...",);
-    await server.sendReadyAck();
-    dbg("addTorrent: server ready, storing in serverSignal",);
-    serverSignal.value = server;
-  } else {
-    dbg("addTorrent: reusing existing server",);
+  if (engineSignal.value === "browsertorrent") {
+    if (!server) {
+      dbg("addTorrent: creating server...",);
+      server = wt.createServer({ scope: "/", },);
+      dbg("addTorrent: server created, calling sendReadyAck...",);
+      await server.sendReadyAck();
+      dbg("addTorrent: server ready, storing in serverSignal",);
+      serverSignal.value = server;
+    } else {
+      dbg("addTorrent: reusing existing server",);
+    }
   }
 
   try {
@@ -356,47 +426,68 @@ export async function addTorrent(torrentId: string,): Promise<void> {
       );
     },);
 
-    torrent.on("ready", () => {
+    const onReady = () => {
       dbg("EVENT: torrent ready!",);
       dbg("  infoHash:", torrent.infoHash,);
       dbg("  name:", torrent.name,);
       dbg("  files:", torrent.files?.length,);
       dbg("  server:", serverSignal.value ? "available" : "NULL",);
+
+      if (engineSignal.value === "webtorrent") {
+        // deno-lint-ignore no-explicit-any
+        torrent.files.forEach((file: any, idx: number) => {
+          const compatibleFile = {
+            name: file.name,
+            length: file.length,
+            createReadStream(opts?: { start?: number; end?: number }) {
+              const nodeStream = file.createReadStream(opts);
+              return nodeStreamToWebStream(nodeStream);
+            }
+          };
+          // deno-lint-ignore no-explicit-any
+          streamManager.register(torrent.infoHash, idx, compatibleFile as any);
+        });
+        dbg("Original WebTorrent files registered in streamManager manually.");
+      }
+    };
+
+    torrent.on("ready", onReady);
+    if (torrent.ready) {
+      onReady();
+    }
+
+    // deno-lint-ignore no-explicit-any
+    torrent.on("error", (e: any) => {
+      const msg = e?.detail?.message ?? e?.message ?? String(e,);
+      dbg("EVENT: torrent error:", msg,);
     },);
 
-    torrent.on("error", (e: Event,) => {
-      const ce = e as CustomEvent<Error>;
-      dbg("EVENT: torrent error:", ce.detail?.message ?? String(e,),);
-    },);
-
-    torrent.on("wire", (e: CustomEvent<{ wire: Wire; addr: string }>,) => {
-      dbg("EVENT: wire/peer connected from:", e.detail.addr,);
-      const swarm = (torrent as unknown as {
-        swarm: { peers: Map<string, { wire: Wire }> };
-      }).swarm;
-      const wires = [...(swarm?.peers.values() ?? []),]
-        .map((p,) => p.wire)
-        .filter((w: Wire | null,): w is Wire => w !== null);
+    // deno-lint-ignore no-explicit-any
+    torrent.on("wire", (e: any) => {
+      const wire = e?.detail?.wire ?? e;
+      const addr = e?.detail?.addr ?? wire?.remoteAddress ?? "unknown";
+      dbg("EVENT: wire/peer connected from:", addr,);
+      const wires = torrent.wires || [];
       dbg("  total peers:", wires.length,);
       peersSignal.value = wires;
-      e.detail.wire.on("close", () => {
-        dbg("EVENT: wire/peer disconnected from:", e.detail.addr,);
-        const updated = [...(swarm?.peers.values() ?? []),]
-          .map((p: unknown,) => (p as { wire: Wire }).wire)
-          .filter((w: Wire | null,): w is Wire => w !== null);
-        peersSignal.value = updated;
+      wire.on("close", () => {
+        dbg("EVENT: wire/peer disconnected from:", addr,);
+        peersSignal.value = torrent.wires || [];
       },);
     },);
 
-    torrent.on("warning", (e: Event,) => {
-      const ce = e as CustomEvent<Error>;
-      dbg("EVENT: warning:", ce.detail?.message ?? String(e,),);
+    // deno-lint-ignore no-explicit-any
+    torrent.on("warning", (e: any) => {
+      const msg = e?.detail?.message ?? e?.message ?? String(e,);
+      dbg("EVENT: warning:", msg,);
     },);
 
-    torrent.on("download", (e: CustomEvent<{ bytes: number }>,) => {
+    // deno-lint-ignore no-explicit-any
+    torrent.on("download", (e: any) => {
+      const bytesNum = typeof e === "number" ? e : (e?.detail?.bytes ?? 0);
       dbg(
         "EVENT: download:",
-        e.detail?.bytes,
+        bytesNum,
         "bytes, progress:",
         Math.round(torrent.progress * 100,) + "%",
       );
@@ -415,11 +506,9 @@ export async function addTorrent(torrentId: string,): Promise<void> {
 
     // Log swarm state periodically for debugging
     const swarmInterval = setInterval(() => {
-      const swarm = (torrent as unknown as {
-        swarm: { peers: Map<string, { wire: Wire }> };
-      }).swarm;
+      const swarm = torrent.swarm;
       if (swarm) {
-        const peers = swarm.peers ? [...swarm.peers.keys(),] : [];
+        const peers = swarm.peers ? [...swarm.peers.keys(),] : (torrent.wires || []);
         dbg(
           "SWARM STATUS: peers:",
           peers.length,
@@ -428,30 +517,26 @@ export async function addTorrent(torrentId: string,): Promise<void> {
         );
         dbg("  downloaded:", torrent.downloaded, "of", torrent.length,);
         if (peers.length > 0) {
-          dbg("  peer addrs:", peers,);
+          // deno-lint-ignore no-explicit-any
+          dbg("  peer addrs:", peers.map((p: any) => p.remoteAddress || p),);
         }
       }
     }, 5000,);
 
     // Log tracker connection attempts via client events
-    (wt as unknown as {
-      on: (event: string, listener: (...args: unknown[]) => void,) => void;
-    }).on("trackerAnnounce", (...args: unknown[]) => {
+    wt.on("trackerAnnounce", (...args: unknown[]) => {
       const tracker = args[1] as string;
       dbg("EVENT: client trackerAnnounce to:", tracker,);
     },);
-    (wt as unknown as {
-      on: (event: string, listener: (...args: unknown[]) => void,) => void;
-    }).on("trackerWarning", (...args: unknown[]) => {
+    wt.on("trackerWarning", (...args: unknown[]) => {
       const tracker = args[1] as string;
       dbg("EVENT: client trackerWarning from:", tracker,);
     },);
-    (wt as unknown as {
-      on: (event: string, listener: (...args: unknown[]) => void,) => void;
-    }).on("trackerError", (...args: unknown[]) => {
-      const e = args[0] as Event;
-      const ce = e as CustomEvent<Error>;
-      dbg("EVENT: client trackerError:", ce.detail?.message ?? String(e,),);
+    wt.on("trackerError", (...args: unknown[]) => {
+      // deno-lint-ignore no-explicit-any
+      const e = args[0] as any;
+      const msg = e?.detail?.message ?? e?.message ?? String(e,);
+      dbg("EVENT: client trackerError:", msg,);
     },);
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e,);
@@ -479,6 +564,9 @@ export async function removeTorrent(infoHash: string,): Promise<void> {
     modeSignal.value = "idle";
   }
   await torrentsDb.delete(infoHash,);
+  if (engineSignal.value === "webtorrent") {
+    streamManager.unregisterTorrent(infoHash);
+  }
   dbg("removeTorrent: done",);
 }
 
@@ -502,6 +590,7 @@ export function cleanup(): void {
   downSpeedSignal.value = 0;
   upSpeedSignal.value = 0;
   errorSignal.value = null;
+  streamManager.clear();
   dbg("cleanup: done",);
 }
 

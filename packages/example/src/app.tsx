@@ -15,6 +15,7 @@ import {
   initClient,
   modeSignal,
   peersSignal,
+  engineSignal,
 } from "./torrent-context.tsx";
 
 function dbg(...args: unknown[]) {
@@ -34,6 +35,26 @@ export function App() {
   const mode = modeSignal.value;
   const error = errorSignal.value;
 
+  const handleEngineChange = async (newEngine: "browsertorrent" | "webtorrent") => {
+    if (engineSignal.value === newEngine) return;
+    dbg(`Switching engine to: ${newEngine}`);
+    
+    // Se estiver ativo, limpa o atual e reinicializa
+    const wasEnabled = wtEnabled.value;
+    if (wasEnabled) {
+      dbg("Engine switch: cleaning up active client...");
+      cleanup();
+    }
+    
+    engineSignal.value = newEngine;
+    
+    if (wasEnabled) {
+      dbg("Engine switch: re-initializing client with new engine...");
+      await initClient();
+      dbg("Engine switch: new client ready");
+    }
+  };
+
   const handleToggle = async () => {
     if (wtEnabled.value) {
       dbg("WebTorrent OFF — calling cleanup",);
@@ -51,7 +72,7 @@ export function App() {
     <>
       {/* Header com status */}
       <nav class="top primary">
-        <button class="circle transparent">
+        <button type="button" class="circle transparent">
           <i class="material-symbols white-text">
             hub
           </i>
@@ -61,6 +82,27 @@ export function App() {
             SyntaxMesh
           </h5>
         </label>
+
+        <div class="row no-wrap white-text right-margin" style="gap: 16px;">
+          <label class="radio">
+            <input
+              type="radio"
+              name="engine"
+              checked={engineSignal.value === "browsertorrent"}
+              onChange={() => handleEngineChange("browsertorrent")}
+            />
+            <span class="white-text">BrowserTorrent</span>
+          </label>
+          <label class="radio">
+            <input
+              type="radio"
+              name="engine"
+              checked={engineSignal.value === "webtorrent"}
+              onChange={() => handleEngineChange("webtorrent")}
+            />
+            <span class="white-text">Original WebTorrent</span>
+          </label>
+        </div>
 
         <label class="chip transparent white-text">
           <i class="material-symbols small white-text">

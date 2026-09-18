@@ -166,6 +166,8 @@ const { chromium } = require('@playwright/test');
 
     pageA.on('console', msg => console.log('[Seeder A]', msg.text()));
     pageB.on('console', msg => console.log('[Leecher B]', msg.text()));
+    pageA.on('pageerror', err => console.log('[Seeder A Page Error]', err.stack || err.message || err));
+    pageB.on('pageerror', err => console.log('[Leecher B Page Error]', err.stack || err.message || err));
 
     await pageA.goto('http://127.0.0.1:3000');
     await pageB.goto('http://127.0.0.1:3000');

@@ -20,9 +20,8 @@
   - [x] Automated Playwright + Chromium E2E verification suite (`packages/e2e/test_trackers.js`).
 
 ## Critical Debugging (Active)
-- [ ] **Fix P2P Transfer Timeout**: Investigating why file blocks are not transferring after metadata exchange.
+- [x] **Fix P2P Transfer Timeout**: Solved! Resolved a Temporal Dead Zone (TDZ) ReferenceError in `_registerWire` by moving `attachInitialState` to the bottom of the method.
   - **See Log**: `docs/bugsfound/2026-09-17-e2e-p2p-timeout.md`
-  - **Next Step**: Investigate why the Seeder keeps the Leecher in `choke` state.
 
 ## Current Task
 - [ ] Phase 8: OPFS WorkerDB and UI integration.

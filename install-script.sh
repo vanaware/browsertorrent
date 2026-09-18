@@ -4,10 +4,10 @@ set -e
 echo "📦 Checking and installing zip/unzip prerequisites..."
 if ! command -v zip >/dev/null 2>&1 || ! command -v unzip >/dev/null 2>&1; then
   echo "Installing zip and unzip via apt-get..."
-  DEBIAN_FRONTEND=noninteractive apt-get update -y && \
+  (DEBIAN_FRONTEND=noninteractive apt-get update -y && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" \
-    zip unzip
+    zip unzip) || echo "Warning: failed to install zip/unzip prerequisites"
 fi
 
 echo "🦕 Checking Deno installation..."
@@ -23,12 +23,12 @@ echo "✅ Deno ready: $(deno --version | head -n 1)"
 echo "🤹 Checking TaskJuggler (tj3) installation..."
 if ! command -v tj3 >/dev/null 2>&1; then
   echo "Installing ruby, ruby-dev, build-essential..."
-  DEBIAN_FRONTEND=noninteractive apt-get update -y && \
+  (DEBIAN_FRONTEND=noninteractive apt-get update -y && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" \
-    ruby ruby-dev build-essential
-  echo "Installing taskjuggler gem..."
-  gem install taskjuggler --no-document
+    ruby ruby-dev build-essential && \
+  echo "Installing taskjuggler gem..." && \
+  gem install taskjuggler --no-document) || echo "Warning: failed to install TaskJuggler"
 fi
 
 TJ3_BIN=$(command -v tj3 || find / -name tj3 2>/dev/null | head -n 1)

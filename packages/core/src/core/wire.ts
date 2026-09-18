@@ -306,10 +306,7 @@ export class Wire extends TypedEventTarget<WireEvents> {
       ? new Uint8Array(opts.expectedPeerId,)
       : null;
     this.localExtensions = new Set(
-      opts.extensions ?? [
-        HandshakeExtension.ExtensionProtocol,
-        HandshakeExtension.Fast,
-      ],
+      opts.extensions ?? [],
     );
     this.pieceCount = opts.pieceCount;
     this.pieceLength = opts.pieceLength;
@@ -1199,6 +1196,14 @@ export class Wire extends TypedEventTarget<WireEvents> {
     local: boolean,
   ): void {
     if (message.type === "keepAlive" || message.type === "extended") return;
+    if (
+      message.type === "choke" ||
+      message.type === "unchoke" ||
+      message.type === "interested" ||
+      message.type === "notInterested"
+    ) {
+      return;
+    }
 
     const declaration = message.type === "bitfield" ||
       message.type === "haveAll" ||
@@ -1211,7 +1216,7 @@ export class Wire extends TypedEventTarget<WireEvents> {
       ? this.localAvailabilityDeclared
       : this.remoteAvailabilityDeclared;
 
-    if (declaration) {
+    if (this._fastNegotiated() && declaration) {
       if (!open || declared) {
         throw new ProtocolError(
           "availability declaration must appear once after handshake",
@@ -1229,6 +1234,14 @@ export class Wire extends TypedEventTarget<WireEvents> {
     local: boolean,
   ): void {
     if (message.type === "keepAlive" || message.type === "extended") return;
+    if (
+      message.type === "choke" ||
+      message.type === "unchoke" ||
+      message.type === "interested" ||
+      message.type === "notInterested"
+    ) {
+      return;
+    }
     const declaration = message.type === "bitfield" ||
       message.type === "haveAll" || message.type === "haveNone";
     if (local) {

@@ -2,6 +2,7 @@
 
 import { TypedEventTarget, } from "../utils/event-target.ts";
 import { Transport, Wire, } from "../core/wire.ts";
+import { HandshakeExtension, } from "../core/constants.ts";
 
 // ============================================================================
 // TIPOS E INTERFACES
@@ -322,7 +323,12 @@ export class Peer extends TypedEventTarget<PeerEvents> {
       },
     };
 
-    this.wire = new Wire(transport,);
+    this.wire = new Wire(transport, {
+      extensions: [
+        HandshakeExtension.ExtensionProtocol,
+        HandshakeExtension.Fast,
+      ],
+    },);
     // Expor o endereço do peer nos stats do Wire.
     if (this.opts.addr) {
       const parts = this.opts.addr.split(":",);

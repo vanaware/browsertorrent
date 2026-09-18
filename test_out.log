@@ -1,0 +1,247 @@
+===============================================================
+SYNTAXMESH DETAILED E2E CROSS-COMPATIBILITY TESTING MATRIX
+===============================================================
+
+---------------------------------------------------------------
+RUNNING CASE_2: BrowserTorrent ↔ BrowserTorrent (Local Deno Tracker)
+  Seeder: [browsertorrent] | Leecher: [browsertorrent]
+  Trackers: ws://127.0.0.1:3000/tracker
+---------------------------------------------------------------
+[browsertorrent Seeder A] [main] SW Registered: http://127.0.0.1:3000/
+[browsertorrent Seeder A] [main] SW MessageChannel established (after activation)
+[browsertorrent Seeder A] [PLAYER 00:54:51] effect: torrent: undefined files: undefined video: false
+[browsertorrent Seeder A] [PLAYER 00:54:51] effect: no torrent or no files, waiting...
+[browsertorrent Leecher B] [main] SW Registered: http://127.0.0.1:3000/
+[browsertorrent Leecher B] [main] SW MessageChannel established (after activation)
+[browsertorrent Leecher B] [PLAYER 00:54:52] effect: torrent: undefined files: undefined video: false
+[browsertorrent Leecher B] [PLAYER 00:54:52] effect: no torrent or no files, waiting...
+[browsertorrent Seeder A] Seeding payload: "TEST_CASE_2_browsertorrent_TO_browsertorrent_1789692892850" using browsertorrent...
+[browsertorrent Seeder A] [seed] store available: true put? function entry? true pieceLength: 16384
+[browsertorrent Seeder A] [seed] Populating chunk store with 1 files
+[browsertorrent Seeder A] [_populateChunkStore] Starting with 1 files, pieceLength: 16384
+[browsertorrent Seeder A] [_populateChunkStore] Reading file: test-compat-file.txt size: 58
+[browsertorrent Seeder A] [_populateChunkStore] Wrote final piece 0 size: 58
+[browsertorrent Seeder A] [_populateChunkStore] Done. Total pieces: 1 bytes written: 58
+[browsertorrent Seeder A] [seed] Chunk store populated and verified successfully
+Seeder ready. Magnet URI: magnet:?xt=urn:btih:e8857ceeff08d4a24b8997ec837f742e578339cf&dn=test-compat-file.txt&tr=ws%3A%2F%2F127.0.0.1%3A3000%2Ftracker
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:863710862 1 udp 2122260223 127.0.0.1 62870 typ host generation 0 ufrag S7Tl network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:2763830813 1 udp 2122260223 127.0.0.1 61452 typ host generation 0 ufrag 0qzi network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:3239519342 1 udp 2122260223 127.0.0.1 39509 typ host generation 0 ufrag LiNW network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:3171250347 1 udp 2122260223 127.0.0.1 64718 typ host generation 0 ufrag tRTf network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:2910542439 1 udp 2122260223 127.0.0.1 59978 typ host generation 0 ufrag Q49T network-id 1 network-cost 50
+[browsertorrent Leecher B] Adding magnet using browsertorrent...
+Waiting for connection and data transfer...
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:2721922317 1 udp 2122260223 127.0.0.1 38113 typ host generation 0 ufrag lt82 network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:510036151 1 udp 2122260223 127.0.0.1 46800 typ host generation 0 ufrag 9c4n network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:1794602585 1 udp 2122260223 127.0.0.1 29863 typ host generation 0 ufrag b3en network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:1622013884 1 udp 2122260223 127.0.0.1 44287 typ host generation 0 ufrag t5a7 network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:3543298429 1 udp 2122260223 127.0.0.1 52788 typ host generation 0 ufrag 3xaw network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:1303694358 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag S7Tl network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:1511416457 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag 0qzi network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:3218654966 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag LiNW network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:1135584319 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag tRTf network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:3551836415 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag Q49T network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer initiator] end of candidates (null)
+[browsertorrent Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer initiator] end of candidates (null)
+[browsertorrent Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer initiator] end of candidates (null)
+[browsertorrent Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer initiator] end of candidates (null)
+[browsertorrent Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:3706904469 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag lt82 network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:3771489315 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag 9c4n network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:2489164493 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag b3en network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:2651267880 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag t5a7 network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:764978665 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag 3xaw network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Seeder A] [Peer receiver] signal() received offer
+[browsertorrent Seeder A] [Peer receiver] iceConnectionState: checking
+[browsertorrent Seeder A] [Peer receiver] gathered candidate: candidate:1028689253 1 udp 2122260223 127.0.0.1 27687 typ host generation 0 ufrag 0lGZ network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer receiver] connectionState: connecting
+[browsertorrent Leecher B] [Peer initiator] iceConnectionState: checking
+[browsertorrent Leecher B] [Peer initiator] connectionState: connecting
+[browsertorrent Seeder A] [Peer receiver] iceConnectionState: connected
+[browsertorrent Seeder A] [Peer receiver] Emitting local signal, type: answer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer receiver] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] signal() received answer
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:1464213980 1 udp 2122260223 127.0.0.1 57433 typ host generation 0 ufrag ZLwn network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:1468375573 1 udp 2122260223 127.0.0.1 20083 typ host generation 0 ufrag FsrL network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:540802233 1 udp 2122260223 127.0.0.1 16386 typ host generation 0 ufrag tuFh network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:234311937 1 udp 2122260223 127.0.0.1 61027 typ host generation 0 ufrag guS4 network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:3809515819 1 udp 2122260223 127.0.0.1 22150 typ host generation 0 ufrag fUhM network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] iceConnectionState: connected
+[browsertorrent Leecher B] [Peer initiator] connectionState: connected
+[browsertorrent Seeder A] [Peer receiver] connectionState: connected
+[browsertorrent Leecher B] [Peer initiator] DataChannel OPEN!
+[browsertorrent Seeder A] [Peer receiver] Received remote datachannel: webtorrent
+[browsertorrent Seeder A] [Peer receiver] DataChannel OPEN!
+[browsertorrent Seeder A] [ExtensionHost] sendHandshake fields: {"reqq":250,"m":{},"metadata_size":96}
+[browsertorrent Seeder A] [Torrent] Metadata already available, syncing remote pieces for new wire immediately
+[browsertorrent Seeder A] [Torrent] syncRemotePieces: isHaveAll=false, hasBitfield=false, numPieces=1
+[browsertorrent Seeder A] [Torrent] syncRemotePieces completed: remotePieces.size=0
+[browsertorrent Seeder A] [Torrent] sendInitialState: ready=true, numPieces=1
+[browsertorrent Seeder A] [Torrent] Sending initial bitfield to peer...
+[browsertorrent Seeder A] [Torrent] Sending UNCHOKE to peer
+[browsertorrent Leecher B] [ExtensionHost] sendHandshake fields: {"reqq":250,"m":{}}
+[browsertorrent Leecher B] [Torrent] Metadata already available, syncing remote pieces for new wire immediately
+[browsertorrent Leecher B] [Torrent] syncRemotePieces: isHaveAll=false, hasBitfield=false, numPieces=0
+[browsertorrent Leecher B] [Torrent] syncRemotePieces completed: remotePieces.size=0
+[browsertorrent Leecher B] [Torrent] updateInterest: interesting=false, amInterested=false, peerChoking=true
+[browsertorrent Leecher B] [Torrent] sendInitialState: ready=true, numPieces=0
+[browsertorrent Leecher B] [Torrent] No metadata yet, sending empty bitfield/availability...
+[browsertorrent Leecher B] [Torrent] Sending UNCHOKE to peer
+[browsertorrent Leecher B] [Torrent] updateInterest: interesting=false, amInterested=false, peerChoking=true
+[browsertorrent Seeder A] [Torrent] wire.on('bitfield') received: length=0
+[browsertorrent Leecher B] [Torrent] wire.on('bitfield') received: length=1
+[browsertorrent Leecher B] [Torrent] updateInterest: interesting=false, amInterested=false, peerChoking=true
+[browsertorrent Leecher B] [Torrent] updateInterest: interesting=false, amInterested=false, peerChoking=false
+[browsertorrent Seeder A] [UtMetadata] _onRequest piece: 0, metadataComplete: true, size: 96
+[browsertorrent Leecher B] [UtMetadata] _onData piece: 0, buf.length: 96, totalSize: 96, fetching: true, metaSize: 96
+[browsertorrent Leecher B] [UtMetadata] _verifyMetadataIntegrity metadata.length: 96, first 20 bytes: [100, 54, 58, 108, 101, 110, 103, 116, 104, 105, 53, 56, 101, 52, 58, 110, 97, 109, 101, 50]
+[browsertorrent Leecher B] [Client] swarm metadata event fired, size: 96
+[browsertorrent Leecher B] [Torrent] setMetadata start, infoBuffer length: 96
+[browsertorrent Leecher B] [Torrent] setMetadata: decoding infoBuffer...
+[browsertorrent Leecher B] [Torrent] setMetadata: bencode decoded successfully.
+[browsertorrent Leecher B] [Torrent] setMetadata: pieceLength=16384, totalLength=58, numPieces=1
+[browsertorrent Leecher B] [Torrent] setMetadata: updating store length...
+[browsertorrent Leecher B] [Torrent] setMetadata: emitting metadata event...
+[browsertorrent Leecher B] [Torrent] syncRemotePieces: isHaveAll=false, hasBitfield=true, numPieces=1
+[browsertorrent Leecher B] [Torrent] syncRemotePieces completed: remotePieces.size=1
+[browsertorrent Leecher B] [Torrent] updateInterest: interesting=true, amInterested=false, peerChoking=false
+[browsertorrent Leecher B] [Torrent] Requesting piece 0, length 58 from wire
+[browsertorrent Leecher B] [Torrent] setMetadata: verifying existing pieces...
+[browsertorrent Leecher B] [Torrent] setMetadata: existing pieces verified.
+[browsertorrent Leecher B] [Torrent] setMetadata: emitting ready event...
+[browsertorrent Leecher B] [Torrent] syncRemotePieces: isHaveAll=false, hasBitfield=true, numPieces=1
+[browsertorrent Leecher B] [Torrent] syncRemotePieces completed: remotePieces.size=1
+[browsertorrent Leecher B] [Torrent] updateInterest: interesting=true, amInterested=true, peerChoking=false
+[browsertorrent Leecher B] [Torrent] requestBlocks exit: already have activePiece 0
+[browsertorrent Leecher B] [Torrent] setMetadata: completed successfully!
+[browsertorrent Seeder A] [Torrent] received wire 'request' index=0, offset=0, length=58, pieceFound=true
+[browsertorrent Leecher B] [Torrent] updateInterest: interesting=true, amInterested=true, peerChoking=false
+[browsertorrent Leecher B] [Torrent] requestBlocks exit: already have activePiece 0
+[browsertorrent Leecher B] 🎉 BrowserTorrent reported DONE!
+[browsertorrent Leecher B] [Torrent] requestBlocks exit early: isDestroyed=false, peerChoking=false, done=true
+[browsertorrent Seeder A] [Torrent] wire.on('have') received index=0
+[browsertorrent Seeder A] [Torrent] wire.on('have') received index=0
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:696894276 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag ZLwn network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:2838460033 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag FsrL network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:3734054957 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag tuFh network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:1933095833 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag guS4 network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] gathered candidate: candidate:2648669107 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag fUhM network-id 1 network-cost 50
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+[browsertorrent Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Leecher B] [Peer initiator] end of candidates (null)
+✅ SUCCESS! File transferred and verified byte-for-byte: "TEST_CASE_2_browsertorrent_TO_browsertorrent_1789692892850"
+
+---------------------------------------------------------------
+RUNNING CASE_4A_LOCAL: BrowserTorrent ➔ Original WebTorrent (Local Deno Tracker)
+  Seeder: [browsertorrent] | Leecher: [webtorrent]
+  Trackers: ws://127.0.0.1:3000/tracker
+---------------------------------------------------------------
+[browsertorrent Seeder A] [main] SW Registered: http://127.0.0.1:3000/
+[browsertorrent Seeder A] [main] SW MessageChannel established (after activation)
+[browsertorrent Seeder A] [PLAYER 00:54:54] effect: torrent: undefined files: undefined video: false
+[browsertorrent Seeder A] [PLAYER 00:54:54] effect: no torrent or no files, waiting...
+[webtorrent Leecher B] [main] SW Registered: http://127.0.0.1:3000/
+[webtorrent Leecher B] [main] SW MessageChannel established (after activation)
+[webtorrent Leecher B] [PLAYER 00:54:54] effect: torrent: undefined files: undefined video: false
+[webtorrent Leecher B] [PLAYER 00:54:54] effect: no torrent or no files, waiting...
+[browsertorrent Seeder A] Seeding payload: "TEST_CASE_4A_LOCAL_browsertorrent_TO_webtorrent_1789692895478" using browsertorrent...
+[browsertorrent Seeder A] [seed] store available: true put? function entry? true pieceLength: 16384
+[browsertorrent Seeder A] [seed] Populating chunk store with 1 files
+[browsertorrent Seeder A] [_populateChunkStore] Starting with 1 files, pieceLength: 16384
+[browsertorrent Seeder A] [_populateChunkStore] Reading file: test-compat-file.txt size: 61
+[browsertorrent Seeder A] [_populateChunkStore] Wrote final piece 0 size: 61
+[browsertorrent Seeder A] [_populateChunkStore] Done. Total pieces: 1 bytes written: 61
+[browsertorrent Seeder A] [seed] Chunk store populated and verified successfully
+Seeder ready. Magnet URI: magnet:?xt=urn:btih:f16f7a67f9c2a2a04a5cc6287d5ceaaa705c095a&dn=test-compat-file.txt&tr=ws%3A%2F%2F127.0.0.1%3A3000%2Ftracker
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:571671696 1 udp 2122260223 127.0.0.1 64584 typ host generation 0 ufrag k1FJ network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:944955358 1 udp 2122260223 127.0.0.1 22061 typ host generation 0 ufrag UiY7 network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:2289807484 1 udp 2122260223 127.0.0.1 50955 typ host generation 0 ufrag W2NG network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:3565705728 1 udp 2122260223 127.0.0.1 26951 typ host generation 0 ufrag tdoa network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:1761517279 1 udp 2122260223 127.0.0.1 19069 typ host generation 0 ufrag zv2L network-id 1 network-cost 50
+[webtorrent Leecher B] Adding magnet using webtorrent...
+Waiting for connection and data transfer...
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:1557980680 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag k1FJ network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:3338144586 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag UiY7 network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:4139012836 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag W2NG network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:706907796 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag tdoa network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] gathered candidate: candidate:2522106443 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag zv2L network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer initiator] end of candidates (null)
+[browsertorrent Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer initiator] end of candidates (null)
+[browsertorrent Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer initiator] end of candidates (null)
+[browsertorrent Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer initiator] end of candidates (null)
+[browsertorrent Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer initiator] end of candidates (null)
+[browsertorrent Seeder A] [Peer receiver] signal() received offer
+[browsertorrent Seeder A] [Peer receiver] iceConnectionState: checking
+[browsertorrent Seeder A] [Peer receiver] gathered candidate: candidate:3842957983 1 udp 2122260223 127.0.0.1 48429 typ host generation 0 ufrag DlJc network-id 1 network-cost 50
+[browsertorrent Seeder A] [Peer receiver] connectionState: connecting
+[browsertorrent Seeder A] [Peer receiver] iceConnectionState: connected
+[browsertorrent Seeder A] [Peer receiver] Emitting local signal, type: answer, sdp has candidate: true
+[browsertorrent Seeder A] [Peer receiver] end of candidates (null)
+[browsertorrent Seeder A] [Peer receiver] connectionState: connected
+[browsertorrent Seeder A] [Peer receiver] Received remote datachannel: 3a289bd74173905a3add2678dbdc3912e111cc53
+[browsertorrent Seeder A] [Peer receiver] DataChannel OPEN!
+[browsertorrent Seeder A] [ExtensionHost] sendHandshake fields: {"reqq":250,"m":{},"metadata_size":96}
+[browsertorrent Seeder A] [Torrent] Metadata already available, syncing remote pieces for new wire immediately
+[browsertorrent Seeder A] [Torrent] syncRemotePieces: isHaveAll=false, hasBitfield=false, numPieces=1
+[browsertorrent Seeder A] [Torrent] syncRemotePieces completed: remotePieces.size=0
+[browsertorrent Seeder A] [Torrent] sendInitialState: ready=true, numPieces=1
+[browsertorrent Seeder A] [Torrent] Sending initial bitfield to peer...
+[browsertorrent Seeder A] [Torrent] Sending UNCHOKE to peer
+[browsertorrent Seeder A] [UtMetadata] _onRequest piece: 0, metadataComplete: true, size: 96
+  [Progress: 0% | Active Peers: 0]
+  [Progress: 0% | Active Peers: 0]
+  [Progress: 0% | Active Peers: 0]
+  [Progress: 0% | Active Peers: 0]
+  [Progress: 0% | Active Peers: 0]
+  [Progress: 0% | Active Peers: 0]
+Diagnostics - Seeder: { progress: 1, peers: 0 } Leecher: { progress: 0, peers: 0 }
+
+---------------------------------------------------------------
+RUNNING CASE_4B_LOCAL: Original WebTorrent ➔ BrowserTorrent (Local Deno Tracker)
+  Seeder: [webtorrent] | Leecher: [browsertorrent]
+  Trackers: ws://127.0.0.1:3000/tracker
+---------------------------------------------------------------
+[webtorrent Seeder A] Failed to load resource: the server responded with a status of 404 (Not Found)
+[webtorrent Seeder A] [main] SW Registered: http://127.0.0.1:3000/
+[webtorrent Seeder A] [main] SW MessageChannel established (after activation)
+[browsertorrent Leecher B] Failed to load resource: the server responded with a status of 404 (Not Found)
+[webtorrent Seeder A] [PLAYER 00:55:31] effect: torrent: undefined files: undefined video: false
+[webtorrent Seeder A] [PLAYER 00:55:31] effect: no torrent or no files, waiting...
+[browsertorrent Leecher B] [main] SW Registered: http://127.0.0.1:3000/
+[browsertorrent Leecher B] [main] SW MessageChannel established (after activation)
+[browsertorrent Leecher B] [PLAYER 00:55:31] effect: torrent: undefined files: undefined video: false
+[browsertorrent Leecher B] [PLAYER 00:55:31] effect: no torrent or no files, waiting...
+Suite execution error: page.evaluate: TypeError: WT is not a constructor
+    at eval (eval at evaluate (:311:30), <anonymous>:18:20)
+    at async <anonymous>:337:30
+    at runP2PTest (/app/applet/packages/e2e/test_cross_compat.js:64:38)
+    at async /app/applet/packages/e2e/test_cross_compat.js:324:5 {
+  log: []
+}

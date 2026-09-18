@@ -24,6 +24,12 @@
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
       rel="stylesheet" />
 
+    <!-- Original WebTorrent (v2.5.1 CDN) loaded as ES Module -->
+    <script type="module">
+      import WebTorrent from './webtorrent.min.js';
+      window.WebTorrent = WebTorrent;
+    </script>
+
     <!-- Debug Panel Styles -->
     <style>
     .debug-panel {
