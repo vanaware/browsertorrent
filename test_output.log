@@ -1,0 +1,130 @@
+===============================================================
+SYNTAXMESH E2E VALIDATION SUITE (PLAYWRIGHT + CHROMIUM)
+===============================================================
+
+---------------------------------------------------------------
+TEST 1: CONNECT TO PUBLIC TRACKERS (wss://tracker.webtorrent.dev)
+---------------------------------------------------------------
+[PublicTest Console] [main] SW Registered: http://127.0.0.1:3000/
+[PublicTest Console] [main] SW MessageChannel established (after activation)
+[PublicTest Console] [PLAYER 00:00:58] effect: torrent: undefined files: undefined video: false
+[PublicTest Console] [PLAYER 00:00:58] effect: no torrent or no files, waiting...
+[PublicTest Console] Connecting WsTracker to wss://tracker.webtorrent.dev...
+[PublicTest Console] ✅ Received update from public tracker! Interval: 120
+[PublicTest Console] ❌ Announce promise error: Tracker destroyed
+✅ TEST 1 PASSED: Client connects to public tracker successfully.
+
+---------------------------------------------------------------
+TEST 2: WSTRACKER COMPATIBILITY WITH ORIGINAL WEBTORRENT SPEC
+---------------------------------------------------------------
+Simulating upstream WebTorrent client announce...
+Received response from WsTracker: announce info_hash: 12345678901234567890
+✅ WsTracker conforms to BEP announce response format!
+✅ TEST 2 PASSED: WsTracker is fully compatible with original WebTorrent clients!
+
+---------------------------------------------------------------
+TEST 3: P2P FILE TRANSFER & SHARING VIA LOCAL WSTRACKER
+---------------------------------------------------------------
+[Seeder A] [main] SW Registered: http://127.0.0.1:3000/
+[Seeder A] [main] SW MessageChannel established (after activation)
+[Seeder A] [PLAYER 00:01:00] effect: torrent: undefined files: undefined video: false
+[Seeder A] [PLAYER 00:01:00] effect: no torrent or no files, waiting...
+[Leecher B] [main] SW Registered: http://127.0.0.1:3000/
+[Leecher B] [main] SW MessageChannel established (after activation)
+[Leecher B] [PLAYER 00:01:00] effect: torrent: undefined files: undefined video: false
+[Leecher B] [PLAYER 00:01:00] effect: no torrent or no files, waiting...
+[Seeder A] Starting Client A (Seeder)...
+[Seeder A] [seed] store available: true put? function entry? true pieceLength: 16384
+[Seeder A] [seed] Populating chunk store with 1 files
+[Seeder A] [_populateChunkStore] Starting with 1 files, pieceLength: 16384
+[Seeder A] [_populateChunkStore] Reading file: test-share.txt size: 68
+[Seeder A] [Peer initiator] gathered candidate: candidate:158886348 1 udp 2122260223 127.0.0.1 57072 typ host generation 0 ufrag ebGD network-id 1 network-cost 50
+[Seeder A] [Peer initiator] gathered candidate: candidate:2522268764 1 udp 2122260223 127.0.0.1 53591 typ host generation 0 ufrag 5TUf network-id 1 network-cost 50
+[Seeder A] [Peer initiator] gathered candidate: candidate:2547433137 1 udp 2122260223 127.0.0.1 62559 typ host generation 0 ufrag pU5+ network-id 1 network-cost 50
+[Seeder A] [Peer initiator] gathered candidate: candidate:3596267361 1 udp 2122260223 127.0.0.1 32251 typ host generation 0 ufrag lzEB network-id 1 network-cost 50
+[Seeder A] [Peer initiator] gathered candidate: candidate:559729499 1 udp 2122260223 127.0.0.1 26222 typ host generation 0 ufrag P1mo network-id 1 network-cost 50
+[Seeder A] [_populateChunkStore] Wrote final piece 0 size: 68
+[Seeder A] [_populateChunkStore] Done. Total pieces: 1 bytes written: 68
+[Seeder A] [seed] Chunk store populated and verified successfully
+[Seeder A] Torrent seeded on A! Magnet: magnet:?xt=urn:btih:fa9e774d7dd7e35938bb9f46ca4f51b84f136412&dn=test-share.txt&tr=ws%3A%2F%2F127.0.0.1%3A3000%2Ftracker InfoHash: fa9e774d7dd7e35938bb9f46ca4f51b84f136412
+Seeder A ready with Magnet: magnet:?xt=urn:btih:fa9e774d7dd7e35938bb9f46ca4f51b84f136412&dn=test-share.txt&tr=ws%3A%2F%2F127.0.0.1%3A3000%2Ftracker
+[Leecher B] Starting Client B (Leecher)...
+Waiting for P2P connection and file transfer via Local Tracker...
+[Leecher B] [Peer initiator] gathered candidate: candidate:3426108324 1 udp 2122260223 127.0.0.1 61022 typ host generation 0 ufrag TXZ2 network-id 1 network-cost 50
+[Leecher B] [Peer initiator] gathered candidate: candidate:827257895 1 udp 2122260223 127.0.0.1 22597 typ host generation 0 ufrag +dNu network-id 1 network-cost 50
+[Leecher B] [Peer initiator] gathered candidate: candidate:2438294536 1 udp 2122260223 127.0.0.1 38679 typ host generation 0 ufrag TcvD network-id 1 network-cost 50
+[Leecher B] [Peer initiator] gathered candidate: candidate:1887081570 1 udp 2122260223 127.0.0.1 17810 typ host generation 0 ufrag IyfR network-id 1 network-cost 50
+[Leecher B] [Peer initiator] gathered candidate: candidate:3561975770 1 udp 2122260223 127.0.0.1 20197 typ host generation 0 ufrag 9bl8 network-id 1 network-cost 50
+[Seeder A] [Peer initiator] gathered candidate: candidate:2008517460 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag ebGD network-id 1 network-cost 50
+[Seeder A] [Peer initiator] gathered candidate: candidate:3902351044 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag 5TUf network-id 1 network-cost 50
+[Seeder A] [Peer initiator] gathered candidate: candidate:1769761317 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag pU5+ network-id 1 network-cost 50
+[Seeder A] [Peer initiator] gathered candidate: candidate:686849013 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag lzEB network-id 1 network-cost 50
+[Seeder A] [Peer initiator] gathered candidate: candidate:3757449167 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag P1mo network-id 1 network-cost 50
+[Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[Seeder A] [Peer initiator] end of candidates (null)
+[Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[Seeder A] [Peer initiator] end of candidates (null)
+[Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[Seeder A] [Peer initiator] end of candidates (null)
+[Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[Seeder A] [Peer initiator] end of candidates (null)
+[Seeder A] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[Seeder A] [Peer initiator] end of candidates (null)
+[Leecher B] [Peer initiator] gathered candidate: candidate:3815764905 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag TXZ2 network-id 1 network-cost 50
+[Leecher B] [Peer initiator] gathered candidate: candidate:3487834291 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag +dNu network-id 1 network-cost 50
+[Leecher B] [Peer initiator] gathered candidate: candidate:4019883664 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag TcvD network-id 1 network-cost 50
+[Leecher B] [Peer initiator] gathered candidate: candidate:246773498 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag IyfR network-id 1 network-cost 50
+[Leecher B] [Peer initiator] gathered candidate: candidate:2860551490 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag 9bl8 network-id 1 network-cost 50
+[Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[Leecher B] [Peer initiator] end of candidates (null)
+[Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[Leecher B] [Peer initiator] end of candidates (null)
+[Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[Leecher B] [Peer initiator] end of candidates (null)
+[Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[Leecher B] [Peer initiator] end of candidates (null)
+[Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[Leecher B] [Peer initiator] end of candidates (null)
+[Seeder A] [Peer receiver] signal() received offer
+[Seeder A] [Peer receiver] iceConnectionState: checking
+[Seeder A] [Peer receiver] gathered candidate: candidate:2447658014 1 udp 2122260223 127.0.0.1 58839 typ host generation 0 ufrag U1o8 network-id 1 network-cost 50
+[Seeder A] [Peer receiver] connectionState: connecting
+[Seeder A] [Peer receiver] iceConnectionState: connected
+[Seeder A] [Peer receiver] Emitting local signal, type: answer, sdp has candidate: true
+[Seeder A] [Peer receiver] end of candidates (null)
+[Leecher B] [Peer initiator] iceConnectionState: checking
+[Leecher B] [Peer initiator] connectionState: connecting
+[Leecher B] [Peer initiator] signal() received answer
+[Leecher B] [Peer initiator] gathered candidate: candidate:2574858259 1 udp 2122260223 127.0.0.1 47237 typ host generation 0 ufrag WSSn network-id 1 network-cost 50
+[Leecher B] [Peer initiator] gathered candidate: candidate:137139134 1 udp 2122260223 127.0.0.1 60020 typ host generation 0 ufrag TMzU network-id 1 network-cost 50
+[Leecher B] [Peer initiator] gathered candidate: candidate:3111578072 1 udp 2122260223 127.0.0.1 17233 typ host generation 0 ufrag 5UAD network-id 1 network-cost 50
+[Leecher B] [Peer initiator] gathered candidate: candidate:3013021136 1 udp 2122260223 127.0.0.1 57162 typ host generation 0 ufrag oYja network-id 1 network-cost 50
+[Leecher B] [Peer initiator] gathered candidate: candidate:2294383495 1 udp 2122260223 127.0.0.1 52555 typ host generation 0 ufrag jGNN network-id 1 network-cost 50
+[Leecher B] [Peer initiator] iceConnectionState: connected
+[Seeder A] [Peer receiver] connectionState: connected
+[Leecher B] [Peer initiator] connectionState: connected
+[Leecher B] [Peer initiator] DataChannel OPEN!
+[Seeder A] [Peer receiver] Received remote datachannel: webtorrent
+[Seeder A] [Peer receiver] DataChannel OPEN!
+[Leecher B] [UtMetadata] _onData piece: 0, buf.length: 90, totalSize: 90, fetching: true, metaSize: 90
+[Leecher B] [UtMetadata] _verifyMetadataIntegrity metadata.length: 90, first 20 bytes: [100, 54, 58, 108, 101, 110, 103, 116, 104, 105, 54, 56, 101, 52, 58, 110, 97, 109, 101, 49]
+[Leecher B] [Client] swarm metadata event fired, size: 90
+[Leecher B] [Torrent] setMetadata start, infoBuffer length: 90
+[Leecher B] [Peer initiator] gathered candidate: candidate:1741941895 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag WSSn network-id 1 network-cost 50
+[Leecher B] [Peer initiator] gathered candidate: candidate:1994617126 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag TMzU network-id 1 network-cost 50
+[Leecher B] [Peer initiator] gathered candidate: candidate:1205615948 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag 5UAD network-id 1 network-cost 50
+[Leecher B] [Peer initiator] gathered candidate: candidate:1295898948 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag oYja network-id 1 network-cost 50
+[Leecher B] [Peer initiator] gathered candidate: candidate:4128137503 1 tcp 1518280447 127.0.0.1 9 typ host tcptype active generation 0 ufrag jGNN network-id 1 network-cost 50
+[Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[Leecher B] [Peer initiator] end of candidates (null)
+[Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[Leecher B] [Peer initiator] end of candidates (null)
+[Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[Leecher B] [Peer initiator] end of candidates (null)
+[Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[Leecher B] [Peer initiator] end of candidates (null)
+[Leecher B] [Peer initiator] Emitting local signal, type: offer, sdp has candidate: true
+[Leecher B] [Peer initiator] end of candidates (null)
+Diagnostics at timeout: { progress: 0, peers: 1, downloaded: 0, bitfield: 0 }
+Test Suite Error: Error: Test 3 Failed: P2P file transfer timed out.
+    at /app/applet/packages/e2e/test_trackers.js:280:13

@@ -524,7 +524,6 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     } | null = null;
 
     const requestBlocks = () => {
-      console.log(`[Torrent] requestBlocks called: isDestroyed=${wire.isDestroyed}, peerChoking=${wire.peerChoking}, done=${this.done}, activePiece=${!!activePiece}`);
       if (wire.isDestroyed || wire.peerChoking || this.done) return;
       if (activePiece) return;
 
@@ -536,7 +535,6 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
         }
       }
 
-      console.log(`[Torrent] requestBlocks targetPieceIndex=${targetPieceIndex}, numPieces=${this.numPieces}, remotePieces=${Array.from(remotePieces)}`);
       if (targetPieceIndex === -1) return;
 
       const pLen = targetPieceIndex === this.numPieces - 1
@@ -568,12 +566,10 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
           break;
         }
       }
-      console.log(`[Torrent] updateInterest: hasInterestingPiece=${hasInterestingPiece}, numPieces=${this.numPieces}, remotePieces=${Array.from(remotePieces)}, wire.peerChoking=${wire.peerChoking}, wire.amInterested=${wire.amInterested}`);
       if (hasInterestingPiece && !wire.amInterested) {
         wire.amInterested = true;
         wire.sendInterested();
       }
-      console.log(`[Torrent] updateInterest done: peerChoking=${wire.peerChoking}, numPieces=${this.numPieces}, remotePiecesSize=${remotePieces.size}`);
       if (!wire.peerChoking) {
         requestBlocks();
       }
@@ -613,6 +609,12 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     this.on("metadata", syncRemotePieces,);
     this.on("ready", syncRemotePieces,);
 
+    // 🔥 CORREÇÃO: Se já temos metadados, sincroniza imediatamente para este wire
+    if (this._metadataReceived || this.ready) {
+      console.log("[Torrent] Metadata already available, syncing remote pieces for new wire immediately");
+      syncRemotePieces();
+    }
+
     wire.on("have", (e: any,) => {
       remotePieces.add(e.detail.index,);
       updateInterest();
@@ -627,6 +629,14 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     wire.on("unchoke", () => {
       updateInterest();
     },);
+    
+    wire.on("interested", () => {
+      try {
+        wire.sendUnchoke();
+      } catch (err) {
+        console.warn("[Torrent] Error sending unchoke on interested:", err);
+      }
+    });
 
     wire.on("piece", async (e: any,) => {
       const { index, offset, block, } = e.detail;

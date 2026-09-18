@@ -46,6 +46,12 @@ Welcome to the SyntaxMesh project! This file (`AGENTS.md`) is automatically inje
   - Tests: `deno task test`.
 - **Proactive Unit Testing**: Whenever you implement new functions, utilities, or complex logic, you MUST proactively create unit tests for them using the `@std/testing/bdd` standard. Do not wait for the user to explicitly ask for tests.
 
+## 8. Persistence of Debugging & Bugs Found
+- **Mandatory Debug Logs**: All complex debugging processes MUST be recorded in `docs/bugsfound/`.
+- **Pre-flight Check**: Before starting a fix, check `docs/bugsfound/` for existing logs on the issue.
+- **Context Preservation**: If you are interrupted (quota, timeout), you MUST leave a summary of your findings and next steps in a new log file in `docs/bugsfound/`. This is critical for cross-model/cross-turn continuity.
+- **Protocol**: Refer to `docs/bugsfound/DEBUG_PROTOCOL.md` for the standard format.
+
 By following these guidelines, we maintain a fast, dependency-free, and cohesive Deno/Preact environment without the overhead of Node.js toolchains or complex CSS bundlers.
 
 We are developing an PWA app following a planned directive and tasks. Follow instruction for actual status and next task at CURRENT.md file.
