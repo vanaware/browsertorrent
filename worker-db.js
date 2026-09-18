@@ -1,4 +1,4 @@
-/* BrowserTorrent v0.0.106-mu74q2or */
+/* BrowserTorrent v0.0.111-mu76cjbv */
 
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
@@ -1626,7 +1626,7 @@ var db = Object.assign((dbName, storeName, prefix) => createScopedDb(dbName, sto
 var opfs = Object.assign((dbName, storeName, prefix, basePath = "") => createScopedOpfs(dbName, storeName, prefix, basePath), globalSwOpfsAPI);
 
 // packages/utils/src/config/mod.ts
-var APP_VERSION = true ? "v0.0.106-mu74q2or" : "dev";
+var APP_VERSION = true ? "v0.0.111-mu76cjbv" : "dev";
 
 // packages/worker-db/src/worker.ts
 console.log(`[DB] \u{1F30C} Worker-db carregado (v${APP_VERSION}).`);

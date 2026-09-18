@@ -4,53 +4,27 @@
       "bytes": 67,
       "imports": []
     },
+    "packages/core/src/service-worker/stream-handler.ts": {
+      "bytes": 27508,
+      "imports": [
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
     "packages/core/src/version.ts": {
       "bytes": 633,
       "imports": [
         {
           "path": "<define:__GENERATED_ASSETS__>",
-          "kind": "import-statement",
-          "external": true
-        }
-      ],
-      "format": "esm"
-    },
-    "packages/core/src/service-worker/cache.ts": {
-      "bytes": 8393,
-      "imports": [
-        {
-          "path": "packages/core/src/version.ts",
-          "kind": "import-statement",
-          "original": "../version.ts"
-        },
-        {
-          "path": "<define:__GENERATED_ASSETS__>",
-          "kind": "import-statement",
-          "external": true
-        },
-        {
-          "path": "<runtime>",
-          "kind": "import-statement",
-          "external": true
-        }
-      ],
-      "format": "esm"
-    },
-    "packages/core/src/service-worker/stream-handler.ts": {
-      "bytes": 26274,
-      "imports": [
-        {
-          "path": "packages/core/src/service-worker/cache.ts",
-          "kind": "import-statement",
-          "original": "./cache.ts"
-        },
-        {
-          "path": "<define:__GENERATED_ASSETS__>",
-          "kind": "import-statement",
-          "external": true
-        },
-        {
-          "path": "<runtime>",
           "kind": "import-statement",
           "external": true
         }
@@ -79,7 +53,7 @@
       "format": "esm"
     },
     "packages/core/src/service-worker/mod.ts": {
-      "bytes": 1409,
+      "bytes": 1607,
       "imports": [
         {
           "path": "packages/core/src/service-worker/stream-handler.ts",
@@ -92,9 +66,974 @@
           "original": "./register.ts"
         },
         {
-          "path": "packages/core/src/service-worker/cache.ts",
+          "path": "<define:__GENERATED_ASSETS__>",
           "kind": "import-statement",
-          "original": "./cache.ts"
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/event-target.ts": {
+      "bytes": 5958,
+      "imports": [
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/encoding.ts": {
+      "bytes": 15920,
+      "imports": [
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/magnet.ts": {
+      "bytes": 36360,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/encoding.ts",
+          "kind": "import-statement",
+          "original": "./encoding.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/bencode.ts": {
+      "bytes": 48889,
+      "imports": [
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/errors.ts": {
+      "bytes": 9432,
+      "imports": [
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/torrent-types.ts": {
+      "bytes": 13611,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/errors.ts",
+          "kind": "import-statement",
+          "original": "./errors.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/metainfo-v2.ts": {
+      "bytes": 33950,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/errors.ts",
+          "kind": "import-statement",
+          "original": "./errors.ts"
+        },
+        {
+          "path": "packages/core/src/utils/torrent-types.ts",
+          "kind": "import-statement",
+          "original": "./torrent-types.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/metainfo-parser.ts": {
+      "bytes": 36579,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "./bencode.ts"
+        },
+        {
+          "path": "packages/core/src/utils/errors.ts",
+          "kind": "import-statement",
+          "original": "./errors.ts"
+        },
+        {
+          "path": "packages/core/src/utils/torrent-types.ts",
+          "kind": "import-statement",
+          "original": "./torrent-types.ts"
+        },
+        {
+          "path": "packages/core/src/utils/metainfo-v2.ts",
+          "kind": "import-statement",
+          "original": "./metainfo-v2.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/metainfo-identity.ts": {
+      "bytes": 27274,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "./bencode.ts"
+        },
+        {
+          "path": "packages/core/src/utils/errors.ts",
+          "kind": "import-statement",
+          "original": "./errors.ts"
+        },
+        {
+          "path": "packages/core/src/utils/metainfo-parser.ts",
+          "kind": "import-statement",
+          "original": "./metainfo-parser.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/parse-torrent.ts": {
+      "bytes": 21023,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/magnet.ts",
+          "kind": "import-statement",
+          "original": "./magnet.ts"
+        },
+        {
+          "path": "packages/core/src/utils/metainfo-identity.ts",
+          "kind": "import-statement",
+          "original": "./metainfo-identity.ts"
+        },
+        {
+          "path": "packages/core/src/utils/metainfo-v2.ts",
+          "kind": "import-statement",
+          "original": "./metainfo-v2.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/core/bitfield.ts": {
+      "bytes": 10536,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/errors.ts",
+          "kind": "import-statement",
+          "original": "../utils/errors.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/crypto/hasher.ts": {
+      "bytes": 35761,
+      "imports": [
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/buffer.ts": {
+      "bytes": 19391,
+      "imports": [
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/core/constants.ts": {
+      "bytes": 8101,
+      "imports": [
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/core/handshake.ts": {
+      "bytes": 13935,
+      "imports": [
+        {
+          "path": "packages/core/src/core/constants.ts",
+          "kind": "import-statement",
+          "original": "./constants.ts"
+        },
+        {
+          "path": "packages/core/src/utils/errors.ts",
+          "kind": "import-statement",
+          "original": "../utils/errors.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/net.ts": {
+      "bytes": 26026,
+      "imports": [
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/core/message.ts": {
+      "bytes": 44941,
+      "imports": [
+        {
+          "path": "packages/core/src/core/constants.ts",
+          "kind": "import-statement",
+          "original": "./constants.ts"
+        },
+        {
+          "path": "packages/core/src/utils/errors.ts",
+          "kind": "import-statement",
+          "original": "../utils/errors.ts"
+        },
+        {
+          "path": "packages/core/src/utils/net.ts",
+          "kind": "import-statement",
+          "original": "../utils/net.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/core/extension-host.ts": {
+      "bytes": 37930,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "../utils/bencode.ts"
+        },
+        {
+          "path": "packages/core/src/utils/errors.ts",
+          "kind": "import-statement",
+          "original": "../utils/errors.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/core/wire.ts": {
+      "bytes": 126243,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/event-target.ts",
+          "kind": "import-statement",
+          "original": "../utils/event-target.ts"
+        },
+        {
+          "path": "packages/core/src/utils/buffer.ts",
+          "kind": "import-statement",
+          "original": "../utils/buffer.ts"
+        },
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "../utils/bencode.ts"
+        },
+        {
+          "path": "packages/core/src/utils/errors.ts",
+          "kind": "import-statement",
+          "original": "../utils/errors.ts"
+        },
+        {
+          "path": "packages/core/src/core/handshake.ts",
+          "kind": "import-statement",
+          "original": "./handshake.ts"
+        },
+        {
+          "path": "packages/core/src/core/message.ts",
+          "kind": "import-statement",
+          "original": "./message.ts"
+        },
+        {
+          "path": "packages/core/src/core/constants.ts",
+          "kind": "import-statement",
+          "original": "./constants.ts"
+        },
+        {
+          "path": "packages/core/src/core/extension-host.ts",
+          "kind": "import-statement",
+          "original": "./extension-host.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/core/piece.ts": {
+      "bytes": 4368,
+      "imports": [
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/core/torrent.ts": {
+      "bytes": 96873,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/event-target.ts",
+          "kind": "import-statement",
+          "original": "../utils/event-target.ts"
+        },
+        {
+          "path": "packages/core/src/core/bitfield.ts",
+          "kind": "import-statement",
+          "original": "./bitfield.ts"
+        },
+        {
+          "path": "packages/core/src/crypto/hasher.ts",
+          "kind": "import-statement",
+          "original": "../crypto/hasher.ts"
+        },
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "../utils/bencode.ts"
+        },
+        {
+          "path": "packages/core/src/core/wire.ts",
+          "kind": "import-statement",
+          "original": "./wire.ts"
+        },
+        {
+          "path": "packages/core/src/core/piece.ts",
+          "kind": "import-statement",
+          "original": "./piece.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/network/peer.ts": {
+      "bytes": 41652,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/event-target.ts",
+          "kind": "import-statement",
+          "original": "../utils/event-target.ts"
+        },
+        {
+          "path": "packages/core/src/core/wire.ts",
+          "kind": "import-statement",
+          "original": "../core/wire.ts"
+        },
+        {
+          "path": "packages/core/src/core/constants.ts",
+          "kind": "import-statement",
+          "original": "../core/constants.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/encode-util.ts": {
+      "bytes": 2512,
+      "imports": [
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/network/tracker.ts": {
+      "bytes": 82921,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "../utils/bencode.ts"
+        },
+        {
+          "path": "packages/core/src/utils/errors.ts",
+          "kind": "import-statement",
+          "original": "../utils/errors.ts"
+        },
+        {
+          "path": "packages/core/src/utils/net.ts",
+          "kind": "import-statement",
+          "original": "../utils/net.ts"
+        },
+        {
+          "path": "packages/core/src/utils/encode-util.ts",
+          "kind": "import-statement",
+          "original": "../utils/encode-util.ts"
+        },
+        {
+          "path": "packages/core/src/utils/event-target.ts",
+          "kind": "import-statement",
+          "original": "../utils/event-target.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/core/extension.ts": {
+      "bytes": 2196,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/event-target.ts",
+          "kind": "import-statement",
+          "original": "../utils/event-target.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/extensions/ut-metadata.ts": {
+      "bytes": 39552,
+      "imports": [
+        {
+          "path": "packages/core/src/core/extension.ts",
+          "kind": "import-statement",
+          "original": "../core/extension.ts"
+        },
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "../utils/bencode.ts"
+        },
+        {
+          "path": "packages/core/src/core/bitfield.ts",
+          "kind": "import-statement",
+          "original": "../core/bitfield.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/network/swarm.ts": {
+      "bytes": 41406,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/event-target.ts",
+          "kind": "import-statement",
+          "original": "../utils/event-target.ts"
+        },
+        {
+          "path": "packages/core/src/network/peer.ts",
+          "kind": "import-statement",
+          "original": "./peer.ts"
+        },
+        {
+          "path": "packages/core/src/network/tracker.ts",
+          "kind": "import-statement",
+          "original": "./tracker.ts"
+        },
+        {
+          "path": "packages/core/src/extensions/ut-metadata.ts",
+          "kind": "import-statement",
+          "original": "../extensions/ut-metadata.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/crypto/random.ts": {
+      "bytes": 3636,
+      "imports": [
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/utils/peerid.ts": {
+      "bytes": 25513,
+      "imports": [
+        {
+          "path": "packages/core/src/crypto/random.ts",
+          "kind": "import-statement",
+          "original": "../crypto/random.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/storage/memory-chunk-store.ts": {
+      "bytes": 13135,
+      "imports": [
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/storage/opfs-chunk-store.ts": {
+      "bytes": 22473,
+      "imports": [
+        {
+          "path": "packages/core/src/storage/memory-chunk-store.ts",
+          "kind": "import-statement",
+          "original": "./memory-chunk-store.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/server/stream-manager.ts": {
+      "bytes": 15265,
+      "imports": [
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/server/server.ts": {
+      "bytes": 58797,
+      "imports": [
+        {
+          "path": "packages/core/src/server/stream-manager.ts",
+          "kind": "import-statement",
+          "original": "./stream-manager.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/core/file.ts": {
+      "bytes": 45476,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/event-target.ts",
+          "kind": "import-statement",
+          "original": "../utils/event-target.ts"
+        },
+        {
+          "path": "packages/core/src/server/stream-manager.ts",
+          "kind": "import-statement",
+          "original": "../server/stream-manager.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/torrent-generator/types.ts": {
+      "bytes": 6389,
+      "imports": [
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/torrent-generator/opfs-walker.ts": {
+      "bytes": 8602,
+      "imports": [
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/torrent-generator/opfs-reader.ts": {
+      "bytes": 13996,
+      "imports": [
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/torrent-generator/util.ts": {
+      "bytes": 20648,
+      "imports": [
+        {
+          "path": "packages/core/src/torrent-generator/types.ts",
+          "kind": "import-statement",
+          "original": "./types.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/opfs-reader.ts",
+          "kind": "import-statement",
+          "original": "./opfs-reader.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/torrent-generator/generator.ts": {
+      "bytes": 20026,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "../utils/bencode.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/types.ts",
+          "kind": "import-statement",
+          "original": "./types.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/opfs-walker.ts",
+          "kind": "import-statement",
+          "original": "./opfs-walker.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/util.ts",
+          "kind": "import-statement",
+          "original": "./util.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/torrent-generator/mod.ts": {
+      "bytes": 2004,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "../utils/bencode.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/generator.ts",
+          "kind": "import-statement",
+          "original": "./generator.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/opfs-walker.ts",
+          "kind": "import-statement",
+          "original": "./opfs-walker.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/opfs-reader.ts",
+          "kind": "import-statement",
+          "original": "./opfs-reader.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/util.ts",
+          "kind": "import-statement",
+          "original": "./util.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/types.ts",
+          "kind": "import-statement",
+          "original": "./types.ts"
         },
         {
           "path": "<define:__GENERATED_ASSETS__>",
@@ -104,13 +1043,221 @@
       ],
       "format": "esm"
     },
+    "packages/core/src/extensions/ut-pex.ts": {
+      "bytes": 32027,
+      "imports": [
+        {
+          "path": "packages/core/src/core/extension.ts",
+          "kind": "import-statement",
+          "original": "../core/extension.ts"
+        },
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "../utils/bencode.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/mod.ts": {
+      "bytes": 79979,
+      "imports": [
+        {
+          "path": "packages/core/src/utils/event-target.ts",
+          "kind": "import-statement",
+          "original": "./utils/event-target.ts"
+        },
+        {
+          "path": "packages/core/src/utils/parse-torrent.ts",
+          "kind": "import-statement",
+          "original": "./utils/parse-torrent.ts"
+        },
+        {
+          "path": "packages/core/src/core/torrent.ts",
+          "kind": "import-statement",
+          "original": "./core/torrent.ts"
+        },
+        {
+          "path": "packages/core/src/network/swarm.ts",
+          "kind": "import-statement",
+          "original": "./network/swarm.ts"
+        },
+        {
+          "path": "packages/core/src/utils/peerid.ts",
+          "kind": "import-statement",
+          "original": "./utils/peerid.ts"
+        },
+        {
+          "path": "packages/core/src/storage/opfs-chunk-store.ts",
+          "kind": "import-statement",
+          "original": "./storage/opfs-chunk-store.ts"
+        },
+        {
+          "path": "packages/core/src/storage/memory-chunk-store.ts",
+          "kind": "import-statement",
+          "original": "./storage/memory-chunk-store.ts"
+        },
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "./utils/bencode.ts"
+        },
+        {
+          "path": "packages/core/src/server/server.ts",
+          "kind": "import-statement",
+          "original": "./server/server.ts"
+        },
+        {
+          "path": "packages/core/src/core/file.ts",
+          "kind": "import-statement",
+          "original": "./core/file.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/mod.ts",
+          "kind": "import-statement",
+          "original": "./torrent-generator/mod.ts"
+        },
+        {
+          "path": "packages/core/src/version.ts",
+          "kind": "import-statement",
+          "original": "./version.ts"
+        },
+        {
+          "path": "packages/core/src/core/torrent.ts",
+          "kind": "import-statement",
+          "original": "./core/torrent.ts"
+        },
+        {
+          "path": "packages/core/src/network/swarm.ts",
+          "kind": "import-statement",
+          "original": "./network/swarm.ts"
+        },
+        {
+          "path": "packages/core/src/network/peer.ts",
+          "kind": "import-statement",
+          "original": "./network/peer.ts"
+        },
+        {
+          "path": "packages/core/src/network/tracker.ts",
+          "kind": "import-statement",
+          "original": "./network/tracker.ts"
+        },
+        {
+          "path": "packages/core/src/core/wire.ts",
+          "kind": "import-statement",
+          "original": "./core/wire.ts"
+        },
+        {
+          "path": "packages/core/src/core/file.ts",
+          "kind": "import-statement",
+          "original": "./core/file.ts"
+        },
+        {
+          "path": "packages/core/src/core/piece.ts",
+          "kind": "import-statement",
+          "original": "./core/piece.ts"
+        },
+        {
+          "path": "packages/core/src/utils/parse-torrent.ts",
+          "kind": "import-statement",
+          "original": "./utils/parse-torrent.ts"
+        },
+        {
+          "path": "packages/core/src/utils/peerid.ts",
+          "kind": "import-statement",
+          "original": "./utils/peerid.ts"
+        },
+        {
+          "path": "packages/core/src/extensions/ut-metadata.ts",
+          "kind": "import-statement",
+          "original": "./extensions/ut-metadata.ts"
+        },
+        {
+          "path": "packages/core/src/extensions/ut-pex.ts",
+          "kind": "import-statement",
+          "original": "./extensions/ut-pex.ts"
+        },
+        {
+          "path": "packages/core/src/server/server.ts",
+          "kind": "import-statement",
+          "original": "./server/server.ts"
+        },
+        {
+          "path": "packages/core/src/server/stream-manager.ts",
+          "kind": "import-statement",
+          "original": "./server/stream-manager.ts"
+        },
+        {
+          "path": "packages/core/src/torrent-generator/mod.ts",
+          "kind": "import-statement",
+          "original": "./torrent-generator/mod.ts"
+        },
+        {
+          "path": "packages/core/src/service-worker/mod.ts",
+          "kind": "import-statement",
+          "original": "./service-worker/mod.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "packages/core/src/torrent-generator/mod.ts",
+          "kind": "dynamic-import",
+          "original": "./torrent-generator/mod.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/service-worker/src/cache.ts": {
+      "bytes": 8218,
+      "imports": [
+        {
+          "path": "packages/core/src/mod.ts",
+          "kind": "import-statement",
+          "original": "@vanaware/browsertorrent"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
     "packages/service-worker/src/sw.ts": {
-      "bytes": 946,
+      "bytes": 4880,
       "imports": [
         {
           "path": "packages/core/src/service-worker/mod.ts",
           "kind": "import-statement",
-          "original": "../../core/src/service-worker/mod.ts"
+          "original": "@vanaware/browsertorrent/service-worker"
+        },
+        {
+          "path": "packages/service-worker/src/cache.ts",
+          "kind": "import-statement",
+          "original": "./cache.ts"
         },
         {
           "path": "<define:__GENERATED_ASSETS__>",
@@ -126,7 +1273,7 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 18647
+      "bytes": 493233
     },
     "packages/server/build/dist/sw.js": {
       "imports": [],
@@ -134,25 +1281,154 @@
       "entryPoint": "packages/service-worker/src/sw.ts",
       "inputs": {
         "<define:__GENERATED_ASSETS__>": {
-          "bytesInOutput": 110
+          "bytesInOutput": 236
         },
-        "packages/core/src/version.ts": {
-          "bytesInOutput": 34
+        "packages/core/src/utils/bencode.ts": {
+          "bytesInOutput": 252
         },
-        "packages/core/src/service-worker/cache.ts": {
-          "bytesInOutput": 2145
+        "packages/core/src/torrent-generator/types.ts": {
+          "bytesInOutput": 122
         },
-        "packages/core/src/service-worker/stream-handler.ts": {
-          "bytesInOutput": 7249
+        "packages/core/src/torrent-generator/opfs-walker.ts": {
+          "bytesInOutput": 134
         },
-        "packages/core/src/service-worker/mod.ts": {
-          "bytesInOutput": 0
+        "packages/core/src/torrent-generator/opfs-reader.ts": {
+          "bytesInOutput": 134
+        },
+        "packages/core/src/torrent-generator/util.ts": {
+          "bytesInOutput": 162
+        },
+        "packages/core/src/torrent-generator/generator.ts": {
+          "bytesInOutput": 209
+        },
+        "packages/core/src/torrent-generator/mod.ts": {
+          "bytesInOutput": 243
         },
         "packages/service-worker/src/sw.ts": {
-          "bytesInOutput": 30
+          "bytesInOutput": 657
+        },
+        "packages/core/src/service-worker/mod.ts": {
+          "bytesInOutput": 32
+        },
+        "packages/core/src/service-worker/stream-handler.ts": {
+          "bytesInOutput": 7805
+        },
+        "packages/core/src/service-worker/register.ts": {
+          "bytesInOutput": 32
+        },
+        "packages/core/src/version.ts": {
+          "bytesInOutput": 32
+        },
+        "packages/service-worker/src/cache.ts": {
+          "bytesInOutput": 2054
+        },
+        "packages/core/src/mod.ts": {
+          "bytesInOutput": 287
+        },
+        "packages/core/src/utils/event-target.ts": {
+          "bytesInOutput": 1350
+        },
+        "packages/core/src/utils/parse-torrent.ts": {
+          "bytesInOutput": 32
+        },
+        "packages/core/src/utils/magnet.ts": {
+          "bytesInOutput": 113
+        },
+        "packages/core/src/utils/encoding.ts": {
+          "bytesInOutput": 122
+        },
+        "packages/core/src/utils/metainfo-identity.ts": {
+          "bytesInOutput": 48
+        },
+        "packages/core/src/utils/errors.ts": {
+          "bytesInOutput": 32
+        },
+        "packages/core/src/utils/metainfo-parser.ts": {
+          "bytesInOutput": 48
+        },
+        "packages/core/src/utils/torrent-types.ts": {
+          "bytesInOutput": 82
+        },
+        "packages/core/src/utils/metainfo-v2.ts": {
+          "bytesInOutput": 62
+        },
+        "packages/core/src/core/torrent.ts": {
+          "bytesInOutput": 48
+        },
+        "packages/core/src/core/bitfield.ts": {
+          "bytesInOutput": 32
+        },
+        "packages/core/src/crypto/hasher.ts": {
+          "bytesInOutput": 32
+        },
+        "packages/core/src/core/wire.ts": {
+          "bytesInOutput": 48
+        },
+        "packages/core/src/utils/buffer.ts": {
+          "bytesInOutput": 32
+        },
+        "packages/core/src/core/handshake.ts": {
+          "bytesInOutput": 167
+        },
+        "packages/core/src/core/constants.ts": {
+          "bytesInOutput": 227
+        },
+        "packages/core/src/core/message.ts": {
+          "bytesInOutput": 32
+        },
+        "packages/core/src/utils/net.ts": {
+          "bytesInOutput": 32
+        },
+        "packages/core/src/core/extension-host.ts": {
+          "bytesInOutput": 48
+        },
+        "packages/core/src/core/piece.ts": {
+          "bytesInOutput": 32
+        },
+        "packages/core/src/network/swarm.ts": {
+          "bytesInOutput": 32
+        },
+        "packages/core/src/network/peer.ts": {
+          "bytesInOutput": 32
+        },
+        "packages/core/src/network/tracker.ts": {
+          "bytesInOutput": 90
+        },
+        "packages/core/src/utils/encode-util.ts": {
+          "bytesInOutput": 32
+        },
+        "packages/core/src/extensions/ut-metadata.ts": {
+          "bytesInOutput": 48
+        },
+        "packages/core/src/core/extension.ts": {
+          "bytesInOutput": 32
+        },
+        "packages/core/src/utils/peerid.ts": {
+          "bytesInOutput": 32
+        },
+        "packages/core/src/crypto/random.ts": {
+          "bytesInOutput": 32
+        },
+        "packages/core/src/storage/opfs-chunk-store.ts": {
+          "bytesInOutput": 32
+        },
+        "packages/core/src/storage/memory-chunk-store.ts": {
+          "bytesInOutput": 32
+        },
+        "packages/core/src/server/server.ts": {
+          "bytesInOutput": 67
+        },
+        "packages/core/src/server/stream-manager.ts": {
+          "bytesInOutput": 2559
+        },
+        "packages/core/src/core/file.ts": {
+          "bytesInOutput": 12496
+        },
+        "packages/core/src/extensions/ut-pex.ts": {
+          "bytesInOutput": 48
         }
       },
-      "bytes": 9974
+      "bytes": 33547
     }
   }
 }

@@ -1087,30 +1087,9 @@
       ],
       "format": "esm"
     },
-    "packages/core/src/service-worker/cache.ts": {
-      "bytes": 8393,
-      "imports": [
-        {
-          "path": "packages/core/src/version.ts",
-          "kind": "import-statement",
-          "original": "../version.ts"
-        },
-        {
-          "path": "<runtime>",
-          "kind": "import-statement",
-          "external": true
-        }
-      ],
-      "format": "esm"
-    },
     "packages/core/src/service-worker/stream-handler.ts": {
-      "bytes": 26274,
+      "bytes": 27508,
       "imports": [
-        {
-          "path": "packages/core/src/service-worker/cache.ts",
-          "kind": "import-statement",
-          "original": "./cache.ts"
-        },
         {
           "path": "<runtime>",
           "kind": "import-statement",
@@ -1136,7 +1115,7 @@
       "format": "esm"
     },
     "packages/core/src/service-worker/mod.ts": {
-      "bytes": 1409,
+      "bytes": 1607,
       "imports": [
         {
           "path": "packages/core/src/service-worker/stream-handler.ts",
@@ -1147,17 +1126,12 @@
           "path": "packages/core/src/service-worker/register.ts",
           "kind": "import-statement",
           "original": "./register.ts"
-        },
-        {
-          "path": "packages/core/src/service-worker/cache.ts",
-          "kind": "import-statement",
-          "original": "./cache.ts"
         }
       ],
       "format": "esm"
     },
     "packages/core/src/mod.ts": {
-      "bytes": 79789,
+      "bytes": 79979,
       "imports": [
         {
           "path": "packages/core/src/utils/event-target.ts",
@@ -1618,7 +1592,7 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 958690
+      "bytes": 955275
     },
     "packages/server/build/dist/main.js": {
       "imports": [],
@@ -1751,20 +1725,17 @@
         "packages/core/src/extensions/ut-pex.ts": {
           "bytesInOutput": 8636
         },
-        "packages/core/src/service-worker/cache.ts": {
-          "bytesInOutput": 2254
-        },
         "packages/core/src/service-worker/stream-handler.ts": {
-          "bytesInOutput": 7401
+          "bytesInOutput": 7894
         },
         "packages/core/src/service-worker/register.ts": {
           "bytesInOutput": 1581
         },
         "packages/core/src/service-worker/mod.ts": {
-          "bytesInOutput": 146
+          "bytesInOutput": 128
         },
         "packages/core/src/mod.ts": {
-          "bytesInOutput": 23454
+          "bytesInOutput": 23520
         },
         "https:https://esm.sh/preact@10.29.7/denonext/preact.mjs": {
           "bytesInOutput": 16382
@@ -1851,7 +1822,7 @@
           "bytesInOutput": 7873
         }
       },
-      "bytes": 497843
+      "bytes": 496084
     }
   }
 }

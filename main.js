@@ -1,4 +1,4 @@
-/* BrowserTorrent v0.0.106-mu74q2or */
+/* BrowserTorrent v0.0.111-mu76cjbv */
 
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
@@ -7985,7 +7985,7 @@ var init_mod = __esm({
 var VERSION, CORE_VERSION;
 var init_version = __esm({
   "packages/core/src/version.ts"() {
-    VERSION = "0.0.106-mu74q2or";
+    VERSION = "0.0.111-mu76cjbv";
     CORE_VERSION = VERSION;
   }
 });
@@ -8216,70 +8216,6 @@ var init_ut_pex = __esm({
   }
 });
 
-// packages/core/src/service-worker/cache.ts
-function handleCacheInstall(event, assetsToCache) {
-  const assets = assetsToCache ?? (typeof __GENERATED_ASSETS__ !== "undefined" ? __GENERATED_ASSETS__ : []);
-  console.log("[SW-CACHE] Installing Service Worker cache...");
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => {
-    console.log("[SW-CACHE] Caching essential resources:", assets.length, "items");
-    return Promise.all(assets.map((url) => {
-      return cache.add(url).catch((err) => {
-        console.warn(`[SW-CACHE] Failed to cache resource: ${url}`, err);
-      });
-    }));
-  }).then(() => self.skipWaiting()));
-}
-function handleCacheActivate(event) {
-  console.log("[SW-CACHE] Activating Service Worker and cleaning old caches...");
-  event.waitUntil(caches.keys().then((cacheNames) => {
-    return Promise.all(cacheNames.map((cache) => {
-      if (cache !== CACHE_NAME && cache.startsWith("browsertorrent-")) {
-        console.log(`[SW-CACHE] Removing old cache: ${cache}`);
-        return caches.delete(cache);
-      }
-    }));
-  }).then(() => self.clients.claim()));
-}
-async function handleCacheFetch(event) {
-  if (event.request.method !== "GET") {
-    return void 0;
-  }
-  if (!event.request.url.startsWith(self.location.origin) || event.request.url.includes("/api/")) {
-    return void 0;
-  }
-  try {
-    const networkResponse = await fetch(event.request);
-    if (networkResponse.ok) {
-      const responseClone = networkResponse.clone();
-      const cache = await caches.open(CACHE_NAME);
-      await cache.put(event.request, responseClone);
-    }
-    return networkResponse;
-  } catch (_err) {
-    const cache = await caches.open(CACHE_NAME);
-    const cachedResponse = await cache.match(event.request);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-    return new Response("Resource unavailable offline.", {
-      status: 503,
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8"
-      }
-    });
-  }
-}
-var CACHE_NAME;
-var init_cache = __esm({
-  "packages/core/src/service-worker/cache.ts"() {
-    init_version();
-    CACHE_NAME = `browsertorrent-cache-v${VERSION}`;
-    __name(handleCacheInstall, "handleCacheInstall");
-    __name(handleCacheActivate, "handleCacheActivate");
-    __name(handleCacheFetch, "handleCacheFetch");
-  }
-});
-
 // packages/core/src/service-worker/stream-handler.ts
 function guessDestination(pathname) {
   if (/\.(mp4|webm|mkv|avi|mov)$/i.test(pathname)) return "video";
@@ -8289,8 +8225,14 @@ function guessDestination(pathname) {
 }
 function getWebTorrentPrefix(scope) {
   const baseScope = scope || (typeof self !== "undefined" && self.registration?.scope ? self.registration.scope : "/");
-  const pathname = new URL(baseScope, typeof self !== "undefined" ? self.location?.origin || "http://localhost" : "http://localhost").pathname;
+  const pathname = new URL(baseScope, typeof self !== "undefined" && self.location?.origin ? self.location.origin : "http://localhost").pathname;
   return (pathname.endsWith("/") ? pathname : pathname + "/") + "webtorrent/";
+}
+function isWebTorrentStreamRequest(urlOrRequest, scope) {
+  const urlString = typeof urlOrRequest === "string" ? urlOrRequest : urlOrRequest instanceof Request ? urlOrRequest.url : urlOrRequest.href;
+  const url = new URL(urlString, typeof self !== "undefined" && self.location?.origin ? self.location.origin : "http://localhost");
+  const prefix = getWebTorrentPrefix(scope);
+  return url.pathname.startsWith(prefix);
 }
 function handleStream(req, url, pagePort, scope) {
   return new Promise((resolve) => {
@@ -8448,70 +8390,66 @@ function handleStream(req, url, pagePort, scope) {
     ]);
   });
 }
-function initStreamingServiceWorker(options = {}) {
+function createWebTorrentFetchHandler(options = {}) {
   const requestQueue = [];
   let pagePort = null;
-  self.addEventListener("install", (e3) => {
-    if (options.cacheAssets !== false) {
-      handleCacheInstall(e3);
-    } else {
-      self.skipWaiting();
+  function setPagePort(port) {
+    pagePort = port;
+    console.log("[sw-fetch-handler] pagePort attached");
+    processQueue();
+  }
+  __name(setPagePort, "setPagePort");
+  function getPagePort() {
+    return pagePort;
+  }
+  __name(getPagePort, "getPagePort");
+  function isStreamRequest(urlOrRequest) {
+    return isWebTorrentStreamRequest(urlOrRequest, options.prefix);
+  }
+  __name(isStreamRequest, "isStreamRequest");
+  function handleFetch(event) {
+    const url = new URL(event.request.url);
+    if (!isStreamRequest(url)) {
+      return null;
     }
-  });
-  self.addEventListener("activate", (e3) => {
-    if (options.cacheAssets !== false) {
-      handleCacheActivate(e3);
-    } else {
-      e3.waitUntil(self.clients.claim());
-    }
-  });
-  self.addEventListener("message", (e3) => {
-    const { data } = e3;
-    if (data?.type === "PORT") {
-      pagePort = e3.ports[0];
-      console.log("[sw] pagePort received");
-      processQueue();
-    }
-  });
-  self.addEventListener("fetch", (e3) => {
-    const url = new URL(e3.request.url);
-    const prefix = options.prefix || getWebTorrentPrefix();
-    if (!url.pathname.startsWith(prefix)) {
-      if (options.cacheAssets !== false) {
-        const cachePromise = handleCacheFetch(e3);
-        e3.respondWith(cachePromise.then((resp) => resp || fetch(e3.request)));
-      }
-      return;
-    }
-    console.log("[sw] stream fetch intercepted:", url.pathname);
+    console.log("[sw-fetch-handler] intercepting stream fetch:", url.pathname);
     if (!pagePort) {
-      e3.respondWith(new Promise((resolve) => {
+      return new Promise((resolve) => {
         requestQueue.push({
           resolve,
-          req: e3.request,
+          req: event.request,
           url
         });
-      }));
-      return;
+      });
     }
-    e3.respondWith(handleStream(e3.request, url, pagePort, self.registration.scope));
-  });
+    const scope = typeof self !== "undefined" && self.registration?.scope ? self.registration.scope : "/";
+    return handleStream(event.request, url, pagePort, scope);
+  }
+  __name(handleFetch, "handleFetch");
   async function processQueue() {
+    const scope = typeof self !== "undefined" && self.registration?.scope ? self.registration.scope : "/";
     while (requestQueue.length > 0 && pagePort) {
       const item = requestQueue.shift();
-      const resp = await handleStream(item.req, item.url, pagePort, self.registration.scope);
+      const resp = await handleStream(item.req, item.url, pagePort, scope);
       item.resolve(resp);
     }
   }
   __name(processQueue, "processQueue");
+  return {
+    setPagePort,
+    getPagePort,
+    isStreamRequest,
+    handleFetch,
+    handleStream: /* @__PURE__ */ __name((req, url, port, scope) => handleStream(req, url, port, scope), "handleStream")
+  };
 }
 var init_stream_handler = __esm({
   "packages/core/src/service-worker/stream-handler.ts"() {
-    init_cache();
     __name(guessDestination, "guessDestination");
     __name(getWebTorrentPrefix, "getWebTorrentPrefix");
+    __name(isWebTorrentStreamRequest, "isWebTorrentStreamRequest");
     __name(handleStream, "handleStream");
-    __name(initStreamingServiceWorker, "initStreamingServiceWorker");
+    __name(createWebTorrentFetchHandler, "createWebTorrentFetchHandler");
   }
 });
 
@@ -8559,7 +8497,6 @@ var init_mod2 = __esm({
   "packages/core/src/service-worker/mod.ts"() {
     init_stream_handler();
     init_register();
-    init_cache();
   }
 });
 
@@ -8588,6 +8525,7 @@ __export(mod_exports2, {
   buildStreamURL: () => buildStreamURL,
   calcPieceSize: () => calcPieceSize,
   createServer: () => createServer,
+  createWebTorrentFetchHandler: () => createWebTorrentFetchHandler,
   decodePeerId: () => decodePeerId,
   decodePexUpdate: () => decodePexUpdate,
   encodePexUpdate: () => encodePexUpdate,
@@ -8599,9 +8537,9 @@ __export(mod_exports2, {
   getWebTorrentPrefix: () => getWebTorrentPrefix,
   guessDestination: () => guessDestination,
   handleStream: () => handleStream,
-  initStreamingServiceWorker: () => initStreamingServiceWorker,
   isHiddenFile: () => isHiddenFile,
   isServiceWorkerSupported: () => isServiceWorkerSupported,
+  isWebTorrentStreamRequest: () => isWebTorrentStreamRequest,
   parseStreamURL: () => parseStreamURL,
   parseTorrent: () => parseTorrent,
   registerServiceWorker: () => registerServiceWorker,
