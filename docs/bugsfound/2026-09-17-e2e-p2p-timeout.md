@@ -28,7 +28,31 @@ O teste `packages/e2e/test_trackers.js` (Teste 3) falha consistentemente com "P2
 - **Rastreamento Extensivo**: Adicionados logs de prefixo `[Torrent]` e `[Wire]` para rastrear cada mensagem do protocolo BitTorrent (choke, unchoke, interested, request, piece).
 - **Aumento de Timeout E2E**: Timeout do teste P2P aumentado para 60s com diagnósticos extras de estado interno.
 
-## Próximos Passos Recomendados
-1. Verificar se o Seeder está recebendo a mensagem `INTERESTED` e respondendo com `UNCHOKE`.
-2. Monitorar a função `wire._onMessage` para ver se mensagens de `REQUEST` chegam ao Seeder e se mensagens de `PIECE` chegam ao Leecher.
-3. Validar se o `ChunkStore` realmente persiste os dados durante o teste (verificar logs de `put` no store).
+## Update - Sessão em Andamento (17/09/2026)
+
+### Descobertas Recentes
+- **Unchoke-on-Interested Implementado**: O Seeder agora responde automaticamente com `UNCHOKE` ao receber `INTERESTED`. Os logs confirmam que o intercâmbio de mensagens `UNCHOKE` está ocorrendo em ambos os sentidos.
+- **Race de Metadados Mitigada**: Adicionada lógica para chamar `syncRemotePieces()` imediatamente se o metadado já estiver disponível quando o wire é registrado.
+- **Stall em 0%**: Mesmo com `metadataReceived: true` e wires em estado `unchoked`, o leecher reporta `bitfield: 0` nos diagnósticos do teste e não emite requisições de blocos (`REQUEST`).
+
+### Hipótese Atual: Falha na Sincronização do Bitfield Remoto
+O `bitfield` do torrent no Leecher não está sendo populado corretamente após a recepção do metadado. 
+No `Torrent.ts`, o `syncRemotePieces` depende de `isHaveAll` ou `savedBitfield`. Se o Seeder enviar `HAVE_ALL` (ou o bitfield completo) *antes* do Leecher ter o metadado, essa informação pode estar sendo perdida ou não processada corretamente quando o metadado finalmente chega.
+
+### Próximos Passos (Imediato)
+1. **Verificar `isHaveAll`**: Confirmar se o `isHaveAll` está sendo preservado e aplicado corretamente durante o `syncRemotePieces`.
+2. **Isolar Armazenamento**: Desabilitar OPFS temporariamente no teste E2E para garantir que o problema não é o armazenamento bloqueando o progresso.
+3. **Debug de `remotePieces`**: Adicionar logs específicos no `syncRemotePieces` para ver se ele está encontrando peças para adicionar ao `remotePieces` set.
+4. **Verificar Seeder `ready`**: Confirmar se o Seeder A está realmente entrando em estado `ready` e enviando `HAVE_ALL` ou `BITFIELD`.
+
+### Plano de Ação
+Vou adicionar logs de depuração em pontos estratégicos do `Torrent.ts` para capturar:
+- Quando `sendInitialState` é disparado.
+- O conteúdo de `isHaveAll` e `savedBitfield` no momento de `syncRemotePieces`.
+- Se o Seeder está recebendo o handshake e enviando a disponibilidade inicial.
+
+---
+### Update 17:05 - Execução com MemoryStore
+- **Ação**: Desabilitado OPFS no script E2E.
+- **Objetivo**: Isolar se o problema é o protocolo P2P ou a persistência em disco.
+- **Logs**: Capturando saída detalhada para analisar o fluxo de handshakes.

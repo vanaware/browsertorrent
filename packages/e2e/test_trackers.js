@@ -182,7 +182,7 @@ const { chromium } = require('@playwright/test');
       
       console.log("Starting Client A (Seeder)...");
       const clientA = new Client({
-        useOPFS: true,
+        useOPFS: false,
         rtcConfig: { iceServers: [] }
       });
       window.clientA = clientA;
@@ -219,7 +219,7 @@ const { chromium } = require('@playwright/test');
       
       console.log("Starting Client B (Leecher)...");
       const clientB = new Client({
-        useOPFS: true,
+        useOPFS: false,
         rtcConfig: { iceServers: [] }
       });
       window.clientB = clientB;

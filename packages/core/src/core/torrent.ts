@@ -440,23 +440,27 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     // ── 1. Enviar Bitfield inicial e Unchoke após Handshake ────────────────
     let initialStateSent = false;
     const sendInitialState = () => {
+      console.log(`[Torrent] sendInitialState: ready=${this.ready}, numPieces=${this.numPieces}`);
       if (!initialStateSent) {
         initialStateSent = true;
         if (this.numPieces > 0) {
           if (this.bitfield.count() === this.numPieces) {
             try {
+              console.log("[Torrent] Seeder detected, sending HAVE_ALL");
               wire.sendHaveAll();
             } catch {
               wire.sendBitfield(this.bitfield.toBuffer(),);
             }
           } else if (this.bitfield.count() === 0) {
             try {
+              console.log("[Torrent] Leecher detected, sending HAVE_NONE");
               wire.sendHaveNone();
             } catch {
               wire.sendBitfield(this.bitfield.toBuffer(),);
             }
           } else {
             try {
+              console.log("[Torrent] Partial leecher detected, sending bitfield");
               wire.sendBitfield(this.bitfield.toBuffer(),);
             } catch (err) {
               console.warn("[Torrent] Erro ao enviar bitfield inicial:", err,);
@@ -464,6 +468,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
           }
         } else {
           try {
+            console.log("[Torrent] No metadata yet, sending HAVE_NONE");
             wire.sendHaveNone();
           } catch {
             try {
@@ -476,6 +481,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
       }
       // Desafogar o peer remoto para permitir requisições
       try {
+        console.log("[Torrent] Sending UNCHOKE to peer");
         wire.sendUnchoke();
       } catch (err) {
         console.warn("[Torrent] Erro ao enviar unchoke inicial:", err,);
@@ -524,8 +530,14 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     } | null = null;
 
     const requestBlocks = () => {
-      if (wire.isDestroyed || wire.peerChoking || this.done) return;
-      if (activePiece) return;
+      if (wire.isDestroyed || wire.peerChoking || this.done) {
+        console.log(`[Torrent] requestBlocks exit early: isDestroyed=${wire.isDestroyed}, peerChoking=${wire.peerChoking}, done=${this.done}`);
+        return;
+      }
+      if (activePiece) {
+        console.log(`[Torrent] requestBlocks exit: already have activePiece ${activePiece.index}`);
+        return;
+      }
 
       let targetPieceIndex = -1;
       for (let i = 0; i < this.numPieces; i++) {
@@ -566,6 +578,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
           break;
         }
       }
+      console.log(`[Torrent] updateInterest: interesting=${hasInterestingPiece}, amInterested=${wire.amInterested}, peerChoking=${wire.peerChoking}`);
       if (hasInterestingPiece && !wire.amInterested) {
         wire.amInterested = true;
         wire.sendInterested();
@@ -578,7 +591,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     wire.on("bitfield", (e: any,) => {
       const bf: Uint8Array = e.detail.bitfield;
       savedBitfield = bf;
-      console.log(`[Torrent] wire.on('bitfield') length=${bf.length}`);
+      console.log(`[Torrent] wire.on('bitfield') received: length=${bf.length}`);
       for (let i = 0; i < bf.length * 8; i++) {
         const byteIdx = Math.floor(i / 8,);
         const bitIdx = 7 - (i % 8);
@@ -590,7 +603,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     },);
 
     const syncRemotePieces = () => {
-      console.log(`[Torrent] syncRemotePieces triggered: isHaveAll=${isHaveAll}, savedBitfield=${!!savedBitfield}, numPieces=${this.numPieces}`);
+      console.log(`[Torrent] syncRemotePieces: isHaveAll=${isHaveAll}, hasBitfield=${!!savedBitfield}, numPieces=${this.numPieces}`);
       if (isHaveAll) {
         for (let i = 0; i < this.numPieces; i++) remotePieces.add(i,);
       } else if (savedBitfield) {
@@ -602,7 +615,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
           }
         }
       }
-      console.log(`[Torrent] syncRemotePieces remotePieces now has ${remotePieces.size} items`);
+      console.log(`[Torrent] syncRemotePieces completed: remotePieces.size=${remotePieces.size}`);
       updateInterest();
     };
 
@@ -616,11 +629,14 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     }
 
     wire.on("have", (e: any,) => {
-      remotePieces.add(e.detail.index,);
+      const index = e.detail.index;
+      console.log(`[Torrent] wire.on('have') received index=${index}`);
+      remotePieces.add(index,);
       updateInterest();
     },);
 
     wire.on("haveAll", () => {
+      console.log("[Torrent] wire.on('haveAll') received");
       isHaveAll = true;
       for (let i = 0; i < this.numPieces; i++) remotePieces.add(i,);
       updateInterest();
