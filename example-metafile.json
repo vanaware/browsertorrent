@@ -1107,8 +1107,29 @@
       ],
       "format": "esm"
     },
+    "packages/core/src/service-worker/bridge.ts": {
+      "bytes": 26686,
+      "imports": [
+        {
+          "path": "packages/core/src/server/stream-manager.ts",
+          "kind": "import-statement",
+          "original": "../server/stream-manager.ts"
+        },
+        {
+          "path": "packages/core/src/service-worker/register.ts",
+          "kind": "dynamic-import",
+          "original": "./register.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
     "packages/core/src/service-worker/mod.ts": {
-      "bytes": 1607,
+      "bytes": 2311,
       "imports": [
         {
           "path": "packages/core/src/service-worker/stream-handler.ts",
@@ -1119,12 +1140,17 @@
           "path": "packages/core/src/service-worker/register.ts",
           "kind": "import-statement",
           "original": "./register.ts"
+        },
+        {
+          "path": "packages/core/src/service-worker/bridge.ts",
+          "kind": "import-statement",
+          "original": "./bridge.ts"
         }
       ],
       "format": "esm"
     },
     "packages/core/src/mod.ts": {
-      "bytes": 79991,
+      "bytes": 80596,
       "imports": [
         {
           "path": "packages/core/src/utils/event-target.ts",
@@ -1544,7 +1570,7 @@
       "format": "esm"
     },
     "packages/example/src/main.tsx": {
-      "bytes": 33541,
+      "bytes": 4110,
       "imports": [
         {
           "path": "https:https://esm.sh/preact@10.29.7/jsx-runtime",
@@ -1585,7 +1611,7 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 1076834
+      "bytes": 1076531
     },
     "packages/server/build/dist/main.js": {
       "imports": [],
@@ -1722,13 +1748,16 @@
           "bytesInOutput": 7896
         },
         "packages/core/src/service-worker/register.ts": {
-          "bytesInOutput": 1585
+          "bytesInOutput": 1758
+        },
+        "packages/core/src/service-worker/bridge.ts": {
+          "bytesInOutput": 7574
         },
         "packages/core/src/service-worker/mod.ts": {
-          "bytesInOutput": 128
+          "bytesInOutput": 147
         },
         "packages/core/src/mod.ts": {
-          "bytesInOutput": 23524
+          "bytesInOutput": 23911
         },
         "https:https://esm.sh/preact@10.29.7/denonext/preact.mjs": {
           "bytesInOutput": 16379
@@ -1806,10 +1835,10 @@
           "bytesInOutput": 10421
         },
         "packages/example/src/main.tsx": {
-          "bytesInOutput": 7876
+          "bytesInOutput": 760
         }
       },
-      "bytes": 513084
+      "bytes": 514168
     }
   }
 }

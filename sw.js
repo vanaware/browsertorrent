@@ -1,5 +1,5 @@
 /*!
- * BrowserTorrent v0.0.119#mv5i57tp
+ * BrowserTorrent v0.0.134#mv5jafeg
  * (c) 2026 Vanaware - MIT License
  */
 
@@ -20,6 +20,21 @@ var define_GENERATED_ASSETS_default;
 var init_define_GENERATED_ASSETS = __esm({
   "<define:__GENERATED_ASSETS__>"() {
     define_GENERATED_ASSETS_default = ["./webtorrent.min.js", "./main.js", "./index.html"];
+  }
+});
+
+// packages/core/src/version.ts
+var init_version = __esm({
+  "packages/core/src/version.ts"() {
+    init_define_GENERATED_ASSETS();
+  }
+});
+
+// packages/core/src/service-worker/register.ts
+var init_register = __esm({
+  "packages/core/src/service-worker/register.ts"() {
+    init_define_GENERATED_ASSETS();
+    init_version();
   }
 });
 
@@ -328,11 +343,95 @@ function createWebTorrentFetchHandler(options = {}) {
 }
 __name(createWebTorrentFetchHandler, "createWebTorrentFetchHandler");
 
-// packages/core/src/service-worker/register.ts
+// packages/core/src/service-worker/mod.ts
+init_register();
+
+// packages/core/src/service-worker/bridge.ts
 init_define_GENERATED_ASSETS();
 
-// packages/core/src/version.ts
+// packages/core/src/server/stream-manager.ts
 init_define_GENERATED_ASSETS();
+var StreamManager = class {
+  static {
+    __name(this, "StreamManager");
+  }
+  entries = /* @__PURE__ */ new Map();
+  /**
+   * Registers (or replaces) the file entry for a `(infoHash, fileIndex)`.
+   *
+   * The same `File` object is also bound back to the entry through
+   * `infoHash`/`fileIndex` so {@link File.streamURL} can produce a URL
+   * that resolves back to the same record.
+   *
+   * @param infoHash - 40-char hex info hash identifying the torrent.
+   * @param fileIndex - Zero-based file index inside the torrent.
+   * @param file - The {@link File} instance to serve.
+   */
+  register(infoHash, fileIndex, file) {
+    const key = this._key(infoHash, fileIndex);
+    this.entries.set(key, {
+      infoHash,
+      fileIndex,
+      file
+    });
+  }
+  /**
+   * Removes a single file entry.  Safe to call when the entry does not
+   * exist.
+   */
+  unregister(infoHash, fileIndex) {
+    this.entries.delete(this._key(infoHash, fileIndex));
+  }
+  /**
+   * Removes every file entry that belongs to the given torrent.  Used
+   * when a torrent is removed from the client so the SW cannot keep
+   * streaming after the underlying data is gone.
+   */
+  unregisterTorrent(infoHash) {
+    const prefix = `${infoHash}:`;
+    for (const key of this.entries.keys()) {
+      if (key.startsWith(prefix)) this.entries.delete(key);
+    }
+  }
+  /**
+   * Returns the file entry for a `(infoHash, fileIndex)` or `undefined`
+   * if no such file is registered.
+   */
+  get(infoHash, fileIndex) {
+    return this.entries.get(this._key(infoHash, fileIndex));
+  }
+  /**
+   * Lists every currently registered file entry.  Used by tests and
+   * diagnostics — not by the hot path of the streaming protocol.
+   */
+  list() {
+    return Array.from(this.entries.values());
+  }
+  /**
+   * Returns the total number of registered file entries.  Useful for
+   * shutdown checks and for tests asserting cleanup behaviour.
+   */
+  size() {
+    return this.entries.size;
+  }
+  /**
+   * Removes every entry.  Called by the test suite and (in the future)
+   * by a full client destruction path that wants to wipe state without
+   * touching each torrent individually.
+   */
+  clear() {
+    this.entries.clear();
+  }
+  _key(infoHash, fileIndex) {
+    return `${infoHash}:${fileIndex}`;
+  }
+};
+var streamManager = new StreamManager();
+function buildStreamURL(scope, infoHash, fileIndex, name) {
+  const safeName = encodeURIComponent(name);
+  return `${scope}webtorrent/${infoHash}/${fileIndex}/${safeName}`;
+}
+__name(buildStreamURL, "buildStreamURL");
 
 // packages/service-worker/src/cache.ts
 init_define_GENERATED_ASSETS();
@@ -517,92 +616,6 @@ init_bencode();
 
 // packages/core/src/server/server.ts
 init_define_GENERATED_ASSETS();
-
-// packages/core/src/server/stream-manager.ts
-init_define_GENERATED_ASSETS();
-var StreamManager = class {
-  static {
-    __name(this, "StreamManager");
-  }
-  entries = /* @__PURE__ */ new Map();
-  /**
-   * Registers (or replaces) the file entry for a `(infoHash, fileIndex)`.
-   *
-   * The same `File` object is also bound back to the entry through
-   * `infoHash`/`fileIndex` so {@link File.streamURL} can produce a URL
-   * that resolves back to the same record.
-   *
-   * @param infoHash - 40-char hex info hash identifying the torrent.
-   * @param fileIndex - Zero-based file index inside the torrent.
-   * @param file - The {@link File} instance to serve.
-   */
-  register(infoHash, fileIndex, file) {
-    const key = this._key(infoHash, fileIndex);
-    this.entries.set(key, {
-      infoHash,
-      fileIndex,
-      file
-    });
-  }
-  /**
-   * Removes a single file entry.  Safe to call when the entry does not
-   * exist.
-   */
-  unregister(infoHash, fileIndex) {
-    this.entries.delete(this._key(infoHash, fileIndex));
-  }
-  /**
-   * Removes every file entry that belongs to the given torrent.  Used
-   * when a torrent is removed from the client so the SW cannot keep
-   * streaming after the underlying data is gone.
-   */
-  unregisterTorrent(infoHash) {
-    const prefix = `${infoHash}:`;
-    for (const key of this.entries.keys()) {
-      if (key.startsWith(prefix)) this.entries.delete(key);
-    }
-  }
-  /**
-   * Returns the file entry for a `(infoHash, fileIndex)` or `undefined`
-   * if no such file is registered.
-   */
-  get(infoHash, fileIndex) {
-    return this.entries.get(this._key(infoHash, fileIndex));
-  }
-  /**
-   * Lists every currently registered file entry.  Used by tests and
-   * diagnostics — not by the hot path of the streaming protocol.
-   */
-  list() {
-    return Array.from(this.entries.values());
-  }
-  /**
-   * Returns the total number of registered file entries.  Useful for
-   * shutdown checks and for tests asserting cleanup behaviour.
-   */
-  size() {
-    return this.entries.size;
-  }
-  /**
-   * Removes every entry.  Called by the test suite and (in the future)
-   * by a full client destruction path that wants to wipe state without
-   * touching each torrent individually.
-   */
-  clear() {
-    this.entries.clear();
-  }
-  _key(infoHash, fileIndex) {
-    return `${infoHash}:${fileIndex}`;
-  }
-};
-var streamManager = new StreamManager();
-function buildStreamURL(scope, infoHash, fileIndex, name) {
-  const safeName = encodeURIComponent(name);
-  return `${scope}webtorrent/${infoHash}/${fileIndex}/${safeName}`;
-}
-__name(buildStreamURL, "buildStreamURL");
-
-// packages/core/src/server/server.ts
 var STREAM_BLOCK_SIZE = 16 * 1024;
 
 // packages/core/src/core/file.ts
@@ -1021,6 +1034,7 @@ var File = class extends TypedEventTarget {
 
 // packages/core/src/mod.ts
 init_mod();
+init_version();
 
 // packages/core/src/extensions/ut-pex.ts
 init_define_GENERATED_ASSETS();
@@ -1034,7 +1048,7 @@ var _WEBRTC_SUPPORT = (() => {
 })();
 
 // packages/service-worker/src/cache.ts
-var CACHE_VERSION = true ? "v0.0.119#mv5i57tp" : `v${VERSION2}`;
+var CACHE_VERSION = true ? "v0.0.134#mv5jafeg" : `v${VERSION2}`;
 var CACHE_NAME = `browsertorrent-cache-${CACHE_VERSION}`;
 var ASSETS_TO_CACHE = typeof define_GENERATED_ASSETS_default !== "undefined" ? define_GENERATED_ASSETS_default : [];
 function handleInstall(event) {

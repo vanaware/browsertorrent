@@ -1,5 +1,5 @@
 /*!
- * BrowserTorrent v0.0.119#mv5i57tp
+ * BrowserTorrent v0.0.134#mv5jafeg
  * (c) 2026 Vanaware - MIT License
  */
 
@@ -8457,6 +8457,11 @@ var init_stream_handler = __esm({
 });
 
 // packages/core/src/service-worker/register.ts
+var register_exports = {};
+__export(register_exports, {
+  isServiceWorkerSupported: () => isServiceWorkerSupported,
+  registerServiceWorker: () => registerServiceWorker
+});
 function isServiceWorkerSupported() {
   return typeof navigator !== "undefined" && "serviceWorker" in navigator;
 }
@@ -8495,11 +8500,257 @@ var init_register = __esm({
   }
 });
 
+// packages/core/src/service-worker/bridge.ts
+function guessContentType2(name) {
+  const ext = name.split(".").pop()?.toLowerCase();
+  const types = {
+    mp4: "video/mp4",
+    webm: "video/webm",
+    mkv: "video/x-matroska",
+    avi: "video/x-msvideo",
+    mov: "video/quicktime",
+    mp3: "audio/mpeg",
+    m4a: "audio/mp4",
+    ogg: "audio/ogg",
+    wav: "audio/wav",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    gif: "image/gif",
+    webp: "image/webp",
+    html: "text/html",
+    txt: "text/plain",
+    json: "application/json",
+    pdf: "application/pdf"
+  };
+  return types[ext ?? ""] ?? "application/octet-stream";
+}
+function parseRange(header, fileLength) {
+  if (!header) return null;
+  const match = header.match(/^bytes=(\d+)-(\d*)$/);
+  if (!match) return null;
+  const start = Number(match[1]);
+  const endStr = match[2];
+  const end = endStr ? Number(endStr) : fileLength - 1;
+  if (!Number.isFinite(start) || start < 0 || start >= fileLength) return null;
+  if (!Number.isFinite(end) || end < start || end >= fileLength) return null;
+  return {
+    start,
+    end
+  };
+}
+function waitForServiceWorkerActivation(worker) {
+  return new Promise((resolve) => {
+    if (worker.state === "activated") {
+      resolve();
+      return;
+    }
+    const onChange = /* @__PURE__ */ __name(() => {
+      if (worker.state === "activated") {
+        worker.removeEventListener("statechange", onChange);
+        resolve();
+      }
+    }, "onChange");
+    worker.addEventListener("statechange", onChange);
+  });
+}
+async function connectServiceWorkerBridge(workerOrOptions, optionsOrScope) {
+  if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) {
+    return null;
+  }
+  let sw;
+  let scope;
+  if (workerOrOptions && typeof workerOrOptions === "object" && "postMessage" in workerOrOptions) {
+    sw = workerOrOptions;
+    if (typeof optionsOrScope === "string") {
+      scope = optionsOrScope;
+    } else if (optionsOrScope && typeof optionsOrScope === "object") {
+      scope = optionsOrScope.scope;
+    }
+  } else if (workerOrOptions && typeof workerOrOptions === "object") {
+    const opts = workerOrOptions;
+    sw = opts.worker;
+    scope = opts.scope;
+  }
+  if (!sw) {
+    const reg = await navigator.serviceWorker.ready;
+    sw = reg.active ?? void 0;
+  }
+  if (!sw) return null;
+  const channel = new MessageChannel();
+  const { port1, port2 } = channel;
+  sw.postMessage({
+    type: "PORT"
+  }, [
+    port1
+  ]);
+  port2.onmessage = (e3) => {
+    const msg = e3.data;
+    if (msg?.type !== "webtorrent-request") return;
+    const { url, method, headers, scope: scope2 } = msg;
+    const chunkPort = e3.ports[0];
+    const requestPort = e3.ports[1];
+    if (!chunkPort || !requestPort) return;
+    try {
+      const parsed = parseStreamURL(url, scope2 || "/");
+      if (!parsed) {
+        chunkPort.postMessage({
+          status: 404,
+          body: "Not Found"
+        });
+        chunkPort.postMessage(null);
+        chunkPort.close();
+        return;
+      }
+      const entry = streamManager.get(parsed.infoHash, parsed.fileIndex);
+      if (!entry) {
+        chunkPort.postMessage({
+          status: 404,
+          body: "File not registered"
+        });
+        chunkPort.postMessage(null);
+        chunkPort.close();
+        return;
+      }
+      const file = entry.file;
+      const range = parseRange(headers?.["range"], file.length);
+      const status = range ? 206 : 200;
+      const statusText = range ? "Partial Content" : "OK";
+      const contentType = guessContentType2(file.name);
+      const respHeaders = {
+        "Content-Type": contentType,
+        "Accept-Ranges": "bytes",
+        "Cache-Control": "no-store"
+      };
+      if (range) {
+        respHeaders["Content-Range"] = `bytes ${range.start}-${range.end}/${file.length}`;
+        respHeaders["Content-Length"] = String(range.end - range.start + 1);
+      } else {
+        respHeaders["Content-Length"] = String(file.length);
+      }
+      const rangeStart = range?.start ?? 0;
+      const rangeEnd = range?.end ?? file.length - 1;
+      let currentOffset = rangeStart;
+      let fileStream = null;
+      let fileIterator = null;
+      const ensureStream = /* @__PURE__ */ __name(() => {
+        if (!fileStream) {
+          if (typeof file.createReadStream === "function") {
+            fileStream = file.createReadStream({
+              start: rangeStart,
+              end: rangeEnd
+            });
+          } else {
+            fileStream = new ReadableStream({
+              async start(controller) {
+                if (file[Symbol.asyncIterator]) {
+                  for await (const chunk of file) {
+                    controller.enqueue(chunk);
+                  }
+                }
+                controller.close();
+              }
+            });
+          }
+          fileIterator = fileStream.getReader();
+        }
+      }, "ensureStream");
+      let closed = false;
+      const cleanup2 = /* @__PURE__ */ __name(() => {
+        closed = true;
+        fileIterator = null;
+        fileStream = null;
+        chunkPort.close();
+      }, "cleanup");
+      chunkPort.onmessage = async (ev) => {
+        if (closed) return;
+        const data = ev.data;
+        if (data === null || data === false) {
+          cleanup2();
+          return;
+        }
+        if (data === true) {
+          if (currentOffset > rangeEnd) {
+            chunkPort.postMessage(null);
+            cleanup2();
+            return;
+          }
+          ensureStream();
+          const { value, done } = await fileIterator.read();
+          if (closed) return;
+          if (done || !value || value.byteLength === 0) {
+            chunkPort.postMessage(null);
+            cleanup2();
+            return;
+          }
+          currentOffset += value.byteLength;
+          chunkPort.postMessage(value);
+        }
+      };
+      chunkPort.start?.();
+      requestPort.postMessage({
+        status,
+        statusText,
+        headers: respHeaders,
+        body: "STREAM"
+      });
+    } catch (err2) {
+      chunkPort.postMessage({
+        status: 500,
+        body: String(err2)
+      });
+      chunkPort.postMessage(null);
+      chunkPort.close();
+    }
+  };
+  return channel;
+}
+async function registerAndConnectServiceWorker(options = {}) {
+  if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) {
+    return null;
+  }
+  const { registerServiceWorker: registerServiceWorker2 } = await Promise.resolve().then(() => (init_register(), register_exports));
+  const reg = await registerServiceWorker2(options);
+  if (!reg) return null;
+  const activeWorker = reg.active ?? reg.installing ?? reg.waiting;
+  if (activeWorker) {
+    if (activeWorker.state !== "activated") {
+      await waitForServiceWorkerActivation(activeWorker);
+    }
+    const channel = await connectServiceWorkerBridge({
+      worker: reg.active ?? activeWorker,
+      scope: options.scope
+    });
+    return {
+      registration: reg,
+      channel
+    };
+  }
+  return {
+    registration: reg,
+    channel: null
+  };
+}
+var waitForActivation, establishSWConnection;
+var init_bridge = __esm({
+  "packages/core/src/service-worker/bridge.ts"() {
+    init_stream_manager();
+    __name(guessContentType2, "guessContentType");
+    __name(parseRange, "parseRange");
+    __name(waitForServiceWorkerActivation, "waitForServiceWorkerActivation");
+    waitForActivation = waitForServiceWorkerActivation;
+    __name(connectServiceWorkerBridge, "connectServiceWorkerBridge");
+    establishSWConnection = connectServiceWorkerBridge;
+    __name(registerAndConnectServiceWorker, "registerAndConnectServiceWorker");
+  }
+});
+
 // packages/core/src/service-worker/mod.ts
 var init_mod2 = __esm({
   "packages/core/src/service-worker/mod.ts"() {
     init_stream_handler();
     init_register();
+    init_bridge();
   }
 });
 
@@ -8527,27 +8778,34 @@ __export(mod_exports2, {
   buildPieceFiles: () => buildPieceFiles,
   buildStreamURL: () => buildStreamURL,
   calcPieceSize: () => calcPieceSize,
+  connectServiceWorkerBridge: () => connectServiceWorkerBridge,
   createServer: () => createServer,
   createWebTorrentFetchHandler: () => createWebTorrentFetchHandler,
   decodePeerId: () => decodePeerId,
   decodePexUpdate: () => decodePexUpdate,
   encodePexUpdate: () => encodePexUpdate,
+  establishSWConnection: () => establishSWConnection,
   fileSizeSum: () => fileSizeSum,
   generateBrowserTorrentPeerId: () => generateBrowserTorrentPeerId,
   generateTorrent: () => generateTorrent,
   getDefaultCreatedBy: () => getDefaultCreatedBy,
   getOPFSFileSize: () => getOPFSFileSize,
   getWebTorrentPrefix: () => getWebTorrentPrefix,
+  guessContentType: () => guessContentType2,
   guessDestination: () => guessDestination,
   handleStream: () => handleStream,
   isHiddenFile: () => isHiddenFile,
   isServiceWorkerSupported: () => isServiceWorkerSupported,
   isWebTorrentStreamRequest: () => isWebTorrentStreamRequest,
+  parseRange: () => parseRange,
   parseStreamURL: () => parseStreamURL,
   parseTorrent: () => parseTorrent,
+  registerAndConnectServiceWorker: () => registerAndConnectServiceWorker,
   registerServiceWorker: () => registerServiceWorker,
   sha1sum: () => sha1sum,
   streamManager: () => streamManager,
+  waitForActivation: () => waitForActivation,
+  waitForServiceWorkerActivation: () => waitForServiceWorkerActivation,
   walkOPFSDir: () => walkOPFSDir
 });
 var _WEBRTC_SUPPORT, Client;
@@ -14370,218 +14628,17 @@ window.BrowserTorrentTest = {
   Peer,
   WsTracker
 };
-function waitForActivation(worker) {
-  return new Promise((resolve) => {
-    if (worker.state === "activated") {
-      resolve();
-      return;
-    }
-    const onChange = /* @__PURE__ */ __name(() => {
-      if (worker.state === "activated") {
-        worker.removeEventListener("statechange", onChange);
-        resolve();
-      }
-    }, "onChange");
-    worker.addEventListener("statechange", onChange);
-  });
-}
-__name(waitForActivation, "waitForActivation");
-async function establishSWConnection() {
-  if (!("serviceWorker" in navigator)) return;
-  const reg = await navigator.serviceWorker.ready;
-  const sw = reg.active;
-  if (!sw) return;
-  const { port1, port2 } = new MessageChannel();
-  sw.postMessage({
-    type: "PORT"
-  }, [
-    port1
-  ]);
-  port2.onmessage = (e3) => {
-    const msg = e3.data;
-    if (msg?.type !== "webtorrent-request") return;
-    const { url, method, headers, scope, destination } = msg;
-    const chunkPort = e3.ports[0];
-    const requestPort = e3.ports[1];
-    console.log("[main] SW request:", method, url);
-    try {
-      const parsed = parseStreamURL(url, scope || getScope());
-      if (!parsed) {
-        chunkPort.postMessage({
-          status: 404,
-          body: "Not Found"
-        });
-        chunkPort.postMessage(null);
-        chunkPort.close();
-        return;
-      }
-      const entry = streamManager.get(parsed.infoHash, parsed.fileIndex);
-      if (!entry) {
-        console.log("[main] streamManager MISS \u2014 looking for:", parsed.infoHash, "idx:", parsed.fileIndex, "\n  Registered entries:", streamManager.list().map((e4) => `${e4.infoHash}:${e4.fileIndex} (${e4.file.name})`));
-        chunkPort.postMessage({
-          status: 404,
-          body: "File not registered"
-        });
-        chunkPort.postMessage(null);
-        chunkPort.close();
-        return;
-      }
-      const file = entry.file;
-      const range = parseRange(headers["range"], file.length);
-      const status = range ? 206 : 200;
-      const statusText = range ? "Partial Content" : "OK";
-      const contentType = guessContentType2(file.name);
-      const respHeaders = {
-        "Content-Type": contentType,
-        "Accept-Ranges": "bytes",
-        "Cache-Control": "no-store"
-      };
-      if (range) {
-        respHeaders["Content-Range"] = `bytes ${range.start}-${range.end}/${file.length}`;
-        respHeaders["Content-Length"] = String(range.end - range.start + 1);
-      } else {
-        respHeaders["Content-Length"] = String(file.length);
-      }
-      const rangeStart = range?.start ?? 0;
-      const rangeEnd = range?.end ?? file.length - 1;
-      let currentOffset = rangeStart;
-      let fileStream = null;
-      let fileIterator = null;
-      const ensureStream = /* @__PURE__ */ __name(() => {
-        if (!fileStream) {
-          console.log("[main] ensureStream: creating ReadableStream, start:", rangeStart, "end:", rangeEnd);
-          fileStream = file.createReadStream({
-            start: rangeStart,
-            end: rangeEnd
-          });
-          fileIterator = fileStream.getReader();
-          console.log("[main] ensureStream: stream created, file.length:", file.length);
-        }
-      }, "ensureStream");
-      let closed = false;
-      const cleanup2 = /* @__PURE__ */ __name(() => {
-        closed = true;
-        fileIterator = null;
-        fileStream = null;
-        chunkPort.close();
-      }, "cleanup");
-      chunkPort.onmessage = async (ev) => {
-        console.log("[main] chunkPort.onmessage FIRED, data:", ev.data, "closed:", closed);
-        if (closed) return;
-        const data = ev.data;
-        if (data === null || data === false) {
-          cleanup2();
-          return;
-        }
-        if (data === true) {
-          console.log("[main] SW wants chunk, currentOffset:", currentOffset, "rangeEnd:", rangeEnd);
-          if (currentOffset > rangeEnd) {
-            console.log("[main] all bytes sent, sending null");
-            chunkPort.postMessage(null);
-            cleanup2();
-            return;
-          }
-          ensureStream();
-          console.log("[main] reading chunk from fileIterator...");
-          const { value, done } = await fileIterator.read();
-          console.log("[main] fileIterator.read() returned, done:", done, "value:", value?.byteLength ?? "null");
-          if (closed) return;
-          if (done || !value || value.byteLength === 0) {
-            console.log("[main] stream done, sending null, read bytes:", currentOffset - rangeStart, "/", rangeEnd - rangeStart + 1);
-            chunkPort.postMessage(null);
-            cleanup2();
-            return;
-          }
-          currentOffset += value.byteLength;
-          console.log("[main] \u2192 chunk to SW:", value.byteLength, "bytes, offset:", currentOffset, "/", rangeEnd + 1);
-          chunkPort.postMessage(value);
-        }
-      };
-      chunkPort.start?.();
-      console.log("[main] chunkPort started");
-      requestPort.postMessage({
-        status,
-        statusText,
-        headers: respHeaders,
-        body: "STREAM"
-      });
-      console.log("[main] Response metadata sent, body=STREAM, range:", rangeStart, "-", rangeEnd);
-    } catch (err2) {
-      console.error("[main] Error:", err2);
-      chunkPort.postMessage({
-        status: 500,
-        body: String(err2)
-      });
-      chunkPort.postMessage(null);
-      chunkPort.close();
-    }
-  };
-}
-__name(establishSWConnection, "establishSWConnection");
-function parseRange(header, fileLength) {
-  if (!header) return null;
-  const match = header.match(/^bytes=(\d+)-(\d*)$/);
-  if (!match) return null;
-  const start = Number(match[1]);
-  const endStr = match[2];
-  const end = endStr ? Number(endStr) : fileLength - 1;
-  if (!Number.isFinite(start) || start < 0 || start >= fileLength) return null;
-  if (!Number.isFinite(end) || end < start || end >= fileLength) return null;
-  return {
-    start,
-    end
-  };
-}
-__name(parseRange, "parseRange");
-function guessContentType2(name) {
-  const ext = name.split(".").pop()?.toLowerCase();
-  const types = {
-    mp4: "video/mp4",
-    webm: "video/webm",
-    mkv: "video/x-matroska",
-    avi: "video/x-msvideo",
-    mov: "video/quicktime",
-    mp3: "audio/mpeg",
-    m4a: "audio/mp4",
-    ogg: "audio/ogg",
-    wav: "audio/wav",
-    jpg: "image/jpeg",
-    jpeg: "image/jpeg",
-    png: "image/png",
-    gif: "image/gif",
-    webp: "image/webp"
-  };
-  return types[ext ?? ""] ?? "application/octet-stream";
-}
-__name(guessContentType2, "guessContentType");
 async function bootstrap() {
   if (!navigator.storage?.getDirectory) {
     console.warn("[main] OPFS n\xE3o dispon\xEDvel");
   }
   if ("serviceWorker" in navigator) {
     try {
-      const reg = await navigator.serviceWorker.register("./sw.js", {
+      await registerAndConnectServiceWorker({
+        scriptUrl: "./sw.js",
         scope: "./"
       });
-      console.log("[main] SW Registered:", reg.scope);
-      const activeWorker = reg.active ?? reg.installing ?? reg.waiting;
-      if (activeWorker) {
-        if (activeWorker.state === "activated") {
-          await establishSWConnection();
-          console.log("[main] SW MessageChannel established");
-        } else {
-          await waitForActivation(activeWorker);
-          await establishSWConnection();
-          console.log("[main] SW MessageChannel established (after activation)");
-        }
-      } else {
-        const reg2 = await navigator.serviceWorker.ready;
-        const w3 = reg2.active;
-        if (w3) {
-          await establishSWConnection();
-          console.log("[main] SW MessageChannel established (via ready)");
-        }
-      }
+      console.log("[main] SW registered and MessageChannel established via @vanaware/browsertorrent");
     } catch (e3) {
       console.error("[main] SW Registration failed:", e3);
     }

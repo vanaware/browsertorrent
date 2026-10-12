@@ -52,8 +52,50 @@
       ],
       "format": "esm"
     },
+    "packages/core/src/server/stream-manager.ts": {
+      "bytes": 15265,
+      "imports": [
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "packages/core/src/service-worker/bridge.ts": {
+      "bytes": 26686,
+      "imports": [
+        {
+          "path": "packages/core/src/server/stream-manager.ts",
+          "kind": "import-statement",
+          "original": "../server/stream-manager.ts"
+        },
+        {
+          "path": "<define:__GENERATED_ASSETS__>",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "packages/core/src/service-worker/register.ts",
+          "kind": "dynamic-import",
+          "original": "./register.ts"
+        },
+        {
+          "path": "<runtime>",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
     "packages/core/src/service-worker/mod.ts": {
-      "bytes": 1607,
+      "bytes": 2311,
       "imports": [
         {
           "path": "packages/core/src/service-worker/stream-handler.ts",
@@ -64,6 +106,11 @@
           "path": "packages/core/src/service-worker/register.ts",
           "kind": "import-statement",
           "original": "./register.ts"
+        },
+        {
+          "path": "packages/core/src/service-worker/bridge.ts",
+          "kind": "import-statement",
+          "original": "./bridge.ts"
         },
         {
           "path": "<define:__GENERATED_ASSETS__>",
@@ -834,22 +881,6 @@
       ],
       "format": "esm"
     },
-    "packages/core/src/server/stream-manager.ts": {
-      "bytes": 15265,
-      "imports": [
-        {
-          "path": "<define:__GENERATED_ASSETS__>",
-          "kind": "import-statement",
-          "external": true
-        },
-        {
-          "path": "<runtime>",
-          "kind": "import-statement",
-          "external": true
-        }
-      ],
-      "format": "esm"
-    },
     "packages/core/src/server/server.ts": {
       "bytes": 58797,
       "imports": [
@@ -1070,7 +1101,7 @@
       "format": "esm"
     },
     "packages/core/src/mod.ts": {
-      "bytes": 79991,
+      "bytes": 80596,
       "imports": [
         {
           "path": "packages/core/src/utils/event-target.ts",
@@ -1226,7 +1257,7 @@
       "format": "esm"
     },
     "packages/service-worker/src/cache.ts": {
-      "bytes": 8290,
+      "bytes": 8358,
       "imports": [
         {
           "path": "packages/core/src/mod.ts",
@@ -1273,7 +1304,7 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 493649
+      "bytes": 503671
     },
     "packages/server/build/dist/sw.js": {
       "imports": [],
@@ -1282,6 +1313,12 @@
       "inputs": {
         "<define:__GENERATED_ASSETS__>": {
           "bytesInOutput": 218
+        },
+        "packages/core/src/version.ts": {
+          "bytesInOutput": 108
+        },
+        "packages/core/src/service-worker/register.ts": {
+          "bytesInOutput": 145
         },
         "packages/core/src/utils/bencode.ts": {
           "bytesInOutput": 252
@@ -1308,22 +1345,22 @@
           "bytesInOutput": 657
         },
         "packages/core/src/service-worker/mod.ts": {
-          "bytesInOutput": 32
+          "bytesInOutput": 49
         },
         "packages/core/src/service-worker/stream-handler.ts": {
           "bytesInOutput": 7805
         },
-        "packages/core/src/service-worker/register.ts": {
+        "packages/core/src/service-worker/bridge.ts": {
           "bytesInOutput": 32
         },
-        "packages/core/src/version.ts": {
-          "bytesInOutput": 32
+        "packages/core/src/server/stream-manager.ts": {
+          "bytesInOutput": 2559
         },
         "packages/service-worker/src/cache.ts": {
           "bytesInOutput": 2054
         },
         "packages/core/src/mod.ts": {
-          "bytesInOutput": 287
+          "bytesInOutput": 303
         },
         "packages/core/src/utils/event-target.ts": {
           "bytesInOutput": 1350
@@ -1418,9 +1455,6 @@
         "packages/core/src/server/server.ts": {
           "bytesInOutput": 67
         },
-        "packages/core/src/server/stream-manager.ts": {
-          "bytesInOutput": 2559
-        },
         "packages/core/src/core/file.ts": {
           "bytesInOutput": 12496
         },
@@ -1428,7 +1462,7 @@
           "bytesInOutput": 48
         }
       },
-      "bytes": 33569
+      "bytes": 33875
     }
   }
 }
