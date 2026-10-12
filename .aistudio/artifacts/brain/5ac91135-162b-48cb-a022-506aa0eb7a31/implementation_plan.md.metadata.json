@@ -1,0 +1,6 @@
+{
+  "summary": "Plano de implementação da arquitetura de Presença P2P, Rendezvous e Mensagens Diretas via WebTorrent público e WebRTC DataChannels para o BrowserTorrent. Documenta os 3 modos de descoberta de presença (InfoHash derivado, sala/tópico público, modelo híbrido), os 3 fluxos de apresentação/handshake para usuários desconhecidos, a comunicação efêmera em tempo real via WebRTC DataChannel e a integração na interface BeerCSS/Preact Signals.",
+  "updatedAt": "2026-10-12T18:56:18.258600843Z",
+  "requestFeedback": true,
+  "userFacing": true
+}
