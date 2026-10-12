@@ -22,7 +22,7 @@
  * - `MAX_TORRENTS`: Maximum swarms in LRU cache (default: 100)
  */
 
-import { createServer, WebSocketTracker } from "./mod.ts";
+import { createServer, WebSocketTracker, } from "./mod.ts";
 
 interface CLIOptions {
   port: number;

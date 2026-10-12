@@ -7,8 +7,8 @@
  * Groups peers by torrent info hash and coordinates peer discovery with LRU eviction.
  */
 
-import { LRUCache } from "./lru.ts";
-import { PeerConnectionManager } from "./peer.ts";
+import { LRUCache, } from "./lru.ts";
+import { PeerConnectionManager, } from "./peer.ts";
 
 /**
  * Aggregated statistics and lifecycle info for an individual torrent swarm.
@@ -82,8 +82,8 @@ export class SwarmManager {
    * @param maxPeersPerTorrent - Maximum peers stored per torrent swarm (defaults to 50).
    * @param maxTorrents - Maximum number of distinct swarms tracked before LRU eviction (defaults to 100).
    */
-  constructor(maxPeersPerTorrent: number = 50, maxTorrents: number = 100) {
-    this.swarms = new LRUCache<Set<string>>(maxTorrents);
+  constructor(maxPeersPerTorrent: number = 50, maxTorrents: number = 100,) {
+    this.swarms = new LRUCache<Set<string>>(maxTorrents,);
     this.peerManager = new PeerConnectionManager();
     this.maxPeersPerTorrent = maxPeersPerTorrent;
   }
@@ -93,11 +93,11 @@ export class SwarmManager {
    *
    * @param announce - Peer announcement data containing IDs and network metrics.
    */
-  addPeer(announce: PeerAnnounce): void {
-    const { infoHash, peerId } = announce;
+  addPeer(announce: PeerAnnounce,): void {
+    const { infoHash, peerId, } = announce;
 
     // Get or create peer set for this torrent
-    let peerIds = this.swarms.get(infoHash);
+    let peerIds = this.swarms.get(infoHash,);
     if (!peerIds) {
       peerIds = new Set();
     }
@@ -105,15 +105,15 @@ export class SwarmManager {
     // Check if we're at max peers per torrent
     if (peerIds.size >= this.maxPeersPerTorrent) {
       // Remove the oldest peer from this torrent
-      const oldestPeerId = Array.from(peerIds)[0];
+      const oldestPeerId = Array.from(peerIds,)[0];
       if (oldestPeerId) {
-        peerIds.delete(oldestPeerId);
+        peerIds.delete(oldestPeerId,);
       }
     }
 
     // Add peer to swarm
-    peerIds.add(peerId);
-    this.swarms.put(infoHash, peerIds);
+    peerIds.add(peerId,);
+    this.swarms.put(infoHash, peerIds,);
 
     // Update peer manager
     this.peerManager.addConnection(
@@ -123,7 +123,7 @@ export class SwarmManager {
       announce.port,
     );
 
-    console.log("[SWARM] Peer", peerId, "added to swarm", infoHash);
+    console.log("[SWARM] Peer", peerId, "added to swarm", infoHash,);
   }
 
   /**
@@ -132,16 +132,16 @@ export class SwarmManager {
    * @param infoHash - Torrent info hash.
    * @param peerId - Peer ID to remove.
    */
-  removePeer(infoHash: string, peerId: string): void {
-    const peerIds = this.swarms.get(infoHash);
+  removePeer(infoHash: string, peerId: string,): void {
+    const peerIds = this.swarms.get(infoHash,);
     if (!peerIds) return;
 
-    peerIds.delete(peerId);
-    this.swarms.put(infoHash, peerIds);
+    peerIds.delete(peerId,);
+    this.swarms.put(infoHash, peerIds,);
 
-    this.peerManager.removeConnection(peerId);
+    this.peerManager.removeConnection(peerId,);
 
-    console.log("[SWARM] Peer", peerId, "removed from swarm", infoHash);
+    console.log("[SWARM] Peer", peerId, "removed from swarm", infoHash,);
   }
 
   /**
@@ -151,13 +151,13 @@ export class SwarmManager {
    * @param numwant - Maximum number of peer IDs requested (defaults to 50).
    * @returns An array of peer ID strings.
    */
-  getPeers(infoHash: string, numwant: number = 50): string[] {
-    const peerIds = this.swarms.get(infoHash);
+  getPeers(infoHash: string, numwant: number = 50,): string[] {
+    const peerIds = this.swarms.get(infoHash,);
     if (!peerIds) return [];
 
     // Return up to numwant peers
-    const peers = Array.from(peerIds);
-    return peers.slice(0, numwant);
+    const peers = Array.from(peerIds,);
+    return peers.slice(0, numwant,);
   }
 
   /**
@@ -166,8 +166,8 @@ export class SwarmManager {
    * @param infoHash - Torrent info hash.
    * @returns A {@link SwarmInfo} object with peer counts and status.
    */
-  getSwarmInfo(infoHash: string): SwarmInfo {
-    const peerIds = this.swarms.get(infoHash);
+  getSwarmInfo(infoHash: string,): SwarmInfo {
+    const peerIds = this.swarms.get(infoHash,);
     const peerCount = peerIds ? peerIds.size : 0;
 
     return {
@@ -189,8 +189,8 @@ export class SwarmManager {
   getAllSwarmInfo(): SwarmInfo[] {
     const swarms: SwarmInfo[] = [];
 
-    for (const [infoHash] of this.swarms.entries()) {
-      swarms.push(this.getSwarmInfo(infoHash));
+    for (const [infoHash,] of this.swarms.entries()) {
+      swarms.push(this.getSwarmInfo(infoHash,),);
     }
 
     return swarms;

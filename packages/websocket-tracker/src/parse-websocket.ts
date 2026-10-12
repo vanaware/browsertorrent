@@ -136,9 +136,9 @@ export type TrackerResponse =
  * }
  * ```
  */
-export function parseWebSocketMessage(data: string): TrackerMessage | null {
+export function parseWebSocketMessage(data: string,): TrackerMessage | null {
   try {
-    const parsed = JSON.parse(data);
+    const parsed = JSON.parse(data,);
 
     // Validate required fields
     if (!parsed.action || !parsed.info_hash || !parsed.peer_id) {
@@ -148,14 +148,14 @@ export function parseWebSocketMessage(data: string): TrackerMessage | null {
     // Parse based on action type
     switch (parsed.action) {
       case "announce":
-        return parseAnnounceRequest(parsed);
+        return parseAnnounceRequest(parsed,);
       case "scrape":
-        return parseScrapeRequest(parsed);
+        return parseScrapeRequest(parsed,);
       default:
         return null;
     }
   } catch (error) {
-    console.error("[PARSE] Failed to parse message:", error);
+    console.error("[PARSE] Failed to parse message:", error,);
     return null;
   }
 }
@@ -173,16 +173,16 @@ function parseAnnounceRequest(
 
   return {
     action: "announce",
-    info_hash: String(data.info_hash),
-    peer_id: String(data.peer_id),
-    port: Number(data.port),
-    uploaded: Number(data.uploaded) || 0,
-    downloaded: Number(data.downloaded) || 0,
-    left: Number(data.left) || 0,
+    info_hash: String(data.info_hash,),
+    peer_id: String(data.peer_id,),
+    port: Number(data.port,),
+    uploaded: Number(data.uploaded,) || 0,
+    downloaded: Number(data.downloaded,) || 0,
+    left: Number(data.left,) || 0,
     event: (data.event as TrackerAnnounceRequest["event"]) || "",
-    numwant: Number(data.numwant) || 50,
-    compact: Number(data.compact) || 0,
-    no_peer_id: Number(data.no_peer_id) || 0,
+    numwant: Number(data.numwant,) || 50,
+    compact: Number(data.compact,) || 0,
+    no_peer_id: Number(data.no_peer_id,) || 0,
   };
 }
 
@@ -199,8 +199,8 @@ function parseScrapeRequest(
 
   return {
     action: "scrape",
-    info_hash: String(data.info_hash),
-    peer_id: String(data.peer_id),
+    info_hash: String(data.info_hash,),
+    peer_id: String(data.peer_id,),
   };
 }
 
@@ -313,7 +313,7 @@ export function formatScrapeResponse(
  * console.log("Message valid:", isValid);
  * ```
  */
-export function validateTrackerMessage(message: TrackerMessage): boolean {
+export function validateTrackerMessage(message: TrackerMessage,): boolean {
   // Validate info_hash format (should be at least 20-byte string)
   if (!message.info_hash || message.info_hash.length < 20) {
     return false;
@@ -326,7 +326,7 @@ export function validateTrackerMessage(message: TrackerMessage): boolean {
 
   // Validate port range if present
   if ("port" in message) {
-    const port = Number(message.port);
+    const port = Number(message.port,);
     if (port < 1 || port > 65535) {
       return false;
     }

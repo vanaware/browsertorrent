@@ -42,15 +42,19 @@ import {
   WebSocketTracker,
   type WebSocketTrackerOptions,
 } from "./server.ts";
-import { type ITracker, TrackerRouter } from "./router.ts";
+import { type ITracker, TrackerRouter, } from "./router.ts";
 import {
   type PeerConnection,
   PeerConnectionManager,
   type PeerInfo,
 } from "./peer.ts";
-import { type PeerAnnounce, type SwarmInfo, SwarmManager } from "./swarm.ts";
-import { LRUCache } from "./lru.ts";
-import { type ServerHealth, StatsManager, type TrackerStats } from "./stats.ts";
+import { type PeerAnnounce, type SwarmInfo, SwarmManager, } from "./swarm.ts";
+import { LRUCache, } from "./lru.ts";
+import {
+  type ServerHealth,
+  StatsManager,
+  type TrackerStats,
+} from "./stats.ts";
 import {
   formatAnnounceResponse,
   formatErrorResponse,
@@ -126,7 +130,7 @@ export function createServer(
   port: number = 8000,
   options?: Partial<WebSocketTrackerOptions>,
 ): WebSocketTracker {
-  return new WebSocketTracker(port, options);
+  return new WebSocketTracker(port, options,);
 }
 
 /**
@@ -141,8 +145,8 @@ export function createServer(
  * ```
  */
 export async function runCLI(): Promise<void> {
-  const port = Number(Deno.env.get("PORT") || "8000");
-  const hostname = Deno.env.get("HOSTNAME") || "0.0.0.0";
+  const port = Number(Deno.env.get("PORT",) || "8000",);
+  const hostname = Deno.env.get("HOSTNAME",) || "0.0.0.0";
 
   console.log(
     "[TRACKER] Starting WebSocket tracker on",
@@ -153,21 +157,21 @@ export async function runCLI(): Promise<void> {
 
   const tracker = createServer(port, {
     hostname,
-    maxPeers: Number(Deno.env.get("MAX_PEERS") || "1000"),
-    maxPeersPerTorrent: Number(Deno.env.get("MAX_PEERS_PER_TORRENT") || "50"),
-    maxTorrents: Number(Deno.env.get("MAX_TORRENTS") || "100"),
-    intervalMs: Number(Deno.env.get("INTERVAL_MS") || "120000"),
-  });
+    maxPeers: Number(Deno.env.get("MAX_PEERS",) || "1000",),
+    maxPeersPerTorrent: Number(Deno.env.get("MAX_PEERS_PER_TORRENT",) || "50",),
+    maxTorrents: Number(Deno.env.get("MAX_TORRENTS",) || "100",),
+    intervalMs: Number(Deno.env.get("INTERVAL_MS",) || "120000",),
+  },);
 
   // Handle graceful shutdown
   const shutdown = () => {
-    console.log("[TRACKER] Shutting down...");
+    console.log("[TRACKER] Shutting down...",);
     tracker.close();
-    Deno.exit(0);
+    Deno.exit(0,);
   };
 
-  Deno.addSignalListener("SIGINT", shutdown);
-  Deno.addSignalListener("SIGTERM", shutdown);
+  Deno.addSignalListener("SIGINT", shutdown,);
+  Deno.addSignalListener("SIGTERM", shutdown,);
 
   // Start listening (runs indefinitely until close() is called)
   await tracker.start();

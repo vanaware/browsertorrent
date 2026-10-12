@@ -24,7 +24,7 @@ export interface Writer {
    * @param p - Bytes to write.
    * @returns The number of bytes written.
    */
-  write(p: Uint8Array): Promise<number>;
+  write(p: Uint8Array,): Promise<number>;
 }
 
 /** Standard piece-size presets (BEP 3). `SIZE_AUTO` defers to automatic calculation. */

@@ -72,7 +72,7 @@ export class StatsManager {
    *
    * @param maxMemoryMB - Target memory ceiling in Megabytes used to compute degraded/unhealthy status (defaults to 512).
    */
-  constructor(maxMemoryMB: number = 512) {
+  constructor(maxMemoryMB: number = 512,) {
     this.connections = 0;
     this.messages = 0;
     this.completed = 0;
@@ -116,7 +116,7 @@ export class StatsManager {
    *
    * @param bytes - Number of downloaded bytes to add.
    */
-  addDownloaded(bytes: number): void {
+  addDownloaded(bytes: number,): void {
     this.downloaded += bytes;
   }
 
@@ -145,7 +145,7 @@ export class StatsManager {
    * @param totalTorrents - Current total active swarms.
    * @returns A {@link ServerHealth} evaluation report.
    */
-  getHealth(totalPeers: number, totalTorrents: number): ServerHealth {
+  getHealth(totalPeers: number, totalTorrents: number,): ServerHealth {
     const memoryUsage = this.getMemoryUsage();
 
     let status: "healthy" | "degraded" | "unhealthy" = "healthy";
@@ -186,7 +186,7 @@ export class StatsManager {
    * @returns Total elapsed seconds since server started.
    */
   getUptimeSeconds(): number {
-    return Math.floor((Date.now() - this.startTime) / 1000);
+    return Math.floor((Date.now() - this.startTime) / 1000,);
   }
 
   /**
@@ -196,13 +196,13 @@ export class StatsManager {
    */
   getFormattedUptime(): string {
     const seconds = this.getUptimeSeconds();
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
+    const hours = Math.floor(seconds / 3600,);
+    const minutes = Math.floor((seconds % 3600) / 60,);
     const secs = seconds % 60;
 
-    return `${hours.toString().padStart(2, "0")}:${
-      minutes.toString().padStart(2, "0")
-    }:${secs.toString().padStart(2, "0")}`;
+    return `${hours.toString().padStart(2, "0",)}:${
+      minutes.toString().padStart(2, "0",)
+    }:${secs.toString().padStart(2, "0",)}`;
   }
 
   /**

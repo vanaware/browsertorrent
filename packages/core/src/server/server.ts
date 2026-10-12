@@ -24,7 +24,7 @@
  * ```
  */
 
-import type { Torrent } from "../core/torrent.ts";
+import type { Torrent, } from "../core/torrent.ts";
 import {
   buildStreamURL,
   parseStreamURL,
@@ -141,7 +141,7 @@ export interface Transport {
   close(): void;
 }
 
-export type { StreamEntry };
+export type { StreamEntry, };
 
 /**
  * Minimal controller surface used by the default transport. Matches
@@ -152,12 +152,12 @@ export interface ServiceWorkerControllerLike {
   scope: string;
   /** Active Service Worker worker handle or null. */
   active:
-    | { postMessage?: (data: unknown, transfer?: Transferable[]) => void }
+    | { postMessage?: (data: unknown, transfer?: Transferable[],) => void }
     | null;
   /**
    * Returns a promise that resolves when a message event matches the supplied sourceId.
    */
-  waitForMessage(sourceId: string): Promise<unknown>;
+  waitForMessage(sourceId: string,): Promise<unknown>;
 }
 
 /**
@@ -244,12 +244,12 @@ export function createServiceWorkerTransport(
 export class InProcessTransport implements Transport {
   /** Array of sent messages recorded by the in-process test transport. */
   readonly sent: unknown[] = [];
-  private responseResolver?: (data: StreamResponseMetadata) => void;
+  private responseResolver?: (data: StreamResponseMetadata,) => void;
   /** @internal — exposed for tests. */
   public activePort?: MessagePort;
 
-  postMessage(message: unknown): void {
-    this.sent.push(message);
+  postMessage(message: unknown,): void {
+    this.sent.push(message,);
   }
 
   requestStream(
@@ -257,19 +257,19 @@ export class InProcessTransport implements Transport {
     port: MessagePort,
   ): Promise<StreamResponseMetadata> {
     this.activePort = port;
-    return new Promise<StreamResponseMetadata>((resolve) => {
+    return new Promise<StreamResponseMetadata>((resolve,) => {
       this.responseResolver = resolve;
-    });
+    },);
   }
 
   /** Test helper: deliver the metadata reply for the current request. */
-  deliverResponse(data: StreamResponseMetadata): void {
-    this.responseResolver?.(data);
+  deliverResponse(data: StreamResponseMetadata,): void {
+    this.responseResolver?.(data,);
   }
 
   /** Test helper: send a pull signal (`true` for more, `false` to end). */
-  sendPull(signal: PullSignal): void {
-    this.activePort?.postMessage(signal);
+  sendPull(signal: PullSignal,): void {
+    this.activePort?.postMessage(signal,);
   }
 
   close(): void {
@@ -304,14 +304,14 @@ export class WebTorrentServer {
   public isDestroyed: boolean = false;
 
   private readonly transport: Transport;
-  private readonly pendingAcks: Set<(ok: boolean) => void> = new Set();
+  private readonly pendingAcks: Set<(ok: boolean,) => void> = new Set();
 
   /**
    * Initializes a WebTorrentServer instance.
    *
    * @param opts - Transport and scope options.
    */
-  constructor(opts: { transport: Transport; scope: string }) {
+  constructor(opts: { transport: Transport; scope: string },) {
     this.transport = opts.transport;
     this.scope = opts.scope;
   }
@@ -560,25 +560,25 @@ export function parseRangeHeader(
   if (!header) return null;
 
   // "bytes=start-end" or "bytes=start-"
-  const match = header.match(/^bytes=(\d+)-(\d*)$/);
+  const match = header.match(/^bytes=(\d+)-(\d*)$/,);
   if (!match) return null;
 
-  const start = Number(match[1]);
+  const start = Number(match[1],);
   const endStr = match[2];
 
-  if (!Number.isFinite(start) || start < 0 || start >= fileLength) {
+  if (!Number.isFinite(start,) || start < 0 || start >= fileLength) {
     return null;
   }
 
   const end = endStr !== ""
-    ? Math.min(Number(endStr), fileLength - 1)
+    ? Math.min(Number(endStr,), fileLength - 1,)
     : fileLength - 1;
 
-  if (!Number.isFinite(end) || end < start || end >= fileLength) {
+  if (!Number.isFinite(end,) || end < start || end >= fileLength) {
     return null;
   }
 
-  return { start, end };
+  return { start, end, };
 }
 
 /**

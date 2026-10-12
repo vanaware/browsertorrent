@@ -1,5 +1,5 @@
 // packages/core/src/service-worker/bridge.ts
-import { parseStreamURL, streamManager } from "../server/stream-manager.ts";
+import { parseStreamURL, streamManager, } from "../server/stream-manager.ts";
 
 /**
  * Guesses the MIME `Content-Type` header from a file name extension.
@@ -16,8 +16,8 @@ import { parseStreamURL, streamManager } from "../server/stream-manager.ts";
  * const mime = guessContentType("video.mp4"); // "video/mp4"
  * ```
  */
-export function guessContentType(name: string): string {
-  const ext = name.split(".").pop()?.toLowerCase();
+export function guessContentType(name: string,): string {
+  const ext = name.split(".",).pop()?.toLowerCase();
   const types: Record<string, string> = {
     mp4: "video/mp4",
     webm: "video/webm",
@@ -61,14 +61,14 @@ export function parseRange(
   fileLength: number,
 ): { start: number; end: number } | null {
   if (!header) return null;
-  const match = header.match(/^bytes=(\d+)-(\d*)$/);
+  const match = header.match(/^bytes=(\d+)-(\d*)$/,);
   if (!match) return null;
-  const start = Number(match[1]);
+  const start = Number(match[1],);
   const endStr = match[2];
-  const end = endStr ? Number(endStr) : fileLength - 1;
-  if (!Number.isFinite(start) || start < 0 || start >= fileLength) return null;
-  if (!Number.isFinite(end) || end < start || end >= fileLength) return null;
-  return { start, end };
+  const end = endStr ? Number(endStr,) : fileLength - 1;
+  if (!Number.isFinite(start,) || start < 0 || start >= fileLength) return null;
+  if (!Number.isFinite(end,) || end < start || end >= fileLength) return null;
+  return { start, end, };
 }
 
 /**
@@ -90,25 +90,25 @@ export function parseRange(
 export function waitForServiceWorkerActivation(
   worker: ServiceWorker,
 ): Promise<void> {
-  return new Promise((resolve) => {
+  return new Promise((resolve,) => {
     if (worker.state === "activated") {
       resolve();
       return;
     }
     const onChange = () => {
       if (worker.state === "activated") {
-        worker.removeEventListener("statechange", onChange);
+        worker.removeEventListener("statechange", onChange,);
         resolve();
       }
     };
-    worker.addEventListener("statechange", onChange);
-  });
+    worker.addEventListener("statechange", onChange,);
+  },);
 }
 
 /**
  * Backward-compatibility alias for {@link waitForServiceWorkerActivation}.
  */
-export const waitForActivation: (worker: ServiceWorker) => Promise<void> =
+export const waitForActivation: (worker: ServiceWorker,) => Promise<void> =
   waitForServiceWorkerActivation;
 
 /**
@@ -174,45 +174,45 @@ export async function connectServiceWorkerBridge(
   if (!sw) return null;
 
   const channel = new MessageChannel();
-  const { port1, port2 } = channel;
+  const { port1, port2, } = channel;
 
   // Send port1 to SW for streaming
-  sw.postMessage({ type: "PORT" }, [port1]);
+  sw.postMessage({ type: "PORT", }, [port1,],);
 
   // port2 listens for streaming requests from SW
-  port2.onmessage = (e: MessageEvent) => {
+  port2.onmessage = (e: MessageEvent,) => {
     const msg = e.data;
     if (msg?.type !== "webtorrent-request") return;
 
-    const { url, method, headers, scope } = msg;
+    const { url, method, headers, scope, } = msg;
     const chunkPort = e.ports[0];
     const requestPort = e.ports[1];
 
     if (!chunkPort || !requestPort) return;
 
     try {
-      const parsed = parseStreamURL(url, scope || "/");
+      const parsed = parseStreamURL(url, scope || "/",);
       if (!parsed) {
-        chunkPort.postMessage({ status: 404, body: "Not Found" });
-        chunkPort.postMessage(null);
+        chunkPort.postMessage({ status: 404, body: "Not Found", },);
+        chunkPort.postMessage(null,);
         chunkPort.close();
         return;
       }
 
-      const entry = streamManager.get(parsed.infoHash, parsed.fileIndex);
+      const entry = streamManager.get(parsed.infoHash, parsed.fileIndex,);
       if (!entry) {
-        chunkPort.postMessage({ status: 404, body: "File not registered" });
-        chunkPort.postMessage(null);
+        chunkPort.postMessage({ status: 404, body: "File not registered", },);
+        chunkPort.postMessage(null,);
         chunkPort.close();
         return;
       }
 
       // deno-lint-ignore no-explicit-any
       const file = entry.file as any;
-      const range = parseRange(headers?.["range"], file.length);
+      const range = parseRange(headers?.["range"], file.length,);
       const status = range ? 206 : 200;
       const statusText = range ? "Partial Content" : "OK";
-      const contentType = guessContentType(file.name);
+      const contentType = guessContentType(file.name,);
 
       const respHeaders: Record<string, string> = {
         "Content-Type": contentType,
@@ -223,9 +223,9 @@ export async function connectServiceWorkerBridge(
       if (range) {
         respHeaders["Content-Range"] =
           `bytes ${range.start}-${range.end}/${file.length}`;
-        respHeaders["Content-Length"] = String(range.end - range.start + 1);
+        respHeaders["Content-Length"] = String(range.end - range.start + 1,);
       } else {
-        respHeaders["Content-Length"] = String(file.length);
+        respHeaders["Content-Length"] = String(file.length,);
       }
 
       const rangeStart = range?.start ?? 0;
@@ -241,18 +241,18 @@ export async function connectServiceWorkerBridge(
             fileStream = file.createReadStream({
               start: rangeStart,
               end: rangeEnd,
-            });
+            },);
           } else {
             fileStream = new ReadableStream<Uint8Array>({
-              async start(controller) {
+              async start(controller,) {
                 if (file[Symbol.asyncIterator]) {
                   for await (const chunk of file) {
-                    controller.enqueue(chunk);
+                    controller.enqueue(chunk,);
                   }
                 }
                 controller.close();
               },
-            });
+            },);
           }
           fileIterator = fileStream!.getReader();
         }
@@ -266,7 +266,7 @@ export async function connectServiceWorkerBridge(
         chunkPort.close();
       };
 
-      chunkPort.onmessage = async (ev: MessageEvent) => {
+      chunkPort.onmessage = async (ev: MessageEvent,) => {
         if (closed) return;
         const data = ev.data;
 
@@ -277,23 +277,23 @@ export async function connectServiceWorkerBridge(
 
         if (data === true) {
           if (currentOffset > rangeEnd) {
-            chunkPort.postMessage(null);
+            chunkPort.postMessage(null,);
             cleanup();
             return;
           }
 
           ensureStream();
-          const { value, done } = await fileIterator!.read();
+          const { value, done, } = await fileIterator!.read();
           if (closed) return;
 
           if (done || !value || value.byteLength === 0) {
-            chunkPort.postMessage(null);
+            chunkPort.postMessage(null,);
             cleanup();
             return;
           }
 
           currentOffset += value.byteLength;
-          chunkPort.postMessage(value);
+          chunkPort.postMessage(value,);
         }
       };
 
@@ -304,10 +304,10 @@ export async function connectServiceWorkerBridge(
         statusText,
         headers: respHeaders,
         body: "STREAM",
-      });
+      },);
     } catch (err) {
-      chunkPort.postMessage({ status: 500, body: String(err) });
-      chunkPort.postMessage(null);
+      chunkPort.postMessage({ status: 500, body: String(err,), },);
+      chunkPort.postMessage(null,);
       chunkPort.close();
     }
   };
@@ -348,27 +348,28 @@ export const establishSWConnection: typeof connectServiceWorkerBridge =
 export async function registerAndConnectServiceWorker(
   options: { scriptUrl?: string; scope?: string; version?: string } = {},
 ): Promise<
-  { registration: ServiceWorkerRegistration; channel: MessageChannel | null } | null
+  | { registration: ServiceWorkerRegistration; channel: MessageChannel | null }
+  | null
 > {
   if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) {
     return null;
   }
 
-  const { registerServiceWorker } = await import("./register.ts");
-  const reg = await registerServiceWorker(options);
+  const { registerServiceWorker, } = await import("./register.ts");
+  const reg = await registerServiceWorker(options,);
   if (!reg) return null;
 
   const activeWorker = reg.active ?? reg.installing ?? reg.waiting;
   if (activeWorker) {
     if (activeWorker.state !== "activated") {
-      await waitForServiceWorkerActivation(activeWorker);
+      await waitForServiceWorkerActivation(activeWorker,);
     }
     const channel = await connectServiceWorkerBridge({
       worker: reg.active ?? activeWorker,
       scope: options.scope,
-    });
-    return { registration: reg, channel };
+    },);
+    return { registration: reg, channel, };
   }
 
-  return { registration: reg, channel: null };
+  return { registration: reg, channel: null, };
 }

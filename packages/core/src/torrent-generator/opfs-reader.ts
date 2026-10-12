@@ -47,7 +47,7 @@ export class OPFSMultiFileReader {
    *   Each entry must have either a `handle` set, or a `size` matching a
    *   pre-fetched `File` (see {@link withFile}).
    */
-  constructor(entries: OPFSFileEntry[]) {
+  constructor(entries: OPFSFileEntry[],) {
     this.#entries = [...entries,];
   }
 

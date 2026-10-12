@@ -292,30 +292,30 @@ export function encodeGeneric(
  * console.log(client?.name); // "BrowserTorrent"
  * ```
  */
-export function decodePeerId(peerId: string | Uint8Array): ClientInfo | null {
+export function decodePeerId(peerId: string | Uint8Array,): ClientInfo | null {
   const peeridStr = typeof peerId === "string"
     ? peerId
-    : new TextDecoder("utf-8", { fatal: false }).decode(peerId);
+    : new TextDecoder("utf-8", { fatal: false, },).decode(peerId,);
 
   if (peeridStr.length < 20) return null;
-  const id = peeridStr.slice(0, 20);
+  const id = peeridStr.slice(0, 20,);
 
-  if (isAzStyle(id)) {
-    const code = id.slice(1, 3);
-    const versionRaw = id.slice(3, 7);
+  if (isAzStyle(id,)) {
+    const code = id.slice(1, 3,);
+    const versionRaw = id.slice(3, 7,);
     const name = AZUREUS_CLIENTS[code] || `Unknown (${code})`;
-    const version = parseAzVersion(versionRaw);
+    const version = parseAzVersion(versionRaw,);
 
-    return { code, name, version, style: "azureus" };
+    return { code, name, version, style: "azureus", };
   }
 
-  if (isShadowStyle(id)) {
+  if (isShadowStyle(id,)) {
     const code = id[0]!;
-    const versionRaw = id.slice(1, 6);
+    const versionRaw = id.slice(1, 6,);
     const name = SHADOW_CLIENTS[code] || `Unknown (${code})`;
-    const version = parseShadowVersion(versionRaw);
+    const version = parseShadowVersion(versionRaw,);
 
-    return { code, name, version, style: "shadow" };
+    return { code, name, version, style: "shadow", };
   }
 
   return null;
@@ -327,8 +327,8 @@ export function decodePeerId(peerId: string | Uint8Array): ClientInfo | null {
  * @param peerId - 20-byte string or Uint8Array.
  * @returns Human-readable client name, or `"Unknown Client"`.
  */
-export function getPeerIdClientName(peerId: string | Uint8Array): string {
-  const info = decodePeerId(peerId);
+export function getPeerIdClientName(peerId: string | Uint8Array,): string {
+  const info = decodePeerId(peerId,);
   return info?.name || "Unknown Client";
 }
 
@@ -347,8 +347,8 @@ export function getPeerIdClientName(peerId: string | Uint8Array): string {
  */
 export function generateBrowserTorrentPeerId(): Uint8Array {
   const prefix = BT_PEER_ID_PREFIX;
-  const randomPart = generateRandomString(20 - prefix.length);
+  const randomPart = generateRandomString(20 - prefix.length,);
   const peerIdStr = prefix + randomPart;
 
-  return new TextEncoder().encode(peerIdStr);
+  return new TextEncoder().encode(peerIdStr,);
 }

@@ -10,7 +10,7 @@
 /**
  * Internal doubly-linked list node for the LRU cache.
  */
-interface LRUNode<T> {
+interface LRUNode<T,> {
   key: string;
   value: T;
   prev: LRUNode<T> | null;
@@ -37,7 +37,7 @@ interface LRUNode<T> {
  * console.log(cache.getSize()); // 2
  * ```
  */
-export class LRUCache<T> {
+export class LRUCache<T,> {
   private map: Map<string, LRUNode<T>>;
   private head: LRUNode<T> | null;
   private tail: LRUNode<T> | null;
@@ -49,7 +49,7 @@ export class LRUCache<T> {
    *
    * @param capacity - Maximum number of entries before eviction (defaults to 100).
    */
-  constructor(capacity: number = 100) {
+  constructor(capacity: number = 100,) {
     this.capacity = capacity;
     this.map = new Map();
     this.head = null;
@@ -64,11 +64,11 @@ export class LRUCache<T> {
    * @param key - The cache key to look up.
    * @returns The value associated with the key, or `undefined` if not present.
    */
-  get(key: string): T | undefined {
-    const node = this.map.get(key);
+  get(key: string,): T | undefined {
+    const node = this.map.get(key,);
     if (!node) return undefined;
 
-    this.moveToFront(node);
+    this.moveToFront(node,);
     return node.value;
   }
 
@@ -79,22 +79,22 @@ export class LRUCache<T> {
    * @param key - The unique cache key.
    * @param value - The value to store.
    */
-  put(key: string, value: T): void {
-    const existing = this.map.get(key);
+  put(key: string, value: T,): void {
+    const existing = this.map.get(key,);
     if (existing) {
       existing.value = value;
-      this.moveToFront(existing);
+      this.moveToFront(existing,);
       return;
     }
 
-    const newNode: LRUNode<T> = { key, value, prev: null, next: null };
+    const newNode: LRUNode<T> = { key, value, prev: null, next: null, };
 
     if (this.size >= this.capacity) {
       this.evict();
     }
 
-    this.addToFront(newNode);
-    this.map.set(key, newNode);
+    this.addToFront(newNode,);
+    this.map.set(key, newNode,);
     this.size++;
   }
 
@@ -104,12 +104,12 @@ export class LRUCache<T> {
    * @param key - The cache key to remove.
    * @returns `true` if the item was found and removed, `false` otherwise.
    */
-  remove(key: string): boolean {
-    const node = this.map.get(key);
+  remove(key: string,): boolean {
+    const node = this.map.get(key,);
     if (!node) return false;
 
-    this.removeNode(node);
-    this.map.delete(key);
+    this.removeNode(node,);
+    this.map.delete(key,);
     this.size--;
     return true;
   }
@@ -120,8 +120,8 @@ export class LRUCache<T> {
    * @param key - The cache key to check.
    * @returns `true` if the key exists, `false` otherwise.
    */
-  has(key: string): boolean {
-    return this.map.has(key);
+  has(key: string,): boolean {
+    return this.map.has(key,);
   }
 
   /**
@@ -152,7 +152,7 @@ export class LRUCache<T> {
     const keys: string[] = [];
     let current = this.head;
     while (current) {
-      keys.push(current.key);
+      keys.push(current.key,);
       current = current.next;
     }
     return keys;
@@ -167,7 +167,7 @@ export class LRUCache<T> {
     const values: T[] = [];
     let current = this.head;
     while (current) {
-      values.push(current.value);
+      values.push(current.value,);
       current = current.next;
     }
     return values;
@@ -178,11 +178,11 @@ export class LRUCache<T> {
    *
    * @returns An array of key-value pairs.
    */
-  entries(): [string, T][] {
-    const entries: [string, T][] = [];
+  entries(): [string, T,][] {
+    const entries: [string, T,][] = [];
     let current = this.head;
     while (current) {
-      entries.push([current.key, current.value]);
+      entries.push([current.key, current.value,],);
       current = current.next;
     }
     return entries;
@@ -191,17 +191,17 @@ export class LRUCache<T> {
   /**
    * Moves an existing node to the head of the linked list.
    */
-  private moveToFront(node: LRUNode<T>): void {
+  private moveToFront(node: LRUNode<T>,): void {
     if (node === this.head) return;
 
-    this.removeNode(node);
-    this.addToFront(node);
+    this.removeNode(node,);
+    this.addToFront(node,);
   }
 
   /**
    * Prepends a node to the head of the linked list.
    */
-  private addToFront(node: LRUNode<T>): void {
+  private addToFront(node: LRUNode<T>,): void {
     node.prev = null;
     node.next = this.head;
 
@@ -218,7 +218,7 @@ export class LRUCache<T> {
   /**
    * Detaches a node from the linked list.
    */
-  private removeNode(node: LRUNode<T>): void {
+  private removeNode(node: LRUNode<T>,): void {
     if (node.prev) {
       node.prev.next = node.next;
     } else {
@@ -242,8 +242,8 @@ export class LRUCache<T> {
     if (!this.tail) return;
 
     const key = this.tail.key;
-    this.removeNode(this.tail);
-    this.map.delete(key);
+    this.removeNode(this.tail,);
+    this.map.delete(key,);
     this.size--;
   }
 }

@@ -59,11 +59,11 @@ import {
 // Create tracker instance with custom options
 const tracker = createServer(8000, {
   hostname: "0.0.0.0",
-  maxPeers: 5000,             // Max peers across all swarms
-  maxPeersPerTorrent: 50,      // Max peers returned in announce responses
-  maxTorrents: 1000,           // Max distinct info hashes kept in LRU cache
-  intervalMs: 120_000,         // Client re-announce interval (2 minutes)
-});
+  maxPeers: 5000, // Max peers across all swarms
+  maxPeersPerTorrent: 50, // Max peers returned in announce responses
+  maxTorrents: 1000, // Max distinct info hashes kept in LRU cache
+  intervalMs: 120_000, // Client re-announce interval (2 minutes)
+},);
 
 // Start listening (resolves when server is closed)
 await tracker.start();
@@ -81,36 +81,36 @@ import {
   WebSocketTracker,
 } from "jsr:@vanaware/browsertorrent-tracker";
 
-const tracker = new WebSocketTracker(8000);
-const router = new TrackerRouter(tracker);
+const tracker = new WebSocketTracker(8000,);
+const router = new TrackerRouter(tracker,);
 
-Deno.serve({ port: 8000 }, (req: Request) => {
-  const url = new URL(req.url);
+Deno.serve({ port: 8000, }, (req: Request,) => {
+  const url = new URL(req.url,);
 
   // Health check endpoint
   if (url.pathname === "/health") {
-    return new Response(JSON.stringify({ status: "ok" }), {
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(JSON.stringify({ status: "ok", },), {
+      headers: { "Content-Type": "application/json", },
+    },);
   }
 
   // Forward all tracker traffic (WebSocket upgrades, /announce, /scrape)
-  return router.handleRequest(req);
-});
+  return router.handleRequest(req,);
+},);
 ```
 
 ---
 
 ## 🛠️ CLI Flags & Environment Variables
 
-| Flag | Environment Variable | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `-p, --port` | `PORT` | `8000` | Port to listen on |
-| `-H, --host` | `HOSTNAME` | `0.0.0.0` | Hostname or IP to bind |
-| `--max-peers` | `MAX_PEERS` | `1000` | Global maximum connected peers before eviction |
-| `--max-peers-per-torrent` | `MAX_PEERS_PER_TORRENT` | `50` | Maximum peer addresses returned per announcement |
-| `--max-torrents` | `MAX_TORRENTS` | `100` | Maximum distinct info hashes tracked in LRU cache |
-| `-h, --help` | — | — | Show help message and exit |
+| Flag                      | Environment Variable    | Default   | Description                                       |
+| :------------------------ | :---------------------- | :-------- | :------------------------------------------------ |
+| `-p, --port`              | `PORT`                  | `8000`    | Port to listen on                                 |
+| `-H, --host`              | `HOSTNAME`              | `0.0.0.0` | Hostname or IP to bind                            |
+| `--max-peers`             | `MAX_PEERS`             | `1000`    | Global maximum connected peers before eviction    |
+| `--max-peers-per-torrent` | `MAX_PEERS_PER_TORRENT` | `50`      | Maximum peer addresses returned per announcement  |
+| `--max-torrents`          | `MAX_TORRENTS`          | `100`     | Maximum distinct info hashes tracked in LRU cache |
+| `-h, --help`              | —                       | —         | Show help message and exit                        |
 
 ---
 
@@ -118,17 +118,17 @@ Deno.serve({ port: 8000 }, (req: Request) => {
 
 `@vanaware/browsertorrent-tracker` exposes granular subpath exports for specialized workflows:
 
-| Subpath | Description |
-| :--- | :--- |
-| `jsr:@vanaware/browsertorrent-tracker` | Main entry point: `createServer`, `WebSocketTracker`, `TrackerRouter`, and types. |
-| `jsr:@vanaware/browsertorrent-tracker/cli` | Command-line daemon entry point with argument parsing and signal handling. |
-| `jsr:@vanaware/browsertorrent-tracker/server` | Low-level `WebSocketTracker` server class and configuration options. |
-| `jsr:@vanaware/browsertorrent-tracker/router` | HTTP and WebSocket request router (`TrackerRouter`, `ITracker`). |
-| `jsr:@vanaware/browsertorrent-tracker/peer` | Peer connection manager (`PeerConnectionManager`, `PeerInfo`). |
-| `jsr:@vanaware/browsertorrent-tracker/swarm` | Swarm manager and peer discovery coordinator (`SwarmManager`). |
-| `jsr:@vanaware/browsertorrent-tracker/stats` | Telemetry and health metrics manager (`StatsManager`, `TrackerStats`). |
-| `jsr:@vanaware/browsertorrent-tracker/lru` | High-speed bounded LRU cache implementation (`LRUCache`). |
-| `jsr:@vanaware/browsertorrent-tracker/parse-websocket` | Message parser and response formatter for BEP 15/31 protocol. |
+| Subpath                                                | Description                                                                       |
+| :----------------------------------------------------- | :-------------------------------------------------------------------------------- |
+| `jsr:@vanaware/browsertorrent-tracker`                 | Main entry point: `createServer`, `WebSocketTracker`, `TrackerRouter`, and types. |
+| `jsr:@vanaware/browsertorrent-tracker/cli`             | Command-line daemon entry point with argument parsing and signal handling.        |
+| `jsr:@vanaware/browsertorrent-tracker/server`          | Low-level `WebSocketTracker` server class and configuration options.              |
+| `jsr:@vanaware/browsertorrent-tracker/router`          | HTTP and WebSocket request router (`TrackerRouter`, `ITracker`).                  |
+| `jsr:@vanaware/browsertorrent-tracker/peer`            | Peer connection manager (`PeerConnectionManager`, `PeerInfo`).                    |
+| `jsr:@vanaware/browsertorrent-tracker/swarm`           | Swarm manager and peer discovery coordinator (`SwarmManager`).                    |
+| `jsr:@vanaware/browsertorrent-tracker/stats`           | Telemetry and health metrics manager (`StatsManager`, `TrackerStats`).            |
+| `jsr:@vanaware/browsertorrent-tracker/lru`             | High-speed bounded LRU cache implementation (`LRUCache`).                         |
+| `jsr:@vanaware/browsertorrent-tracker/parse-websocket` | Message parser and response formatter for BEP 15/31 protocol.                     |
 
 ---
 
@@ -152,6 +152,7 @@ In WebRTC BitTorrent swarms, browsers cannot accept incoming TCP/UDP connections
 - **Health & Telemetry**: `http://<host>:<port>/stats`
 
 ### Sample `/stats` Output:
+
 ```json
 {
   "totalPeers": 142,

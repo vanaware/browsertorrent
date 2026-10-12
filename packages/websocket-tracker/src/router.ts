@@ -18,7 +18,7 @@ export interface ITracker {
    * @param req - The raw HTTP request object.
    * @returns HTTP Response with bencoded or JSON announce data.
    */
-  handleHttpAnnounce(url: URL, req: Request): Response | Promise<Response>;
+  handleHttpAnnounce(url: URL, req: Request,): Response | Promise<Response>;
 
   /**
    * Handles an HTTP GET scrape request.
@@ -27,14 +27,14 @@ export interface ITracker {
    * @param req - The raw HTTP request object.
    * @returns HTTP Response with scrape metrics.
    */
-  handleHttpScrape(url: URL, req: Request): Response | Promise<Response>;
+  handleHttpScrape(url: URL, req: Request,): Response | Promise<Response>;
 
   /**
    * Attaches an upgraded WebSocket connection to the tracker's peer pool.
    *
    * @param ws - Open WebSocket instance.
    */
-  handleConnection(ws: WebSocket): void;
+  handleConnection(ws: WebSocket,): void;
 }
 
 /**
@@ -59,7 +59,7 @@ export class TrackerRouter {
    *
    * @param tracker - Tracker backend implementing {@link ITracker}.
    */
-  constructor(tracker: ITracker) {
+  constructor(tracker: ITracker,) {
     this.tracker = tracker;
   }
 
@@ -69,24 +69,24 @@ export class TrackerRouter {
    * @param req - Incoming HTTP Request.
    * @returns An HTTP Response or WebSocket upgrade response.
    */
-  async handleRequest(req: Request): Promise<Response> {
-    const url = new URL(req.url);
+  async handleRequest(req: Request,): Promise<Response> {
+    const url = new URL(req.url,);
 
     // WebSocket upgrade
-    if (req.headers.get("upgrade") === "websocket") {
-      const { socket, response } = Deno.upgradeWebSocket(req);
-      this.tracker.handleConnection(socket);
+    if (req.headers.get("upgrade",) === "websocket") {
+      const { socket, response, } = Deno.upgradeWebSocket(req,);
+      this.tracker.handleConnection(socket,);
       return response;
     }
 
     // HTTP tracker endpoints
     if (url.pathname === "/announce") {
-      return await this.tracker.handleHttpAnnounce(url, req);
+      return await this.tracker.handleHttpAnnounce(url, req,);
     }
     if (url.pathname === "/scrape") {
-      return await this.tracker.handleHttpScrape(url, req);
+      return await this.tracker.handleHttpScrape(url, req,);
     }
 
-    return new Response("Not Found", { status: 404 });
+    return new Response("Not Found", { status: 404, },);
   }
 }

@@ -7,7 +7,6 @@
  * Reads files directly from the Origin Private File System (`FileSystemFileHandle` or `FileSystemDirectoryHandle`),
  * calculates SHA-1 piece hashes incrementally with low memory overhead, and encodes bencoded `.torrent` metainfo.
  *
- *
  * @example
  * ```ts
  * import { generateTorrent, PieceSizeEnum } from "jsr:@vanaware/browsertorrent/torrent-generator";
@@ -31,10 +30,10 @@
  * ```
  */
 
-export { decode, encode } from "../utils/bencode.ts";
-export { generateTorrent } from "./generator.ts";
-export { getOPFSFileSize, walkOPFSDir } from "./opfs-walker.ts";
-export { OPFSMultiFileReader } from "./opfs-reader.ts";
+export { decode, encode, } from "../utils/bencode.ts";
+export { generateTorrent, } from "./generator.ts";
+export { getOPFSFileSize, walkOPFSDir, } from "./opfs-walker.ts";
+export { OPFSMultiFileReader, } from "./opfs-reader.ts";
 export {
   buildPieceFiles,
   calcPieceSize,
@@ -43,7 +42,7 @@ export {
   isHiddenFile,
   sha1sum,
 } from "./util.ts";
-export { PieceSizeEnum } from "./types.ts";
+export { PieceSizeEnum, } from "./types.ts";
 export type {
   BencodeDict,
   BencodeKey,

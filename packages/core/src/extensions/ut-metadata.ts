@@ -14,7 +14,7 @@ import {
 } from "../utils/bencode.ts";
 import { Bitfield, } from "../core/bitfield.ts";
 import type { Wire, } from "../core/wire.ts";
-import type { ExtensionHost } from "../core/extension-host.ts";
+import type { ExtensionHost, } from "../core/extension-host.ts";
 
 const MAX_METADATA_SIZE = 10_000_000;
 const PIECE_LENGTH = 16384;
@@ -132,7 +132,7 @@ export class UtMetadata extends Extension {
    *
    * @param handshake - Decoded extended handshake record or Map.
    */
-  public onExtendedHandshake(handshake: Record<string, unknown> | any): void {
+  public onExtendedHandshake(handshake: Record<string, unknown> | any,): void {
     console.log(
       `[UtMetadata] onExtendedHandshake: m=${
         JSON.stringify(handshake.m,)
@@ -206,7 +206,7 @@ export class UtMetadata extends Extension {
    *
    * @param buf - Raw payload bytes.
    */
-  public onMessage(buf: Uint8Array): void {
+  public onMessage(buf: Uint8Array,): void {
     let dict: BencodeDict;
     let trailer: Uint8Array;
     try {
@@ -302,7 +302,7 @@ export class UtMetadata extends Extension {
     return true;
   }
 
-  #send(dict: BencodeDict, trailer?: Uint8Array): void {
+  #send(dict: BencodeDict, trailer?: Uint8Array,): void {
     console.log(
       `[UtMetadata] _send: dict=${JSON.stringify(dict,)}, trailerLength=${
         trailer ? trailer.length : 0
@@ -324,7 +324,7 @@ export class UtMetadata extends Extension {
     }
   }
 
-  #request(piece: number): void {
+  #request(piece: number,): void {
     const existingRequest = this._requestedPieces.get(piece,);
     if (existingRequest) {
       clearTimeout(existingRequest.timer,);
@@ -340,7 +340,7 @@ export class UtMetadata extends Extension {
     this._requestedPieces.set(piece, { piece, attempts, timer, },);
   }
 
-  #data(piece: number, buf: Uint8Array, totalSize?: number): void {
+  #data(piece: number, buf: Uint8Array, totalSize?: number,): void {
     const request = this._requestedPieces.get(piece,);
     if (request) {
       clearTimeout(request.timer,);
@@ -354,14 +354,14 @@ export class UtMetadata extends Extension {
     this.#send(msg, buf,);
   }
 
-  #reject(piece: number): void {
+  #reject(piece: number,): void {
     this.#send({
       msg_type: 2,
       piece,
     },);
   }
 
-  #onRequest(piece: number): void {
+  #onRequest(piece: number,): void {
     console.log(
       `[UtMetadata] _onRequest piece: ${piece}, metadataComplete: ${this._metadataComplete}, size: ${this._metadataSize}`,
     );
@@ -377,7 +377,7 @@ export class UtMetadata extends Extension {
     this.#data(piece, buf, this._metadataSize,);
   }
 
-  #onData(piece: number, buf: Uint8Array, totalSize?: number): void {
+  #onData(piece: number, buf: Uint8Array, totalSize?: number,): void {
     console.log(
       `[UtMetadata] _onData piece: ${piece}, buf.length: ${buf.length}, totalSize: ${totalSize}, fetching: ${this._fetching}, metaSize: ${this._metadataSize}`,
     );
@@ -404,7 +404,7 @@ export class UtMetadata extends Extension {
     this.#checkDone();
   }
 
-  #onReject(piece: number): void {
+  #onReject(piece: number,): void {
     const request = this._requestedPieces.get(piece,);
     if (request) {
       clearTimeout(request.timer,);
@@ -424,7 +424,7 @@ export class UtMetadata extends Extension {
     }
   }
 
-  #handleTimeout(piece: number): void {
+  #handleTimeout(piece: number,): void {
     this._requestedPieces.delete(piece,);
 
     if (!this._fetching) return;

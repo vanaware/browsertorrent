@@ -72,35 +72,35 @@
  * ```
  */
 
-import { TypedEventTarget } from "./utils/event-target.ts";
+import { TypedEventTarget, } from "./utils/event-target.ts";
 import {
   type ParsedTorrent,
   type ParsedTorrentFile,
   parseTorrent,
 } from "./utils/parse-torrent.ts";
-import { Torrent } from "./core/torrent.ts";
-import { Swarm } from "./network/swarm.ts";
-import { generateBrowserTorrentPeerId } from "./utils/peerid.ts";
-import { OPFSChunkStore } from "./storage/opfs-chunk-store.ts";
-import { type ChunkStore } from "./storage/opfs-chunk-store.ts";
-import { MemoryChunkStore } from "./storage/memory-chunk-store.ts";
-import { decode, encode } from "./utils/bencode.ts";
-import type { BencodeDict } from "./utils/bencode.ts";
+import { Torrent, } from "./core/torrent.ts";
+import { Swarm, } from "./network/swarm.ts";
+import { generateBrowserTorrentPeerId, } from "./utils/peerid.ts";
+import { OPFSChunkStore, } from "./storage/opfs-chunk-store.ts";
+import { type ChunkStore, } from "./storage/opfs-chunk-store.ts";
+import { MemoryChunkStore, } from "./storage/memory-chunk-store.ts";
+import { decode, encode, } from "./utils/bencode.ts";
+import type { BencodeDict, } from "./utils/bencode.ts";
 import {
   createServer,
   registerTorrentFiles,
   unregisterTorrentFiles,
   type WebTorrentServer,
 } from "./server/server.ts";
-import { File } from "./core/file.ts";
+import { File, } from "./core/file.ts";
 import {
   generateTorrent,
   type OPFSFileEntry,
   PieceSizeEnum,
 } from "./torrent-generator/mod.ts";
-import { CORE_VERSION, VERSION } from "./version.ts";
+import { CORE_VERSION, VERSION, } from "./version.ts";
 
-export { CORE_VERSION, VERSION } from "./version.ts";
+export { CORE_VERSION, VERSION, } from "./version.ts";
 
 // ── WebRTC feature detection ──────────────────────────────────────────
 const _WEBRTC_SUPPORT: boolean = (() => {
@@ -205,11 +205,11 @@ export interface AddTorrentOptions {
   /**
    * Optional callback invoked as soon as torrent metadata is verified and ready.
    */
-  onReady?: (torrent: Torrent) => void;
+  onReady?: (torrent: Torrent,) => void;
   /**
    * Optional callback invoked when all pieces have been fully downloaded and verified.
    */
-  onDone?: (torrent: Torrent) => void;
+  onDone?: (torrent: Torrent,) => void;
 }
 
 /**
@@ -263,11 +263,11 @@ export interface SeedOptions {
   /**
    * Callback invoked when the seeded torrent becomes ready in the client.
    */
-  onReady?: (torrent: Torrent) => void;
+  onReady?: (torrent: Torrent,) => void;
   /**
    * Callback invoked when the seeded torrent is completed.
    */
-  onDone?: (torrent: Torrent) => void;
+  onDone?: (torrent: Torrent,) => void;
 }
 
 /**
@@ -365,19 +365,19 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
    * });
    * ```
    */
-  constructor(opts: ClientOptions = {}) {
+  constructor(opts: ClientOptions = {},) {
     super();
     this.opts = opts;
-    this._downloadLimit = Math.max(0, opts.downloadLimit ?? 0);
-    this._uploadLimit = Math.max(0, opts.uploadLimit ?? 0);
+    this._downloadLimit = Math.max(0, opts.downloadLimit ?? 0,);
+    this._uploadLimit = Math.max(0, opts.uploadLimit ?? 0,);
 
     let peerIdBuffer: Uint8Array;
     if (opts.peerId) {
       if (typeof opts.peerId === "string") {
-        peerIdBuffer = new Uint8Array(20);
+        peerIdBuffer = new Uint8Array(20,);
         for (let i = 0; i < 20; i++) {
           peerIdBuffer[i] = parseInt(
-            opts.peerId.substring(i * 2, i * 2 + 2),
+            opts.peerId.substring(i * 2, i * 2 + 2,),
             16,
           );
         }
@@ -389,14 +389,14 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
     }
 
     this.peerIdBuffer = peerIdBuffer;
-    this.peerId = Array.from(peerIdBuffer)
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
+    this.peerId = Array.from(peerIdBuffer,)
+      .map((b,) => b.toString(16,).padStart(2, "0",))
+      .join("",);
 
     queueMicrotask(() => {
       this.ready = true;
-      this.emit("ready");
-    });
+      this.emit("ready",);
+    },);
   }
 
   // ── Aggregate getters ──────────────────────────────────────────────
@@ -500,10 +500,10 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
    * client.throttleDownload(512 * 1024); // 512 KB/s
    * ```
    */
-  throttleDownload(rate: number): void {
-    this._downloadLimit = Math.max(0, rate);
+  throttleDownload(rate: number,): void {
+    this._downloadLimit = Math.max(0, rate,);
     for (const swarm of this.swarms.values()) {
-      swarm.throttleDownload(this._downloadLimit);
+      swarm.throttleDownload(this._downloadLimit,);
     }
   }
 
@@ -517,10 +517,10 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
    * client.throttleUpload(256 * 1024); // 256 KB/s
    * ```
    */
-  throttleUpload(rate: number): void {
-    this._uploadLimit = Math.max(0, rate);
+  throttleUpload(rate: number,): void {
+    this._uploadLimit = Math.max(0, rate,);
     for (const swarm of this.swarms.values()) {
-      swarm.throttleUpload(this._uploadLimit);
+      swarm.throttleUpload(this._uploadLimit,);
     }
   }
 
@@ -543,8 +543,8 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
   ): Promise<Torrent | null> {
     if (this.destroyed) return null;
     try {
-      const parsed = await parseTorrent(torrentId);
-      return this.torrents.get(parsed.infoHash) ?? null;
+      const parsed = await parseTorrent(torrentId,);
+      return this.torrents.get(parsed.infoHash,) ?? null;
     } catch {
       return null;
     }
@@ -1226,20 +1226,23 @@ export { Swarm, } from "./network/swarm.ts";
 export { Peer, } from "./network/peer.ts";
 export { HttpTracker, WsTracker, } from "./network/tracker.ts";
 export type { Tracker, } from "./network/tracker.ts";
-export { Wire } from "./core/wire.ts";
-export { File } from "./core/file.ts";
-export { Piece } from "./core/piece.ts";
-export { Bitfield } from "./core/bitfield.ts";
-export { ExtensionHost } from "./core/extension-host.ts";
-export { Extension } from "./core/extension.ts";
-export type { ExtensionEvents } from "./core/extension.ts";
-export { decodeHandshake, encodeHandshake } from "./core/handshake.ts";
-export type { EncodeHandshakeOptions, PeerHandshake } from "./core/handshake.ts";
-export { decodeMessage, encodeMessage } from "./core/message.ts";
-export type { PeerMessage } from "./core/message.ts";
-export { OPFSChunkStore } from "./storage/opfs-chunk-store.ts";
-export type { ChunkStore } from "./storage/opfs-chunk-store.ts";
-export { decode, encode } from "./utils/bencode.ts";
+export { Wire, } from "./core/wire.ts";
+export { File, } from "./core/file.ts";
+export { Piece, } from "./core/piece.ts";
+export { Bitfield, } from "./core/bitfield.ts";
+export { ExtensionHost, } from "./core/extension-host.ts";
+export { Extension, } from "./core/extension.ts";
+export type { ExtensionEvents, } from "./core/extension.ts";
+export { decodeHandshake, encodeHandshake, } from "./core/handshake.ts";
+export type {
+  EncodeHandshakeOptions,
+  PeerHandshake,
+} from "./core/handshake.ts";
+export { decodeMessage, encodeMessage, } from "./core/message.ts";
+export type { PeerMessage, } from "./core/message.ts";
+export { OPFSChunkStore, } from "./storage/opfs-chunk-store.ts";
+export type { ChunkStore, } from "./storage/opfs-chunk-store.ts";
+export { decode, encode, } from "./utils/bencode.ts";
 export type {
   BencodeDict,
   BencodeKey,
@@ -1248,22 +1251,22 @@ export type {
   BencodeValue,
   DecodeOptions,
 } from "./utils/bencode.ts";
-export { parseTorrent } from "./utils/parse-torrent.ts";
+export { parseTorrent, } from "./utils/parse-torrent.ts";
 export {
   BT_PEER_ID_PREFIX,
   decodePeerId,
   generateBrowserTorrentPeerId,
 } from "./utils/peerid.ts";
-export { UtMetadata } from "./extensions/ut-metadata.ts";
+export { UtMetadata, } from "./extensions/ut-metadata.ts";
 export {
   decodePexUpdate,
   encodePexUpdate,
   PexPeerFlag,
   UtPexExtension,
 } from "./extensions/ut-pex.ts";
-export type { ParsedTorrent } from "./utils/parse-torrent.ts";
-export type { ClientInfo } from "./utils/peerid.ts";
-export type { PexPeer, PexUpdate, UtPexOptions } from "./extensions/ut-pex.ts";
+export type { ParsedTorrent, } from "./utils/parse-torrent.ts";
+export type { ClientInfo, } from "./utils/peerid.ts";
+export type { PexPeer, PexUpdate, UtPexOptions, } from "./extensions/ut-pex.ts";
 export {
   createServer,
   type CreateServerOptions,
@@ -1317,9 +1320,9 @@ export {
   type ServiceWorkerBridgeOptions,
   type ServiceWorkerRegisterOptions,
   type StreamHandlerOptions,
-  type WebTorrentFetchHandler,
   waitForActivation,
   waitForServiceWorkerActivation,
+  type WebTorrentFetchHandler,
 } from "./service-worker/mod.ts";
 
 /**
@@ -1330,4 +1333,4 @@ export default Client;
 /**
  * Re-export `Client` as `WebTorrent` for seamless drop-in parity with WebTorrent codebases.
  */
-export { Client as WebTorrent };
+export { Client as WebTorrent, };

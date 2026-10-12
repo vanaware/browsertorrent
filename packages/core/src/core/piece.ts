@@ -24,7 +24,7 @@ export class Piece {
    * @param length - Byte length of the piece.
    * @param offset - Absolute byte offset of this piece inside the torrent stream.
    */
-  constructor(index: number, length: number, offset: number) {
+  constructor(index: number, length: number, offset: number,) {
     this.index = index;
     this.length = length;
     this.offset = offset;

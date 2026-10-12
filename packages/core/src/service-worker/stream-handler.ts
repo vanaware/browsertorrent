@@ -19,7 +19,7 @@ export interface WebTorrentFetchHandler {
   /**
    * Sets or updates the active MessagePort connected to the client window.
    */
-  setPagePort: (port: MessagePort) => void;
+  setPagePort: (port: MessagePort,) => void;
 
   /**
    * Returns the current active MessagePort, or `null` if disconnected.
@@ -29,12 +29,12 @@ export interface WebTorrentFetchHandler {
   /**
    * Tests whether an incoming URL or Request targets the streaming interceptor prefix.
    */
-  isStreamRequest: (urlOrRequest: URL | Request | string) => boolean;
+  isStreamRequest: (urlOrRequest: URL | Request | string,) => boolean;
 
   /**
    * Intercepts a Service Worker FetchEvent and streams data from the main thread torrent engine.
    */
-  handleFetch: (event: FetchEvent) => Promise<Response> | null;
+  handleFetch: (event: FetchEvent,) => Promise<Response> | null;
 
   /**
    * Handles low-level stream reading with HTTP 206 Partial Content range requests and backpressure.
@@ -61,10 +61,10 @@ export interface WebTorrentFetchHandler {
  * guessDestination("/webtorrent/abc/video.mp4"); // "video"
  * ```
  */
-export function guessDestination(pathname: string): string {
-  if (/\.(mp4|webm|mkv|avi|mov)$/i.test(pathname)) return "video";
-  if (/\.(mp3|m4a|ogg|wav)$/i.test(pathname)) return "audio";
-  if (/\.(jpe?g|png|gif|webp)$/i.test(pathname)) return "image";
+export function guessDestination(pathname: string,): string {
+  if (/\.(mp4|webm|mkv|avi|mov)$/i.test(pathname,)) return "video";
+  if (/\.(mp3|m4a|ogg|wav)$/i.test(pathname,)) return "audio";
+  if (/\.(jpe?g|png|gif|webp)$/i.test(pathname,)) return "image";
   return "document";
 }
 
@@ -82,7 +82,7 @@ export function guessDestination(pathname: string): string {
  * getWebTorrentPrefix("/"); // "/webtorrent/"
  * ```
  */
-export function getWebTorrentPrefix(scope?: string): string {
+export function getWebTorrentPrefix(scope?: string,): string {
   const baseScope = scope ||
     (typeof self !== "undefined" && self.registration?.scope
       ? self.registration.scope
@@ -93,7 +93,7 @@ export function getWebTorrentPrefix(scope?: string): string {
       ? self.location.origin
       : "http://localhost",
   ).pathname;
-  return (pathname.endsWith("/") ? pathname : pathname + "/") + "webtorrent/";
+  return (pathname.endsWith("/",) ? pathname : pathname + "/") + "webtorrent/";
 }
 
 /**
@@ -127,8 +127,8 @@ export function isWebTorrentStreamRequest(
       ? self.location.origin
       : "http://localhost",
   );
-  const prefix = getWebTorrentPrefix(scope);
-  return url.pathname.startsWith(prefix);
+  const prefix = getWebTorrentPrefix(scope,);
+  return url.pathname.startsWith(prefix,);
 }
 
 /**

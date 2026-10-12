@@ -428,7 +428,7 @@ function _decodeByteString(
  * console.log("Encoded byte length:", bytes.length);
  * ```
  */
-export function encode(value: BencodeValue): Uint8Array {
+export function encode(value: BencodeValue,): Uint8Array {
   const writer = new _ByteWriter();
   _encodeValue(value, writer, new WeakSet<object>(),);
   return writer.finish();

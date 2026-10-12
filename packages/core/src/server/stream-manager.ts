@@ -9,7 +9,9 @@ export interface StreamableFile {
   /** Optional async iterator yielding binary chunks. */
   [Symbol.asyncIterator]?: () => AsyncIterator<Uint8Array>;
   /** Optional readable stream factory. */
-  createReadStream?: (opts?: { start?: number; end?: number }) => ReadableStream<Uint8Array>;
+  createReadStream?: (
+    opts?: { start?: number; end?: number },
+  ) => ReadableStream<Uint8Array>;
 }
 
 /**

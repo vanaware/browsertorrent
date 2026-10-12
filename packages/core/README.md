@@ -26,20 +26,23 @@ Leverages **WebRTC DataChannels** for peer-to-peer swarms, the **Origin Private 
 Add `@vanaware/browsertorrent` to your project from JSR:
 
 ### Deno
+
 ```bash
 deno add jsr:@vanaware/browsertorrent
 ```
 
 ### npm / pnpm / yarn (via JSR)
+
 ```bash
 npx jsr add @vanaware/browsertorrent
 ```
 
 ### In Browser (ES Modules / CDN)
+
 ```html
 <script type="module">
-  import { Client } from "https://esm.sh/jsr/@vanaware/browsertorrent";
-  const client = new Client();
+import { Client, } from "https://esm.sh/jsr/@vanaware/browsertorrent";
+const client = new Client();
 </script>
 ```
 
@@ -50,27 +53,27 @@ npx jsr add @vanaware/browsertorrent
 ### 1. Downloading from a Magnet URI
 
 ```typescript
-import { Client } from "jsr:@vanaware/browsertorrent";
+import { Client, } from "jsr:@vanaware/browsertorrent";
 
 const client = new Client({
   maxConns: 55,
   downloadLimit: 2 * 1024 * 1024, // 2 MB/s throttle (optional)
-});
+},);
 
 const magnetURI =
   "magnet:?xt=urn:btih:08ada5a7a6183aae1e09d831df6748d566095a10&dn=Sintel&tr=wss%3A%2F%2Ftracker.webtorrent.dev";
 
 const torrent = await client.add(magnetURI, {
-  onReady: (t) => console.log("Metadata ready:", t.name, t.length),
-  onDone: (t) => console.log("Download finished!"),
-});
+  onReady: (t,) => console.log("Metadata ready:", t.name, t.length,),
+  onDone: (t,) => console.log("Download finished!",),
+},);
 
-torrent.on("download", (e) => {
+torrent.on("download", (e,) => {
   console.log(
-    `Speed: ${(torrent.downloadSpeed / 1024).toFixed(1)} KB/s, ` +
-    `Progress: ${(torrent.progress * 100).toFixed(1)}%`
+    `Speed: ${(torrent.downloadSpeed / 1024).toFixed(1,)} KB/s, ` +
+      `Progress: ${(torrent.progress * 100).toFixed(1,)}%`,
   );
-});
+},);
 ```
 
 ---
@@ -78,22 +81,22 @@ torrent.on("download", (e) => {
 ### 2. Seeding a File from Browser OPFS
 
 ```typescript
-import { Client, PieceSizeEnum } from "jsr:@vanaware/browsertorrent";
+import { Client, PieceSizeEnum, } from "jsr:@vanaware/browsertorrent";
 
 const client = new Client();
 
 // Retrieve file handle from Origin Private File System
 const rootDir = await navigator.storage.getDirectory();
-const fileHandle = await rootDir.getFileHandle("presentation.mp4");
+const fileHandle = await rootDir.getFileHandle("presentation.mp4",);
 
 const torrent = await client.seed(fileHandle, {
   name: "presentation.mp4",
   pieceSize: PieceSizeEnum.SIZE_AUTO,
-  announce: ["wss://tracker.webtorrent.dev"],
-});
+  announce: ["wss://tracker.webtorrent.dev",],
+},);
 
-console.log("Seeding started! Share this Magnet URI:");
-console.log(torrent.magnetURI);
+console.log("Seeding started! Share this Magnet URI:",);
+console.log(torrent.magnetURI,);
 ```
 
 ---
@@ -103,49 +106,51 @@ console.log(torrent.magnetURI);
 Stream torrent video chunks directly to HTML5 `<video controls>` without downloading the entire file first.
 
 #### In Your Main Script (`main.ts`):
+
 ```typescript
-import { Client } from "jsr:@vanaware/browsertorrent";
-import { registerAndConnectServiceWorker } from "jsr:@vanaware/browsertorrent/service-worker";
+import { Client, } from "jsr:@vanaware/browsertorrent";
+import { registerAndConnectServiceWorker, } from "jsr:@vanaware/browsertorrent/service-worker";
 
 // 1. Register Service Worker and establish dual MessageChannel bridge
 await registerAndConnectServiceWorker({
   scriptUrl: "./sw.js",
   scope: "./",
-});
+},);
 
 // 2. Initialize BitTorrent client and streaming server
 const client = new Client();
-client.createServer({ scope: "/" });
+client.createServer({ scope: "/", },);
 
 // 3. Add torrent and assign streamURL to video element
-const torrent = await client.add("magnet:?xt=urn:btih:...");
+const torrent = await client.add("magnet:?xt=urn:btih:...",);
 
 torrent.on("ready", () => {
   const file = torrent.files[0];
-  const videoEl = document.querySelector<HTMLVideoElement>("#player")!;
+  const videoEl = document.querySelector<HTMLVideoElement>("#player",)!;
   videoEl.src = file.streamURL;
   videoEl.play();
-});
+},);
 ```
 
 #### In Your Service Worker (`sw.ts`):
+
 ```typescript
-import { createWebTorrentFetchHandler } from "jsr:@vanaware/browsertorrent/service-worker";
+import { createWebTorrentFetchHandler, } from "jsr:@vanaware/browsertorrent/service-worker";
 
 const torrentHandler = createWebTorrentFetchHandler();
 
-self.addEventListener("message", (event) => {
+self.addEventListener("message", (event,) => {
   if (event.data?.type === "PORT") {
-    torrentHandler.setPagePort(event.ports[0]);
+    torrentHandler.setPagePort(event.ports[0],);
   }
-});
+},);
 
-self.addEventListener("fetch", (event) => {
-  if (torrentHandler.isStreamRequest(event.request)) {
-    const responsePromise = torrentHandler.handleFetch(event);
-    if (responsePromise) event.respondWith(responsePromise);
+self.addEventListener("fetch", (event,) => {
+  if (torrentHandler.isStreamRequest(event.request,)) {
+    const responsePromise = torrentHandler.handleFetch(event,);
+    if (responsePromise) event.respondWith(responsePromise,);
   }
-});
+},);
 ```
 
 ---
@@ -154,12 +159,12 @@ self.addEventListener("fetch", (event) => {
 
 `@vanaware/browsertorrent` is modularized into four distinct subpath exports:
 
-| Subpath | Description |
-| :--- | :--- |
-| `jsr:@vanaware/browsertorrent` | Core BitTorrent engine: `Client`, `Torrent`, `Swarm`, `Peer`, `Wire`, `File`, `OPFSChunkStore`. |
-| `jsr:@vanaware/browsertorrent/service-worker` | Streaming fetch interceptor, dual MessageChannel bridges, and SW lifecycle handlers. |
-| `jsr:@vanaware/browsertorrent/server` | In-browser HTTP streaming server bridge (`createServer`, `registerTorrentFiles`). |
-| `jsr:@vanaware/browsertorrent/torrent-generator` | High-speed `.torrent` generator reading directly from browser OPFS handles. |
+| Subpath                                          | Description                                                                                     |
+| :----------------------------------------------- | :---------------------------------------------------------------------------------------------- |
+| `jsr:@vanaware/browsertorrent`                   | Core BitTorrent engine: `Client`, `Torrent`, `Swarm`, `Peer`, `Wire`, `File`, `OPFSChunkStore`. |
+| `jsr:@vanaware/browsertorrent/service-worker`    | Streaming fetch interceptor, dual MessageChannel bridges, and SW lifecycle handlers.            |
+| `jsr:@vanaware/browsertorrent/server`            | In-browser HTTP streaming server bridge (`createServer`, `registerTorrentFiles`).               |
+| `jsr:@vanaware/browsertorrent/torrent-generator` | High-speed `.torrent` generator reading directly from browser OPFS handles.                     |
 
 ---
 
@@ -211,13 +216,13 @@ self.addEventListener("fetch", (event) => {
 
 ## 🌐 Platform & Browser Support
 
-| Platform / Browser | WebRTC DataChannels | OPFS Storage | Service Worker Streaming |
-| :--- | :---: | :---: | :---: |
-| **Google Chrome / Chromium** (86+) | ✅ Full | ✅ Full | ✅ Full |
-| **Mozilla Firefox** (111+) | ✅ Full | ✅ Full | ✅ Full |
-| **Apple Safari** (15.2+) | ✅ Full | ✅ Full | ✅ Full |
-| **Microsoft Edge** | ✅ Full | ✅ Full | ✅ Full |
-| **Deno** (v2.x) | ✅ CLI / Server | ⚠️ RAM fallback | ⚠️ Server-side |
+| Platform / Browser                 | WebRTC DataChannels |  OPFS Storage   | Service Worker Streaming |
+| :--------------------------------- | :-----------------: | :-------------: | :----------------------: |
+| **Google Chrome / Chromium** (86+) |       ✅ Full       |     ✅ Full     |         ✅ Full          |
+| **Mozilla Firefox** (111+)         |       ✅ Full       |     ✅ Full     |         ✅ Full          |
+| **Apple Safari** (15.2+)           |       ✅ Full       |     ✅ Full     |         ✅ Full          |
+| **Microsoft Edge**                 |       ✅ Full       |     ✅ Full     |         ✅ Full          |
+| **Deno** (v2.x)                    |   ✅ CLI / Server   | ⚠️ RAM fallback |      ⚠️ Server-side      |
 
 ---
 

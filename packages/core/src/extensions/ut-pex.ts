@@ -8,7 +8,7 @@
 
 import { Extension, } from "../core/extension.ts";
 import type { Wire, } from "../core/wire.ts";
-import type { ExtensionHost } from "../core/extension-host.ts";
+import type { ExtensionHost, } from "../core/extension-host.ts";
 import {
   BencodeDict,
   BencodeValue,
@@ -195,11 +195,11 @@ export class UtPexExtension extends Extension {
   public onRegister(
     context: {
       host: ExtensionHost;
-      send: (payload: Uint8Array) => Promise<void>;
+      send: (payload: Uint8Array,) => Promise<void>;
     },
   ): void {
     // When this extension is registered with the wire, capture the extension ID
-    const id = context.host.localExtensions.get(this.name);
+    const id = context.host.localExtensions.get(this.name,);
     if (id !== undefined) {
       this._extensionId = id;
     }
