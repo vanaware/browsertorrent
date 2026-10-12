@@ -1,5 +1,5 @@
 /*!
- * BrowserTorrent v0.0.139#mv5mfdg1
+ * BrowserTorrent v0.0.139#mv5n52dm
  * (c) 2026 Vanaware - MIT License
  */
 
@@ -1052,7 +1052,7 @@ var _WEBRTC_SUPPORT = (() => {
 })();
 
 // packages/service-worker/src/cache.ts
-var CACHE_VERSION = true ? "v0.0.139#mv5mfdg1" : `v${VERSION2}`;
+var CACHE_VERSION = true ? "v0.0.139#mv5n52dm" : `v${VERSION2}`;
 var CACHE_NAME = `browsertorrent-cache-${CACHE_VERSION}`;
 var ASSETS_TO_CACHE = typeof define_GENERATED_ASSETS_default !== "undefined" ? define_GENERATED_ASSETS_default : [];
 function handleInstall(event) {
