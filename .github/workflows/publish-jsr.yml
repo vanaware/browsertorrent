@@ -21,7 +21,8 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version-file: .tool-versions
+          cache: true
 
       - name: Verify Types and Dry Run
         run: deno publish --dry-run
@@ -41,7 +42,8 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version-file: .tool-versions
+          cache: true
 
       - name: Verify Types and Dry Run
         run: deno publish --dry-run
