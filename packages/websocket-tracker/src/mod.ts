@@ -1,19 +1,36 @@
 /**
- * @file mod.ts
- * @description Primary entry point for `@vanaware/browsertorrent-tracker`.
- * A lightweight, high-performance WebSocket & HTTP BitTorrent tracker in pure Deno TypeScript
- * designed for WebTorrent & BrowserTorrent WebRTC peer swarms.
+ * @module
  *
- * @example
+ * # @vanaware/browsertorrent-tracker
+ *
+ * High-performance, lightweight WebSocket and HTTP BitTorrent tracker in pure Deno TypeScript.
+ * Specifically built for WebTorrent, BrowserTorrent, and WebRTC peer swarms.
+ *
+ * ## Key Features
+ * - **Full WebRTC Signaling**: Manages SDP offer pools and forwards SDP answers between browser peers.
+ * - **Dual Endpoints**: Supports `ws://` / `wss://` WebSocket signaling as well as standard HTTP `/announce` and `/scrape`.
+ * - **LRU Swarm Eviction**: High concurrency support with bounded memory limits and automatic stale peer eviction.
+ * - **Zero External Runtime Dependencies**: Standard Deno HTTP and WebSocket server.
+ * - **CLI and Programmatic API**: Run directly as a daemon with CLI flags or mount into any existing Deno app.
+ *
+ * ## Usage Example
+ *
+ * ### Programmatic Server
  * ```ts
- * import { createServer, WebSocketTracker } from "jsr:@vanaware/browsertorrent-tracker";
+ * import { createServer } from "jsr:@vanaware/browsertorrent-tracker";
  *
  * const tracker = createServer(8000, {
  *   hostname: "0.0.0.0",
- *   maxTorrents: 500,
+ *   maxPeers: 2000,
+ *   intervalMs: 120_000,
  * });
  *
  * await tracker.start();
+ * ```
+ *
+ * ### CLI Daemon
+ * ```bash
+ * deno run -A jsr:@vanaware/browsertorrent-tracker/cli --port 8000
  * ```
  */
 
@@ -160,3 +177,8 @@ export async function runCLI(): Promise<void> {
 if (import.meta.main) {
   runCLI();
 }
+
+/**
+ * Default export representing {@link WebSocketTracker}.
+ */
+export default WebSocketTracker;

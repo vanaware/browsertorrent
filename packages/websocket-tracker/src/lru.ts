@@ -1,6 +1,9 @@
 /**
- * @file lru.ts
- * @description In-memory Least-Recently-Used (LRU) cache implementation.
+ * @module lru
+ *
+ * # @vanaware/browsertorrent-tracker/lru
+ *
+ * In-memory Least-Recently-Used (LRU) cache implementation.
  * Used by the tracker for bounded, high-speed swarm and peer memory management.
  */
 

@@ -48,19 +48,41 @@ export interface WebTorrentFetchHandler {
 }
 
 /**
- * Guesses media destination type from URL pathname.
+ * Guesses the HTML5 media category (`"video"`, `"audio"`, `"image"`, or `"document"`)
+ * based on the file extension of the requested URL.
+ *
+ * @param pathname - URL path string.
+ * @returns `"video" | "audio" | "image" | "document"`.
+ *
+ * @example
+ * ```ts
+ * import { guessDestination } from "jsr:@vanaware/browsertorrent/service-worker";
+ *
+ * guessDestination("/webtorrent/abc/video.mp4"); // "video"
+ * ```
  */
-export function guessDestination(pathname: string,): string {
-  if (/\.(mp4|webm|mkv|avi|mov)$/i.test(pathname,)) return "video";
-  if (/\.(mp3|m4a|ogg|wav)$/i.test(pathname,)) return "audio";
-  if (/\.(jpe?g|png|gif|webp)$/i.test(pathname,)) return "image";
+export function guessDestination(pathname: string): string {
+  if (/\.(mp4|webm|mkv|avi|mov)$/i.test(pathname)) return "video";
+  if (/\.(mp3|m4a|ogg|wav)$/i.test(pathname)) return "audio";
+  if (/\.(jpe?g|png|gif|webp)$/i.test(pathname)) return "image";
   return "document";
 }
 
 /**
- * Computes the /webtorrent/ URL prefix for stream request interception.
+ * Computes the normalized `/webtorrent/` URL prefix used by the streaming interceptor
+ * for a given Service Worker registration scope.
+ *
+ * @param scope - Base URL scope of the Service Worker.
+ * @returns Prefix string ending with `/webtorrent/`.
+ *
+ * @example
+ * ```ts
+ * import { getWebTorrentPrefix } from "jsr:@vanaware/browsertorrent/service-worker";
+ *
+ * getWebTorrentPrefix("/"); // "/webtorrent/"
+ * ```
  */
-export function getWebTorrentPrefix(scope?: string,): string {
+export function getWebTorrentPrefix(scope?: string): string {
   const baseScope = scope ||
     (typeof self !== "undefined" && self.registration?.scope
       ? self.registration.scope
@@ -71,11 +93,24 @@ export function getWebTorrentPrefix(scope?: string,): string {
       ? self.location.origin
       : "http://localhost",
   ).pathname;
-  return (pathname.endsWith("/",) ? pathname : pathname + "/") + "webtorrent/";
+  return (pathname.endsWith("/") ? pathname : pathname + "/") + "webtorrent/";
 }
 
 /**
- * Determines whether an incoming URL or Request matches the WebTorrent streaming pattern.
+ * Determines whether an incoming URL or HTTP Request targets the WebTorrent streaming interceptor.
+ *
+ * @param urlOrRequest - URL string, {@link URL} object, or {@link Request} object to check.
+ * @param scope - Optional custom Service Worker scope.
+ * @returns `true` if the request matches the streaming prefix.
+ *
+ * @example
+ * ```ts
+ * import { isWebTorrentStreamRequest } from "jsr:@vanaware/browsertorrent/service-worker";
+ *
+ * if (isWebTorrentStreamRequest(event.request)) {
+ *   // Intercept streaming fetch
+ * }
+ * ```
  */
 export function isWebTorrentStreamRequest(
   urlOrRequest: URL | Request | string,
@@ -92,12 +127,21 @@ export function isWebTorrentStreamRequest(
       ? self.location.origin
       : "http://localhost",
   );
-  const prefix = getWebTorrentPrefix(scope,);
-  return url.pathname.startsWith(prefix,);
+  const prefix = getWebTorrentPrefix(scope);
+  return url.pathname.startsWith(prefix);
 }
 
 /**
- * Handles WebTorrent streaming fetch interception using dual MessageChannels.
+ * Handles WebTorrent streaming fetch interception using dual `MessageChannel`s with backpressure.
+ *
+ * Exchanges messages between the Service Worker and the client window page to fulfill
+ * HTTP 206 Partial Content range requests and standard full downloads.
+ *
+ * @param req - The incoming fetch {@link Request}.
+ * @param url - The parsed {@link URL}.
+ * @param pagePort - The {@link MessagePort} connected to the main thread.
+ * @param scope - Service Worker registration scope URL.
+ * @returns A promise resolving to an HTTP {@link Response} stream.
  */
 export function handleStream(
   req: Request,
@@ -297,8 +341,34 @@ export function handleStream(
 }
 
 /**
- * Creates a stream fetch handler factory for any Service Worker.
- * Allows decoupling streaming from static caching and lifecycle events.
+ * Creates a complete WebTorrent streaming fetch interceptor handler for any Service Worker.
+ *
+ * Decouples BitTorrent streaming logic from static caching, lifecycle events, and offline PWA assets.
+ * Handles incoming `FetchEvent` requests matching `/webtorrent/` and queries the main thread
+ * via {@link MessagePort} for chunk data.
+ *
+ * @param options - Interceptor options, including optional custom prefix.
+ * @returns A {@link WebTorrentFetchHandler} instance with methods `setPagePort`, `isStreamRequest`, and `handleFetch`.
+ *
+ * @example
+ * ```ts
+ * import { createWebTorrentFetchHandler } from "jsr:@vanaware/browsertorrent/service-worker";
+ *
+ * const handler = createWebTorrentFetchHandler();
+ *
+ * self.addEventListener("message", (event) => {
+ *   if (event.data?.type === "PORT") {
+ *     handler.setPagePort(event.ports[0]);
+ *   }
+ * });
+ *
+ * self.addEventListener("fetch", (event) => {
+ *   if (handler.isStreamRequest(event.request)) {
+ *     const responsePromise = handler.handleFetch(event);
+ *     if (responsePromise) event.respondWith(responsePromise);
+ *   }
+ * });
+ * ```
  */
 export function createWebTorrentFetchHandler(
   options: StreamHandlerOptions = {},

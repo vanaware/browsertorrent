@@ -276,12 +276,11 @@ export class UtMetadata extends Extension {
     let validMetadata = newMetadata;
     try {
       const info = decode(newMetadata,) as BencodeDict;
-      if (info.info) {
+      if (info && info.info) {
         validMetadata = encode(info.info,);
       }
-    } catch (err) {
-      console.warn("Invalid metadata buffer:", err,);
-      return false;
+    } catch (_err) {
+      // Keep raw metadata buffer if not a full torrent bencode dict
     }
 
     this.metadata = validMetadata;

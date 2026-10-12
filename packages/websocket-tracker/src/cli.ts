@@ -1,11 +1,28 @@
 #!/usr/bin/env deno run --allow-net --allow-env --allow-read --allow-write
 
 /**
- * CLI for WebSocket Tracker.
- * Run with: deno run --allow-all src/cli.ts [options]
+ * @module cli
+ *
+ * # @vanaware/browsertorrent-tracker/cli
+ *
+ * Command-line interface daemon for running the BitTorrent WebSocket & HTTP tracker server.
+ *
+ * ## Usage
+ *
+ * ### Direct execution with JSR:
+ * ```bash
+ * deno run --allow-net --allow-env jsr:@vanaware/browsertorrent-tracker/cli --port 8000 --host 0.0.0.0
+ * ```
+ *
+ * ### Environment Variables:
+ * - `PORT`: Listening port (default: 8000)
+ * - `HOSTNAME`: Bind address (default: 0.0.0.0)
+ * - `MAX_PEERS`: Maximum total peers (default: 1000)
+ * - `MAX_PEERS_PER_TORRENT`: Maximum peers returned per swarm (default: 50)
+ * - `MAX_TORRENTS`: Maximum swarms in LRU cache (default: 100)
  */
 
-import { createServer, WebSocketTracker, } from "./mod.ts";
+import { createServer, WebSocketTracker } from "./mod.ts";
 
 interface CLIOptions {
   port: number;

@@ -1,6 +1,9 @@
 /**
- * @file swarm.ts
- * @description Swarm management for the WebSocket BitTorrent tracker.
+ * @module swarm
+ *
+ * # @vanaware/browsertorrent-tracker/swarm
+ *
+ * Swarm management for the WebSocket BitTorrent tracker.
  * Groups peers by torrent info hash and coordinates peer discovery with LRU eviction.
  */
 

@@ -1,9 +1,12 @@
-// /browsertorrent/monorepo/webtorrent/src/torrent-generator/mod.ts
 /**
- * @file mod.ts
- * @description Public surface of the OPFS-backed torrent generator.
- * Provides high-speed hashing and `.torrent` metainfo generation directly from
- * the browser's Origin Private File System (OPFS).
+ * @module torrent-generator
+ *
+ * # @vanaware/browsertorrent/torrent-generator
+ *
+ * High-speed OPFS-based `.torrent` metainfo generator for the browser.
+ * Reads files directly from the Origin Private File System (`FileSystemFileHandle` or `FileSystemDirectoryHandle`),
+ * calculates SHA-1 piece hashes incrementally with low memory overhead, and encodes bencoded `.torrent` metainfo.
+ *
  *
  * @example
  * ```ts

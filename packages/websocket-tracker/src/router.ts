@@ -1,6 +1,9 @@
 /**
- * @file router.ts
- * @description HTTP and WebSocket request router for the BitTorrent tracker server.
+ * @module router
+ *
+ * # @vanaware/browsertorrent-tracker/router
+ *
+ * HTTP and WebSocket request router for the BitTorrent tracker server.
  * Dispatches upgrade requests to WebSocket handlers and query requests to HTTP announce/scrape handlers.
  */
 

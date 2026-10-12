@@ -1,6 +1,6 @@
 {
   "name": "@vanaware/browsertorrent-tracker",
-  "version": "0.0.134",
+  "version": "0.0.138",
   "description": "High-performance, lightweight WebSocket & HTTP BitTorrent tracker in pure Deno TypeScript for WebTorrent & BrowserTorrent WebRTC swarms.",
   "license": "MIT",
   "compilerOptions": {

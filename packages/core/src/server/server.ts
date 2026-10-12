@@ -1,6 +1,30 @@
-// /browsertorrent/monorepo/webtorrent/src/server/server.ts
+/**
+ * @module server
+ *
+ * # @vanaware/browsertorrent/server
+ *
+ * In-browser HTTP server bridge connected to a Service Worker.
+ *
+ * Translates Service Worker fetch requests into piece reads from the BitTorrent {@link ChunkStore},
+ * allowing video/audio elements to seek smoothly across files with full HTTP 206 Partial Content support.
+ *
+ * ## Usage Example
+ * ```ts
+ * import { createServer, registerTorrentFiles } from "jsr:@vanaware/browsertorrent/server";
+ * import { Client } from "jsr:@vanaware/browsertorrent";
+ *
+ * const client = new Client();
+ * const server = createServer({ scope: "/" });
+ *
+ * const torrent = await client.add("magnet:?xt=urn:btih:...");
+ * torrent.on("ready", () => {
+ *   registerTorrentFiles(torrent, torrent.files);
+ *   console.log("Stream URL:", torrent.files[0].streamURL);
+ * });
+ * ```
+ */
 
-import type { Torrent, } from "../core/torrent.ts";
+import type { Torrent } from "../core/torrent.ts";
 import {
   buildStreamURL,
   parseStreamURL,
@@ -427,7 +451,7 @@ export function buildFileStream(
   _transport: Transport,
   opts: { rangeStart?: number; rangeEnd?: number } = {},
 ): ReadableStream<Uint8Array> {
-  const file: File = entry.file;
+  const file: StreamableFile = entry.file;
 
   let fileOffset = opts.rangeStart ?? 0;
   const endOffset = opts.rangeEnd ?? file.length;

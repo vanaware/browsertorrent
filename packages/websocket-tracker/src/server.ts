@@ -1,7 +1,11 @@
 /**
- * @file server.ts
- * @description WebSocket & HTTP BitTorrent tracker server implemented in pure Deno.
- * Provides 100% protocol parity with WebTorrent's bittorrent-tracker for WebRTC swarms.
+ * @module server
+ *
+ * # @vanaware/browsertorrent-tracker/server
+ *
+ * Core WebSocket & HTTP BitTorrent tracker server implementation for Deno.
+ * Implements 100% protocol parity with WebTorrent's `bittorrent-tracker` specification,
+ * supporting WebRTC peer discovery, offer distribution, answer forwarding, and standard scrape metrics.
  */
 
 import { LRUCache } from "./lru.ts";

@@ -10,8 +10,6 @@ export interface StreamableFile {
   [Symbol.asyncIterator]?: () => AsyncIterator<Uint8Array>;
   /** Optional readable stream factory. */
   createReadStream?: (opts?: { start?: number; end?: number }) => ReadableStream<Uint8Array>;
-  /** Allow any additional properties. */
-  [key: string]: unknown;
 }
 
 /**

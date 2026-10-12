@@ -2,7 +2,19 @@
 import { parseStreamURL, streamManager } from "../server/stream-manager.ts";
 
 /**
- * Guesses MIME content-type from filename extension.
+ * Guesses the MIME `Content-Type` header from a file name extension.
+ *
+ * Supports common video, audio, image, and text formats suitable for in-browser streaming.
+ *
+ * @param name - File name or path (e.g., `"movie.mp4"`, `"track.mp3"`).
+ * @returns The matched MIME type string, or `"application/octet-stream"` if unrecognized.
+ *
+ * @example
+ * ```ts
+ * import { guessContentType } from "jsr:@vanaware/browsertorrent/service-worker";
+ *
+ * const mime = guessContentType("video.mp4"); // "video/mp4"
+ * ```
  */
 export function guessContentType(name: string): string {
   const ext = name.split(".").pop()?.toLowerCase();
@@ -30,7 +42,19 @@ export function guessContentType(name: string): string {
 }
 
 /**
- * Parses HTTP Range header into start and end byte offsets.
+ * Parses an HTTP `Range` request header (e.g., `"bytes=0-1048575"`) into inclusive start and end byte indices.
+ *
+ * @param header - Raw `Range` header string received from an HTTP request.
+ * @param fileLength - Total length of the requested file in bytes.
+ * @returns An object containing `{ start, end }` byte offsets, or `null` if the header is missing, malformed, or out of bounds.
+ *
+ * @example
+ * ```ts
+ * import { parseRange } from "jsr:@vanaware/browsertorrent/service-worker";
+ *
+ * const range = parseRange("bytes=0-499", 1000);
+ * // { start: 0, end: 499 }
+ * ```
  */
 export function parseRange(
   header: string | undefined,
@@ -48,7 +72,20 @@ export function parseRange(
 }
 
 /**
- * Waits for a ServiceWorker in installing/waiting state to become activated.
+ * Waits for a Service Worker instance in `installing` or `waiting` state to become `activated`.
+ *
+ * @param worker - The target {@link ServiceWorker} instance.
+ * @returns A promise that resolves when the worker enters the `"activated"` state.
+ *
+ * @example
+ * ```ts
+ * import { waitForServiceWorkerActivation } from "jsr:@vanaware/browsertorrent/service-worker";
+ *
+ * const reg = await navigator.serviceWorker.register("./sw.js");
+ * if (reg.installing) {
+ *   await waitForServiceWorkerActivation(reg.installing);
+ * }
+ * ```
  */
 export function waitForServiceWorkerActivation(
   worker: ServiceWorker,
@@ -85,14 +122,23 @@ export interface ServiceWorkerBridgeOptions {
 }
 
 /**
- * Low-level bridge: Connects an active Service Worker to the streamManager for BitTorrent streaming.
- * Accepts either a ServiceWorker instance directly or a ServiceWorkerBridgeOptions object.
+ * Low-level bridge that connects an active Service Worker to the {@link streamManager} for BitTorrent streaming.
+ *
+ * Transfers a `MessageChannel` port to the Service Worker (`{ type: "PORT" }`) and sets up a duplex
+ * streaming protocol for serving file chunks with backpressure and range requests.
+ *
+ * @param workerOrOptions - An active {@link ServiceWorker} instance or a {@link ServiceWorkerBridgeOptions} object.
+ * @param optionsOrScope - Scope URL string or configuration options when passing a worker instance.
+ * @returns The established {@link MessageChannel}, or `null` if Service Workers are unsupported or no active worker is found.
  *
  * @example
- * // Low-level direct worker pass:
- * const reg = await navigator.serviceWorker.register("./my-sw.js");
- * await waitForServiceWorkerActivation(reg.active!);
+ * ```ts
+ * import { connectServiceWorkerBridge, waitForServiceWorkerActivation } from "jsr:@vanaware/browsertorrent/service-worker";
+ *
+ * const reg = await navigator.serviceWorker.register("./sw.js");
+ * if (reg.installing) await waitForServiceWorkerActivation(reg.installing);
  * const channel = await connectServiceWorkerBridge(reg.active!, { scope: "./" });
+ * ```
  */
 export async function connectServiceWorkerBridge(
   workerOrOptions?: ServiceWorker | ServiceWorkerBridgeOptions,
@@ -276,8 +322,28 @@ export const establishSWConnection: typeof connectServiceWorkerBridge =
   connectServiceWorkerBridge;
 
 /**
- * Complete helper that registers the Service Worker, waits for activation,
- * and sets up the streaming bridge.
+ * High-level helper that registers the Service Worker, awaits its activation,
+ * and automatically establishes the duplex streaming MessageChannel bridge.
+ *
+ * This provides an out-of-the-box solution for progressive web apps to support
+ * video and audio streaming from BitTorrent swarms.
+ *
+ * @param options - Registration and script options:
+ *   - `scriptUrl`: Custom path to the Service Worker file (defaults to `${scope}sw.js`).
+ *   - `scope`: Application URL scope for the Service Worker (defaults to base pathname).
+ *   - `version`: Version cache-busting query parameter.
+ * @returns A promise resolving to the registration and established {@link MessageChannel}, or `null` if unsupported.
+ *
+ * @example
+ * ```ts
+ * import { registerAndConnectServiceWorker } from "jsr:@vanaware/browsertorrent/service-worker";
+ *
+ * const res = await registerAndConnectServiceWorker({
+ *   scriptUrl: "./sw.js",
+ *   scope: "./",
+ * });
+ * console.log("Service Worker connected:", res?.registration.scope);
+ * ```
  */
 export async function registerAndConnectServiceWorker(
   options: { scriptUrl?: string; scope?: string; version?: string } = {},

@@ -8,7 +8,7 @@ import { signal, } from "@preact/signals";
 import type { ComponentChildren, } from "preact";
 import type { Client, Torrent, Wire, } from "@vanaware/browsertorrent";
 import type { WebTorrentServer, } from "@vanaware/browsertorrent";
-import { db, } from "@vanaware/workerdb";
+import { dbsw as db, } from "@vanaware/workerdb";
 import { streamManager, } from "@vanaware/browsertorrent";
 
 // Helper para converter stream Node (usado no WebTorrent original do browser) em Web ReadableStream

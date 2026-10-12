@@ -1,6 +1,9 @@
 /**
- * @file parse-websocket.ts
- * @description WebSocket message parsing and serialization for the BEP 15/31 BitTorrent tracker protocol.
+ * @module parse-websocket
+ *
+ * # @vanaware/browsertorrent-tracker/parse-websocket
+ *
+ * WebSocket message parsing and serialization for the BEP 15/31 BitTorrent tracker protocol.
  * Validates incoming JSON messages from WebTorrent/BrowserTorrent peers and formats standard responses.
  */
 

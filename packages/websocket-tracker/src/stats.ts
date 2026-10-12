@@ -1,6 +1,9 @@
 /**
- * @file stats.ts
- * @description Telemetry and health metrics manager for the WebSocket tracker server.
+ * @module stats
+ *
+ * # @vanaware/browsertorrent-tracker/stats
+ *
+ * Telemetry and health metrics manager for the WebSocket tracker server.
  * Tracks connected clients, bandwidth volume, message counters, and heap memory usage.
  */
 

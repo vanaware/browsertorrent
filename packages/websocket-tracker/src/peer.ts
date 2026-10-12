@@ -1,6 +1,9 @@
 /**
- * @file peer.ts
- * @description Peer connection management for the WebSocket tracker.
+ * @module peer
+ *
+ * # @vanaware/browsertorrent-tracker/peer
+ *
+ * Peer connection management for the WebSocket tracker.
  * Tracks individual connected peers, their metadata, statistics, and socket handles.
  */
 
