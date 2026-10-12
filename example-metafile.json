@@ -781,7 +781,7 @@
       "format": "esm"
     },
     "packages/core/src/extensions/ut-metadata.ts": {
-      "bytes": 42636,
+      "bytes": 42615,
       "imports": [
         {
           "path": "packages/core/src/core/extension.ts",
@@ -892,7 +892,7 @@
       "format": "esm"
     },
     "packages/core/src/server/stream-manager.ts": {
-      "bytes": 17883,
+      "bytes": 17787,
       "imports": [
         {
           "path": "<runtime>",
@@ -903,7 +903,7 @@
       "format": "esm"
     },
     "packages/core/src/server/server.ts": {
-      "bytes": 62608,
+      "bytes": 64502,
       "imports": [
         {
           "path": "packages/core/src/server/stream-manager.ts",
@@ -1019,7 +1019,7 @@
       "format": "esm"
     },
     "packages/core/src/torrent-generator/mod.ts": {
-      "bytes": 3930,
+      "bytes": 4167,
       "imports": [
         {
           "path": "packages/core/src/utils/bencode.ts",
@@ -1081,7 +1081,7 @@
       "format": "esm"
     },
     "packages/core/src/service-worker/stream-handler.ts": {
-      "bytes": 28968,
+      "bytes": 35235,
       "imports": [
         {
           "path": "<runtime>",
@@ -1108,7 +1108,7 @@
       "format": "esm"
     },
     "packages/core/src/service-worker/bridge.ts": {
-      "bytes": 27142,
+      "bytes": 34161,
       "imports": [
         {
           "path": "packages/core/src/server/stream-manager.ts",
@@ -1129,7 +1129,7 @@
       "format": "esm"
     },
     "packages/core/src/service-worker/mod.ts": {
-      "bytes": 2311,
+      "bytes": 6166,
       "imports": [
         {
           "path": "packages/core/src/service-worker/stream-handler.ts",
@@ -1150,7 +1150,7 @@
       "format": "esm"
     },
     "packages/core/src/mod.ts": {
-      "bytes": 82620,
+      "bytes": 107989,
       "imports": [
         {
           "path": "packages/core/src/utils/event-target.ts",
@@ -1336,7 +1336,7 @@
       "format": "esm"
     },
     "packages/example/src/torrent-context.tsx": {
-      "bytes": 62890,
+      "bytes": 62914,
       "imports": [
         {
           "path": "https:https://esm.sh/preact@10.29.7/jsx-runtime",
@@ -1646,7 +1646,7 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 1095674
+      "bytes": 1115887
     },
     "packages/server/build/dist/main.js": {
       "imports": [],
@@ -1729,7 +1729,7 @@
           "bytesInOutput": 324
         },
         "packages/core/src/extensions/ut-metadata.ts": {
-          "bytesInOutput": 12999
+          "bytesInOutput": 12925
         },
         "packages/core/src/network/swarm.ts": {
           "bytesInOutput": 12273
@@ -1792,7 +1792,7 @@
           "bytesInOutput": 147
         },
         "packages/core/src/mod.ts": {
-          "bytesInOutput": 24454
+          "bytesInOutput": 30586
         },
         "https:https://esm.sh/preact@10.29.7/denonext/preact.mjs": {
           "bytesInOutput": 16379
@@ -1843,7 +1843,7 @@
           "bytesInOutput": 18740
         },
         "packages/example/src/torrent-context.tsx": {
-          "bytesInOutput": 16297
+          "bytesInOutput": 16296
         },
         "packages/example/src/components/seeder-panel.tsx": {
           "bytesInOutput": 4897
@@ -1873,7 +1873,7 @@
           "bytesInOutput": 760
         }
       },
-      "bytes": 522176
+      "bytes": 528233
     }
   }
 }

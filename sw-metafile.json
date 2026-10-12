@@ -5,7 +5,7 @@
       "imports": []
     },
     "packages/core/src/service-worker/stream-handler.ts": {
-      "bytes": 28968,
+      "bytes": 35235,
       "imports": [
         {
           "path": "<define:__GENERATED_ASSETS__>",
@@ -53,7 +53,7 @@
       "format": "esm"
     },
     "packages/core/src/server/stream-manager.ts": {
-      "bytes": 17883,
+      "bytes": 17787,
       "imports": [
         {
           "path": "<define:__GENERATED_ASSETS__>",
@@ -69,7 +69,7 @@
       "format": "esm"
     },
     "packages/core/src/service-worker/bridge.ts": {
-      "bytes": 27142,
+      "bytes": 34161,
       "imports": [
         {
           "path": "packages/core/src/server/stream-manager.ts",
@@ -95,7 +95,7 @@
       "format": "esm"
     },
     "packages/core/src/service-worker/mod.ts": {
-      "bytes": 2311,
+      "bytes": 6166,
       "imports": [
         {
           "path": "packages/core/src/service-worker/stream-handler.ts",
@@ -741,7 +741,7 @@
       "format": "esm"
     },
     "packages/core/src/extensions/ut-metadata.ts": {
-      "bytes": 42636,
+      "bytes": 42615,
       "imports": [
         {
           "path": "packages/core/src/core/extension.ts",
@@ -882,7 +882,7 @@
       "format": "esm"
     },
     "packages/core/src/server/server.ts": {
-      "bytes": 62608,
+      "bytes": 64502,
       "imports": [
         {
           "path": "packages/core/src/server/stream-manager.ts",
@@ -1034,7 +1034,7 @@
       "format": "esm"
     },
     "packages/core/src/torrent-generator/mod.ts": {
-      "bytes": 3930,
+      "bytes": 4167,
       "imports": [
         {
           "path": "packages/core/src/utils/bencode.ts",
@@ -1101,7 +1101,7 @@
       "format": "esm"
     },
     "packages/core/src/mod.ts": {
-      "bytes": 82620,
+      "bytes": 107989,
       "imports": [
         {
           "path": "packages/core/src/utils/event-target.ts",
@@ -1339,7 +1339,7 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 521706
+      "bytes": 541750
     },
     "packages/server/build/dist/sw.js": {
       "imports": [],

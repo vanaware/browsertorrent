@@ -1,5 +1,5 @@
 /*!
- * BrowserTorrent v0.0.135#mv5kban8
+ * BrowserTorrent v0.0.139#mv5lfthw
  * (c) 2026 Vanaware - MIT License
  */
 
@@ -5667,12 +5667,10 @@ var init_ut_metadata = __esm({
         let validMetadata = newMetadata;
         try {
           const info = decode(newMetadata);
-          if (info.info) {
+          if (info && info.info) {
             validMetadata = encode(info.info);
           }
-        } catch (err2) {
-          console.warn("Invalid metadata buffer:", err2);
-          return false;
+        } catch (_err) {
         }
         this.metadata = validMetadata;
         this._metadataSize = validMetadata.length;
@@ -8991,6 +8989,7 @@ __export(mod_exports2, {
   UtMetadata: () => UtMetadata,
   UtPexExtension: () => UtPexExtension,
   VERSION: () => VERSION,
+  WebTorrent: () => Client,
   WebTorrentServer: () => WebTorrentServer,
   Wire: () => Wire,
   WsTracker: () => WsTracker,
@@ -9005,6 +9004,7 @@ __export(mod_exports2, {
   decodeMessage: () => decodeMessage,
   decodePeerId: () => decodePeerId,
   decodePexUpdate: () => decodePexUpdate,
+  default: () => mod_default,
   encode: () => encode,
   encodeHandshake: () => encodeHandshake,
   encodeMessage: () => encodeMessage,
@@ -9033,7 +9033,7 @@ __export(mod_exports2, {
   waitForServiceWorkerActivation: () => waitForServiceWorkerActivation,
   walkOPFSDir: () => walkOPFSDir
 });
-var _WEBRTC_SUPPORT, Client;
+var _WEBRTC_SUPPORT, Client, mod_default;
 var init_mod3 = __esm({
   "packages/core/src/mod.ts"() {
     init_event_target();
@@ -9078,12 +9078,29 @@ var init_mod3 = __esm({
       static {
         __name(this, "Client");
       }
-      /** `true` if the runtime supports WebRTC (RTCPeerConnection). */
+      /**
+       * `true` if the runtime supports WebRTC `RTCPeerConnection` for P2P swarming.
+       */
       static WEBRTC_SUPPORT = _WEBRTC_SUPPORT;
+      /**
+       * The 40-character hex representation of this client's 20-byte BitTorrent Peer ID.
+       */
       peerId;
+      /**
+       * Raw 20-byte binary buffer of this client's BitTorrent Peer ID.
+       */
       peerIdBuffer;
+      /**
+       * Map of active torrents keyed by 40-character lowercase hexadecimal info hash.
+       */
       torrents = /* @__PURE__ */ new Map();
+      /**
+       * Array of active torrents managed by this client.
+       */
       torrentList = [];
+      /**
+       * Active in-browser streaming HTTP bridge server, if created via {@link createServer}.
+       */
       server = null;
       swarms = /* @__PURE__ */ new Map();
       opts;
@@ -9093,6 +9110,21 @@ var init_mod3 = __esm({
       _downloadLimit = 0;
       /** Global upload throttle in bytes/s (0 = unlimited). */
       _uploadLimit = 0;
+      /**
+       * Creates a new BrowserTorrent {@link Client} instance.
+       *
+       * @param opts - Optional configuration options (peerId, maxConns, storage options, limits).
+       *
+       * @example
+       * ```ts
+       * import { Client } from "jsr:@vanaware/browsertorrent";
+       *
+       * const client = new Client({
+       *   useOPFS: true,
+       *   downloadLimit: 1024 * 1024, // 1 MB/s
+       * });
+       * ```
+       */
       constructor(opts = {}) {
         super();
         this.opts = opts;
@@ -9119,16 +9151,27 @@ var init_mod3 = __esm({
         });
       }
       // ── Aggregate getters ──────────────────────────────────────────────
+      /**
+       * `true` if the client has finished initializing and has not been destroyed.
+       */
       get isReady() {
         return this.ready && !this.destroyed;
       }
+      /**
+       * `true` if {@link destroy} was called on this client.
+       */
       get isDestroyed() {
         return this.destroyed;
       }
+      /**
+       * Number of torrents currently tracked by this client.
+       */
       get torrentCount() {
         return this.torrents.size;
       }
-      /** Aggregate download speed across all torrents (bytes/s). */
+      /**
+       * Aggregate download speed across all active torrents in bytes per second.
+       */
       get downloadSpeed() {
         let total = 0;
         for (const t of this.torrents.values()) {
@@ -9136,7 +9179,9 @@ var init_mod3 = __esm({
         }
         return total;
       }
-      /** Aggregate upload speed across all torrents (bytes/s). */
+      /**
+       * Aggregate upload speed across all active torrents in bytes per second.
+       */
       get uploadSpeed() {
         let total = 0;
         for (const t of this.torrents.values()) {
@@ -9144,7 +9189,10 @@ var init_mod3 = __esm({
         }
         return total;
       }
-      /** Aggregate progress (0..1) weighted by torrent length. */
+      /**
+       * Aggregate download progress between `0.0` (0%) and `1.0` (100%),
+       * weighted by total byte lengths of all torrents.
+       */
       get progress() {
         let totalLen = 0;
         let totalDownloaded = 0;
@@ -9155,7 +9203,10 @@ var init_mod3 = __esm({
         if (totalLen === 0) return 0;
         return totalDownloaded / totalLen;
       }
-      /** Aggregate ratio: total uploaded / total downloaded. */
+      /**
+       * Aggregate ratio of uploaded bytes to downloaded bytes across all torrents.
+       * Returns `Infinity` if nothing was downloaded yet but data was uploaded.
+       */
       get ratio() {
         let totalDown = 0;
         let totalUp = 0;
@@ -9166,18 +9217,28 @@ var init_mod3 = __esm({
         if (totalDown === 0) return totalUp > 0 ? Infinity : 0;
         return totalUp / totalDown;
       }
-      /** Currently configured download limit (bytes/s). */
+      /**
+       * Currently configured global download rate limit in bytes per second (0 = unlimited).
+       */
       get downloadLimit() {
         return this._downloadLimit;
       }
-      /** Currently configured upload limit (bytes/s). */
+      /**
+       * Currently configured global upload rate limit in bytes per second (0 = unlimited).
+       */
       get uploadLimit() {
         return this._uploadLimit;
       }
       // ── Throttle ───────────────────────────────────────────────────────
       /**
-       * Set the global download rate limit.
-       * @param rate bytes/s; `0` removes the limit.
+       * Throttles the global download speed across all active and future torrent swarms.
+       *
+       * @param rate - Target rate limit in bytes per second. Pass `0` to remove the limit.
+       *
+       * @example
+       * ```ts
+       * client.throttleDownload(512 * 1024); // 512 KB/s
+       * ```
        */
       throttleDownload(rate) {
         this._downloadLimit = Math.max(0, rate);
@@ -9186,8 +9247,14 @@ var init_mod3 = __esm({
         }
       }
       /**
-       * Set the global upload rate limit.
-       * @param rate bytes/s; `0` removes the limit.
+       * Throttles the global upload speed across all active and future torrent swarms.
+       *
+       * @param rate - Target rate limit in bytes per second. Pass `0` to remove the limit.
+       *
+       * @example
+       * ```ts
+       * client.throttleUpload(256 * 1024); // 256 KB/s
+       * ```
        */
       throttleUpload(rate) {
         this._uploadLimit = Math.max(0, rate);
@@ -9196,8 +9263,18 @@ var init_mod3 = __esm({
         }
       }
       /**
-       * Get a torrent by `infoHash` (hex), magnet URI, or `.torrent` file buffer.
-       * Returns `null` if not found.
+       * Finds an active torrent by info hash (40-hex string), Magnet URI, or parsed descriptor.
+       *
+       * @param torrentId - Magnet URI, hex infoHash, or `.torrent` Uint8Array.
+       * @returns The matching {@link Torrent} instance, or `null` if not found.
+       *
+       * @example
+       * ```ts
+       * const torrent = await client.get("magnet:?xt=urn:btih:...");
+       * if (torrent) {
+       *   console.log("Found torrent:", torrent.name);
+       * }
+       * ```
        */
       async get(torrentId) {
         if (this.destroyed) return null;
@@ -9209,6 +9286,19 @@ var init_mod3 = __esm({
         }
       }
       // ── Service Worker integration ─────────────────────────────────────
+      /**
+       * Creates or returns an in-browser streaming HTTP server bridge connected to a Service Worker.
+       * Enables direct HTML5 media playback via `<video src="...">` or `<audio src="...">`.
+       *
+       * @param opts - Options with optional Service Worker controller or custom scope prefix.
+       * @returns Initialized {@link WebTorrentServer}.
+       *
+       * @example
+       * ```ts
+       * const server = client.createServer({ scope: "/" });
+       * console.log("Streaming scope:", server.scope);
+       * ```
+       */
       createServer(opts = {}) {
         if (this.server) return this.server;
         const scope = opts.scope || this.opts.serviceWorkerScope || "/";
@@ -9244,6 +9334,19 @@ var init_mod3 = __esm({
           torrent
         }));
       }
+      /**
+       * Automatically registers a Service Worker from the configured `serviceWorkerUrl`
+       * and initializes the streaming {@link WebTorrentServer}.
+       *
+       * @returns Active ServiceWorker instance, or `null` if unsupported or unconfigured.
+       *
+       * @example
+       * ```ts
+       * const client = new Client({ serviceWorkerUrl: "./sw.js", serviceWorkerScope: "./" });
+       * const sw = await client.initServiceWorker();
+       * console.log("Service Worker registered:", !!sw);
+       * ```
+       */
       async initServiceWorker() {
         if (typeof navigator === "undefined" || !navigator.serviceWorker) {
           return null;
@@ -9261,6 +9364,25 @@ var init_mod3 = __esm({
         return reg.active;
       }
       // ── add / remove / destroy ─────────────────────────────────────────
+      /**
+       * Adds and starts downloading/participating in a BitTorrent swarm.
+       *
+       * Accepts a Magnet URI, 40-hex infoHash string, or `.torrent` file Uint8Array buffer.
+       * Returns a {@link Torrent} instance. If the torrent was already added, returns the existing instance.
+       *
+       * @param torrentId - Magnet URI, hex infoHash, or `.torrent` Uint8Array.
+       * @param opts - Configuration options (skip verification, callbacks, extra trackers).
+       * @returns Active {@link Torrent} instance.
+       * @throws {Error} If the client is destroyed or input is invalid.
+       *
+       * @example
+       * ```ts
+       * const torrent = await client.add("magnet:?xt=urn:btih:...", {
+       *   announce: ["wss://tracker.webtorrent.dev"],
+       *   onReady: (t) => console.log("Torrent metadata ready:", t.name),
+       * });
+       * ```
+       */
       async add(torrentId, opts = {}) {
         if (this.destroyed) throw new Error("Client is destroyed");
         const parsed = await parseTorrent(torrentId);
@@ -9342,14 +9464,28 @@ var init_mod3 = __esm({
         return torrent;
       }
       /**
-       * Seed a file or directory as a new torrent.
+       * Seeds an OPFS directory, file handle, Blob, or binary buffer as a new torrent.
        *
-       * Internally:
-       * 1. Builds an OPFS-backed generator entry.
-       * 2. Calls `generateTorrent()` to produce a `.torrent` buffer.
-       * 3. Calls {@link WebTorrent.add} on that buffer.
+       * Automatically generates the `.torrent` metainfo, writes pieces to OPFS, adds the torrent
+       * to the client, and announces to the configured trackers.
        *
-       * @returns the {@link Torrent} once it's been added and announced.
+       * @param input - FileSystemFileHandle, FileSystemDirectoryHandle, Blob, File, or Uint8Array.
+       * @param opts - Seeding options (display name, piece size, trackers, web seeds).
+       * @param cb - Optional callback invoked when the torrent is created.
+       * @returns The newly created and seeding {@link Torrent} instance.
+       * @throws {Error} If client is destroyed or OPFS is unavailable.
+       *
+       * @example
+       * ```ts
+       * const root = await navigator.storage.getDirectory();
+       * const handle = await root.getFileHandle("video.mp4");
+       *
+       * const torrent = await client.seed(handle, {
+       *   name: "video.mp4",
+       *   announce: ["wss://tracker.webtorrent.dev"],
+       * });
+       * console.log("Magnet URI:", torrent.magnetURI);
+       * ```
        */
       async seed(input, opts = {}, cb) {
         if (this.destroyed) throw new Error("Client is destroyed");
@@ -9553,6 +9689,20 @@ var init_mod3 = __esm({
           create: true
         });
       }
+      /**
+       * Stops and removes a torrent from the client by its 40-character hex info hash.
+       *
+       * Closes all peer wire connections, unannounces from trackers, and optionally deletes
+       * stored pieces from OPFS storage.
+       *
+       * @param infoHash - 40-character hex info hash identifying the torrent.
+       * @param destroyStore - If `true`, permanently deletes downloaded pieces from OPFS (default: `false`).
+       *
+       * @example
+       * ```ts
+       * await client.remove(torrent.infoHash, true); // remove and delete files from OPFS
+       * ```
+       */
       async remove(infoHash, destroyStore = false) {
         const torrent = this.torrents.get(infoHash);
         const swarm = this.swarms.get(infoHash);
@@ -9577,6 +9727,17 @@ var init_mod3 = __esm({
           unregisterTorrentFiles(infoHash);
         }
       }
+      /**
+       * Destroys the client, terminating all active swarms, peer connections, and servers.
+       *
+       * @param callback - Optional callback invoked after all resources have been cleaned up.
+       *
+       * @example
+       * ```ts
+       * await client.destroy();
+       * console.log("Client destroyed");
+       * ```
+       */
       async destroy(callback) {
         if (this.destroyed) return;
         this.destroyed = true;
@@ -9618,6 +9779,7 @@ var init_mod3 = __esm({
         });
       }
     };
+    mod_default = Client;
   }
 });
 
@@ -13279,7 +13441,7 @@ function dbg(...args) {
   ];
 }
 __name(dbg, "dbg");
-var torrentsDb = db2("browsertorrent", "torrents");
+var torrentsDb = db("browsertorrent", "torrents");
 async function initClient() {
   const existing = clientSignal.value;
   if (existing) {
