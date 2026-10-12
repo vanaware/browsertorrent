@@ -208,7 +208,8 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
   private async _generateOffers(count: number,): Promise<TrackerOffer[]> {
     const offers: TrackerOffer[] = [];
     const promises = Array.from({ length: count, },).map(async () => {
-      const offerId = Array.from(crypto.getRandomValues(new Uint8Array(20,),),)
+      // 20-char hex string (10 random bytes) fits within WebTorrent public tracker 20-byte string limit
+      const offerId = Array.from(crypto.getRandomValues(new Uint8Array(10,),),)
         .map((b,) => b.toString(16,).padStart(2, "0",)).join("",);
 
       const peer = this._createPeer(true, `webrtc:${offerId}`,);
@@ -260,16 +261,34 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
 
     // Recebemos uma RESPOSTA (Answer) a uma oferta nossa
     if (answer && offerId) {
-      const peer = this.pendingOffers.get(offerId,);
+      let peer = this.pendingOffers.get(offerId,);
+      if (!peer) {
+        for (const [k, p,] of this.pendingOffers.entries()) {
+          if (k.startsWith(offerId,) || offerId.startsWith(k,)) {
+            peer = p;
+            this.pendingOffers.delete(k,);
+            break;
+          }
+        }
+      } else {
+        this.pendingOffers.delete(offerId,);
+      }
+
       if (peer) {
+        console.log(
+          `[Swarm] Received answer for offerId: ${offerId}, signaling peer`,
+        );
         peer.id = peerId;
         this.peers.set(`webrtc:${peerId}`, peer,);
-        this.pendingOffers.delete(offerId,);
         this._hookPeerEvents(peer, `webrtc:${peerId}`,);
         peer.signal(answer,);
         this.emit(
           "peer",
           new CustomEvent("peer", { detail: { peer, source: "tracker", }, },),
+        );
+      } else {
+        console.warn(
+          `[Swarm] Received answer for unknown offerId: ${offerId}`,
         );
       }
       return;
@@ -279,6 +298,9 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
     if (offer && offerId) {
       if (this.peers.has(`webrtc:${peerId}`,)) return; // Já estamos conectados ou conectando
 
+      console.log(
+        `[Swarm] Received offer from remote peer ${peerId}, offerId: ${offerId}`,
+      );
       const peer = this._createPeer(false, `webrtc:${peerId}`,);
       peer.id = peerId;
       this.peers.set(`webrtc:${peerId}`, peer,);
@@ -287,6 +309,9 @@ export class Swarm extends TypedEventTarget<SwarmEvents> {
       // Quando nossa answer for gerada, enviaremos de volta pelo Tracker
       peer.on("signal", (e: any,) => {
         const answerSdp = e.detail.data as WebRTCSdp;
+        console.log(
+          `[Swarm] Sending answer back through tracker for peerId: ${peerId}, offerId: ${offerId}`,
+        );
         tracker.announce({
           to_peer_id: peerId,
           offer_id: offerId,

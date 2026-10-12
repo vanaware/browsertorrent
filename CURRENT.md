@@ -23,7 +23,7 @@
     - [x] WebTorrent ↔ BrowserTorrent Interoperability: PASSED
     - [x] BrowserTorrent SW Streaming Validation: PASSED
     - [x] WebTorrent ➔ BrowserTorrent SW Streaming Compatibility: PASSED
-    - [x] Public Tracker Scenarios (B_PUBLIC/C): TIMEOUT (Sandbox env limitation)
+    - [x] Public Tracker Scenarios (TEST 4): PASSED (verified byte-for-byte P2P transfer over wss://tracker.webtorrent.dev)
     - [x] Documentation of streaming differences (`packages/e2e/STREAMING_DIFFERENCES.md`).
 - [x] Phase 8: Core Consolidation & Service Worker Decoupling
   - [x] Migrated all required utilities into `@vanaware/browsertorrent` core package.

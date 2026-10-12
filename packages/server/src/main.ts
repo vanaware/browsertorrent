@@ -11,7 +11,7 @@ const __dirname = new URL(".", import.meta.url,).pathname;
 const fsRoot = Deno.env.get("FS_ROOT",) ??
   new URL("../build/dist", import.meta.url,).pathname;
 
-Deno.serve({ port, }, async (req,) => {
+Deno.serve({ port, hostname: "0.0.0.0", }, async (req,) => {
   try {
     const url = new URL(req.url,);
 

@@ -290,8 +290,13 @@ const { chromium } = require('@playwright/test');
     console.log("\n---------------------------------------------------------------");
     console.log("TEST 4: P2P SIGNALING & TRANSFER VIA PUBLIC TRACKER");
     console.log("---------------------------------------------------------------");
-    const pagePublicA = await browser.newPage();
-    const pagePublicB = await browser.newPage();
+    const contextPublicA = await browser.newContext();
+    const contextPublicB = await browser.newContext();
+    await contextPublicA.grantPermissions(["camera", "microphone"]);
+    await contextPublicB.grantPermissions(["camera", "microphone"]);
+
+    const pagePublicA = await contextPublicA.newPage();
+    const pagePublicB = await contextPublicB.newPage();
     pagePublicA.on('console', msg => console.log('[Public Seeder A]', msg.text()));
     pagePublicB.on('console', msg => console.log('[Public Leecher B]', msg.text()));
 
@@ -302,8 +307,12 @@ const { chromium } = require('@playwright/test');
 
     const PUBLIC_PAYLOAD = "PUBLIC_TRACKER_TEST_" + Date.now();
     const publicSeedResult = await pagePublicA.evaluate(async (payload) => {
+      await navigator.mediaDevices.getUserMedia({ audio: true }).catch(() => {});
       const { Client } = window.BrowserTorrentTest;
-      const client = new Client({ useOPFS: true });
+      const client = new Client({
+        useOPFS: false,
+        rtcConfig: { iceServers: [] }
+      });
       window.publicClientA = client;
 
       const encoder = new TextEncoder();
@@ -327,9 +336,16 @@ const { chromium } = require('@playwright/test');
 
     console.log("Seeding on public tracker with infoHash:", publicSeedResult.infoHash);
 
+    // Brief wait for public tracker announce
+    await new Promise(r => setTimeout(r, 2000));
+
     await pagePublicB.evaluate(async (meta) => {
+      await navigator.mediaDevices.getUserMedia({ audio: true }).catch(() => {});
       const { Client } = window.BrowserTorrentTest;
-      const client = new Client({ useOPFS: true });
+      const client = new Client({
+        useOPFS: false,
+        rtcConfig: { iceServers: [] }
+      });
       window.publicClientB = client;
       window.publicDone = false;
       window.publicContent = null;
@@ -349,9 +365,9 @@ const { chromium } = require('@playwright/test');
       });
     }, publicSeedResult);
 
-    console.log("Waiting for public tracker announcement and P2P connection (up to 20s)...");
+    console.log("Waiting for public tracker announcement and P2P connection (up to 30s)...");
     let publicTransferSuccess = false;
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 30; i++) {
       const status = await pagePublicB.evaluate(() => ({
         done: window.publicDone,
         content: window.publicContent,
@@ -359,7 +375,7 @@ const { chromium } = require('@playwright/test');
       }));
       if (status.done && status.content === PUBLIC_PAYLOAD) {
         publicTransferSuccess = true;
-        console.log("✅ SUCCESS! Transferred file via public tracker!");
+        console.log(`✅ SUCCESS! Transferred file via public tracker: "${status.content}"`);
         break;
       }
       await new Promise(r => setTimeout(r, 1000));
@@ -368,8 +384,11 @@ const { chromium } = require('@playwright/test');
     if (publicTransferSuccess) {
       console.log("✅ TEST 4 PASSED: Client connects with public tracker and transfers files!");
     } else {
-      console.log("ℹ️ Public tracker test note: Public tracker announced successfully, but NAT/STUN or rate limiting on public tracker may prevent instant STUN loopback between test instances. (Local tracker verified 100% P2P transfer).");
+      throw new Error("Test 4 Failed: Public tracker P2P file transfer timed out.");
     }
+
+    await contextPublicA.close();
+    await contextPublicB.close();
 
     console.log("\n===============================================================");
     console.log("SUMMARY OF PLAYWRIGHT E2E TESTS COMPLETED");
