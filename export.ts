@@ -40,7 +40,6 @@ export type ModoExportacao =
   | "denotorrent"
   | "tracker"
   | "server"
-  | "workerdb"
   | "utils"
   | "sw";
 
@@ -167,22 +166,6 @@ export const CONFIGURACOES: Record<ModoExportacao, ExportConfig> = {
     incluiVersao: false,
     instrucaoCustomizada:
       "O texto abaixo contém os arquivos de configuração e execução do SERVIDOR para testes do exemplo ui.",
-    default: true, // ✅ Roda por padrão
-  },
-  workerdb: {
-    arquivoSaida: "snapshots/worker-db.md",
-    extensoesPermitidas: EXTENSOES_PADRAO,
-    pastaBase: "packages/worker-db",
-    subpastasPermitidas: ["src", "tests", "docs", "example",],
-    arquivosRaizPermitidos: [
-      "build.ts",
-      "deno.json",
-      "deno.jsonc",
-      "readme.md",
-    ],
-    incluiVersao: false,
-    instrucaoCustomizada:
-      "O texto abaixo contém experimentos e código da área de @vanaware/worker-db",
     default: true, // ✅ Roda por padrão
   },
   utils: {

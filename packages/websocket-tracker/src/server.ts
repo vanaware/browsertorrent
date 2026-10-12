@@ -85,8 +85,12 @@ export class WebSocketTracker {
       {
         port: this.port,
         hostname: this.hostname,
-        onListen: ({ hostname, port, }: { hostname: string; port: number }) => {
-          console.log(`[TRACKER] WebSocket server listening on ws://${hostname}:${port}`,);
+        onListen: (
+          { hostname, port, }: { hostname: string; port: number },
+        ) => {
+          console.log(
+            `[TRACKER] WebSocket server listening on ws://${hostname}:${port}`,
+          );
         },
       },
       (req: Request,): Response | Promise<Response> =>

@@ -330,8 +330,12 @@ export async function incrementVersion(
 
   // Update packages/core/src/version.ts
   try {
-    const coreVersionContent = `// packages/core/src/version.ts\n// Auto-generated during build\nexport const VERSION = "${newVersion}";\nexport const CORE_VERSION = VERSION;\n`;
-    await Deno.writeTextFile("packages/core/src/version.ts", coreVersionContent,);
+    const coreVersionContent =
+      `// packages/core/src/version.ts\n// Auto-generated during build\nexport const VERSION = "${newVersion}";\nexport const CORE_VERSION = VERSION;\n`;
+    await Deno.writeTextFile(
+      "packages/core/src/version.ts",
+      coreVersionContent,
+    );
   } catch (_e) {
     // ignore if path does not exist
   }

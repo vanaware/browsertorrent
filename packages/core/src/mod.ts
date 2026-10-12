@@ -791,7 +791,9 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
       throw new Error("OPFS not available: cannot seed from this environment",);
     }
     const root = await navigator.storage.getDirectory();
-    return await root.getDirectoryHandle("browsertorrent-seed", { create: true, },);
+    return await root.getDirectoryHandle("browsertorrent-seed", {
+      create: true,
+    },);
   }
 
   async remove(infoHash: string, destroyStore = false,): Promise<void> {
@@ -887,9 +889,9 @@ export { File, } from "./core/file.ts";
 export { Piece, } from "./core/piece.ts";
 export { parseTorrent, } from "./utils/parse-torrent.ts";
 export {
+  BT_PEER_ID_PREFIX,
   decodePeerId,
   generateBrowserTorrentPeerId,
-  BT_PEER_ID_PREFIX,
 } from "./utils/peerid.ts";
 export { UtMetadata, } from "./extensions/ut-metadata.ts";
 export {
@@ -945,4 +947,3 @@ export {
   type StreamHandlerOptions,
   type WebTorrentFetchHandler,
 } from "./service-worker/mod.ts";
-

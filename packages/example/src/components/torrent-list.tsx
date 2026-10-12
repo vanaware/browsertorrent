@@ -10,11 +10,13 @@ import {
   torrentsSignal,
 } from "../torrent-context.tsx";
 
-function buildMagnetURI(t: any): string {
+function buildMagnetURI(t: any,): string {
   const ih = t.infoHash;
-  const name = encodeURIComponent(t.name ?? "download");
+  const name = encodeURIComponent(t.name ?? "download",);
   const trackers: string[] = t.announce?.length ? t.announce : getTrackers();
-  const trs = trackers.map((track: string) => `&tr=${encodeURIComponent(track)}`).join("");
+  const trs = trackers.map((track: string,) =>
+    `&tr=${encodeURIComponent(track,)}`
+  ).join("",);
   return `magnet:?xt=urn:btih:${ih}&dn=${name}${trs}`;
 }
 import type { Torrent, } from "@vanaware/browsertorrent";
@@ -76,11 +78,13 @@ export function TorrentList() {
                 type="button"
                 class="circle transparent"
                 onClick={() => {
-                  const magnet = buildMagnetURI(t);
-                  navigator.clipboard.writeText(magnet);
+                  const magnet = buildMagnetURI(t,);
+                  navigator.clipboard.writeText(magnet,);
                 }}
                 title="Copiar Magnet">
-                <i class="material-symbols">link</i>
+                <i class="material-symbols">
+                  link
+                </i>
               </button>
               {!isActive && (
                 <button

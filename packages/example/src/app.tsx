@@ -8,7 +8,7 @@ import { LeecherPanel, } from "./components/leecher-panel.tsx";
 import { PlayerPanel, } from "./components/player-panel.tsx";
 import { DebugPanel, } from "./components/debug-panel.tsx";
 import { TorrentList, } from "./components/torrent-list.tsx";
-import { SwarmVisualizer } from "./components/swarm-visualizer.tsx";
+import { SwarmVisualizer, } from "./components/swarm-visualizer.tsx";
 import {
   cleanup,
   debugSignal,
@@ -92,7 +92,9 @@ export function App() {
             <i class="material-symbols small white-text">
               settings
             </i>
-            {engineSignal.value === "browsertorrent" ? "BrowserTorrent" : "Original WebTorrent"}
+            {engineSignal.value === "browsertorrent"
+              ? "BrowserTorrent"
+              : "Original WebTorrent"}
           </div>
           <label class="radio">
             <input
@@ -116,7 +118,9 @@ export function App() {
           </label>
         </div>
 
-        <label class="chip transparent white-text" title="Local Tracker (Fast Discovery)">
+        <label
+          class="chip transparent white-text"
+          title="Local Tracker (Fast Discovery)">
           <i class="material-symbols small white-text">
             lan
           </i>
@@ -126,9 +130,14 @@ export function App() {
               checked={useLocalTrackerSignal.value}
               onChange={() => {
                 useLocalTrackerSignal.value = !useLocalTrackerSignal.value;
-                dbg(`Local tracker ${useLocalTrackerSignal.value ? "enabled" : "disabled"}`);
+                dbg(
+                  `Local tracker ${
+                    useLocalTrackerSignal.value ? "enabled" : "disabled"
+                  }`,
+                );
               }} />
-            <span></span>
+            <span>
+            </span>
           </div>
         </label>
 

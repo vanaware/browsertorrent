@@ -152,7 +152,10 @@ Deno.test("ExtensionHost: setHandshakeField with undefined removes field", () =>
 });
 
 Deno.test("ExtensionHost: constructor sets client/port/reqq fields", () => {
-  const { host, sent, } = createMockHost({ client: "BrowserTorrent/1.0", port: 6881, },);
+  const { host, sent, } = createMockHost({
+    client: "BrowserTorrent/1.0",
+    port: 6881,
+  },);
   host.use(new TestExtension(),);
   host.sendHandshake();
   // The sent handshake should include v and p

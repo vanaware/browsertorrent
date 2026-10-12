@@ -20,13 +20,13 @@ import { getScope, TorrentProvider, } from "./torrent-context.tsx";
 
 import {
   Client,
+  parseStreamURL,
   Peer,
+  streamManager,
   Swarm,
   Torrent,
-  WsTracker,
-  parseStreamURL,
-  streamManager,
   type WebTorrentServer,
+  WsTracker,
 } from "@vanaware/browsertorrent";
 
 // EXPOSE GLOBALS FOR E2E PLAYWRIGHT TESTING

@@ -21,11 +21,16 @@ export async function registerServiceWorker(
   options: ServiceWorkerRegisterOptions = {},
 ): Promise<ServiceWorkerRegistration | null> {
   if (!isServiceWorkerSupported()) {
-    console.warn("[BrowserTorrent] Service Workers are not supported in this environment.",);
+    console.warn(
+      "[BrowserTorrent] Service Workers are not supported in this environment.",
+    );
     return null;
   }
 
-  let basePath = options.scope || (typeof globalThis !== "undefined" && globalThis.location ? globalThis.location.pathname : "/");
+  let basePath = options.scope ||
+    (typeof globalThis !== "undefined" && globalThis.location
+      ? globalThis.location.pathname
+      : "/");
   if (basePath.split("/",).pop()?.includes(".",)) {
     basePath = basePath.substring(0, basePath.lastIndexOf("/",) + 1,);
   } else if (!basePath.endsWith("/",)) {
@@ -34,7 +39,9 @@ export async function registerServiceWorker(
 
   const ver = options.version || VERSION;
   const scriptName = options.scriptUrl || `${basePath}sw.js`;
-  const finalUrl = scriptName.includes("?",) ? `${scriptName}&v=${ver}` : `${scriptName}?v=${ver}`;
+  const finalUrl = scriptName.includes("?",)
+    ? `${scriptName}&v=${ver}`
+    : `${scriptName}?v=${ver}`;
 
   try {
     const registration = await navigator.serviceWorker.register(finalUrl, {
@@ -42,11 +49,16 @@ export async function registerServiceWorker(
     },);
 
     await navigator.serviceWorker.ready;
-    console.log(`[BrowserTorrent] Service Worker ready with scope: ${basePath}`,);
+    console.log(
+      `[BrowserTorrent] Service Worker ready with scope: ${basePath}`,
+    );
     return registration;
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err,);
-    console.error("[BrowserTorrent] Failed to register Service Worker:", message,);
+    console.error(
+      "[BrowserTorrent] Failed to register Service Worker:",
+      message,
+    );
     throw new Error(`Failed to register Service Worker: ${message}`,);
   }
 }

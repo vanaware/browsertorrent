@@ -35,6 +35,7 @@
 
 ## Current Task
 - [ ] Phase 9: OPFS WorkerDB and UI integration.
+  - [x] Migrated `worker-db` to standalone package `jsr:@vanaware/workerdb` and removed `packages/worker-db` from workspace.
   - [ ] Integrate `WorkerDB` for persistent torrent state.
   - [ ] Connect `Swarm` and `Peer` logic to the UI reactive signals.
   - [ ] Implement a clean dashboard using BeerCSS for managing torrents.

@@ -66,14 +66,16 @@ export function LeecherPanel({ disabled, }: Props,) {
           <label for="magnet-input">
             Magnet / InfoHash
           </label>
-          <button 
-            type="button" 
-            class="transparent front" 
+          <button
+            type="button"
+            class="transparent front"
             onClick={async () => {
               const text = await navigator.clipboard.readText();
               if (text) magnetInput.value = text;
             }}>
-            <i class="material-symbols">content_paste</i>
+            <i class="material-symbols">
+              content_paste
+            </i>
           </button>
         </div>
       )}

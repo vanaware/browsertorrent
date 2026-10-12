@@ -39,7 +39,10 @@ bt-tracker --port 8000
 ### 2. Programmatic Usage in Deno Server
 
 ```typescript
-import { createServer, WebSocketTracker } from "jsr:@vanaware/browsertorrent-tracker";
+import {
+  createServer,
+  WebSocketTracker,
+} from "jsr:@vanaware/browsertorrent-tracker";
 
 const tracker = createServer(8000, {
   hostname: "0.0.0.0",
@@ -47,7 +50,7 @@ const tracker = createServer(8000, {
   maxPeersPerTorrent: 50,
   maxTorrents: 1000,
   intervalMs: 120_000,
-});
+},);
 
 // Start listening
 await tracker.start();
@@ -57,14 +60,14 @@ await tracker.start();
 
 ## 🛠️ CLI Options & Environment Variables
 
-| Flag | Env Variable | Default | Description |
-| --- | --- | --- | --- |
-| `-p, --port` | `PORT` | `8000` | Port to listen on |
-| `-H, --host` | `HOSTNAME` | `0.0.0.0` | Hostname or IP to bind |
-| `--max-peers` | `MAX_PEERS` | `1000` | Global maximum connected peers |
-| `--max-peers-per-torrent` | `MAX_PEERS_PER_TORRENT` | `50` | Maximum peers returned per swarm |
-| `--max-torrents` | `MAX_TORRENTS` | `100` | Maximum distinct info-hashes tracked |
-| `-h, --help` | — | — | Show help message |
+| Flag                      | Env Variable            | Default   | Description                          |
+| ------------------------- | ----------------------- | --------- | ------------------------------------ |
+| `-p, --port`              | `PORT`                  | `8000`    | Port to listen on                    |
+| `-H, --host`              | `HOSTNAME`              | `0.0.0.0` | Hostname or IP to bind               |
+| `--max-peers`             | `MAX_PEERS`             | `1000`    | Global maximum connected peers       |
+| `--max-peers-per-torrent` | `MAX_PEERS_PER_TORRENT` | `50`      | Maximum peers returned per swarm     |
+| `--max-torrents`          | `MAX_TORRENTS`          | `100`     | Maximum distinct info-hashes tracked |
+| `-h, --help`              | —                       | —         | Show help message                    |
 
 ---
 

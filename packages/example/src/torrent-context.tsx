@@ -8,7 +8,7 @@ import { signal, } from "@preact/signals";
 import type { ComponentChildren, } from "preact";
 import type { Client, Torrent, Wire, } from "@vanaware/browsertorrent";
 import type { WebTorrentServer, } from "@vanaware/browsertorrent";
-import { db, } from "@vanaware/worker-db";
+import { db, } from "@vanaware/workerdb";
 import { streamManager, } from "@vanaware/browsertorrent";
 
 // Helper para converter stream Node (usado no WebTorrent original do browser) em Web ReadableStream
@@ -50,7 +50,7 @@ export const PUBLIC_TRACKERS = [
 
 export function getTrackers(): string[] {
   if (useLocalTrackerSignal.value) {
-    return [LOCAL_TRACKER, ...PUBLIC_TRACKERS];
+    return [LOCAL_TRACKER, ...PUBLIC_TRACKERS,];
   }
   return PUBLIC_TRACKERS;
 }
@@ -60,13 +60,13 @@ export function getTrackers(): string[] {
 export const engineSignal = signal<"browsertorrent" | "webtorrent">(
   "browsertorrent",
 );
-export const useLocalTrackerSignal = signal<boolean>(true);
+export const useLocalTrackerSignal = signal<boolean>(true,);
 
 export function getScope() {
   if (typeof globalThis.window === "undefined") return "/";
   // GH Pages support: detect base path from location
   const path = globalThis.window.location.pathname;
-  return path.endsWith("/") ? "./" : "./" + path.split("/").pop() + "/";
+  return path.endsWith("/",) ? "./" : "./" + path.split("/",).pop() + "/";
 }
 
 // deno-lint-ignore no-explicit-any
@@ -411,10 +411,13 @@ export async function addTorrent(torrentId: string,): Promise<void> {
 
   try {
     const trackers = getTrackers();
-    dbg("addTorrent: calling wt.add('" + torrentId + "') with trackers:", trackers,);
+    dbg(
+      "addTorrent: calling wt.add('" + torrentId + "') with trackers:",
+      trackers,
+    );
     const torrent = await wt.add(torrentId, {
       announce: trackers,
-    });
+    },);
     dbg("addTorrent: wt.add() returned",);
     dbg(
       "  torrent.infoHash:",

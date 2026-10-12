@@ -2,12 +2,12 @@
 
 import { assertEquals, } from "@std/assert";
 import {
+  BT_PEER_ID_PREFIX,
   decodePeerId,
   generateBrowserTorrentPeerId,
   getPeerIdClientName,
   isAzStyle,
   isShadowStyle,
-  BT_PEER_ID_PREFIX,
 } from "../src/utils/peerid.ts";
 
 import { generateRandomString, } from "../src/crypto/random.ts";
