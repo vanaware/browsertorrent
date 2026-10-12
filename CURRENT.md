@@ -36,6 +36,9 @@
 ## Current Task
 - [ ] Phase 9: OPFS WorkerDB and UI integration.
   - [x] Migrated `worker-db` to standalone package `jsr:@vanaware/workerdb` and removed `packages/worker-db` from workspace.
+  - [x] Removed root legacy scripts (`esbuild.ts`, `build.ts`, `export.ts`) in favor of `./scripts/` and `jsr:@vanaware/buildit`.
+  - [x] Eliminated `packages/utils` from workspace and codebase.
+  - [x] Consolidated Service Worker streaming bridge into `packages/core` with dual-tier API (low-level `connectServiceWorkerBridge` with full developer control, and intermediate `registerAndConnectServiceWorker` for standard out-of-the-box use), keeping generic PWA caching exclusively in `packages/service-worker`.
   - [ ] Integrate `WorkerDB` for persistent torrent state.
   - [ ] Connect `Swarm` and `Peer` logic to the UI reactive signals.
   - [ ] Implement a clean dashboard using BeerCSS for managing torrents.

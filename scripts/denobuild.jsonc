@@ -1,7 +1,7 @@
 {
   "$schema": "https://vanaware.github.io/buildit/schema/denobuild.json",
   "versionPaths": [
-    "packages/utils/src/config/version.ts"
+    "packages/core/src/version.ts"
   ],
   "forcepackagesversion": true,
   "targets": {

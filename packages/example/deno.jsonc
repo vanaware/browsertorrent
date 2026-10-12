@@ -22,6 +22,9 @@
     "preact/jsx-runtime": "https://esm.sh/preact@10.29.7/jsx-runtime",
     "@preact/signals": "https://esm.sh/@preact/signals@1.3.1?deps=preact@10.29.7",
     "@vanaware/browsertorrent": "../core/src/mod.ts",
+    "@vanaware/browsertorrent/service-worker": "../core/src/service-worker/mod.ts",
+    "@vanaware/browsertorrent/server": "../core/src/server/server.ts",
+    "@vanaware/browsertorrent/torrent-generator": "../core/src/torrent-generator/mod.ts",
     "@vanaware/workerdb": "jsr:@vanaware/workerdb@^0.5.1",
     "@vanaware/worker-db": "jsr:@vanaware/workerdb@^0.5.1"
   },

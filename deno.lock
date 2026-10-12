@@ -26,7 +26,6 @@
     "jsr:@std/path@^1.1.5": "1.1.6",
     "jsr:@std/path@^1.1.6": "1.1.6",
     "jsr:@std/streams@^1.2.0": "1.2.0",
-    "jsr:@std/testing@*": "1.0.21",
     "jsr:@std/testing@^1.0.20": "1.0.21",
     "jsr:@std/text@^1.0.19": "1.1.0",
     "jsr:@vanaware/buildit@~0.5.2": "0.5.2",
@@ -979,12 +978,6 @@
           "jsr:@std/fs@1",
           "jsr:@std/http@1",
           "jsr:@std/path@1"
-        ]
-      },
-      "packages/utils": {
-        "dependencies": [
-          "jsr:@std/assert@*",
-          "jsr:@std/testing@*"
         ]
       },
       "packages/websocket-tracker": {

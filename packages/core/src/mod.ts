@@ -934,16 +934,26 @@ export type {
   Torrent as GeneratedTorrent,
   Writer as TorrentWriter,
 } from "./torrent-generator/mod.ts";
-// Service Worker streaming & registration integration
+// Service Worker streaming, registration & bridge integration
 export {
+  connectServiceWorkerBridge,
   createWebTorrentFetchHandler,
+  establishSWConnection,
   getWebTorrentPrefix,
+  guessContentType,
   guessDestination,
   handleStream,
   isServiceWorkerSupported,
   isWebTorrentStreamRequest,
+  parseRange,
+  registerAndConnectServiceWorker,
   registerServiceWorker,
+  type ServiceWorkerBridgeOptions,
   type ServiceWorkerRegisterOptions,
   type StreamHandlerOptions,
   type WebTorrentFetchHandler,
+  waitForActivation,
+  waitForServiceWorkerActivation,
 } from "./service-worker/mod.ts";
+
+

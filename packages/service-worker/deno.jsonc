@@ -24,17 +24,12 @@
     "fake-indexeddb/auto": "https://esm.sh/fake-indexeddb@6.2.5/auto?bundle"
   },
   "tasks": {
-    "test": "deno test --allow-env --allow-net --allow-read --allow-write tests/",
-    "check": "deno check src/**/*.ts tests/**/*.ts",
-    "build": "deno run --allow-import --allow-read --allow-write --allow-env --allow-net --env-file --unstable-bundle ../esbuild.ts sw",
+    "test": "deno test --allow-env --allow-net --allow-read --allow-write src/",
+    "check": "deno check src/**/*.ts",
+    "build": "deno run -A ../../scripts/esbuild.ts sw",
     "tests": "deno task check && deno task test"
   },
   "exports": {
-    ".": "./src/mod.ts",
-    "./utils": "./src/utils/mod.ts",
-    "./handshakes/contato": "./src/handshakes/hand-contato.ts",
-    "./handshakes/sdp": "./src/handshakes/hand-sdp.ts",
-    "./handshakes/profile": "./src/handshakes/hand-profile.ts",
-    "./handshakes/mensagem": "./src/handshakes/hand-mensagem.ts"
+    ".": "./src/mod.ts"
   }
 }

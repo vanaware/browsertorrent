@@ -1,6 +1,6 @@
 {
   "name": "@vanaware/browsertorrent",
-  "version": "1.0.3-h3",
+  "version": "0.0.133#mv5j0pmh",
   "exports": {
     ".": "./src/mod.ts",
     "./service-worker": "./src/service-worker/mod.ts",
