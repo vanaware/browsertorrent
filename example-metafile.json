@@ -1062,7 +1062,7 @@
       "format": "esm"
     },
     "packages/core/src/version.ts": {
-      "bytes": 633,
+      "bytes": 613,
       "imports": [],
       "format": "esm"
     },
@@ -1592,7 +1592,7 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 955275
+      "bytes": 955270
     },
     "packages/server/build/dist/main.js": {
       "imports": [],
@@ -1720,7 +1720,7 @@
           "bytesInOutput": 736
         },
         "packages/core/src/version.ts": {
-          "bytesInOutput": 161
+          "bytesInOutput": 153
         },
         "packages/core/src/extensions/ut-pex.ts": {
           "bytesInOutput": 8636
@@ -1822,7 +1822,7 @@
           "bytesInOutput": 7873
         }
       },
-      "bytes": 496084
+      "bytes": 496116
     }
   }
 }

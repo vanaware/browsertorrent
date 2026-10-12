@@ -1,7 +1,7 @@
 {
   "inputs": {
     "<define:__GENERATED_ASSETS__>": {
-      "bytes": 67,
+      "bytes": 50,
       "imports": []
     },
     "packages/core/src/service-worker/stream-handler.ts": {
@@ -21,7 +21,7 @@
       "format": "esm"
     },
     "packages/core/src/version.ts": {
-      "bytes": 633,
+      "bytes": 613,
       "imports": [
         {
           "path": "<define:__GENERATED_ASSETS__>",
@@ -1273,7 +1273,7 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 493233
+      "bytes": 493202
     },
     "packages/server/build/dist/sw.js": {
       "imports": [],
@@ -1281,7 +1281,7 @@
       "entryPoint": "packages/service-worker/src/sw.ts",
       "inputs": {
         "<define:__GENERATED_ASSETS__>": {
-          "bytesInOutput": 236
+          "bytesInOutput": 218
         },
         "packages/core/src/utils/bencode.ts": {
           "bytesInOutput": 252
@@ -1428,7 +1428,7 @@
           "bytesInOutput": 48
         }
       },
-      "bytes": 33547
+      "bytes": 33569
     }
   }
 }

@@ -1,4 +1,7 @@
-/* BrowserTorrent v0.0.111-mu76cjbv */
+/*!
+ * BrowserTorrent v0.0.115#mv5hlrfr
+ * (c) 2026 Vanaware - MIT License
+ */
 
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
@@ -16,7 +19,7 @@ var __esm = (fn, res, err) => function __init() {
 var define_GENERATED_ASSETS_default;
 var init_define_GENERATED_ASSETS = __esm({
   "<define:__GENERATED_ASSETS__>"() {
-    define_GENERATED_ASSETS_default = ["./main.js", "./worker-db.js", "./webtorrent.min.js", "./index.html"];
+    define_GENERATED_ASSETS_default = ["./webtorrent.min.js", "./main.js", "./index.html"];
   }
 });
 
@@ -1031,7 +1034,7 @@ var _WEBRTC_SUPPORT = (() => {
 })();
 
 // packages/service-worker/src/cache.ts
-var CACHE_VERSION = true ? "v0.0.111-mu76cjbv" : `v${VERSION2}`;
+var CACHE_VERSION = true ? "v0.0.115#mv5hlrfr" : `v${VERSION2}`;
 var CACHE_NAME = `browsertorrent-cache-${CACHE_VERSION}`;
 var ASSETS_TO_CACHE = typeof define_GENERATED_ASSETS_default !== "undefined" ? define_GENERATED_ASSETS_default : [];
 function handleInstall(event) {

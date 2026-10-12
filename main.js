@@ -1,4 +1,7 @@
-/* BrowserTorrent v0.0.111-mu76cjbv */
+/*!
+ * BrowserTorrent v0.0.115#mv5hlrfr
+ * (c) 2026 Vanaware - MIT License
+ */
 
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
@@ -7985,7 +7988,7 @@ var init_mod = __esm({
 var VERSION, CORE_VERSION;
 var init_version = __esm({
   "packages/core/src/version.ts"() {
-    VERSION = "0.0.111-mu76cjbv";
+    VERSION = "1.0.3-h3";
     CORE_VERSION = VERSION;
   }
 });
