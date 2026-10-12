@@ -5,7 +5,7 @@
       "imports": []
     },
     "packages/core/src/service-worker/stream-handler.ts": {
-      "bytes": 27508,
+      "bytes": 27900,
       "imports": [
         {
           "path": "<define:__GENERATED_ASSETS__>",
@@ -32,7 +32,7 @@
       "format": "esm"
     },
     "packages/core/src/service-worker/register.ts": {
-      "bytes": 5671,
+      "bytes": 5779,
       "imports": [
         {
           "path": "packages/core/src/version.ts",
@@ -1070,7 +1070,7 @@
       "format": "esm"
     },
     "packages/core/src/mod.ts": {
-      "bytes": 79979,
+      "bytes": 79991,
       "imports": [
         {
           "path": "packages/core/src/utils/event-target.ts",
@@ -1226,7 +1226,7 @@
       "format": "esm"
     },
     "packages/service-worker/src/cache.ts": {
-      "bytes": 8218,
+      "bytes": 8290,
       "imports": [
         {
           "path": "packages/core/src/mod.ts",
@@ -1247,7 +1247,7 @@
       "format": "esm"
     },
     "packages/service-worker/src/sw.ts": {
-      "bytes": 4880,
+      "bytes": 4892,
       "imports": [
         {
           "path": "packages/core/src/service-worker/mod.ts",
@@ -1273,7 +1273,7 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 493202
+      "bytes": 493649
     },
     "packages/server/build/dist/sw.js": {
       "imports": [],

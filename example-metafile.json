@@ -154,8 +154,8 @@
       ],
       "format": "esm"
     },
-    "packages/worker-db/src/utils/id.ts": {
-      "bytes": 8231,
+    "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/utils/id.ts": {
+      "bytes": 11761,
       "imports": [
         {
           "path": "<runtime>",
@@ -165,16 +165,16 @@
       ],
       "format": "esm"
     },
-    "packages/worker-db/src/ls.ts": {
-      "bytes": 23347,
+    "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/ls.ts": {
+      "bytes": 28297,
       "imports": [
         {
-          "path": "packages/worker-db/src/utils/id.ts",
+          "path": "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/utils/id.ts",
           "kind": "import-statement",
           "original": "./utils/id.ts"
         },
         {
-          "path": "packages/worker-db/src/mod-main.ts",
+          "path": "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/mod-main.ts",
           "kind": "import-statement",
           "original": "./mod-main.ts"
         },
@@ -186,8 +186,8 @@
       ],
       "format": "esm"
     },
-    "https:https://esm.sh/idb-keyval@6.2.1/denonext/idb-keyval.mjs": {
-      "bytes": 1929,
+    "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/utils/idb-keyval.ts": {
+      "bytes": 23063,
       "imports": [
         {
           "path": "<runtime>",
@@ -197,19 +197,8 @@
       ],
       "format": "esm"
     },
-    "https:https://esm.sh/idb-keyval@6.2.1": {
-      "bytes": 91,
-      "imports": [
-        {
-          "path": "https:https://esm.sh/idb-keyval@6.2.1/denonext/idb-keyval.mjs",
-          "kind": "import-statement",
-          "original": "/idb-keyval@6.2.1/denonext/idb-keyval.mjs"
-        }
-      ],
-      "format": "esm"
-    },
-    "https:https://esm.sh/fflate@0.8.2/es2022/fflate.mjs": {
-      "bytes": 31916,
+    "node_modules/.deno/fflate@0.8.3/node_modules/fflate/esm/browser.js": {
+      "bytes": 90922,
       "imports": [
         {
           "path": "<runtime>",
@@ -219,32 +208,21 @@
       ],
       "format": "esm"
     },
-    "https:https://esm.sh/fflate@0.8.2?target=es2022": {
-      "bytes": 77,
+    "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/db.ts": {
+      "bytes": 162542,
       "imports": [
         {
-          "path": "https:https://esm.sh/fflate@0.8.2/es2022/fflate.mjs",
+          "path": "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/utils/idb-keyval.ts",
           "kind": "import-statement",
-          "original": "/fflate@0.8.2/es2022/fflate.mjs"
-        }
-      ],
-      "format": "esm"
-    },
-    "packages/worker-db/src/db.ts": {
-      "bytes": 71745,
-      "imports": [
-        {
-          "path": "https:https://esm.sh/idb-keyval@6.2.1",
-          "kind": "import-statement",
-          "original": "idb-keyval"
+          "original": "./utils/idb-keyval.ts"
         },
         {
-          "path": "https:https://esm.sh/fflate@0.8.2?target=es2022",
+          "path": "node_modules/.deno/fflate@0.8.3/node_modules/fflate/esm/browser.js",
           "kind": "import-statement",
-          "original": "fflate"
+          "original": "npm:fflate@^0.8.3"
         },
         {
-          "path": "packages/worker-db/src/utils/id.ts",
+          "path": "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/utils/id.ts",
           "kind": "import-statement",
           "original": "./utils/id.ts"
         },
@@ -256,11 +234,11 @@
       ],
       "format": "esm"
     },
-    "packages/worker-db/src/rpc.ts": {
-      "bytes": 33536,
+    "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/rpc.ts": {
+      "bytes": 61184,
       "imports": [
         {
-          "path": "packages/worker-db/src/utils/id.ts",
+          "path": "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/utils/id.ts",
           "kind": "import-statement",
           "original": "./utils/id.ts"
         },
@@ -272,23 +250,38 @@
       ],
       "format": "esm"
     },
-    "packages/worker-db/src/mod-main.ts": {
-      "bytes": 764,
+    "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/utils/version.ts": {
+      "bytes": 833,
+      "imports": [],
+      "format": "esm"
+    },
+    "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/mod-main.ts": {
+      "bytes": 2836,
       "imports": [
         {
-          "path": "packages/worker-db/src/ls.ts",
+          "path": "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/ls.ts",
           "kind": "import-statement",
           "original": "./ls.ts"
         },
         {
-          "path": "packages/worker-db/src/db.ts",
+          "path": "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/db.ts",
           "kind": "import-statement",
           "original": "./db.ts"
         },
         {
-          "path": "packages/worker-db/src/rpc.ts",
+          "path": "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/rpc.ts",
           "kind": "import-statement",
           "original": "./rpc.ts"
+        },
+        {
+          "path": "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/utils/id.ts",
+          "kind": "import-statement",
+          "original": "./utils/id.ts"
+        },
+        {
+          "path": "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/utils/version.ts",
+          "kind": "import-statement",
+          "original": "./utils/version.ts"
         }
       ],
       "format": "esm"
@@ -1088,7 +1081,7 @@
       "format": "esm"
     },
     "packages/core/src/service-worker/stream-handler.ts": {
-      "bytes": 27508,
+      "bytes": 27900,
       "imports": [
         {
           "path": "<runtime>",
@@ -1099,7 +1092,7 @@
       "format": "esm"
     },
     "packages/core/src/service-worker/register.ts": {
-      "bytes": 5671,
+      "bytes": 5779,
       "imports": [
         {
           "path": "packages/core/src/version.ts",
@@ -1131,7 +1124,7 @@
       "format": "esm"
     },
     "packages/core/src/mod.ts": {
-      "bytes": 79979,
+      "bytes": 79991,
       "imports": [
         {
           "path": "packages/core/src/utils/event-target.ts",
@@ -1282,7 +1275,7 @@
       "format": "esm"
     },
     "packages/example/src/torrent-context.tsx": {
-      "bytes": 62859,
+      "bytes": 62890,
       "imports": [
         {
           "path": "https:https://esm.sh/preact@10.29.7/jsx-runtime",
@@ -1300,9 +1293,9 @@
           "original": "@preact/signals"
         },
         {
-          "path": "packages/worker-db/src/mod-main.ts",
+          "path": "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/mod-main.ts",
           "kind": "import-statement",
-          "original": "@vanaware/worker-db"
+          "original": "@vanaware/workerdb"
         },
         {
           "path": "packages/core/src/mod.ts",
@@ -1349,7 +1342,7 @@
       "format": "esm"
     },
     "packages/example/src/components/leecher-panel.tsx": {
-      "bytes": 11945,
+      "bytes": 11981,
       "imports": [
         {
           "path": "https:https://esm.sh/preact@10.29.7/jsx-runtime",
@@ -1453,7 +1446,7 @@
       "format": "esm"
     },
     "packages/example/src/components/torrent-list.tsx": {
-      "bytes": 11821,
+      "bytes": 11893,
       "imports": [
         {
           "path": "https:https://esm.sh/preact@10.29.7/jsx-runtime",
@@ -1474,7 +1467,7 @@
       "format": "esm"
     },
     "packages/example/src/components/swarm-visualizer.tsx": {
-      "bytes": 8732,
+      "bytes": 9348,
       "imports": [
         {
           "path": "https:https://esm.sh/preact@10.29.7/jsx-runtime",
@@ -1495,7 +1488,7 @@
       "format": "esm"
     },
     "packages/example/src/app.tsx": {
-      "bytes": 25090,
+      "bytes": 25282,
       "imports": [
         {
           "path": "https:https://esm.sh/preact@10.29.7/jsx-runtime",
@@ -1592,7 +1585,7 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 955270
+      "bytes": 1076834
     },
     "packages/server/build/dist/main.js": {
       "imports": [],
@@ -1603,22 +1596,22 @@
           "bytesInOutput": 1616
         },
         "packages/core/src/utils/encoding.ts": {
-          "bytesInOutput": 2458
+          "bytesInOutput": 2463
         },
         "packages/core/src/utils/magnet.ts": {
-          "bytesInOutput": 5866
+          "bytesInOutput": 5861
         },
         "packages/core/src/utils/bencode.ts": {
-          "bytesInOutput": 12262
+          "bytesInOutput": 12276
         },
         "packages/core/src/utils/errors.ts": {
           "bytesInOutput": 2129
         },
         "packages/core/src/utils/torrent-types.ts": {
-          "bytesInOutput": 1626
+          "bytesInOutput": 1630
         },
         "packages/core/src/utils/metainfo-v2.ts": {
-          "bytesInOutput": 9304
+          "bytesInOutput": 9309
         },
         "packages/core/src/utils/metainfo-parser.ts": {
           "bytesInOutput": 9247
@@ -1654,31 +1647,31 @@
           "bytesInOutput": 9858
         },
         "packages/core/src/core/wire.ts": {
-          "bytesInOutput": 37361
+          "bytesInOutput": 37374
         },
         "packages/core/src/core/piece.ts": {
           "bytesInOutput": 1317
         },
         "packages/core/src/core/torrent.ts": {
-          "bytesInOutput": 30525
+          "bytesInOutput": 30560
         },
         "packages/core/src/network/peer.ts": {
-          "bytesInOutput": 11204
+          "bytesInOutput": 11214
         },
         "packages/core/src/utils/encode-util.ts": {
           "bytesInOutput": 332
         },
         "packages/core/src/network/tracker.ts": {
-          "bytesInOutput": 18062
+          "bytesInOutput": 18086
         },
         "packages/core/src/core/extension.ts": {
           "bytesInOutput": 324
         },
         "packages/core/src/extensions/ut-metadata.ts": {
-          "bytesInOutput": 11315
+          "bytesInOutput": 11320
         },
         "packages/core/src/network/swarm.ts": {
-          "bytesInOutput": 12263
+          "bytesInOutput": 12273
         },
         "packages/core/src/crypto/random.ts": {
           "bytesInOutput": 633
@@ -1687,19 +1680,19 @@
           "bytesInOutput": 5550
         },
         "packages/core/src/storage/memory-chunk-store.ts": {
-          "bytesInOutput": 3558
+          "bytesInOutput": 3569
         },
         "packages/core/src/storage/opfs-chunk-store.ts": {
-          "bytesInOutput": 6155
+          "bytesInOutput": 6173
         },
         "packages/core/src/server/stream-manager.ts": {
           "bytesInOutput": 3580
         },
         "packages/core/src/server/server.ts": {
-          "bytesInOutput": 13486
+          "bytesInOutput": 13488
         },
         "packages/core/src/core/file.ts": {
-          "bytesInOutput": 14255
+          "bytesInOutput": 14259
         },
         "packages/core/src/torrent-generator/types.ts": {
           "bytesInOutput": 1094
@@ -1708,13 +1701,13 @@
           "bytesInOutput": 1405
         },
         "packages/core/src/torrent-generator/opfs-reader.ts": {
-          "bytesInOutput": 3983
+          "bytesInOutput": 3985
         },
         "packages/core/src/torrent-generator/util.ts": {
           "bytesInOutput": 4217
         },
         "packages/core/src/torrent-generator/generator.ts": {
-          "bytesInOutput": 3514
+          "bytesInOutput": 3518
         },
         "packages/core/src/torrent-generator/mod.ts": {
           "bytesInOutput": 736
@@ -1723,22 +1716,22 @@
           "bytesInOutput": 153
         },
         "packages/core/src/extensions/ut-pex.ts": {
-          "bytesInOutput": 8636
+          "bytesInOutput": 8640
         },
         "packages/core/src/service-worker/stream-handler.ts": {
-          "bytesInOutput": 7894
+          "bytesInOutput": 7896
         },
         "packages/core/src/service-worker/register.ts": {
-          "bytesInOutput": 1581
+          "bytesInOutput": 1585
         },
         "packages/core/src/service-worker/mod.ts": {
           "bytesInOutput": 128
         },
         "packages/core/src/mod.ts": {
-          "bytesInOutput": 23520
+          "bytesInOutput": 23524
         },
         "https:https://esm.sh/preact@10.29.7/denonext/preact.mjs": {
-          "bytesInOutput": 16382
+          "bytesInOutput": 16379
         },
         "https:https://esm.sh/preact@10.29.7/denonext/jsx-runtime.mjs": {
           "bytesInOutput": 518
@@ -1764,35 +1757,29 @@
         "https:https://esm.sh/@preact/signals@1.3.1?deps=preact@10.29.7": {
           "bytesInOutput": 0
         },
-        "packages/worker-db/src/utils/id.ts": {
-          "bytesInOutput": 1824
+        "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/utils/id.ts": {
+          "bytesInOutput": 1933
         },
-        "packages/worker-db/src/ls.ts": {
-          "bytesInOutput": 7037
+        "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/ls.ts": {
+          "bytesInOutput": 6982
         },
-        "packages/worker-db/src/mod-main.ts": {
+        "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/mod-main.ts": {
           "bytesInOutput": 0
         },
-        "https:https://esm.sh/idb-keyval@6.2.1/denonext/idb-keyval.mjs": {
-          "bytesInOutput": 2035
+        "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/utils/idb-keyval.ts": {
+          "bytesInOutput": 3696
         },
-        "https:https://esm.sh/idb-keyval@6.2.1": {
-          "bytesInOutput": 0
+        "node_modules/.deno/fflate@0.8.3/node_modules/fflate/esm/browser.js": {
+          "bytesInOutput": 27464
         },
-        "https:https://esm.sh/fflate@0.8.2/es2022/fflate.mjs": {
-          "bytesInOutput": 43091
+        "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/db.ts": {
+          "bytesInOutput": 43647
         },
-        "https:https://esm.sh/fflate@0.8.2?target=es2022": {
-          "bytesInOutput": 0
-        },
-        "packages/worker-db/src/db.ts": {
-          "bytesInOutput": 20958
-        },
-        "packages/worker-db/src/rpc.ts": {
-          "bytesInOutput": 10898
+        "https:https://jsr.io/@vanaware/workerdb/0.5.1/src/rpc.ts": {
+          "bytesInOutput": 18740
         },
         "packages/example/src/torrent-context.tsx": {
-          "bytesInOutput": 16315
+          "bytesInOutput": 16297
         },
         "packages/example/src/components/seeder-panel.tsx": {
           "bytesInOutput": 4897
@@ -1804,7 +1791,7 @@
           "bytesInOutput": 0
         },
         "packages/example/src/components/player-panel.tsx": {
-          "bytesInOutput": 8695
+          "bytesInOutput": 8701
         },
         "packages/example/src/components/debug-panel.tsx": {
           "bytesInOutput": 2000
@@ -1813,16 +1800,16 @@
           "bytesInOutput": 4201
         },
         "packages/example/src/components/swarm-visualizer.tsx": {
-          "bytesInOutput": 3869
+          "bytesInOutput": 3925
         },
         "packages/example/src/app.tsx": {
           "bytesInOutput": 10421
         },
         "packages/example/src/main.tsx": {
-          "bytesInOutput": 7873
+          "bytesInOutput": 7876
         }
       },
-      "bytes": 496116
+      "bytes": 513084
     }
   }
 }
