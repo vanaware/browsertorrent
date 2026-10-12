@@ -1,5 +1,5 @@
 /*!
- * BrowserTorrent v0.0.134#mv5jehii
+ * BrowserTorrent v0.0.135#mv5k7ulh
  * (c) 2026 Vanaware - MIT License
  */
 
@@ -1656,6 +1656,12 @@ var init_bitfield = __esm({
       buffer;
       _length;
       grow;
+      /**
+       * Creates a new Bitfield instance.
+       *
+       * @param length - Total number of bits or BitfieldOptions configuration.
+       * @param opts - Optional grow configuration if length is passed as number.
+       */
       constructor(length, opts) {
         if (typeof length === "object") {
           this._length = length.length;
@@ -1667,6 +1673,15 @@ var init_bitfield = __esm({
         const byteLength = Math.ceil(this._length / 8);
         this.buffer = new Uint8Array(byteLength);
       }
+      /**
+       * Instantiates a Bitfield from an existing raw byte buffer.
+       *
+       * @param buffer - Incoming byte array containing packed bits.
+       * @param length - Number of active bits expected.
+       * @param opts - Grow options.
+       * @returns Initialized {@link Bitfield}.
+       * @throws {BitfieldError} If buffer length or spare bits are invalid.
+       */
       static fromBytes(buffer, length, opts) {
         const requiredBytes = Math.ceil(length / 8);
         if (buffer.length !== requiredBytes) {
@@ -1684,9 +1699,18 @@ var init_bitfield = __esm({
         bitfield.buffer = new Uint8Array(buffer);
         return bitfield;
       }
+      /**
+       * Total number of bits tracked by this bitfield.
+       */
       get length() {
         return this._length;
       }
+      /**
+       * Checks whether the bit at the given index is set (1).
+       *
+       * @param index - Zero-based bit index.
+       * @returns `true` if the bit is 1, `false` otherwise.
+       */
       get(index) {
         if (index < 0) return false;
         if (index >= this._length) {
@@ -1697,6 +1721,12 @@ var init_bitfield = __esm({
         const bitIndex = index % 8;
         return (this.buffer[byteIndex] & 128 >> bitIndex) !== 0;
       }
+      /**
+       * Sets the bit at the given index to 1.
+       *
+       * @param index - Zero-based bit index.
+       * @throws {BitfieldError} If index is negative or out of range when grow is disabled.
+       */
       set(index) {
         if (index < 0) {
           throw new BitfieldError("Cannot set negative index", "NEGATIVE_INDEX");
@@ -1706,18 +1736,28 @@ var init_bitfield = __esm({
             throw new BitfieldError(`Index ${index} is out of range (length: ${this._length})`, "INDEX_OUT_OF_RANGE");
           }
           const newLength = typeof this.grow === "number" ? Math.max(this._length + this.grow, index + 1) : index + 1;
-          this._resize(newLength);
+          this.#resize(newLength);
         }
         const byteIndex = Math.floor(index / 8);
         const bitIndex = index % 8;
         this.buffer[byteIndex] |= 128 >> bitIndex;
       }
+      /**
+       * Unsets the bit at the given index (sets to 0).
+       *
+       * @param index - Zero-based bit index.
+       */
       unset(index) {
         if (index < 0 || index >= this._length) return;
         const byteIndex = Math.floor(index / 8);
         const bitIndex = index % 8;
         this.buffer[byteIndex] &= ~(128 >> bitIndex);
       }
+      /**
+       * Counts the total number of set bits (1s) across the bitfield.
+       *
+       * @returns Number of set bits.
+       */
       count() {
         let count = 0;
         for (let i3 = 0; i3 < this._length; i3++) {
@@ -1725,10 +1765,15 @@ var init_bitfield = __esm({
         }
         return count;
       }
+      /**
+       * Returns a copy of the underlying packed bitfield byte buffer.
+       *
+       * @returns Binary {@link Uint8Array} representing the bitfield.
+       */
       toBuffer() {
         return new Uint8Array(this.buffer);
       }
-      _resize(newLength) {
+      #resize(newLength) {
         const newByteLength = Math.ceil(newLength / 8);
         const newBuffer = new Uint8Array(newByteLength);
         newBuffer.set(this.buffer);
@@ -2166,6 +2211,19 @@ function encodeMessagePayload(message) {
   payload.set(body, 1);
   return payload;
 }
+function decodeMessage(frame) {
+  if (frame.length < 4) {
+    throw new ProtocolError("peer message is missing its length prefix");
+  }
+  const length = new DataView(frame.buffer, frame.byteOffset, frame.byteLength).getUint32(0);
+  if (length !== frame.length - 4) {
+    throw new ProtocolError(`peer message length prefix is ${length}, received ${frame.length - 4}`);
+  }
+  if (length === 0) return {
+    type: "keepAlive"
+  };
+  return decodeMessagePayload(frame.subarray(4));
+}
 function decodeMessagePayload(payload) {
   if (payload.length === 0) {
     throw new ProtocolError("non-keepalive message has no message ID");
@@ -2399,6 +2457,7 @@ var init_message = __esm({
     init_net();
     __name(encodeMessage, "encodeMessage");
     __name(encodeMessagePayload, "encodeMessagePayload");
+    __name(decodeMessage, "decodeMessage");
     __name(decodeMessagePayload, "decodeMessagePayload");
     __name(encodeBlockRequest, "encodeBlockRequest");
     __name(decodeBlockRequest, "decodeBlockRequest");
@@ -3669,6 +3728,13 @@ var init_piece = __esm({
       offset;
       /** Whether the piece hash has been verified (optional, set by consumer). */
       hash;
+      /**
+       * Initializes a Piece descriptor.
+       *
+       * @param index - Zero-based piece index in the torrent.
+       * @param length - Byte length of the piece.
+       * @param offset - Absolute byte offset of this piece inside the torrent stream.
+       */
       constructor(index, length, offset) {
         this.index = index;
         this.length = length;
@@ -3755,6 +3821,12 @@ var init_torrent = __esm({
       _speedIntervals = /* @__PURE__ */ new Set();
       /** File objects registrados pelo cliente (para forward de eventos). */
       _registeredFiles = [];
+      /**
+       * Initializes a Torrent instance from parsed metainfo and runtime options.
+       *
+       * @param parsedTorrent - Metainfo structure parsed from a `.torrent` or magnet URI.
+       * @param opts - Storage backend, swarm coordinator, and verification options.
+       */
       constructor(parsedTorrent, opts) {
         super();
         this.parsedTorrent = parsedTorrent;
@@ -3773,7 +3845,7 @@ var init_torrent = __esm({
         this._webSeeds = [
           ...parsedTorrent.urlList || []
         ];
-        this._pieces = parsedTorrent.pieces.map((hash, index) => {
+        this._pieces = parsedTorrent.pieces.map((_hash, index) => {
           const pieceLen = index === numPieces - 1 ? this.lastPieceLength : this.pieceLength;
           return new Piece(index, pieceLen, index * this.pieceLength);
         });
@@ -3791,15 +3863,19 @@ var init_torrent = __esm({
       // ==========================================================================
       // GETTERS COMPUTADOS
       // ==========================================================================
+      /** Returns `true` if the torrent has completed piece verification and is active. */
       get ready() {
         return this._ready;
       }
+      /** Returns `true` if `destroy()` was called. */
       get destroyed() {
         return this._destroyed;
       }
+      /** Total verified downloaded bytes. */
       get downloaded() {
         return this._downloaded;
       }
+      /** Total uploaded bytes. */
       get uploaded() {
         return this._uploaded;
       }
@@ -3807,16 +3883,20 @@ var init_torrent = __esm({
       get store() {
         return this._store;
       }
+      /** Whether the torrent is currently paused. */
       get paused() {
         return this._paused;
       }
+      /** Fractional progress between `0.0` (0%) and `1.0` (100%). */
       get progress() {
         if (this.length === 0) return 0;
         return this._downloaded / this.length;
       }
+      /** Total number of pieces in the torrent. */
       get numPieces() {
         return this.expectedPieces.length;
       }
+      /** Byte length of the final piece. */
       get lastPieceLength() {
         return this.length % this.pieceLength || this.pieceLength;
       }
@@ -3979,13 +4059,16 @@ var init_torrent = __esm({
         });
         if (!cb) return task;
       }
-      // ==========================================================================
-      // PAUSE / RESUME
-      // ==========================================================================
+      /**
+       * Pauses all downloading and uploading on this torrent.
+       */
       pause() {
         this._paused = true;
         this._swarm?.pause();
       }
+      /**
+       * Resumes downloading and uploading on this torrent.
+       */
       resume() {
         this._paused = false;
         this._swarm?.resume();
@@ -3993,24 +4076,48 @@ var init_torrent = __esm({
       // ==========================================================================
       // PEERS E WEB SEEDS
       // ==========================================================================
+      /**
+       * Manually adds a peer to the torrent's swarm.
+       *
+       * @param addr - Peer address or WebRTC connection string.
+       * @returns `true` if the peer was queued for connection, `false` otherwise.
+       */
       addPeer(addr) {
         return this._swarm?.addPeer(addr) ?? false;
       }
+      /**
+       * Removes a peer from the torrent swarm.
+       *
+       * @param addr - Peer address.
+       */
       removePeer(addr) {
         this._swarm?.removePeer(addr);
       }
+      /**
+       * Adds a BEP 19 web seed URL.
+       *
+       * @param url - Web seed HTTP URL.
+       */
       addWebSeed(url) {
         if (!this._webSeeds.includes(url)) {
           this._webSeeds.push(url);
         }
       }
+      /**
+       * Removes a BEP 19 web seed URL.
+       *
+       * @param url - Web seed HTTP URL.
+       */
       removeWebSeed(url) {
         const idx = this._webSeeds.indexOf(url);
         if (idx !== -1) this._webSeeds.splice(idx, 1);
       }
-      // ==========================================================================
-      // REGISTRO DE WIRES (chamado pelo Swarm)
-      // ==========================================================================
+      /**
+       * Registers an active peer wire with the torrent, wiring event listeners and rate tracking.
+       *
+       * @param wire - Connected peer wire instance.
+       * @param addr - Remote peer address or identifier.
+       */
       _registerWire(wire, addr) {
         this.emit("wire", new CustomEvent("wire", {
           detail: {
@@ -4225,9 +4332,12 @@ var init_torrent = __esm({
         });
         attachInitialState();
       }
-      // ==========================================================================
-      // INJEÇÃO TARDIA DE METADADOS (Magnet URIs)
-      // ==========================================================================
+      /**
+       * Supplies the bencoded info dictionary bytes received from the swarm (e.g. via BEP 9 ut_metadata).
+       *
+       * @param infoBuffer - Raw bencoded info dictionary buffer.
+       * @returns A promise resolving to `true` if metadata was accepted, `false` if already set.
+       */
       async setMetadata(infoBuffer) {
         console.log(`[Torrent] setMetadata start, infoBuffer length: ${infoBuffer?.length}`);
         if (this._metadataReceived) return false;
@@ -4320,6 +4430,11 @@ var init_torrent = __esm({
       // ==========================================================================
       // CICLO DE VIDA
       // ==========================================================================
+      /**
+       * Internal asynchronous initializer that validates existing pieces and marks the torrent as ready.
+       *
+       * @param skipVerify - Whether to bypass piece hashing during startup.
+       */
       async _init(skipVerify) {
         try {
           if (!skipVerify && this.numPieces > 0) {
@@ -4332,6 +4447,9 @@ var init_torrent = __esm({
           this._onError(err2 instanceof Error ? err2 : new Error(String(err2)));
         }
       }
+      /**
+       * Verifies existing pieces already present in chunk storage upon initialization.
+       */
       async _verifyExistingPieces() {
         this._downloaded = 0;
         this.bitfield = new Bitfield(this.numPieces);
@@ -4369,6 +4487,13 @@ var init_torrent = __esm({
       // ==========================================================================
       // RECEBIMENTO DE DADOS
       // ==========================================================================
+      /**
+       * Receives, verifies SHA-1 hash, and persists a completed piece of data.
+       *
+       * @param index - Zero-based piece index.
+       * @param buf - Raw piece byte buffer.
+       * @returns `true` if verified and saved, `false` otherwise.
+       */
       async receivePiece(index, buf) {
         if (this._destroyed) return false;
         if (this.bitfield.get(index)) return true;
@@ -4407,14 +4532,15 @@ var init_torrent = __esm({
         }
       }
       /**
-       * Registra `File` instances para receberem os eventos `download`/`upload`.
-       * Chamado pelo {@link WebTorrent} após criar os `File`s.
+       * Registers `File` instances to receive `download` and `upload` events.
+       *
+       * @param files - Array of File instances in this torrent.
        */
       _registerFiles(files) {
         this._registeredFiles = files;
       }
       /**
-       * Emite um evento de download/upload nos Files cujo `pieceRange` contém `index`.
+       * Forwards download or upload byte notifications to the corresponding File instances.
        */
       _forwardToFiles(type, index, bytes) {
         for (const f2 of this._registeredFiles) {
@@ -4428,6 +4554,12 @@ var init_torrent = __esm({
           }
         }
       }
+      /**
+       * Retrieves piece bytes from chunk storage if verified as available.
+       *
+       * @param index - Zero-based piece index.
+       * @returns Piece byte buffer or `null` if not available.
+       */
       async getPiece(index) {
         if (!this.bitfield.get(index)) return null;
         try {
@@ -4439,6 +4571,11 @@ var init_torrent = __esm({
           return null;
         }
       }
+      /**
+       * Destroys the torrent session, cancels active timers, and closes storage.
+       *
+       * @param destroyStore - If `true`, permanently deletes the underlying stored files.
+       */
       async destroy(destroyStore = false) {
         if (this._destroyed) return;
         this._destroyed = true;
@@ -4461,6 +4598,9 @@ var init_torrent = __esm({
       // ==========================================================================
       // PRIVADOS
       // ==========================================================================
+      /**
+       * Verifies the SHA-1 hash of a piece buffer against its expected piece hash.
+       */
       async _verifyPiece(index, buf) {
         const expected = this.expectedPieces[index];
         if (!expected) throw new Error(`\xCDndice de pe\xE7a ${index} fora do limite.`);
@@ -4470,12 +4610,18 @@ var init_torrent = __esm({
           throw new Error(`Hash mismatch na pe\xE7a ${index}.`);
         }
       }
+      /**
+       * Resets the inactivity timer that emits the "idle" event.
+       */
       _resetIdleTimer() {
         if (this._idleTimer !== null) clearTimeout(this._idleTimer);
         this._idleTimer = setTimeout(() => {
           this.emit("idle");
         }, this._IDLE_TIMEOUT_MS);
       }
+      /**
+       * Internal error dispatcher emitting the "error" event.
+       */
       _onError(err2) {
         this.emit("error", new CustomEvent("error", {
           detail: {
@@ -5351,6 +5497,7 @@ var init_ut_metadata = __esm({
       static {
         __name(this, "UtMetadata");
       }
+      /** BEP 10 extension identifier name. */
       name = "ut_metadata";
       _fetching = false;
       _metadataComplete = false;
@@ -5358,10 +5505,17 @@ var init_ut_metadata = __esm({
       _numPieces = 0;
       _remainingRejects = 0;
       _bitfield;
+      /** Fully reassembled torrent metadata bytes once transfer completes. */
       metadata = null;
       _requestedPieces = /* @__PURE__ */ new Map();
       _timeoutMs;
       _extensionId = null;
+      /**
+       * Initializes the ut_metadata extension on a wire.
+       *
+       * @param wire - Owning peer wire connection.
+       * @param opts - Configuration options.
+       */
       constructor(wire, opts) {
         super(wire);
         this._bitfield = new Bitfield({
@@ -5373,9 +5527,19 @@ var init_ut_metadata = __esm({
           this.setMetadata(opts.metadata);
         }
       }
+      /**
+       * Handles local registration with the wire's extension host.
+       *
+       * @param context - Registration context containing host and transport sender.
+       */
       onRegister(context) {
         this._extensionId = context.host.localExtensions.get(this.name) ?? null;
       }
+      /**
+       * Returns metadata dictionary fields to announce during extended handshake.
+       *
+       * @returns Map of handshake parameters including `metadata_size`.
+       */
       handshakeFields() {
         const fields = /* @__PURE__ */ new Map();
         if (this._metadataSize !== null) {
@@ -5383,8 +5547,20 @@ var init_ut_metadata = __esm({
         }
         return fields;
       }
+      /**
+       * Handles standard BitTorrent wire handshake.
+       *
+       * @param _infoHash - Torrent info hash.
+       * @param _peerId - Remote peer ID.
+       * @param _extensions - Negotiated handshake extensions.
+       */
       onHandshake(_infoHash, _peerId, _extensions) {
       }
+      /**
+       * Handles incoming BEP 10 extended handshake from remote peer.
+       *
+       * @param handshake - Decoded extended handshake record or Map.
+       */
       onExtendedHandshake(handshake) {
         console.log(`[UtMetadata] onExtendedHandshake: m=${JSON.stringify(handshake.m)}, extensionsSize=${handshake.extensions instanceof Map ? handshake.extensions.size : "not Map"}, metadataSize=${handshake.metadataSize}`);
         let utMetadataId;
@@ -5419,16 +5595,21 @@ var init_ut_metadata = __esm({
               grow: 1e3
             });
             this._fetching = true;
-            this._requestPieces();
+            this.#requestPieces();
           }
         } else {
           this.emit("warning", new CustomEvent("warning", {
             detail: {
-              error: new Error("Peer does not support ut_metadata")
+              error: new Error("Peer does not support ut_metadata extension")
             }
           }));
         }
       }
+      /**
+       * Handles incoming binary messages directed to this extension ID.
+       *
+       * @param buf - Raw payload bytes.
+       */
       onMessage(buf) {
         let dict;
         let trailer;
@@ -5444,24 +5625,30 @@ var init_ut_metadata = __esm({
         }
         switch (dict.msg_type) {
           case 0:
-            this._onRequest(dict.piece);
+            this.#onRequest(dict.piece);
             break;
           case 1:
-            this._onData(dict.piece, trailer, dict.total_size);
+            this.#onData(dict.piece, trailer, dict.total_size);
             break;
           case 2:
-            this._onReject(dict.piece);
+            this.#onReject(dict.piece);
             break;
         }
       }
+      /**
+       * Starts requesting metadata pieces from the remote peer.
+       */
       fetch() {
         if (!this._metadataComplete) {
           this._fetching = true;
           if (this._metadataSize) {
-            this._requestPieces();
+            this.#requestPieces();
           }
         }
       }
+      /**
+       * Cancels any active metadata piece requests and timers.
+       */
       cancel() {
         this._fetching = false;
         for (const request of this._requestedPieces.values()) {
@@ -5469,6 +5656,12 @@ var init_ut_metadata = __esm({
         }
         this._requestedPieces.clear();
       }
+      /**
+       * Sets known metadata bytes (for seeding or after successful reassembly).
+       *
+       * @param newMetadata - Raw metadata buffer.
+       * @returns `true` if metadata was set.
+       */
       setMetadata(newMetadata) {
         if (this._metadataComplete) return true;
         let validMetadata = newMetadata;
@@ -5478,11 +5671,13 @@ var init_ut_metadata = __esm({
             validMetadata = encode(info.info);
           }
         } catch (err2) {
+          console.warn("Invalid metadata buffer:", err2);
+          return false;
         }
-        this.cancel();
         this.metadata = validMetadata;
+        this._metadataSize = validMetadata.length;
         this._metadataComplete = true;
-        this._metadataSize = this._metadataSize ?? this.metadata.length;
+        this._fetching = false;
         if (this.wire.extensionHost.peerExtensions.has("ut_metadata")) {
           this.wire.extensionHost.setHandshakeField("metadata_size", this._metadataSize);
         }
@@ -5493,7 +5688,7 @@ var init_ut_metadata = __esm({
         }));
         return true;
       }
-      _send(dict, trailer) {
+      #send(dict, trailer) {
         console.log(`[UtMetadata] _send: dict=${JSON.stringify(dict)}, trailerLength=${trailer ? trailer.length : 0}, extensionId=${this._extensionId}`);
         let buf = encode(dict);
         if (trailer) {
@@ -5508,17 +5703,17 @@ var init_ut_metadata = __esm({
           console.warn(`[UtMetadata] _send NOT sending because _extensionId is null!`);
         }
       }
-      _request(piece) {
+      #request(piece) {
         const existingRequest = this._requestedPieces.get(piece);
         if (existingRequest) {
           clearTimeout(existingRequest.timer);
         }
-        this._send({
+        this.#send({
           msg_type: 0,
           piece
         });
         const timer = setTimeout(() => {
-          this._handleTimeout(piece);
+          this.#handleTimeout(piece);
         }, this._timeoutMs);
         const attempts = existingRequest ? existingRequest.attempts + 1 : 1;
         this._requestedPieces.set(piece, {
@@ -5527,7 +5722,7 @@ var init_ut_metadata = __esm({
           timer
         });
       }
-      _data(piece, buf, totalSize) {
+      #data(piece, buf, totalSize) {
         const request = this._requestedPieces.get(piece);
         if (request) {
           clearTimeout(request.timer);
@@ -5540,18 +5735,18 @@ var init_ut_metadata = __esm({
         if (typeof totalSize === "number") {
           msg.total_size = totalSize;
         }
-        this._send(msg, buf);
+        this.#send(msg, buf);
       }
-      _reject(piece) {
-        this._send({
+      #reject(piece) {
+        this.#send({
           msg_type: 2,
           piece
         });
       }
-      _onRequest(piece) {
+      #onRequest(piece) {
         console.log(`[UtMetadata] _onRequest piece: ${piece}, metadataComplete: ${this._metadataComplete}, size: ${this._metadataSize}`);
         if (!this._metadataComplete || !this._metadataSize) {
-          return this._reject(piece);
+          return this.#reject(piece);
         }
         const start = piece * PIECE_LENGTH;
         let end = start + PIECE_LENGTH;
@@ -5559,9 +5754,9 @@ var init_ut_metadata = __esm({
           end = this._metadataSize;
         }
         const buf = this.metadata.slice(start, end);
-        this._data(piece, buf, this._metadataSize);
+        this.#data(piece, buf, this._metadataSize);
       }
-      _onData(piece, buf, totalSize) {
+      #onData(piece, buf, totalSize) {
         console.log(`[UtMetadata] _onData piece: ${piece}, buf.length: ${buf.length}, totalSize: ${totalSize}, fetching: ${this._fetching}, metaSize: ${this._metadataSize}`);
         if (buf.length > PIECE_LENGTH || !this._fetching || !this._metadataSize) {
           return;
@@ -5579,16 +5774,16 @@ var init_ut_metadata = __esm({
           clearTimeout(request.timer);
           this._requestedPieces.delete(piece);
         }
-        this._checkDone();
+        this.#checkDone();
       }
-      _onReject(piece) {
+      #onReject(piece) {
         const request = this._requestedPieces.get(piece);
         if (request) {
           clearTimeout(request.timer);
           this._requestedPieces.delete(piece);
         }
         if (this._remainingRejects > 0 && this._fetching) {
-          this._request(piece);
+          this.#request(piece);
           this._remainingRejects -= 1;
         } else {
           this.emit("warning", new CustomEvent("warning", {
@@ -5598,32 +5793,32 @@ var init_ut_metadata = __esm({
           }));
         }
       }
-      _handleTimeout(piece) {
+      #handleTimeout(piece) {
         this._requestedPieces.delete(piece);
         if (!this._fetching) return;
         const maxAttempts = 3;
         const currentRequest = this._requestedPieces.get(piece);
         const attempts = currentRequest ? currentRequest.attempts + 1 : 1;
         if (attempts < maxAttempts) {
-          this._request(piece);
+          this.#request(piece);
         } else {
           this.emit("warning", new CustomEvent("warning", {
             detail: {
               error: new Error(`Timeout while requesting metadata piece ${piece}`)
             }
           }));
-          this._checkDone();
+          this.#checkDone();
         }
       }
-      _requestPieces() {
+      #requestPieces() {
         if (this._fetching && this._metadataSize) {
           this.metadata = new Uint8Array(this._metadataSize);
           for (let piece = 0; piece < this._numPieces; piece++) {
-            this._request(piece);
+            this.#request(piece);
           }
         }
       }
-      _checkDone() {
+      #checkDone() {
         let done = true;
         for (let piece = 0; piece < this._numPieces; piece++) {
           if (!this._bitfield.get(piece)) {
@@ -5632,15 +5827,15 @@ var init_ut_metadata = __esm({
           }
         }
         if (done && this.metadata) {
-          const success = this._verifyMetadataIntegrity();
+          const success = this.#verifyMetadataIntegrity();
           if (success) {
             this.setMetadata(this.metadata);
           } else {
-            this._failedMetadata();
+            this.#failedMetadata();
           }
         }
       }
-      _verifyMetadataIntegrity() {
+      #verifyMetadataIntegrity() {
         if (!this.metadata) return false;
         console.log(`[UtMetadata] _verifyMetadataIntegrity metadata.length: ${this.metadata.length}, first 20 bytes:`, Array.from(this.metadata.slice(0, 20)));
         try {
@@ -5651,7 +5846,7 @@ var init_ut_metadata = __esm({
           return false;
         }
       }
-      _failedMetadata() {
+      #failedMetadata() {
         if (!this._metadataSize) return;
         this._bitfield = new Bitfield({
           length: this._numPieces,
@@ -5659,7 +5854,7 @@ var init_ut_metadata = __esm({
         });
         this._remainingRejects -= this._numPieces;
         if (this._remainingRejects > 0) {
-          this._requestPieces();
+          this.#requestPieces();
         } else {
           this.emit("warning", new CustomEvent("warning", {
             detail: {
@@ -6594,7 +6789,7 @@ var init_stream_manager = __esm({
        *
        * @param infoHash - 40-char hex info hash identifying the torrent.
        * @param fileIndex - Zero-based file index inside the torrent.
-       * @param file - The {@link File} instance to serve.
+       * @param file - The file instance to serve.
        */
       register(infoHash, fileIndex, file) {
         const key = this._key(infoHash, fileIndex);
@@ -6651,6 +6846,9 @@ var init_stream_manager = __esm({
       clear() {
         this.entries.clear();
       }
+      /**
+       * Generates internal cache key for (infoHash, fileIndex).
+       */
       _key(infoHash, fileIndex) {
         return `${infoHash}:${fileIndex}`;
       }
@@ -6945,6 +7143,7 @@ var init_server = __esm({
       static {
         __name(this, "InProcessTransport");
       }
+      /** Array of sent messages recorded by the in-process test transport. */
       sent = [];
       responseResolver;
       /** @internal — exposed for tests. */
@@ -6976,11 +7175,19 @@ var init_server = __esm({
       static {
         __name(this, "WebTorrentServer");
       }
+      /** Base scope URL prefix of the Service Worker. */
       scope;
+      /** `true` when the handshake with the Service Worker is fully established. */
       isReady = false;
+      /** `true` after `destroy()` has been called to tear down the server. */
       isDestroyed = false;
       transport;
       pendingAcks = /* @__PURE__ */ new Set();
+      /**
+       * Initializes a WebTorrentServer instance.
+       *
+       * @param opts - Transport and scope options.
+       */
       constructor(opts) {
         this.transport = opts.transport;
         this.scope = opts.scope;
@@ -7597,6 +7804,8 @@ var init_opfs_reader = __esm({
       #currentSize = 0;
       #closed = false;
       /**
+       * Constructs an OPFSMultiFileReader instance from an ordered list of entries.
+       *
        * @param entries - Ordered list of OPFS file entries to read sequentially.
        *   Each entry must have either a `handle` set, or a `size` matching a
        *   pre-fetched `File` (see {@link withFile}).
@@ -8204,6 +8413,11 @@ var init_ut_pex = __esm({
         this._lastSentAt = now;
         return Promise.resolve();
       }
+      /**
+       * Called when the extension is registered with the peer wire.
+       *
+       * @param context - Registration context containing host and transmitter.
+       */
       onRegister(context) {
         const id = context.host.localExtensions.get(this.name);
         if (id !== void 0) {
@@ -8758,15 +8972,20 @@ var init_mod2 = __esm({
 var mod_exports2 = {};
 __export(mod_exports2, {
   BT_PEER_ID_PREFIX: () => BT_PEER_ID_PREFIX,
+  Bitfield: () => Bitfield,
   CORE_VERSION: () => CORE_VERSION,
   Client: () => Client,
+  Extension: () => Extension,
+  ExtensionHost: () => ExtensionHost,
   File: () => File,
   HttpTracker: () => HttpTracker,
+  OPFSChunkStore: () => OPFSChunkStore,
   OPFSMultiFileReader: () => OPFSMultiFileReader,
   Peer: () => Peer,
   PexPeerFlag: () => PexPeerFlag,
   Piece: () => Piece,
   PieceSizeEnum: () => PieceSizeEnum,
+  StreamManager: () => StreamManager,
   Swarm: () => Swarm,
   Torrent: () => Torrent,
   UtMetadata: () => UtMetadata,
@@ -8781,8 +9000,14 @@ __export(mod_exports2, {
   connectServiceWorkerBridge: () => connectServiceWorkerBridge,
   createServer: () => createServer,
   createWebTorrentFetchHandler: () => createWebTorrentFetchHandler,
+  decode: () => decode,
+  decodeHandshake: () => decodeHandshake,
+  decodeMessage: () => decodeMessage,
   decodePeerId: () => decodePeerId,
   decodePexUpdate: () => decodePexUpdate,
+  encode: () => encode,
+  encodeHandshake: () => encodeHandshake,
+  encodeMessage: () => encodeMessage,
   encodePexUpdate: () => encodePexUpdate,
   establishSWConnection: () => establishSWConnection,
   fileSizeSum: () => fileSizeSum,
@@ -8830,6 +9055,13 @@ var init_mod3 = __esm({
     init_wire();
     init_file();
     init_piece();
+    init_bitfield();
+    init_extension_host();
+    init_extension();
+    init_handshake();
+    init_message();
+    init_opfs_chunk_store();
+    init_bencode();
     init_parse_torrent();
     init_peerid();
     init_ut_metadata();

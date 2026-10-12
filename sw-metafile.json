@@ -5,7 +5,7 @@
       "imports": []
     },
     "packages/core/src/service-worker/stream-handler.ts": {
-      "bytes": 27900,
+      "bytes": 28968,
       "imports": [
         {
           "path": "<define:__GENERATED_ASSETS__>",
@@ -21,7 +21,7 @@
       "format": "esm"
     },
     "packages/core/src/version.ts": {
-      "bytes": 613,
+      "bytes": 1115,
       "imports": [
         {
           "path": "<define:__GENERATED_ASSETS__>",
@@ -32,7 +32,7 @@
       "format": "esm"
     },
     "packages/core/src/service-worker/register.ts": {
-      "bytes": 5779,
+      "bytes": 7286,
       "imports": [
         {
           "path": "packages/core/src/version.ts",
@@ -53,7 +53,7 @@
       "format": "esm"
     },
     "packages/core/src/server/stream-manager.ts": {
-      "bytes": 15265,
+      "bytes": 17883,
       "imports": [
         {
           "path": "<define:__GENERATED_ASSETS__>",
@@ -69,7 +69,7 @@
       "format": "esm"
     },
     "packages/core/src/service-worker/bridge.ts": {
-      "bytes": 26686,
+      "bytes": 27142,
       "imports": [
         {
           "path": "packages/core/src/server/stream-manager.ts",
@@ -174,7 +174,7 @@
       "format": "esm"
     },
     "packages/core/src/utils/bencode.ts": {
-      "bytes": 48889,
+      "bytes": 52044,
       "imports": [
         {
           "path": "<define:__GENERATED_ASSETS__>",
@@ -351,7 +351,7 @@
       "format": "esm"
     },
     "packages/core/src/core/bitfield.ts": {
-      "bytes": 10536,
+      "bytes": 15663,
       "imports": [
         {
           "path": "packages/core/src/utils/errors.ts",
@@ -570,7 +570,7 @@
       "format": "esm"
     },
     "packages/core/src/core/piece.ts": {
-      "bytes": 4368,
+      "bytes": 4961,
       "imports": [
         {
           "path": "<define:__GENERATED_ASSETS__>",
@@ -586,7 +586,7 @@
       "format": "esm"
     },
     "packages/core/src/core/torrent.ts": {
-      "bytes": 96873,
+      "bytes": 102561,
       "imports": [
         {
           "path": "packages/core/src/utils/event-target.ts",
@@ -741,7 +741,7 @@
       "format": "esm"
     },
     "packages/core/src/extensions/ut-metadata.ts": {
-      "bytes": 39552,
+      "bytes": 42636,
       "imports": [
         {
           "path": "packages/core/src/core/extension.ts",
@@ -824,7 +824,7 @@
       "format": "esm"
     },
     "packages/core/src/utils/peerid.ts": {
-      "bytes": 25513,
+      "bytes": 28414,
       "imports": [
         {
           "path": "packages/core/src/crypto/random.ts",
@@ -882,7 +882,7 @@
       "format": "esm"
     },
     "packages/core/src/server/server.ts": {
-      "bytes": 58797,
+      "bytes": 62608,
       "imports": [
         {
           "path": "packages/core/src/server/stream-manager.ts",
@@ -929,7 +929,7 @@
       "format": "esm"
     },
     "packages/core/src/torrent-generator/types.ts": {
-      "bytes": 6389,
+      "bytes": 8806,
       "imports": [
         {
           "path": "<define:__GENERATED_ASSETS__>",
@@ -956,7 +956,7 @@
       "format": "esm"
     },
     "packages/core/src/torrent-generator/opfs-reader.ts": {
-      "bytes": 13996,
+      "bytes": 14202,
       "imports": [
         {
           "path": "<define:__GENERATED_ASSETS__>",
@@ -1034,7 +1034,7 @@
       "format": "esm"
     },
     "packages/core/src/torrent-generator/mod.ts": {
-      "bytes": 2004,
+      "bytes": 3930,
       "imports": [
         {
           "path": "packages/core/src/utils/bencode.ts",
@@ -1075,7 +1075,7 @@
       "format": "esm"
     },
     "packages/core/src/extensions/ut-pex.ts": {
-      "bytes": 32027,
+      "bytes": 32471,
       "imports": [
         {
           "path": "packages/core/src/core/extension.ts",
@@ -1101,7 +1101,7 @@
       "format": "esm"
     },
     "packages/core/src/mod.ts": {
-      "bytes": 80596,
+      "bytes": 82620,
       "imports": [
         {
           "path": "packages/core/src/utils/event-target.ts",
@@ -1197,6 +1197,41 @@
           "path": "packages/core/src/core/piece.ts",
           "kind": "import-statement",
           "original": "./core/piece.ts"
+        },
+        {
+          "path": "packages/core/src/core/bitfield.ts",
+          "kind": "import-statement",
+          "original": "./core/bitfield.ts"
+        },
+        {
+          "path": "packages/core/src/core/extension-host.ts",
+          "kind": "import-statement",
+          "original": "./core/extension-host.ts"
+        },
+        {
+          "path": "packages/core/src/core/extension.ts",
+          "kind": "import-statement",
+          "original": "./core/extension.ts"
+        },
+        {
+          "path": "packages/core/src/core/handshake.ts",
+          "kind": "import-statement",
+          "original": "./core/handshake.ts"
+        },
+        {
+          "path": "packages/core/src/core/message.ts",
+          "kind": "import-statement",
+          "original": "./core/message.ts"
+        },
+        {
+          "path": "packages/core/src/storage/opfs-chunk-store.ts",
+          "kind": "import-statement",
+          "original": "./storage/opfs-chunk-store.ts"
+        },
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "./utils/bencode.ts"
         },
         {
           "path": "packages/core/src/utils/parse-torrent.ts",
@@ -1304,7 +1339,7 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 503671
+      "bytes": 521706
     },
     "packages/server/build/dist/sw.js": {
       "imports": [],
@@ -1354,13 +1389,13 @@
           "bytesInOutput": 32
         },
         "packages/core/src/server/stream-manager.ts": {
-          "bytesInOutput": 2559
+          "bytesInOutput": 2624
         },
         "packages/service-worker/src/cache.ts": {
           "bytesInOutput": 2054
         },
         "packages/core/src/mod.ts": {
-          "bytesInOutput": 303
+          "bytesInOutput": 319
         },
         "packages/core/src/utils/event-target.ts": {
           "bytesInOutput": 1350
@@ -1462,7 +1497,7 @@
           "bytesInOutput": 48
         }
       },
-      "bytes": 33875
+      "bytes": 33956
     }
   }
 }

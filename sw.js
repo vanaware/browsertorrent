@@ -1,5 +1,5 @@
 /*!
- * BrowserTorrent v0.0.134#mv5jehii
+ * BrowserTorrent v0.0.135#mv5k7ulh
  * (c) 2026 Vanaware - MIT License
  */
 
@@ -365,7 +365,7 @@ var StreamManager = class {
    *
    * @param infoHash - 40-char hex info hash identifying the torrent.
    * @param fileIndex - Zero-based file index inside the torrent.
-   * @param file - The {@link File} instance to serve.
+   * @param file - The file instance to serve.
    */
   register(infoHash, fileIndex, file) {
     const key = this._key(infoHash, fileIndex);
@@ -422,6 +422,9 @@ var StreamManager = class {
   clear() {
     this.entries.clear();
   }
+  /**
+   * Generates internal cache key for (infoHash, fileIndex).
+   */
   _key(infoHash, fileIndex) {
     return `${infoHash}:${fileIndex}`;
   }
@@ -1035,6 +1038,7 @@ var File = class extends TypedEventTarget {
 // packages/core/src/mod.ts
 init_mod();
 init_version();
+init_bencode();
 
 // packages/core/src/extensions/ut-pex.ts
 init_define_GENERATED_ASSETS();
@@ -1048,7 +1052,7 @@ var _WEBRTC_SUPPORT = (() => {
 })();
 
 // packages/service-worker/src/cache.ts
-var CACHE_VERSION = true ? "v0.0.134#mv5jehii" : `v${VERSION2}`;
+var CACHE_VERSION = true ? "v0.0.135#mv5k7ulh" : `v${VERSION2}`;
 var CACHE_NAME = `browsertorrent-cache-${CACHE_VERSION}`;
 var ASSETS_TO_CACHE = typeof define_GENERATED_ASSETS_default !== "undefined" ? define_GENERATED_ASSETS_default : [];
 function handleInstall(event) {

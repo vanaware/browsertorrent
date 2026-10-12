@@ -325,7 +325,7 @@
       "format": "esm"
     },
     "packages/core/src/utils/bencode.ts": {
-      "bytes": 48889,
+      "bytes": 52044,
       "imports": [
         {
           "path": "<runtime>",
@@ -467,7 +467,7 @@
       "format": "esm"
     },
     "packages/core/src/core/bitfield.ts": {
-      "bytes": 10536,
+      "bytes": 15663,
       "imports": [
         {
           "path": "packages/core/src/utils/errors.ts",
@@ -640,7 +640,7 @@
       "format": "esm"
     },
     "packages/core/src/core/piece.ts": {
-      "bytes": 4368,
+      "bytes": 4961,
       "imports": [
         {
           "path": "<runtime>",
@@ -651,7 +651,7 @@
       "format": "esm"
     },
     "packages/core/src/core/torrent.ts": {
-      "bytes": 96873,
+      "bytes": 102561,
       "imports": [
         {
           "path": "packages/core/src/utils/event-target.ts",
@@ -781,7 +781,7 @@
       "format": "esm"
     },
     "packages/core/src/extensions/ut-metadata.ts": {
-      "bytes": 39552,
+      "bytes": 42636,
       "imports": [
         {
           "path": "packages/core/src/core/extension.ts",
@@ -849,7 +849,7 @@
       "format": "esm"
     },
     "packages/core/src/utils/peerid.ts": {
-      "bytes": 25513,
+      "bytes": 28414,
       "imports": [
         {
           "path": "packages/core/src/crypto/random.ts",
@@ -892,7 +892,7 @@
       "format": "esm"
     },
     "packages/core/src/server/stream-manager.ts": {
-      "bytes": 15265,
+      "bytes": 17883,
       "imports": [
         {
           "path": "<runtime>",
@@ -903,7 +903,7 @@
       "format": "esm"
     },
     "packages/core/src/server/server.ts": {
-      "bytes": 58797,
+      "bytes": 62608,
       "imports": [
         {
           "path": "packages/core/src/server/stream-manager.ts",
@@ -940,7 +940,7 @@
       "format": "esm"
     },
     "packages/core/src/torrent-generator/types.ts": {
-      "bytes": 6389,
+      "bytes": 8806,
       "imports": [],
       "format": "esm"
     },
@@ -956,7 +956,7 @@
       "format": "esm"
     },
     "packages/core/src/torrent-generator/opfs-reader.ts": {
-      "bytes": 13996,
+      "bytes": 14202,
       "imports": [
         {
           "path": "<runtime>",
@@ -1019,7 +1019,7 @@
       "format": "esm"
     },
     "packages/core/src/torrent-generator/mod.ts": {
-      "bytes": 2004,
+      "bytes": 3930,
       "imports": [
         {
           "path": "packages/core/src/utils/bencode.ts",
@@ -1055,12 +1055,12 @@
       "format": "esm"
     },
     "packages/core/src/version.ts": {
-      "bytes": 613,
+      "bytes": 1115,
       "imports": [],
       "format": "esm"
     },
     "packages/core/src/extensions/ut-pex.ts": {
-      "bytes": 32027,
+      "bytes": 32471,
       "imports": [
         {
           "path": "packages/core/src/core/extension.ts",
@@ -1081,7 +1081,7 @@
       "format": "esm"
     },
     "packages/core/src/service-worker/stream-handler.ts": {
-      "bytes": 27900,
+      "bytes": 28968,
       "imports": [
         {
           "path": "<runtime>",
@@ -1092,7 +1092,7 @@
       "format": "esm"
     },
     "packages/core/src/service-worker/register.ts": {
-      "bytes": 5779,
+      "bytes": 7286,
       "imports": [
         {
           "path": "packages/core/src/version.ts",
@@ -1108,7 +1108,7 @@
       "format": "esm"
     },
     "packages/core/src/service-worker/bridge.ts": {
-      "bytes": 26686,
+      "bytes": 27142,
       "imports": [
         {
           "path": "packages/core/src/server/stream-manager.ts",
@@ -1150,7 +1150,7 @@
       "format": "esm"
     },
     "packages/core/src/mod.ts": {
-      "bytes": 80596,
+      "bytes": 82620,
       "imports": [
         {
           "path": "packages/core/src/utils/event-target.ts",
@@ -1246,6 +1246,41 @@
           "path": "packages/core/src/core/piece.ts",
           "kind": "import-statement",
           "original": "./core/piece.ts"
+        },
+        {
+          "path": "packages/core/src/core/bitfield.ts",
+          "kind": "import-statement",
+          "original": "./core/bitfield.ts"
+        },
+        {
+          "path": "packages/core/src/core/extension-host.ts",
+          "kind": "import-statement",
+          "original": "./core/extension-host.ts"
+        },
+        {
+          "path": "packages/core/src/core/extension.ts",
+          "kind": "import-statement",
+          "original": "./core/extension.ts"
+        },
+        {
+          "path": "packages/core/src/core/handshake.ts",
+          "kind": "import-statement",
+          "original": "./core/handshake.ts"
+        },
+        {
+          "path": "packages/core/src/core/message.ts",
+          "kind": "import-statement",
+          "original": "./core/message.ts"
+        },
+        {
+          "path": "packages/core/src/storage/opfs-chunk-store.ts",
+          "kind": "import-statement",
+          "original": "./storage/opfs-chunk-store.ts"
+        },
+        {
+          "path": "packages/core/src/utils/bencode.ts",
+          "kind": "import-statement",
+          "original": "./utils/bencode.ts"
         },
         {
           "path": "packages/core/src/utils/parse-torrent.ts",
@@ -1611,7 +1646,7 @@
       "imports": [],
       "exports": [],
       "inputs": {},
-      "bytes": 1076531
+      "bytes": 1095674
     },
     "packages/server/build/dist/main.js": {
       "imports": [],
@@ -1649,7 +1684,7 @@
           "bytesInOutput": 4620
         },
         "packages/core/src/core/bitfield.ts": {
-          "bytesInOutput": 3128
+          "bytesInOutput": 4675
         },
         "packages/core/src/crypto/hasher.ts": {
           "bytesInOutput": 539
@@ -1667,7 +1702,7 @@
           "bytesInOutput": 2699
         },
         "packages/core/src/core/message.ts": {
-          "bytesInOutput": 11108
+          "bytesInOutput": 11633
         },
         "packages/core/src/core/extension-host.ts": {
           "bytesInOutput": 9858
@@ -1676,10 +1711,10 @@
           "bytesInOutput": 37374
         },
         "packages/core/src/core/piece.ts": {
-          "bytesInOutput": 1317
+          "bytesInOutput": 1588
         },
         "packages/core/src/core/torrent.ts": {
-          "bytesInOutput": 30560
+          "bytesInOutput": 33222
         },
         "packages/core/src/network/peer.ts": {
           "bytesInOutput": 11214
@@ -1694,7 +1729,7 @@
           "bytesInOutput": 324
         },
         "packages/core/src/extensions/ut-metadata.ts": {
-          "bytesInOutput": 11320
+          "bytesInOutput": 12999
         },
         "packages/core/src/network/swarm.ts": {
           "bytesInOutput": 12273
@@ -1712,10 +1747,10 @@
           "bytesInOutput": 6173
         },
         "packages/core/src/server/stream-manager.ts": {
-          "bytesInOutput": 3580
+          "bytesInOutput": 3657
         },
         "packages/core/src/server/server.ts": {
-          "bytesInOutput": 13488
+          "bytesInOutput": 13920
         },
         "packages/core/src/core/file.ts": {
           "bytesInOutput": 14259
@@ -1727,7 +1762,7 @@
           "bytesInOutput": 1405
         },
         "packages/core/src/torrent-generator/opfs-reader.ts": {
-          "bytesInOutput": 3985
+          "bytesInOutput": 4079
         },
         "packages/core/src/torrent-generator/util.ts": {
           "bytesInOutput": 4217
@@ -1742,7 +1777,7 @@
           "bytesInOutput": 153
         },
         "packages/core/src/extensions/ut-pex.ts": {
-          "bytesInOutput": 8640
+          "bytesInOutput": 8818
         },
         "packages/core/src/service-worker/stream-handler.ts": {
           "bytesInOutput": 7896
@@ -1757,7 +1792,7 @@
           "bytesInOutput": 147
         },
         "packages/core/src/mod.ts": {
-          "bytesInOutput": 23911
+          "bytesInOutput": 24454
         },
         "https:https://esm.sh/preact@10.29.7/denonext/preact.mjs": {
           "bytesInOutput": 16379
@@ -1838,7 +1873,7 @@
           "bytesInOutput": 760
         }
       },
-      "bytes": 514168
+      "bytes": 522176
     }
   }
 }
