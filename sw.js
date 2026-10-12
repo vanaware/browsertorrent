@@ -1,5 +1,5 @@
 /*!
- * BrowserTorrent v0.0.134#mv5jafeg
+ * BrowserTorrent v0.0.134#mv5jehii
  * (c) 2026 Vanaware - MIT License
  */
 
@@ -1048,7 +1048,7 @@ var _WEBRTC_SUPPORT = (() => {
 })();
 
 // packages/service-worker/src/cache.ts
-var CACHE_VERSION = true ? "v0.0.134#mv5jafeg" : `v${VERSION2}`;
+var CACHE_VERSION = true ? "v0.0.134#mv5jehii" : `v${VERSION2}`;
 var CACHE_NAME = `browsertorrent-cache-${CACHE_VERSION}`;
 var ASSETS_TO_CACHE = typeof define_GENERATED_ASSETS_default !== "undefined" ? define_GENERATED_ASSETS_default : [];
 function handleInstall(event) {
