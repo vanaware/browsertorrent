@@ -5,9 +5,9 @@
 
 ---
 
-# Exported Context from Project BrowserTorrent [v0.0.124#mv5i7hjb] - Mode: SW
+# Exported Context from Project BrowserTorrent [v0.1.2#mv5nijrw] - Mode: SW
 
-Automatically generated at: 2026-10-12T17:06:19.976Z
+Automatically generated at: 2026-10-12T19:34:55.483Z
 
 ---
 
@@ -32,12 +32,7 @@ Automatically generated at: 2026-10-12T17:06:19.976Z
   "imports": {
     "@std/assert": "jsr:@std/assert@^1",
     "@std/fs": "jsr:@std/fs@^1",
-    "@std/http": "jsr:@std/http@^1",
-    "@std/path": "jsr:@std/path@^1",
-    "idb-keyval": "https://esm.sh/idb-keyval@6.2.1",
-    "fflate": "https://esm.sh/fflate@0.8.2?target=es2022",
-    "fake-indexeddb": "https://esm.sh/fake-indexeddb@6.2.5?bundle",
-    "fake-indexeddb/auto": "https://esm.sh/fake-indexeddb@6.2.5/auto?bundle"
+    "@std/path": "jsr:@std/path@^1"
   },
   "tasks": {
     "test": "deno test --allow-env --allow-net --allow-read --allow-write src/",
@@ -82,19 +77,21 @@ export function handleInstall(event: ExtendableEvent,): void {
     "[SW-CACHE] Installing Service Worker and caching assets...",
     CACHE_NAME,
   );
-  event.waitUntil((async () => {
-    if (ASSETS_TO_CACHE.length > 0) {
-      const cache = await caches.open(CACHE_NAME,);
-      await Promise.all(
-        ASSETS_TO_CACHE.map((url,) =>
-          cache.add(url,).catch((err,) => {
-            console.warn(`[SW-CACHE] Asset cache warning for ${url}:`, err,);
-          },)
-        ),
-      );
-    }
-    await self.skipWaiting();
-  })(),);
+  event.waitUntil(
+    (async () => {
+      if (ASSETS_TO_CACHE.length > 0) {
+        const cache = await caches.open(CACHE_NAME,);
+        await Promise.all(
+          ASSETS_TO_CACHE.map((url,) =>
+            cache.add(url,).catch((err,) => {
+              console.warn(`[SW-CACHE] Asset cache warning for ${url}:`, err,);
+            },)
+          ),
+        );
+      }
+      await self.skipWaiting();
+    })(),
+  );
 }
 
 /**
@@ -102,21 +99,23 @@ export function handleInstall(event: ExtendableEvent,): void {
  */
 export function handleActivate(event: ExtendableEvent,): void {
   console.log("[SW-CACHE] Activating Service Worker...", CACHE_NAME,);
-  event.waitUntil((async () => {
-    const cacheNames = await caches.keys();
-    await Promise.all(
-      cacheNames.map((cache,) => {
-        if (
-          cache !== CACHE_NAME && cache.startsWith("browsertorrent-cache-",)
-        ) {
-          console.log(`[SW-CACHE] Purging old cache: ${cache}`,);
-          return caches.delete(cache,);
-        }
-        return Promise.resolve(false,);
-      },),
-    );
-    await self.clients.claim();
-  })(),);
+  event.waitUntil(
+    (async () => {
+      const cacheNames = await caches.keys();
+      await Promise.all(
+        cacheNames.map((cache,) => {
+          if (
+            cache !== CACHE_NAME && cache.startsWith("browsertorrent-cache-",)
+          ) {
+            console.log(`[SW-CACHE] Purging old cache: ${cache}`,);
+            return caches.delete(cache,);
+          }
+          return Promise.resolve(false,);
+        },),
+      );
+      await self.clients.claim();
+    })(),
+  );
 }
 
 /**

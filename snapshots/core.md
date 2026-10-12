@@ -7,7 +7,263 @@
 
 # Exported Context from Project BrowserTorrent - Mode: CORE
 
-Automatically generated at: 2026-10-12T17:06:19.992Z
+Automatically generated at: 2026-10-12T19:34:55.496Z
+
+---
+
+## File: `packages/core/README.md`
+
+````md
+# @vanaware/browsertorrent
+
+[![JSR](https://jsr.io/badges/@vanaware/browsertorrent)](https://jsr.io/@vanaware/browsertorrent)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
+A high-performance, browser-first BitTorrent v1 client implemented in pure Deno TypeScript.
+
+Leverages **WebRTC DataChannels** for peer-to-peer swarms, the **Origin Private File System (OPFS)** for persistent piece storage, and an in-browser **Service Worker streaming bridge** with HTTP 206 Partial Content range requests for zero-latency `<video>` and `<audio>` playback.
+
+---
+
+## ⚡ Key Highlights
+
+- **Pure TypeScript & Zero NPM Runtime Dependencies**: Fully built for Deno and modern web browsers without node polyfills.
+- **WebRTC P2P Swarming**: Direct browser-to-browser data transfer using WebRTC DataChannels over WebSocket trackers.
+- **OPFS Storage Engine**: High-throughput piece persistence in the browser's Origin Private File System, with automatic RAM fallback.
+- **Service Worker Media Streaming**: Streams video and audio directly to standard HTML5 `<video>` and `<audio>` elements with HTTP 206 range requests and backpressure.
+- **In-Browser Torrent Generator**: Produces standard bencoded `.torrent` files directly from browser `FileSystemFileHandle` or OPFS directory trees.
+- **Standards Compliant**: Full protocol parity with BEP 3 (core wire protocol), BEP 9 (`ut_metadata`), BEP 10 (extension host), BEP 11 (`ut_pex`), and BEP 15/31 (WebSocket tracker).
+- **WebTorrent Interoperability**: 100% cross-compatible with `webtorrent.js` swarms and trackers.
+
+---
+
+## 📦 Installation
+
+Add `@vanaware/browsertorrent` to your project from JSR:
+
+### Deno
+
+```bash
+deno add jsr:@vanaware/browsertorrent
+```
+
+### npm / pnpm / yarn (via JSR)
+
+```bash
+npx jsr add @vanaware/browsertorrent
+```
+
+### In Browser (ES Modules / CDN)
+
+```html
+<script type="module">
+import { Client, } from "https://esm.sh/jsr/@vanaware/browsertorrent";
+const client = new Client();
+</script>
+```
+
+---
+
+## 🚀 Quick Start
+
+### 1. Downloading from a Magnet URI
+
+```typescript
+import { Client, } from "jsr:@vanaware/browsertorrent";
+
+const client = new Client({
+  maxConns: 55,
+  downloadLimit: 2 * 1024 * 1024, // 2 MB/s throttle (optional)
+},);
+
+const magnetURI =
+  "magnet:?xt=urn:btih:08ada5a7a6183aae1e09d831df6748d566095a10&dn=Sintel&tr=wss%3A%2F%2Ftracker.webtorrent.dev";
+
+const torrent = await client.add(magnetURI, {
+  onReady: (t,) => console.log("Metadata ready:", t.name, t.length,),
+  onDone: (t,) => console.log("Download finished!",),
+},);
+
+torrent.on("download", (e,) => {
+  console.log(
+    `Speed: ${(torrent.downloadSpeed / 1024).toFixed(1,)} KB/s, ` +
+      `Progress: ${(torrent.progress * 100).toFixed(1,)}%`,
+  );
+},);
+```
+
+---
+
+### 2. Seeding a File from Browser OPFS
+
+```typescript
+import { Client, PieceSizeEnum, } from "jsr:@vanaware/browsertorrent";
+
+const client = new Client();
+
+// Retrieve file handle from Origin Private File System
+const rootDir = await navigator.storage.getDirectory();
+const fileHandle = await rootDir.getFileHandle("presentation.mp4",);
+
+const torrent = await client.seed(fileHandle, {
+  name: "presentation.mp4",
+  pieceSize: PieceSizeEnum.SIZE_AUTO,
+  announce: ["wss://tracker.webtorrent.dev",],
+},);
+
+console.log("Seeding started! Share this Magnet URI:",);
+console.log(torrent.magnetURI,);
+```
+
+---
+
+### 3. Media Streaming with Service Worker
+
+Stream torrent video chunks directly to HTML5 `<video controls>` without downloading the entire file first.
+
+#### In Your Main Script (`main.ts`):
+
+```typescript
+import { Client, } from "jsr:@vanaware/browsertorrent";
+import { registerAndConnectServiceWorker, } from "jsr:@vanaware/browsertorrent/service-worker";
+
+// 1. Register Service Worker and establish dual MessageChannel bridge
+await registerAndConnectServiceWorker({
+  scriptUrl: "./sw.js",
+  scope: "./",
+},);
+
+// 2. Initialize BitTorrent client and streaming server
+const client = new Client();
+client.createServer({ scope: "/", },);
+
+// 3. Add torrent and assign streamURL to video element
+const torrent = await client.add("magnet:?xt=urn:btih:...",);
+
+torrent.on("ready", () => {
+  const file = torrent.files[0];
+  const videoEl = document.querySelector<HTMLVideoElement>("#player",)!;
+  videoEl.src = file.streamURL;
+  videoEl.play();
+},);
+```
+
+#### In Your Service Worker (`sw.ts`):
+
+```typescript
+import { createWebTorrentFetchHandler, } from "jsr:@vanaware/browsertorrent/service-worker";
+
+const torrentHandler = createWebTorrentFetchHandler();
+
+self.addEventListener("message", (event,) => {
+  if (event.data?.type === "PORT") {
+    torrentHandler.setPagePort(event.ports[0],);
+  }
+},);
+
+self.addEventListener("fetch", (event,) => {
+  if (torrentHandler.isStreamRequest(event.request,)) {
+    const responsePromise = torrentHandler.handleFetch(event,);
+    if (responsePromise) event.respondWith(responsePromise,);
+  }
+},);
+```
+
+---
+
+## 🗂️ Subpath Exports
+
+`@vanaware/browsertorrent` is modularized into four distinct subpath exports:
+
+| Subpath                                          | Description                                                                                     |
+| :----------------------------------------------- | :---------------------------------------------------------------------------------------------- |
+| `jsr:@vanaware/browsertorrent`                   | Core BitTorrent engine: `Client`, `Torrent`, `Swarm`, `Peer`, `Wire`, `File`, `OPFSChunkStore`. |
+| `jsr:@vanaware/browsertorrent/service-worker`    | Streaming fetch interceptor, dual MessageChannel bridges, and SW lifecycle handlers.            |
+| `jsr:@vanaware/browsertorrent/server`            | In-browser HTTP streaming server bridge (`createServer`, `registerTorrentFiles`).               |
+| `jsr:@vanaware/browsertorrent/torrent-generator` | High-speed `.torrent` generator reading directly from browser OPFS handles.                     |
+
+---
+
+## 📖 Core API Reference
+
+### `Client` (also aliased as `WebTorrent`)
+
+- `new Client(options?: ClientOptions)`: Initializes a new client instance.
+- `client.add(torrentId, options?)`: Adds a Magnet URI, 40-hex info hash, or `.torrent` Uint8Array.
+- `client.seed(input, options?, callback?)`: Seeds OPFS handles, Blobs, Files, or Uint8Arrays.
+- `client.remove(infoHash, destroyStore?)`: Removes a torrent and optionally deletes its OPFS data.
+- `client.destroy(callback?)`: Gracefully closes all swarms and servers.
+- `client.get(torrentId)`: Retrieves an active torrent by ID or info hash.
+- `client.createServer(options?)`: Initializes the in-browser streaming HTTP bridge.
+- `client.throttleDownload(bytesPerSecond)`: Throttles client-wide download bandwidth.
+- `client.throttleUpload(bytesPerSecond)`: Throttles client-wide upload bandwidth.
+- `client.downloadSpeed`: Current aggregate download speed in bytes/s.
+- `client.uploadSpeed`: Current aggregate upload speed in bytes/s.
+- `client.progress`: Overall download progress from `0.0` to `1.0`.
+- `client.ratio`: Ratio of uploaded bytes to downloaded bytes.
+
+### `Torrent`
+
+- `torrent.name`: Display name of the torrent.
+- `torrent.infoHash`: 40-character lowercase hexadecimal hash.
+- `torrent.magnetURI`: Complete magnet URI including trackers.
+- `torrent.files`: Array of enriched {@link File} instances.
+- `torrent.progress`: Progress between `0.0` and `1.0`.
+- `torrent.downloadSpeed`: Current download rate in bytes/s.
+- `torrent.uploadSpeed`: Current upload rate in bytes/s.
+- `torrent.numPeers`: Number of connected WebRTC peers in the swarm.
+- `torrent.timeRemaining`: Estimated seconds until completion (`null` if unknown).
+- `torrent.pause()` / `torrent.resume()`: Pauses or resumes swarm transfers.
+- `torrent.select(start, end, priority)`: Prioritizes a specific range of pieces.
+- `torrent.deselect(start, end, priority)`: Deprioritizes a range of pieces.
+- `torrent.critical(pieceIndex)`: Marks a piece as urgent (for streaming seek positions).
+
+### `File`
+
+- `file.name`: File name with extension.
+- `file.length`: Total size in bytes.
+- `file.streamURL`: Absolute URL served via the Service Worker bridge.
+- `file.createReadStream(options?)`: Returns a `ReadableStream<Uint8Array>`.
+- `file.arrayBuffer()`: Returns a promise resolving to an `ArrayBuffer`.
+- `file.blob()`: Returns a promise resolving to a `Blob`.
+- `file.getBlobURL()`: Returns an object URL (`blob:...`).
+
+---
+
+## 🌐 Platform & Browser Support
+
+| Platform / Browser                 | WebRTC DataChannels |  OPFS Storage   | Service Worker Streaming |
+| :--------------------------------- | :-----------------: | :-------------: | :----------------------: |
+| **Google Chrome / Chromium** (86+) |       ✅ Full       |     ✅ Full     |         ✅ Full          |
+| **Mozilla Firefox** (111+)         |       ✅ Full       |     ✅ Full     |         ✅ Full          |
+| **Apple Safari** (15.2+)           |       ✅ Full       |     ✅ Full     |         ✅ Full          |
+| **Microsoft Edge**                 |       ✅ Full       |     ✅ Full     |         ✅ Full          |
+| **Deno** (v2.x)                    |   ✅ CLI / Server   | ⚠️ RAM fallback |      ⚠️ Server-side      |
+
+---
+
+## 🧪 Testing & Validation
+
+`@vanaware/browsertorrent` undergoes continuous validation with automated unit and integration tests:
+
+```bash
+# Run all unit tests
+deno test -A packages/core/tests/
+
+# Verify type-checking
+deno check packages/core/src/mod.ts
+
+# Dry-run JSR publishing verification
+deno publish --dry-run --config packages/core/deno.jsonc
+```
+
+---
+
+## 📄 License
+
+MIT © [Vanaware](https://github.com/vanaware)
+
+````
 
 ---
 
@@ -16,7 +272,7 @@ Automatically generated at: 2026-10-12T17:06:19.992Z
 ```json
 {
   "name": "@vanaware/browsertorrent",
-  "version": "0.0.124#mv5i7hjb",
+  "version": "0.1.2#mv5nijrw",
   "exports": {
     ".": "./src/mod.ts",
     "./service-worker": "./src/service-worker/mod.ts",
@@ -59,21 +315,51 @@ Automatically generated at: 2026-10-12T17:06:19.992Z
 
 ## File: `packages/core/src/core/bitfield.ts`
 
-```ts
+````ts
 // /browsertorrent/monorepo/webtorrent/src/core/bitfield.ts
+/**
+ * @file bitfield.ts
+ * @description Bitfield implementation for tracking piece availability across swarms.
+ */
 
 import { BitfieldError, } from "../utils/errors.ts";
 
+/**
+ * Configuration options for initializing a {@link Bitfield}.
+ */
 export interface BitfieldOptions {
+  /** Total number of bits in the bitfield. */
   length: number;
+  /** Whether the bitfield can dynamically grow, or the increment size. */
   grow?: boolean | number;
 }
 
+/**
+ * Bitfield data structure used in the BitTorrent protocol to track piece availability.
+ * Provides high-speed bitwise manipulation, spare bits validation, and byte buffer serialization.
+ *
+ * @example
+ * ```ts
+ * import { Bitfield } from "jsr:@vanaware/browsertorrent";
+ *
+ * const bitfield = new Bitfield(16);
+ * bitfield.set(0);
+ * bitfield.set(5);
+ * console.log("Has piece 0:", bitfield.get(0)); // true
+ * console.log("Total downloaded:", bitfield.count()); // 2
+ * ```
+ */
 export class Bitfield {
   private buffer: Uint8Array;
   private _length: number;
   private grow: boolean | number;
 
+  /**
+   * Creates a new Bitfield instance.
+   *
+   * @param length - Total number of bits or BitfieldOptions configuration.
+   * @param opts - Optional grow configuration if length is passed as number.
+   */
   constructor(
     length: number | BitfieldOptions,
     opts?: { grow?: boolean | number },
@@ -90,6 +376,15 @@ export class Bitfield {
     this.buffer = new Uint8Array(byteLength,);
   }
 
+  /**
+   * Instantiates a Bitfield from an existing raw byte buffer.
+   *
+   * @param buffer - Incoming byte array containing packed bits.
+   * @param length - Number of active bits expected.
+   * @param opts - Grow options.
+   * @returns Initialized {@link Bitfield}.
+   * @throws {BitfieldError} If buffer length or spare bits are invalid.
+   */
   static fromBytes(
     buffer: Uint8Array,
     length: number,
@@ -121,10 +416,19 @@ export class Bitfield {
     return bitfield;
   }
 
+  /**
+   * Total number of bits tracked by this bitfield.
+   */
   get length(): number {
     return this._length;
   }
 
+  /**
+   * Checks whether the bit at the given index is set (1).
+   *
+   * @param index - Zero-based bit index.
+   * @returns `true` if the bit is 1, `false` otherwise.
+   */
   get(index: number,): boolean {
     if (index < 0) return false;
     if (index >= this._length) {
@@ -136,6 +440,12 @@ export class Bitfield {
     return (this.buffer[byteIndex]! & (128 >> bitIndex)) !== 0;
   }
 
+  /**
+   * Sets the bit at the given index to 1.
+   *
+   * @param index - Zero-based bit index.
+   * @throws {BitfieldError} If index is negative or out of range when grow is disabled.
+   */
   set(index: number,): void {
     if (index < 0) {
       throw new BitfieldError("Cannot set negative index", "NEGATIVE_INDEX",);
@@ -151,7 +461,7 @@ export class Bitfield {
       const newLength = typeof this.grow === "number"
         ? Math.max(this._length + this.grow, index + 1,)
         : index + 1;
-      this._resize(newLength,);
+      this.#resize(newLength,);
     }
 
     const byteIndex = Math.floor(index / 8,);
@@ -159,6 +469,11 @@ export class Bitfield {
     this.buffer[byteIndex]! |= 128 >> bitIndex;
   }
 
+  /**
+   * Unsets the bit at the given index (sets to 0).
+   *
+   * @param index - Zero-based bit index.
+   */
   unset(index: number,): void {
     if (index < 0 || index >= this._length) return;
     const byteIndex = Math.floor(index / 8,);
@@ -166,6 +481,11 @@ export class Bitfield {
     this.buffer[byteIndex]! &= ~(128 >> bitIndex);
   }
 
+  /**
+   * Counts the total number of set bits (1s) across the bitfield.
+   *
+   * @returns Number of set bits.
+   */
   count(): number {
     let count = 0;
     for (let i = 0; i < this._length; i++) {
@@ -174,11 +494,16 @@ export class Bitfield {
     return count;
   }
 
+  /**
+   * Returns a copy of the underlying packed bitfield byte buffer.
+   *
+   * @returns Binary {@link Uint8Array} representing the bitfield.
+   */
   toBuffer(): Uint8Array {
     return new Uint8Array(this.buffer,);
   }
 
-  private _resize(newLength: number,): void {
+  #resize(newLength: number,): void {
     const newByteLength = Math.ceil(newLength / 8,);
     const newBuffer = new Uint8Array(newByteLength,);
     newBuffer.set(this.buffer,);
@@ -187,7 +512,7 @@ export class Bitfield {
   }
 }
 
-```
+````
 
 ---
 
@@ -1967,6 +2292,13 @@ export class Piece {
   /** Whether the piece hash has been verified (optional, set by consumer). */
   hash?: Uint8Array;
 
+  /**
+   * Initializes a Piece descriptor.
+   *
+   * @param index - Zero-based piece index in the torrent.
+   * @param length - Byte length of the piece.
+   * @param offset - Absolute byte offset of this piece inside the torrent stream.
+   */
   constructor(index: number, length: number, offset: number,) {
     this.index = index;
     this.length = length;
@@ -2108,6 +2440,12 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
   /** File objects registrados pelo cliente (para forward de eventos). */
   private _registeredFiles: File[] = [];
 
+  /**
+   * Initializes a Torrent instance from parsed metainfo and runtime options.
+   *
+   * @param parsedTorrent - Metainfo structure parsed from a `.torrent` or magnet URI.
+   * @param opts - Storage backend, swarm coordinator, and verification options.
+   */
   constructor(parsedTorrent: ParsedTorrent, opts: TorrentOptions,) {
     super();
     this.parsedTorrent = parsedTorrent;
@@ -2127,7 +2465,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     this._selected = new Bitfield(numPieces,);
     this._critical = new Bitfield(numPieces,);
     this._webSeeds = [...(parsedTorrent.urlList || []),];
-    this._pieces = parsedTorrent.pieces.map((hash, index,) => {
+    this._pieces = parsedTorrent.pieces.map((_hash, index,) => {
       const pieceLen = index === numPieces - 1
         ? this.lastPieceLength
         : this.pieceLength;
@@ -2150,15 +2488,19 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
   // GETTERS COMPUTADOS
   // ==========================================================================
 
+  /** Returns `true` if the torrent has completed piece verification and is active. */
   get ready(): boolean {
     return this._ready;
   }
+  /** Returns `true` if `destroy()` was called. */
   get destroyed(): boolean {
     return this._destroyed;
   }
+  /** Total verified downloaded bytes. */
   get downloaded(): number {
     return this._downloaded;
   }
+  /** Total uploaded bytes. */
   get uploaded(): number {
     return this._uploaded;
   }
@@ -2167,19 +2509,23 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     return this._store;
   }
 
+  /** Whether the torrent is currently paused. */
   get paused(): boolean {
     return this._paused;
   }
 
+  /** Fractional progress between `0.0` (0%) and `1.0` (100%). */
   get progress(): number {
     if (this.length === 0) return 0;
     return this._downloaded / this.length;
   }
 
+  /** Total number of pieces in the torrent. */
   get numPieces(): number {
     return this.expectedPieces.length;
   }
 
+  /** Byte length of the final piece. */
   get lastPieceLength(): number {
     return this.length % this.pieceLength || this.pieceLength;
   }
@@ -2373,15 +2719,17 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     if (!cb) return task;
   }
 
-  // ==========================================================================
-  // PAUSE / RESUME
-  // ==========================================================================
-
+  /**
+   * Pauses all downloading and uploading on this torrent.
+   */
   pause(): void {
     this._paused = true;
     this._swarm?.pause();
   }
 
+  /**
+   * Resumes downloading and uploading on this torrent.
+   */
   resume(): void {
     this._paused = false;
     this._swarm?.resume();
@@ -2391,29 +2739,52 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
   // PEERS E WEB SEEDS
   // ==========================================================================
 
+  /**
+   * Manually adds a peer to the torrent's swarm.
+   *
+   * @param addr - Peer address or WebRTC connection string.
+   * @returns `true` if the peer was queued for connection, `false` otherwise.
+   */
   addPeer(addr: string,): boolean {
     return this._swarm?.addPeer(addr,) ?? false;
   }
 
+  /**
+   * Removes a peer from the torrent swarm.
+   *
+   * @param addr - Peer address.
+   */
   removePeer(addr: string,): void {
     this._swarm?.removePeer(addr,);
   }
 
+  /**
+   * Adds a BEP 19 web seed URL.
+   *
+   * @param url - Web seed HTTP URL.
+   */
   addWebSeed(url: string,): void {
     if (!this._webSeeds.includes(url,)) {
       this._webSeeds.push(url,);
     }
   }
 
+  /**
+   * Removes a BEP 19 web seed URL.
+   *
+   * @param url - Web seed HTTP URL.
+   */
   removeWebSeed(url: string,): void {
     const idx = this._webSeeds.indexOf(url,);
     if (idx !== -1) this._webSeeds.splice(idx, 1,);
   }
 
-  // ==========================================================================
-  // REGISTRO DE WIRES (chamado pelo Swarm)
-  // ==========================================================================
-
+  /**
+   * Registers an active peer wire with the torrent, wiring event listeners and rate tracking.
+   *
+   * @param wire - Connected peer wire instance.
+   * @param addr - Remote peer address or identifier.
+   */
   _registerWire(wire: Wire, addr: string,): void {
     this.emit("wire", new CustomEvent("wire", { detail: { wire, addr, }, },),);
 
@@ -2693,10 +3064,12 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     attachInitialState();
   }
 
-  // ==========================================================================
-  // INJEÇÃO TARDIA DE METADADOS (Magnet URIs)
-  // ==========================================================================
-
+  /**
+   * Supplies the bencoded info dictionary bytes received from the swarm (e.g. via BEP 9 ut_metadata).
+   *
+   * @param infoBuffer - Raw bencoded info dictionary buffer.
+   * @returns A promise resolving to `true` if metadata was accepted, `false` if already set.
+   */
   async setMetadata(infoBuffer: Uint8Array,): Promise<boolean> {
     console.log(
       `[Torrent] setMetadata start, infoBuffer length: ${infoBuffer?.length}`,
@@ -2814,6 +3187,11 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
   // CICLO DE VIDA
   // ==========================================================================
 
+  /**
+   * Internal asynchronous initializer that validates existing pieces and marks the torrent as ready.
+   *
+   * @param skipVerify - Whether to bypass piece hashing during startup.
+   */
   private async _init(skipVerify: boolean,): Promise<void> {
     try {
       if (!skipVerify && this.numPieces > 0) {
@@ -2827,6 +3205,9 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     }
   }
 
+  /**
+   * Verifies existing pieces already present in chunk storage upon initialization.
+   */
   private async _verifyExistingPieces(): Promise<void> {
     this._downloaded = 0;
     this.bitfield = new Bitfield(this.numPieces,);
@@ -2872,6 +3253,13 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
   // RECEBIMENTO DE DADOS
   // ==========================================================================
 
+  /**
+   * Receives, verifies SHA-1 hash, and persists a completed piece of data.
+   *
+   * @param index - Zero-based piece index.
+   * @param buf - Raw piece byte buffer.
+   * @returns `true` if verified and saved, `false` otherwise.
+   */
   async receivePiece(index: number, buf: Uint8Array,): Promise<boolean> {
     if (this._destroyed) return false;
     if (this.bitfield.get(index,)) return true;
@@ -2917,15 +3305,16 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
   }
 
   /**
-   * Registra `File` instances para receberem os eventos `download`/`upload`.
-   * Chamado pelo {@link WebTorrent} após criar os `File`s.
+   * Registers `File` instances to receive `download` and `upload` events.
+   *
+   * @param files - Array of File instances in this torrent.
    */
   _registerFiles(files: File[],): void {
     this._registeredFiles = files;
   }
 
   /**
-   * Emite um evento de download/upload nos Files cujo `pieceRange` contém `index`.
+   * Forwards download or upload byte notifications to the corresponding File instances.
    */
   private _forwardToFiles(
     type: "download" | "upload",
@@ -2943,6 +3332,12 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     }
   }
 
+  /**
+   * Retrieves piece bytes from chunk storage if verified as available.
+   *
+   * @param index - Zero-based piece index.
+   * @returns Piece byte buffer or `null` if not available.
+   */
   async getPiece(index: number,): Promise<Uint8Array | null> {
     if (!this.bitfield.get(index,)) return null;
     try {
@@ -2955,6 +3350,11 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     }
   }
 
+  /**
+   * Destroys the torrent session, cancels active timers, and closes storage.
+   *
+   * @param destroyStore - If `true`, permanently deletes the underlying stored files.
+   */
   async destroy(destroyStore = false,): Promise<void> {
     if (this._destroyed) return;
     this._destroyed = true;
@@ -2982,6 +3382,9 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
   // PRIVADOS
   // ==========================================================================
 
+  /**
+   * Verifies the SHA-1 hash of a piece buffer against its expected piece hash.
+   */
   private async _verifyPiece(index: number, buf: Uint8Array,): Promise<void> {
     const expected = this.expectedPieces[index];
     if (!expected) throw new Error(`Índice de peça ${index} fora do limite.`,);
@@ -2996,6 +3399,9 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     }
   }
 
+  /**
+   * Resets the inactivity timer that emits the "idle" event.
+   */
   private _resetIdleTimer(): void {
     if (this._idleTimer !== null) clearTimeout(this._idleTimer,);
     this._idleTimer = setTimeout(() => {
@@ -3003,6 +3409,9 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     }, this._IDLE_TIMEOUT_MS,) as unknown as ReturnType<typeof setTimeout>;
   }
 
+  /**
+   * Internal error dispatcher emitting the "error" event.
+   */
   private _onError(err: Error,): void {
     this.emit(
       "error",
@@ -4991,36 +5400,65 @@ export function generateRandomString(length: number,): string {
 
 ## File: `packages/core/src/extensions/ut-metadata.ts`
 
-```ts
+````ts
 // /browsertorrent/monorepo/webtorrent/src/extensions/ut-metadata.ts
+/**
+ * @file ut-metadata.ts
+ * @description BEP 9 (ut_metadata) extension implementation for exchanging torrent metainfo pieces.
+ */
 
 import { Extension, } from "../core/extension.ts";
 import {
-  BencodeDict,
+  type BencodeDict,
+  type BencodeValue,
   decode,
   decodePrefix,
   encode,
 } from "../utils/bencode.ts";
 import { Bitfield, } from "../core/bitfield.ts";
-import { sha1, sha256, } from "../crypto/hasher.ts";
 import type { Wire, } from "../core/wire.ts";
+import type { ExtensionHost, } from "../core/extension-host.ts";
 
 const MAX_METADATA_SIZE = 10_000_000;
 const PIECE_LENGTH = 16384;
 const DEFAULT_TIMEOUT_MS = 15000; // 15 segundos por peça
 
+/**
+ * Options for configuring the BEP 9 `ut_metadata` extension.
+ */
 export interface UtMetadataOptions {
+  /** Optional preloaded metadata bytes to seed to peers. */
   metadata?: Uint8Array;
+  /** Timeout in milliseconds for requesting pieces (default 15,000 ms). */
   timeoutMs?: number;
 }
 
+/**
+ * Information regarding an active metadata piece request.
+ */
 export interface PieceRequest {
+  /** Zero-based metadata piece index. */
   piece: number;
+  /** Number of request attempts made. */
   attempts: number;
-  timer: number; // ID do timeout
+  /** Browser or Deno timeout identifier. */
+  timer: number;
 }
 
+/**
+ * BEP 9 `ut_metadata` extension implementation.
+ * Allows peers to discover and transfer `.torrent` metadata pieces over BEP 10 extension protocol.
+ *
+ * @example
+ * ```ts
+ * import { UtMetadata } from "jsr:@vanaware/browsertorrent";
+ *
+ * const utMetadata = new UtMetadata(wire, { timeoutMs: 10000 });
+ * utMetadata.fetch();
+ * ```
+ */
 export class UtMetadata extends Extension {
+  /** BEP 10 extension identifier name. */
   public readonly name = "ut_metadata";
 
   private _fetching = false;
@@ -5029,11 +5467,18 @@ export class UtMetadata extends Extension {
   private _numPieces = 0;
   private _remainingRejects = 0;
   private _bitfield: Bitfield;
+  /** Fully reassembled torrent metadata bytes once transfer completes. */
   public metadata: Uint8Array | null = null;
   private _requestedPieces: Map<number, PieceRequest> = new Map();
   private _timeoutMs: number;
   private _extensionId: number | null = null;
 
+  /**
+   * Initializes the ut_metadata extension on a wire.
+   *
+   * @param wire - Owning peer wire connection.
+   * @param opts - Configuration options.
+   */
   constructor(wire: Wire, opts?: UtMetadataOptions,) {
     super(wire,);
     this._bitfield = new Bitfield({ length: 0, grow: 1000, },);
@@ -5043,38 +5488,54 @@ export class UtMetadata extends Extension {
     }
   }
 
+  /**
+   * Handles local registration with the wire's extension host.
+   *
+   * @param context - Registration context containing host and transport sender.
+   */
   public onRegister(
     context: {
-      host: import("../core/extension-host.ts").ExtensionHost;
+      host: ExtensionHost;
       send: (payload: Uint8Array,) => Promise<void>;
     },
   ): void {
     this._extensionId = context.host.localExtensions.get(this.name,) ?? null;
   }
 
-  public handshakeFields(): ReadonlyMap<
-    string,
-    import("../utils/bencode.ts").BencodeValue
-  > {
-    const fields = new Map<
-      string,
-      import("../utils/bencode.ts").BencodeValue
-    >();
+  /**
+   * Returns metadata dictionary fields to announce during extended handshake.
+   *
+   * @returns Map of handshake parameters including `metadata_size`.
+   */
+  public handshakeFields(): ReadonlyMap<string, BencodeValue> {
+    const fields = new Map<string, BencodeValue>();
     if (this._metadataSize !== null) {
       fields.set("metadata_size", this._metadataSize,);
     }
     return fields;
   }
 
+  /**
+   * Handles standard BitTorrent wire handshake.
+   *
+   * @param _infoHash - Torrent info hash.
+   * @param _peerId - Remote peer ID.
+   * @param _extensions - Negotiated handshake extensions.
+   */
   public onHandshake(
     _infoHash: string,
     _peerId: string,
     _extensions: Record<string, unknown>,
-  ) {
-    // Opcional
+  ): void {
+    // Optional hook
   }
 
-  public onExtendedHandshake(handshake: any,) {
+  /**
+   * Handles incoming BEP 10 extended handshake from remote peer.
+   *
+   * @param handshake - Decoded extended handshake record or Map.
+   */
+  public onExtendedHandshake(handshake: Record<string, unknown> | any,): void {
     console.log(
       `[UtMetadata] onExtendedHandshake: m=${
         JSON.stringify(handshake.m,)
@@ -5129,19 +5590,26 @@ export class UtMetadata extends Extension {
         },);
 
         this._fetching = true;
-        this._requestPieces();
+        this.#requestPieces();
       }
     } else {
       this.emit(
         "warning",
         new CustomEvent("warning", {
-          detail: { error: new Error("Peer does not support ut_metadata",), },
+          detail: {
+            error: new Error("Peer does not support ut_metadata extension",),
+          },
         },),
       );
     }
   }
 
-  public onMessage(buf: Uint8Array,) {
+  /**
+   * Handles incoming binary messages directed to this extension ID.
+   *
+   * @param buf - Raw payload bytes.
+   */
+  public onMessage(buf: Uint8Array,): void {
     let dict: BencodeDict;
     let trailer: Uint8Array;
     try {
@@ -5161,56 +5629,67 @@ export class UtMetadata extends Extension {
 
     switch (dict.msg_type) {
       case 0:
-        this._onRequest(dict.piece as number,);
+        this.#onRequest(dict.piece as number,);
         break;
       case 1:
-        this._onData(
+        this.#onData(
           dict.piece as number,
           trailer,
           dict.total_size as number | undefined,
         );
         break;
       case 2:
-        this._onReject(dict.piece as number,);
+        this.#onReject(dict.piece as number,);
         break;
     }
   }
 
-  public fetch() {
+  /**
+   * Starts requesting metadata pieces from the remote peer.
+   */
+  public fetch(): void {
     if (!this._metadataComplete) {
       this._fetching = true;
       if (this._metadataSize) {
-        this._requestPieces();
+        this.#requestPieces();
       }
     }
   }
 
-  public cancel() {
+  /**
+   * Cancels any active metadata piece requests and timers.
+   */
+  public cancel(): void {
     this._fetching = false;
-    // Cancelar todos os timeouts pendentes
     for (const request of this._requestedPieces.values()) {
       clearTimeout(request.timer,);
     }
     this._requestedPieces.clear();
   }
 
+  /**
+   * Sets known metadata bytes (for seeding or after successful reassembly).
+   *
+   * @param newMetadata - Raw metadata buffer.
+   * @returns `true` if metadata was set.
+   */
   public setMetadata(newMetadata: Uint8Array,): boolean {
     if (this._metadataComplete) return true;
 
     let validMetadata = newMetadata;
     try {
       const info = decode(newMetadata,) as BencodeDict;
-      if (info.info) {
+      if (info && info.info) {
         validMetadata = encode(info.info,);
       }
-    } catch (err) {
-      // Ignora erros de decode, usa o buffer cru
+    } catch (_err) {
+      // Keep raw metadata buffer if not a full torrent bencode dict
     }
 
-    this.cancel();
     this.metadata = validMetadata;
+    this._metadataSize = validMetadata.length;
     this._metadataComplete = true;
-    this._metadataSize = this._metadataSize ?? this.metadata.length;
+    this._fetching = false;
 
     if (this.wire.extensionHost.peerExtensions.has("ut_metadata",)) {
       this.wire.extensionHost.setHandshakeField(
@@ -5226,7 +5705,7 @@ export class UtMetadata extends Extension {
     return true;
   }
 
-  private _send(dict: BencodeDict, trailer?: Uint8Array,) {
+  #send(dict: BencodeDict, trailer?: Uint8Array,): void {
     console.log(
       `[UtMetadata] _send: dict=${JSON.stringify(dict,)}, trailerLength=${
         trailer ? trailer.length : 0
@@ -5248,27 +5727,23 @@ export class UtMetadata extends Extension {
     }
   }
 
-  private _request(piece: number,) {
-    // Cancelar timeout anterior para esta peça, se houver
+  #request(piece: number,): void {
     const existingRequest = this._requestedPieces.get(piece,);
     if (existingRequest) {
       clearTimeout(existingRequest.timer,);
     }
 
-    // Enviar solicitação
-    this._send({ msg_type: 0, piece, },);
+    this.#send({ msg_type: 0, piece, },);
 
-    // Configurar novo timeout para esta peça
     const timer = setTimeout(() => {
-      this._handleTimeout(piece,);
+      this.#handleTimeout(piece,);
     }, this._timeoutMs,) as unknown as number;
 
-    // Registrar solicitação com tentativas
     const attempts = existingRequest ? existingRequest.attempts + 1 : 1;
     this._requestedPieces.set(piece, { piece, attempts, timer, },);
   }
 
-  private _data(piece: number, buf: Uint8Array, totalSize?: number,) {
+  #data(piece: number, buf: Uint8Array, totalSize?: number,): void {
     const request = this._requestedPieces.get(piece,);
     if (request) {
       clearTimeout(request.timer,);
@@ -5279,22 +5754,22 @@ export class UtMetadata extends Extension {
     if (typeof totalSize === "number") {
       (msg as unknown as { total_size?: number }).total_size = totalSize;
     }
-    this._send(msg, buf,);
+    this.#send(msg, buf,);
   }
 
-  private _reject(piece: number,) {
-    this._send({
+  #reject(piece: number,): void {
+    this.#send({
       msg_type: 2,
       piece,
     },);
   }
 
-  private _onRequest(piece: number,) {
+  #onRequest(piece: number,): void {
     console.log(
       `[UtMetadata] _onRequest piece: ${piece}, metadataComplete: ${this._metadataComplete}, size: ${this._metadataSize}`,
     );
     if (!this._metadataComplete || !this._metadataSize) {
-      return this._reject(piece,);
+      return this.#reject(piece,);
     }
     const start = piece * PIECE_LENGTH;
     let end = start + PIECE_LENGTH;
@@ -5302,10 +5777,10 @@ export class UtMetadata extends Extension {
       end = this._metadataSize!;
     }
     const buf = this.metadata!.slice(start, end,);
-    this._data(piece, buf, this._metadataSize,);
+    this.#data(piece, buf, this._metadataSize,);
   }
 
-  private _onData(piece: number, buf: Uint8Array, totalSize?: number,) {
+  #onData(piece: number, buf: Uint8Array, totalSize?: number,): void {
     console.log(
       `[UtMetadata] _onData piece: ${piece}, buf.length: ${buf.length}, totalSize: ${totalSize}, fetching: ${this._fetching}, metaSize: ${this._metadataSize}`,
     );
@@ -5313,9 +5788,7 @@ export class UtMetadata extends Extension {
       return;
     }
 
-    // Verificar se já recebemos esta peça
     if (this._bitfield.get(piece,)) {
-      // Peça duplicada, ignorar
       return;
     }
 
@@ -5325,17 +5798,16 @@ export class UtMetadata extends Extension {
     this.metadata.set(buf, piece * PIECE_LENGTH,);
     this._bitfield.set(piece,);
 
-    // Limpar o registro de solicitação para esta peça
     const request = this._requestedPieces.get(piece,);
     if (request) {
       clearTimeout(request.timer,);
       this._requestedPieces.delete(piece,);
     }
 
-    this._checkDone();
+    this.#checkDone();
   }
 
-  private _onReject(piece: number,) {
+  #onReject(piece: number,): void {
     const request = this._requestedPieces.get(piece,);
     if (request) {
       clearTimeout(request.timer,);
@@ -5343,7 +5815,7 @@ export class UtMetadata extends Extension {
     }
 
     if (this._remainingRejects > 0 && this._fetching) {
-      this._request(piece,);
+      this.#request(piece,);
       this._remainingRejects -= 1;
     } else {
       this.emit(
@@ -5355,21 +5827,18 @@ export class UtMetadata extends Extension {
     }
   }
 
-  private _handleTimeout(piece: number,) {
-    // Remover do mapa de solicitações
+  #handleTimeout(piece: number,): void {
     this._requestedPieces.delete(piece,);
 
     if (!this._fetching) return;
 
-    // Tentar novamente se ainda houver tentativas restantes
     const maxAttempts = 3;
     const currentRequest = this._requestedPieces.get(piece,);
     const attempts = currentRequest ? currentRequest.attempts + 1 : 1;
 
     if (attempts < maxAttempts) {
-      this._request(piece,);
+      this.#request(piece,);
     } else {
-      // Muitas tentativas falhas, emitir aviso
       this.emit(
         "warning",
         new CustomEvent("warning", {
@@ -5380,22 +5849,20 @@ export class UtMetadata extends Extension {
           },
         },),
       );
-
-      // Tentar continuar com outras peças
-      this._checkDone();
+      this.#checkDone();
     }
   }
 
-  private _requestPieces() {
+  #requestPieces(): void {
     if (this._fetching && this._metadataSize) {
       this.metadata = new Uint8Array(this._metadataSize,);
       for (let piece = 0; piece < this._numPieces; piece++) {
-        this._request(piece,);
+        this.#request(piece,);
       }
     }
   }
 
-  private _checkDone() {
+  #checkDone(): void {
     let done = true;
     for (let piece = 0; piece < this._numPieces; piece++) {
       if (!this._bitfield.get(piece,)) {
@@ -5404,17 +5871,16 @@ export class UtMetadata extends Extension {
       }
     }
     if (done && this.metadata) {
-      // Verificar a integridade dos dados recebidos calculando o hash
-      const success = this._verifyMetadataIntegrity();
+      const success = this.#verifyMetadataIntegrity();
       if (success) {
         this.setMetadata(this.metadata,);
       } else {
-        this._failedMetadata();
+        this.#failedMetadata();
       }
     }
   }
 
-  private _verifyMetadataIntegrity(): boolean {
+  #verifyMetadataIntegrity(): boolean {
     if (!this.metadata) return false;
 
     console.log(
@@ -5422,13 +5888,7 @@ export class UtMetadata extends Extension {
       Array.from(this.metadata.slice(0, 20,),),
     );
     try {
-      // Verificar se os dados são válidos bencode
       decode(this.metadata,);
-
-      // Para BEP 52, também verificaríamos o hash SHA-256, mas isso
-      // geralmente não é feito durante a transferência via ut_metadata,
-      // pois o hash é verificado quando o torrent é carregado
-
       return true;
     } catch (err) {
       console.warn("Metadata integrity check failed:", err,);
@@ -5436,12 +5896,12 @@ export class UtMetadata extends Extension {
     }
   }
 
-  private _failedMetadata() {
+  #failedMetadata(): void {
     if (!this._metadataSize) return;
     this._bitfield = new Bitfield({ length: this._numPieces, grow: 1000, },);
     this._remainingRejects -= this._numPieces;
     if (this._remainingRejects > 0) {
-      this._requestPieces();
+      this.#requestPieces();
     } else {
       this.emit(
         "warning",
@@ -5453,7 +5913,7 @@ export class UtMetadata extends Extension {
   }
 }
 
-```
+````
 
 ---
 
@@ -5470,6 +5930,7 @@ export class UtMetadata extends Extension {
 
 import { Extension, } from "../core/extension.ts";
 import type { Wire, } from "../core/wire.ts";
+import type { ExtensionHost, } from "../core/extension-host.ts";
 import {
   BencodeDict,
   BencodeValue,
@@ -5525,7 +5986,7 @@ export interface UtPexOptions {
 /** Built-in BEP 11 peer exchange codec and transport extension. */
 export class UtPexExtension extends Extension {
   /** BEP 10 registration name. */
-  public readonly name = UT_PEX_NAME;
+  public readonly name: string = UT_PEX_NAME;
 
   /** Minimum duration enforced between outgoing updates. */
   public readonly minSendIntervalMs: number;
@@ -5648,9 +6109,14 @@ export class UtPexExtension extends Extension {
     return Promise.resolve();
   }
 
+  /**
+   * Called when the extension is registered with the peer wire.
+   *
+   * @param context - Registration context containing host and transmitter.
+   */
   public onRegister(
     context: {
-      host: import("../core/extension-host.ts").ExtensionHost;
+      host: ExtensionHost;
       send: (payload: Uint8Array,) => Promise<void>;
     },
   ): void {
@@ -5840,8 +6306,81 @@ function optionalBytes(
 
 ## File: `packages/core/src/mod.ts`
 
-```ts
-// /browsertorrent/monorepo/webtorrent/src/mod.ts
+````ts
+/**
+ * @module
+ *
+ * # @vanaware/browsertorrent
+ *
+ * A high-performance, browser-first BitTorrent v1 client implemented in pure Deno TypeScript.
+ * Leverages WebRTC DataChannels for peer-to-peer swarms, Origin Private File System (OPFS)
+ * for persistent piece storage, and Service Worker fetch interception for streaming playback.
+ *
+ * ## Key Features
+ * - **Pure TypeScript & Zero NPM Runtime Dependencies**: Fully built for Deno and modern web browsers.
+ * - **WebRTC P2P Swarms**: Direct browser-to-browser data transfer using WebRTC DataChannels.
+ * - **OPFS Chunk Storage**: Fast piece persistence using the browser's Origin Private File System, with automatic RAM fallback.
+ * - **Service Worker Streaming Bridge**: Intercepts HTTP requests with 206 Partial Content support and backpressure for `<video>` / `<audio>` playback.
+ * - **Fast Torrent Generator**: Generates `.torrent` metainfo directly from browser `FileSystemFileHandle` or OPFS directories.
+ * - **Standards Compliant**: Implements BEP 3 (core wire protocol), BEP 9 (`ut_metadata`), BEP 10 (extension protocol), BEP 11 (`ut_pex`), and BEP 15/31 (WebSocket tracker).
+ *
+ * ## Quick Examples
+ *
+ * ### 1. Downloading from a Magnet URI
+ * ```ts
+ * import { Client } from "jsr:@vanaware/browsertorrent";
+ *
+ * const client = new Client();
+ * const magnetURI = "magnet:?xt=urn:btih:...&dn=example.mp4&tr=wss%3A%2F%2Ftracker.webtorrent.dev";
+ *
+ * const torrent = await client.add(magnetURI);
+ *
+ * torrent.on("download", (e) => {
+ *   console.log(`Speed: ${torrent.downloadSpeed} B/s, Progress: ${(torrent.progress * 100).toFixed(1)}%`);
+ * });
+ *
+ * torrent.on("done", () => {
+ *   console.log("Download finished!");
+ * });
+ * ```
+ *
+ * ### 2. Seeding a File from OPFS
+ * ```ts
+ * import { Client, PieceSizeEnum } from "jsr:@vanaware/browsertorrent";
+ *
+ * const client = new Client();
+ * const rootDir = await navigator.storage.getDirectory();
+ * const fileHandle = await rootDir.getFileHandle("sample.mp4");
+ *
+ * const torrent = await client.seed(fileHandle, {
+ *   name: "sample.mp4",
+ *   pieceSize: PieceSizeEnum.SIZE_AUTO,
+ *   announce: ["wss://tracker.webtorrent.dev"],
+ * });
+ *
+ * console.log("Seeding torrent with magnet URI:", torrent.magnetURI);
+ * ```
+ *
+ * ### 3. Media Streaming with Service Worker
+ * ```ts
+ * import { Client } from "jsr:@vanaware/browsertorrent";
+ * import { registerAndConnectServiceWorker } from "jsr:@vanaware/browsertorrent/service-worker";
+ *
+ * await registerAndConnectServiceWorker({ scriptUrl: "./sw.js", scope: "./" });
+ * const client = new Client();
+ * client.createServer({ scope: "/" });
+ *
+ * const torrent = await client.add("magnet:?xt=urn:btih:...");
+ * torrent.on("ready", () => {
+ *   const file = torrent.files[0];
+ *   const videoEl = document.createElement("video");
+ *   videoEl.src = file.streamURL;
+ *   videoEl.controls = true;
+ *   document.body.appendChild(videoEl);
+ * });
+ * ```
+ */
+
 import { TypedEventTarget, } from "./utils/event-target.ts";
 import {
   type ParsedTorrent,
@@ -5883,86 +6422,167 @@ const _WEBRTC_SUPPORT: boolean = (() => {
       }).webkitRTCPeerConnection !== "undefined";
 })();
 
+/**
+ * Event map emitted by {@link Client} / {@link WebTorrent}.
+ */
 export interface WebTorrentEvents {
   [key: string]: Event | CustomEvent;
   /** Emitted when a torrent is added to the client (after add/seed). */
   torrent: CustomEvent<{ torrent: Torrent }>;
   /**
-   * Emitted when a torrent is added to `client.torrents`.
-   * Mirrors upstream `client.on('add', torrent)`.
+   * Emitted when a torrent is registered in `client.torrents`.
+   * Mirrors upstream WebTorrent `client.on('add', torrent)`.
    */
   add: CustomEvent<{ torrent: Torrent }>;
   /**
    * Emitted when a torrent is removed from `client.torrents`.
-   * Mirrors upstream `client.on('remove', torrent)`.
+   * Mirrors upstream WebTorrent `client.on('remove', torrent)`.
    */
   remove: CustomEvent<{ torrent: Torrent; infoHash: string }>;
+  /** Emitted when an unrecoverable client-wide error occurs. */
   error: CustomEvent<{ error: Error }>;
+  /** Emitted once the client initialization microtask completes and the client is ready. */
   ready: Event;
 }
 
+/**
+ * Configuration options for initializing a {@link Client} instance.
+ */
 export interface ClientOptions {
+  /**
+   * Custom 20-byte BitTorrent peer identification string or binary buffer.
+   * If omitted, a standard `-BT0001-...` peer ID is generated automatically.
+   */
   peerId?: Uint8Array | string;
+  /**
+   * Maximum concurrent peer connections per swarm (defaults to 55).
+   */
   maxConns?: number;
+  /**
+   * Listening port number (defaults to 0 for browser WebRTC clients).
+   */
   port?: number;
+  /**
+   * Whether to persist downloaded pieces in the Origin Private File System (OPFS).
+   * Set to `false` to force in-memory storage. Defaults to `true` when supported.
+   */
   useOPFS?: boolean;
+  /**
+   * Optional WebRTC ICE/STUN/TURN configuration passed to RTCPeerConnection.
+   */
   rtcConfig?: RTCConfiguration;
+  /**
+   * Relative or absolute URL of the service worker script (e.g. `./sw.js`).
+   */
   serviceWorkerUrl?: string;
+  /**
+   * Scope URL prefix for Service Worker registration (defaults to `/`).
+   */
   serviceWorkerScope?: string;
   /**
-   * Global download rate limit, in bytes/s. `0` = unlimited.
-   * Default: `0`.
+   * Global download rate limit, in bytes per second. `0` = unlimited (default: `0`).
    */
   downloadLimit?: number;
   /**
-   * Global upload rate limit, in bytes/s. `0` = unlimited.
-   * Default: `0`.
+   * Global upload rate limit, in bytes per second. `0` = unlimited (default: `0`).
    */
   uploadLimit?: number;
 }
 
+/**
+ * Alias of {@link ClientOptions} for WebTorrent API compatibility.
+ */
+export type WebTorrentOptions = ClientOptions;
+
+/**
+ * Options passed to {@link Client.add} when adding a new torrent.
+ */
 export interface AddTorrentOptions {
+  /**
+   * If `true`, skips initial SHA-1 verification of existing pieces in the chunk store.
+   * Useful for freshly seeded data. Default is `false`.
+   */
   skipVerify?: boolean;
+  /**
+   * If `true`, permanently deletes the underlying OPFS storage directory when destroyed.
+   */
   destroyStoreOnDestroy?: boolean;
+  /**
+   * Additional tracker URLs to announce to alongside the torrent's embedded trackers.
+   */
   announce?: string[];
+  /**
+   * Optional callback invoked as soon as torrent metadata is verified and ready.
+   */
   onReady?: (torrent: Torrent,) => void;
   /**
-   * Optional callback invoked when the torrent is fully done.
+   * Optional callback invoked when all pieces have been fully downloaded and verified.
    */
   onDone?: (torrent: Torrent,) => void;
 }
 
-/** Input options for `client.seed()`. */
+/**
+ * Options passed to {@link Client.seed} when creating and sharing a new torrent.
+ */
 export interface SeedOptions {
-  /** Display name; if omitted, the entry's name is used. */
+  /**
+   * Display name for the torrent. Defaults to the entry's file or directory name.
+   */
   name?: string;
-  /** Piece size preset or raw bytes. Default: `AUTO`. */
+  /**
+   * Piece size preset or raw byte count (e.g., `PieceSizeEnum.SIZE_AUTO`). Defaults to automatic.
+   */
   pieceSize?: PieceSizeEnum | number;
-  /** BEP-12 trackers. */
+  /**
+   * BEP 12 tracker URLs list.
+   */
   trackers?: string[];
-  /** Alias for trackers to match WebTorrent API. */
+  /**
+   * Alias for `trackers` to match the WebTorrent API specification.
+   */
   announce?: string[];
-  /** BEP-19 web seeds. */
+  /**
+   * BEP 19 HTTP web seed URLs.
+   */
   webSeeds?: string[];
-  /** BEP-9 comment. */
+  /**
+   * BEP 9 comment string embedded into the metainfo dictionary.
+   */
   comment?: string;
-  /** BEP-9 created-by string. */
+  /**
+   * BEP 9 created-by attribution string.
+   */
   createdBy?: string;
-  /** Mark as private (no DHT/PEX). */
+  /**
+   * Marks the torrent as private, disabling DHT and PEX (default: `false`).
+   */
   private?: boolean;
-  /** BEP-47: align files on piece boundaries. */
+  /**
+   * BEP 47 file alignment: pad files to align with piece boundaries.
+   */
   alignPiece?: boolean;
-  /** Skip files whose name starts with `"."`. */
+  /**
+   * Skips files whose filename starts with a dot `"."` (default: `false`).
+   */
   ignoreHiddenFile?: boolean;
-  /** Forward to {@link AddTorrentOptions}. */
+  /**
+   * Forwarded to {@link AddTorrentOptions.skipVerify}.
+   */
   skipVerify?: boolean;
-  /** Forward to {@link AddTorrentOptions}. */
+  /**
+   * Callback invoked when the seeded torrent becomes ready in the client.
+   */
   onReady?: (torrent: Torrent,) => void;
-  /** Forward to {@link AddTorrentOptions}. */
+  /**
+   * Callback invoked when the seeded torrent is completed.
+   */
   onDone?: (torrent: Torrent,) => void;
 }
 
-/** Input accepted by `client.seed()`. */
+/**
+ * Accepted input types for {@link Client.seed}.
+ * Supports OPFS handles, DOM File/Blob objects, binary buffers, or composite descriptors.
+ */
 export type SeedInput =
   | FileSystemFileHandle
   | FileSystemDirectoryHandle
@@ -5978,14 +6598,56 @@ export type SeedInput =
     }
   >;
 
+/**
+ * Primary BitTorrent Client for browser and Deno environments.
+ * Manages active torrents, WebRTC peer swarms, OPFS piece storage,
+ * and Service Worker streaming bridges.
+ *
+ * @example
+ * ```ts
+ * import { Client } from "jsr:@vanaware/browsertorrent";
+ *
+ * const client = new Client({
+ *   maxConns: 55,
+ *   downloadLimit: 2 * 1024 * 1024, // 2 MB/s
+ * });
+ *
+ * client.on("torrent", (e) => {
+ *   console.log("New torrent added:", e.detail.torrent.infoHash);
+ * });
+ *
+ * const torrent = await client.add("magnet:?xt=urn:btih:...");
+ * ```
+ */
 export class Client extends TypedEventTarget<WebTorrentEvents> {
-  /** `true` if the runtime supports WebRTC (RTCPeerConnection). */
+  /**
+   * `true` if the runtime supports WebRTC `RTCPeerConnection` for P2P swarming.
+   */
   public static readonly WEBRTC_SUPPORT: boolean = _WEBRTC_SUPPORT;
 
+  /**
+   * The 40-character hex representation of this client's 20-byte BitTorrent Peer ID.
+   */
   public readonly peerId: string;
+
+  /**
+   * Raw 20-byte binary buffer of this client's BitTorrent Peer ID.
+   */
   public readonly peerIdBuffer: Uint8Array;
+
+  /**
+   * Map of active torrents keyed by 40-character lowercase hexadecimal info hash.
+   */
   public readonly torrents: Map<string, Torrent> = new Map();
+
+  /**
+   * Array of active torrents managed by this client.
+   */
   public readonly torrentList: Torrent[] = [];
+
+  /**
+   * Active in-browser streaming HTTP bridge server, if created via {@link createServer}.
+   */
   public server: WebTorrentServer | null = null;
 
   private swarms: Map<string, Swarm> = new Map();
@@ -5997,6 +6659,21 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
   /** Global upload throttle in bytes/s (0 = unlimited). */
   private _uploadLimit: number = 0;
 
+  /**
+   * Creates a new BrowserTorrent {@link Client} instance.
+   *
+   * @param opts - Optional configuration options (peerId, maxConns, storage options, limits).
+   *
+   * @example
+   * ```ts
+   * import { Client } from "jsr:@vanaware/browsertorrent";
+   *
+   * const client = new Client({
+   *   useOPFS: true,
+   *   downloadLimit: 1024 * 1024, // 1 MB/s
+   * });
+   * ```
+   */
   constructor(opts: ClientOptions = {},) {
     super();
     this.opts = opts;
@@ -6033,17 +6710,30 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
 
   // ── Aggregate getters ──────────────────────────────────────────────
 
+  /**
+   * `true` if the client has finished initializing and has not been destroyed.
+   */
   get isReady(): boolean {
     return this.ready && !this.destroyed;
   }
+
+  /**
+   * `true` if {@link destroy} was called on this client.
+   */
   get isDestroyed(): boolean {
     return this.destroyed;
   }
+
+  /**
+   * Number of torrents currently tracked by this client.
+   */
   get torrentCount(): number {
     return this.torrents.size;
   }
 
-  /** Aggregate download speed across all torrents (bytes/s). */
+  /**
+   * Aggregate download speed across all active torrents in bytes per second.
+   */
   get downloadSpeed(): number {
     let total = 0;
     for (const t of this.torrents.values()) {
@@ -6052,7 +6742,9 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
     return total;
   }
 
-  /** Aggregate upload speed across all torrents (bytes/s). */
+  /**
+   * Aggregate upload speed across all active torrents in bytes per second.
+   */
   get uploadSpeed(): number {
     let total = 0;
     for (const t of this.torrents.values()) {
@@ -6061,7 +6753,10 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
     return total;
   }
 
-  /** Aggregate progress (0..1) weighted by torrent length. */
+  /**
+   * Aggregate download progress between `0.0` (0%) and `1.0` (100%),
+   * weighted by total byte lengths of all torrents.
+   */
   get progress(): number {
     let totalLen = 0;
     let totalDownloaded = 0;
@@ -6073,7 +6768,10 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
     return totalDownloaded / totalLen;
   }
 
-  /** Aggregate ratio: total uploaded / total downloaded. */
+  /**
+   * Aggregate ratio of uploaded bytes to downloaded bytes across all torrents.
+   * Returns `Infinity` if nothing was downloaded yet but data was uploaded.
+   */
   get ratio(): number {
     let totalDown = 0;
     let totalUp = 0;
@@ -6085,12 +6783,16 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
     return totalUp / totalDown;
   }
 
-  /** Currently configured download limit (bytes/s). */
+  /**
+   * Currently configured global download rate limit in bytes per second (0 = unlimited).
+   */
   get downloadLimit(): number {
     return this._downloadLimit;
   }
 
-  /** Currently configured upload limit (bytes/s). */
+  /**
+   * Currently configured global upload rate limit in bytes per second (0 = unlimited).
+   */
   get uploadLimit(): number {
     return this._uploadLimit;
   }
@@ -6098,8 +6800,14 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
   // ── Throttle ───────────────────────────────────────────────────────
 
   /**
-   * Set the global download rate limit.
-   * @param rate bytes/s; `0` removes the limit.
+   * Throttles the global download speed across all active and future torrent swarms.
+   *
+   * @param rate - Target rate limit in bytes per second. Pass `0` to remove the limit.
+   *
+   * @example
+   * ```ts
+   * client.throttleDownload(512 * 1024); // 512 KB/s
+   * ```
    */
   throttleDownload(rate: number,): void {
     this._downloadLimit = Math.max(0, rate,);
@@ -6109,8 +6817,14 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
   }
 
   /**
-   * Set the global upload rate limit.
-   * @param rate bytes/s; `0` removes the limit.
+   * Throttles the global upload speed across all active and future torrent swarms.
+   *
+   * @param rate - Target rate limit in bytes per second. Pass `0` to remove the limit.
+   *
+   * @example
+   * ```ts
+   * client.throttleUpload(256 * 1024); // 256 KB/s
+   * ```
    */
   throttleUpload(rate: number,): void {
     this._uploadLimit = Math.max(0, rate,);
@@ -6120,8 +6834,18 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
   }
 
   /**
-   * Get a torrent by `infoHash` (hex), magnet URI, or `.torrent` file buffer.
-   * Returns `null` if not found.
+   * Finds an active torrent by info hash (40-hex string), Magnet URI, or parsed descriptor.
+   *
+   * @param torrentId - Magnet URI, hex infoHash, or `.torrent` Uint8Array.
+   * @returns The matching {@link Torrent} instance, or `null` if not found.
+   *
+   * @example
+   * ```ts
+   * const torrent = await client.get("magnet:?xt=urn:btih:...");
+   * if (torrent) {
+   *   console.log("Found torrent:", torrent.name);
+   * }
+   * ```
    */
   async get(
     torrentId: string | Uint8Array | ParsedTorrent,
@@ -6137,6 +6861,19 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
 
   // ── Service Worker integration ─────────────────────────────────────
 
+  /**
+   * Creates or returns an in-browser streaming HTTP server bridge connected to a Service Worker.
+   * Enables direct HTML5 media playback via `<video src="...">` or `<audio src="...">`.
+   *
+   * @param opts - Options with optional Service Worker controller or custom scope prefix.
+   * @returns Initialized {@link WebTorrentServer}.
+   *
+   * @example
+   * ```ts
+   * const server = client.createServer({ scope: "/" });
+   * console.log("Streaming scope:", server.scope);
+   * ```
+   */
   createServer(
     opts: { controller?: ServiceWorker; scope?: string } = {},
   ): WebTorrentServer {
@@ -6193,6 +6930,19 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
     );
   }
 
+  /**
+   * Automatically registers a Service Worker from the configured `serviceWorkerUrl`
+   * and initializes the streaming {@link WebTorrentServer}.
+   *
+   * @returns Active ServiceWorker instance, or `null` if unsupported or unconfigured.
+   *
+   * @example
+   * ```ts
+   * const client = new Client({ serviceWorkerUrl: "./sw.js", serviceWorkerScope: "./" });
+   * const sw = await client.initServiceWorker();
+   * console.log("Service Worker registered:", !!sw);
+   * ```
+   */
   async initServiceWorker(): Promise<ServiceWorker | null> {
     if (typeof navigator === "undefined" || !navigator.serviceWorker) {
       return null;
@@ -6211,6 +6961,25 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
 
   // ── add / remove / destroy ─────────────────────────────────────────
 
+  /**
+   * Adds and starts downloading/participating in a BitTorrent swarm.
+   *
+   * Accepts a Magnet URI, 40-hex infoHash string, or `.torrent` file Uint8Array buffer.
+   * Returns a {@link Torrent} instance. If the torrent was already added, returns the existing instance.
+   *
+   * @param torrentId - Magnet URI, hex infoHash, or `.torrent` Uint8Array.
+   * @param opts - Configuration options (skip verification, callbacks, extra trackers).
+   * @returns Active {@link Torrent} instance.
+   * @throws {Error} If the client is destroyed or input is invalid.
+   *
+   * @example
+   * ```ts
+   * const torrent = await client.add("magnet:?xt=urn:btih:...", {
+   *   announce: ["wss://tracker.webtorrent.dev"],
+   *   onReady: (t) => console.log("Torrent metadata ready:", t.name),
+   * });
+   * ```
+   */
   async add(
     torrentId: string | Uint8Array | ParsedTorrent,
     opts: AddTorrentOptions = {},
@@ -6319,14 +7088,28 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
   }
 
   /**
-   * Seed a file or directory as a new torrent.
+   * Seeds an OPFS directory, file handle, Blob, or binary buffer as a new torrent.
    *
-   * Internally:
-   * 1. Builds an OPFS-backed generator entry.
-   * 2. Calls `generateTorrent()` to produce a `.torrent` buffer.
-   * 3. Calls {@link WebTorrent.add} on that buffer.
+   * Automatically generates the `.torrent` metainfo, writes pieces to OPFS, adds the torrent
+   * to the client, and announces to the configured trackers.
    *
-   * @returns the {@link Torrent} once it's been added and announced.
+   * @param input - FileSystemFileHandle, FileSystemDirectoryHandle, Blob, File, or Uint8Array.
+   * @param opts - Seeding options (display name, piece size, trackers, web seeds).
+   * @param cb - Optional callback invoked when the torrent is created.
+   * @returns The newly created and seeding {@link Torrent} instance.
+   * @throws {Error} If client is destroyed or OPFS is unavailable.
+   *
+   * @example
+   * ```ts
+   * const root = await navigator.storage.getDirectory();
+   * const handle = await root.getFileHandle("video.mp4");
+   *
+   * const torrent = await client.seed(handle, {
+   *   name: "video.mp4",
+   *   announce: ["wss://tracker.webtorrent.dev"],
+   * });
+   * console.log("Magnet URI:", torrent.magnetURI);
+   * ```
    */
   async seed(
     input: SeedInput,
@@ -6639,6 +7422,20 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
     },);
   }
 
+  /**
+   * Stops and removes a torrent from the client by its 40-character hex info hash.
+   *
+   * Closes all peer wire connections, unannounces from trackers, and optionally deletes
+   * stored pieces from OPFS storage.
+   *
+   * @param infoHash - 40-character hex info hash identifying the torrent.
+   * @param destroyStore - If `true`, permanently deletes downloaded pieces from OPFS (default: `false`).
+   *
+   * @example
+   * ```ts
+   * await client.remove(torrent.infoHash, true); // remove and delete files from OPFS
+   * ```
+   */
   async remove(infoHash: string, destroyStore = false,): Promise<void> {
     const torrent = this.torrents.get(infoHash,);
     const swarm = this.swarms.get(infoHash,);
@@ -6668,6 +7465,17 @@ export class Client extends TypedEventTarget<WebTorrentEvents> {
     }
   }
 
+  /**
+   * Destroys the client, terminating all active swarms, peer connections, and servers.
+   *
+   * @param callback - Optional callback invoked after all resources have been cleaned up.
+   *
+   * @example
+   * ```ts
+   * await client.destroy();
+   * console.log("Client destroyed");
+   * ```
+   */
   async destroy(callback?: () => void,): Promise<void> {
     if (this.destroyed) return;
     this.destroyed = true;
@@ -6730,6 +7538,28 @@ export type { Tracker, } from "./network/tracker.ts";
 export { Wire, } from "./core/wire.ts";
 export { File, } from "./core/file.ts";
 export { Piece, } from "./core/piece.ts";
+export { Bitfield, } from "./core/bitfield.ts";
+export { ExtensionHost, } from "./core/extension-host.ts";
+export { Extension, } from "./core/extension.ts";
+export type { ExtensionEvents, } from "./core/extension.ts";
+export { decodeHandshake, encodeHandshake, } from "./core/handshake.ts";
+export type {
+  EncodeHandshakeOptions,
+  PeerHandshake,
+} from "./core/handshake.ts";
+export { decodeMessage, encodeMessage, } from "./core/message.ts";
+export type { PeerMessage, } from "./core/message.ts";
+export { OPFSChunkStore, } from "./storage/opfs-chunk-store.ts";
+export type { ChunkStore, } from "./storage/opfs-chunk-store.ts";
+export { decode, encode, } from "./utils/bencode.ts";
+export type {
+  BencodeDict,
+  BencodeKey,
+  BencodeList,
+  BencodeMap,
+  BencodeValue,
+  DecodeOptions,
+} from "./utils/bencode.ts";
 export { parseTorrent, } from "./utils/parse-torrent.ts";
 export {
   BT_PEER_ID_PREFIX,
@@ -6748,12 +7578,17 @@ export type { ClientInfo, } from "./utils/peerid.ts";
 export type { PexPeer, PexUpdate, UtPexOptions, } from "./extensions/ut-pex.ts";
 export {
   createServer,
+  type CreateServerOptions,
   type StreamRequestMessage,
+  type StreamResponseMetadata,
   WebTorrentServer,
 } from "./server/server.ts";
 export {
   buildStreamURL,
+  type ParsedStreamURL,
   parseStreamURL,
+  type StreamEntry,
+  StreamManager,
   streamManager,
 } from "./server/stream-manager.ts";
 // Phase 5.3: OPFS-based torrent generator
@@ -6777,21 +7612,39 @@ export type {
   Torrent as GeneratedTorrent,
   Writer as TorrentWriter,
 } from "./torrent-generator/mod.ts";
-// Service Worker streaming & registration integration
+// Service Worker streaming, registration & bridge integration
 export {
+  connectServiceWorkerBridge,
   createWebTorrentFetchHandler,
+  establishSWConnection,
   getWebTorrentPrefix,
+  guessContentType,
   guessDestination,
   handleStream,
   isServiceWorkerSupported,
   isWebTorrentStreamRequest,
+  parseRange,
+  registerAndConnectServiceWorker,
   registerServiceWorker,
+  type ServiceWorkerBridgeOptions,
   type ServiceWorkerRegisterOptions,
   type StreamHandlerOptions,
+  waitForActivation,
+  waitForServiceWorkerActivation,
   type WebTorrentFetchHandler,
 } from "./service-worker/mod.ts";
 
-```
+/**
+ * Default export representing the primary BitTorrent {@link Client}.
+ */
+export default Client;
+
+/**
+ * Re-export `Client` as `WebTorrent` for seamless drop-in parity with WebTorrent codebases.
+ */
+export { Client as WebTorrent, };
+
+````
 
 ---
 
@@ -8681,13 +9534,37 @@ export function createTracker(
 ## File: `packages/core/src/server/server.ts`
 
 ````ts
-// /browsertorrent/monorepo/webtorrent/src/server/server.ts
+/**
+ * @module server
+ *
+ * # @vanaware/browsertorrent/server
+ *
+ * In-browser HTTP server bridge connected to a Service Worker.
+ *
+ * Translates Service Worker fetch requests into piece reads from the BitTorrent {@link ChunkStore},
+ * allowing video/audio elements to seek smoothly across files with full HTTP 206 Partial Content support.
+ *
+ * ## Usage Example
+ * ```ts
+ * import { createServer, registerTorrentFiles } from "jsr:@vanaware/browsertorrent/server";
+ * import { Client } from "jsr:@vanaware/browsertorrent";
+ *
+ * const client = new Client();
+ * const server = createServer({ scope: "/" });
+ *
+ * const torrent = await client.add("magnet:?xt=urn:btih:...");
+ * torrent.on("ready", () => {
+ *   registerTorrentFiles(torrent, torrent.files);
+ *   console.log("Stream URL:", torrent.files[0].streamURL);
+ * });
+ * ```
+ */
 
-import type { File, } from "../core/file.ts";
 import type { Torrent, } from "../core/torrent.ts";
 import {
   buildStreamURL,
   parseStreamURL,
+  type StreamableFile,
   type StreamEntry,
   streamManager,
 } from "./stream-manager.ts";
@@ -8703,23 +9580,33 @@ import {
  * next chunk, `false` (or closing the port) ends the stream.
  */
 export interface StreamRequestMessage {
+  /** Literal message type identifying streaming requests. */
   type: "webtorrent-request";
+  /** Full URL requested by the browser client. */
   url: string;
+  /** HTTP request method (usually "GET"). */
   method: string;
+  /** Request HTTP headers (e.g., Range header). */
   headers: Record<string, string>;
+  /** Application scope prefix. */
   scope: string;
+  /** Fetch destination category ("video", "audio", "document", etc.). */
   destination: RequestDestination | string;
 }
 
 /**
- * First reply on the streaming channel.  When `body === "STREAM"` the
+ * First reply on the streaming channel. When `body === "STREAM"` the
  * caller must continue pulling chunks by sending `true` on the port.
  * A non-stream body is returned verbatim and ends the exchange.
  */
 export interface StreamResponseMetadata {
+  /** Response payload indicator or literal body. */
   body: "STREAM" | ArrayBuffer | string | Uint8Array | null;
+  /** HTTP status code (e.g. 200 or 206 Partial Content). */
   status?: number;
+  /** HTTP status status text explanation. */
   statusText?: string;
+  /** Outgoing HTTP headers (Content-Type, Content-Range, Accept-Ranges, etc.). */
   headers?: Record<string, string>;
 }
 
@@ -8728,6 +9615,7 @@ export interface StreamResponseMetadata {
  * is ready to serve `/webtorrent/*` requests.
  */
 export interface WebTorrentReadyMessage {
+  /** Literal action identifier. */
   type: "WEBTORRENT_READY";
 }
 
@@ -8736,6 +9624,7 @@ export interface WebTorrentReadyMessage {
  * port once the main thread is ready to receive streaming requests.
  */
 export interface WebTorrentAckMessage {
+  /** Literal acknowledgement action identifier. */
   type: "WEBTORRENT_ACK";
 }
 
@@ -8788,21 +9677,21 @@ export interface Transport {
   close(): void;
 }
 
+export type { StreamEntry, };
+
 /**
- * Minimal controller surface used by the default transport.  Matches
- * the relevant subset of `ServiceWorkerContainer`/`ServiceWorker`
- * behavior, so we can mock it in tests without standing up a real SW.
+ * Minimal controller surface used by the default transport. Matches
+ * the relevant subset of ServiceWorkerContainer/ServiceWorker behavior.
  */
 export interface ServiceWorkerControllerLike {
+  /** Scope prefix registered with the Service Worker. */
   scope: string;
+  /** Active Service Worker worker handle or null. */
   active:
     | { postMessage?: (data: unknown, transfer?: Transferable[],) => void }
     | null;
   /**
-   * Returns a promise that resolves when a `message` event matches the
-   * supplied `sourceId`.  In the real SW this is replaced by a
-   * `navigator.serviceWorker.addEventListener('message', ...)` handler
-   * that filters by the `MessageEvent.source.id`.
+   * Returns a promise that resolves when a message event matches the supplied sourceId.
    */
   waitForMessage(sourceId: string,): Promise<unknown>;
 }
@@ -8889,6 +9778,7 @@ export function createServiceWorkerTransport(
  * assert the protocol was honored.
  */
 export class InProcessTransport implements Transport {
+  /** Array of sent messages recorded by the in-process test transport. */
   readonly sent: unknown[] = [];
   private responseResolver?: (data: StreamResponseMetadata,) => void;
   /** @internal — exposed for tests. */
@@ -8937,18 +9827,26 @@ export class InProcessTransport implements Transport {
  *    {@link ReadableStream} of bytes.
  *
  * The server is transport-agnostic: production code passes the SW
- * transport, while tests pass an {@link InProcessTransport}.  This
+ * transport, while tests pass an {@link InProcessTransport}. This
  * keeps the streaming protocol exercised even in environments without a
  * real Service Worker (Node, Deno, CI).
  */
 export class WebTorrentServer {
+  /** Base scope URL prefix of the Service Worker. */
   public readonly scope: string;
+  /** `true` when the handshake with the Service Worker is fully established. */
   public isReady: boolean = false;
+  /** `true` after `destroy()` has been called to tear down the server. */
   public isDestroyed: boolean = false;
 
   private readonly transport: Transport;
   private readonly pendingAcks: Set<(ok: boolean,) => void> = new Set();
 
+  /**
+   * Initializes a WebTorrentServer instance.
+   *
+   * @param opts - Transport and scope options.
+   */
   constructor(opts: { transport: Transport; scope: string },) {
     this.transport = opts.transport;
     this.scope = opts.scope;
@@ -9089,7 +9987,7 @@ export function buildFileStream(
   _transport: Transport,
   opts: { rangeStart?: number; rangeEnd?: number } = {},
 ): ReadableStream<Uint8Array> {
-  const file: File = entry.file;
+  const file: StreamableFile = entry.file;
 
   let fileOffset = opts.rangeStart ?? 0;
   const endOffset = opts.rangeEnd ?? file.length;
@@ -9179,7 +10077,9 @@ export function buildFileStream(
 
 /** Parsed byte-range result. */
 export interface ParsedRange {
+  /** Inclusive starting byte offset. */
   start: number;
+  /** Inclusive ending byte offset. */
   end: number;
 }
 
@@ -9218,20 +10118,28 @@ export function parseRangeHeader(
 }
 
 /**
- * Reads the next chunk of `file` starting at `offset`.  This is a
- * separate function (rather than an inline `for await` loop) so the
- * `File` class can grow a smarter implementation later (e.g. adaptive
- * block size based on `RTT` and `BT_RREQ_RATE`) without changing the
- * streaming protocol.
- *
- * The default block size is 16 KiB — small enough to keep latency
- * snappy for video seeks, large enough to amortize `MessageChannel`
- * overhead.
+ * Default chunk block size used when streaming media files (16 KiB).
  */
 export const STREAM_BLOCK_SIZE = 16 * 1024;
 
+/**
+ * Reads the next contiguous chunk of a torrent file starting at the specified byte offset.
+ *
+ * @param file - Torrent file instance to read from.
+ * @param offset - Absolute starting byte offset within the file.
+ * @param length - Maximum number of bytes to read (defaults to STREAM_BLOCK_SIZE).
+ * @returns A Uint8Array slice of file data.
+ *
+ * @example
+ * ```ts
+ * import { readNextChunk } from "jsr:@vanaware/browsertorrent/server";
+ *
+ * const chunk = await readNextChunk(file, 0, 16384);
+ * console.log("Chunk bytes:", chunk.byteLength);
+ * ```
+ */
 export async function readNextChunk(
-  file: File,
+  file: StreamableFile,
   offset: number,
   length: number = STREAM_BLOCK_SIZE,
 ): Promise<Uint8Array> {
@@ -9365,12 +10273,32 @@ export function guessContentType(name: string,): string {
  * Callers wanting a self-test can call {@link WebTorrentServer.sendReadyAck}
  * and then drive the protocol through the test transport.
  */
+/**
+ * Configuration options for creating a streaming WebTorrentServer.
+ */
 export interface CreateServerOptions {
+  /** Target active ServiceWorker controller instance. */
   controller?: ServiceWorker;
+  /** Base URL scope prefix to intercept (defaults to "/"). */
   scope?: string;
+  /** Pluggable transport instance (used for custom communication or tests). */
   transport?: Transport;
 }
 
+/**
+ * Creates an in-browser streaming HTTP server bridge connected to a Service Worker.
+ *
+ * @param opts - Configuration specifying controller, transport, or scope prefix.
+ * @returns Initialized {@link WebTorrentServer} instance.
+ *
+ * @example
+ * ```ts
+ * import { createServer } from "jsr:@vanaware/browsertorrent/server";
+ *
+ * const server = createServer({ scope: "/" });
+ * console.log("Server scope:", server.scope);
+ * ```
+ */
 export function createServer(
   opts: CreateServerOptions = {},
 ): WebTorrentServer {
@@ -9401,8 +10329,8 @@ export function createServer(
  *   use this to assert cleanup behaviour.
  */
 export function registerTorrentFiles(
-  torrent: Torrent,
-  files: File[],
+  torrent: { infoHash: string },
+  files: StreamableFile[],
 ): StreamEntry[] {
   const infoHash = torrent.infoHash;
   const registered: StreamEntry[] = [];
@@ -9436,10 +10364,22 @@ export function unregisterTorrentFiles(infoHash: string,): void {
 
 ## File: `packages/core/src/server/stream-manager.ts`
 
-```ts
-// /browsertorrent/monorepo/webtorrent/src/server/stream-manager.ts
-
-import type { File, } from "../core/file.ts";
+````ts
+/**
+ * Minimal file interface required for streaming via the Service Worker bridge.
+ */
+export interface StreamableFile {
+  /** File display name. */
+  name: string;
+  /** Total byte size of the file. */
+  length: number;
+  /** Optional async iterator yielding binary chunks. */
+  [Symbol.asyncIterator]?: () => AsyncIterator<Uint8Array>;
+  /** Optional readable stream factory. */
+  createReadStream?: (
+    opts?: { start?: number; end?: number },
+  ) => ReadableStream<Uint8Array>;
+}
 
 /**
  * Internal record stored in the {@link StreamManager} for each registered file.
@@ -9450,9 +10390,12 @@ import type { File, } from "../core/file.ts";
  * service-worker bridge can look them up by URL.
  */
 export interface StreamEntry {
+  /** 40-character hex torrent info hash. */
   infoHash: string;
+  /** Zero-based file index inside the torrent. */
   fileIndex: number;
-  file: File;
+  /** Live streamable file instance. */
+  file: StreamableFile;
 }
 
 /**
@@ -9483,9 +10426,9 @@ export class StreamManager {
    *
    * @param infoHash - 40-char hex info hash identifying the torrent.
    * @param fileIndex - Zero-based file index inside the torrent.
-   * @param file - The {@link File} instance to serve.
+   * @param file - The file instance to serve.
    */
-  register(infoHash: string, fileIndex: number, file: File,): void {
+  register(infoHash: string, fileIndex: number, file: StreamableFile,): void {
     const key = this._key(infoHash, fileIndex,);
     this.entries.set(key, { infoHash, fileIndex, file, },);
   }
@@ -9543,6 +10486,9 @@ export class StreamManager {
     this.entries.clear();
   }
 
+  /**
+   * Generates internal cache key for (infoHash, fileIndex).
+   */
   private _key(infoHash: string, fileIndex: number,): string {
     return `${infoHash}:${fileIndex}`;
   }
@@ -9586,12 +10532,33 @@ export function buildStreamURL(
  * shape.  The `infoHash` is validated to be 40 hex characters and
  * `fileIndex` must be a non-negative safe integer.
  */
+/**
+ * Parsed components of a virtual WebTorrent stream URL.
+ */
 export interface ParsedStreamURL {
+  /** 40-character hex torrent info hash. */
   infoHash: string;
+  /** Zero-based file index inside the torrent. */
   fileIndex: number;
+  /** Original unescaped file name. */
   name: string;
 }
 
+/**
+ * Parses a virtual stream URL back into its component infoHash, fileIndex, and file name.
+ *
+ * @param url - The stream URL string to parse.
+ * @param scope - The base Service Worker registration scope.
+ * @returns Parsed stream components, or `null` if the URL format does not match.
+ *
+ * @example
+ * ```ts
+ * import { parseStreamURL } from "jsr:@vanaware/browsertorrent";
+ *
+ * const parsed = parseStreamURL("/webtorrent/0123456789012345678901234567890123456789/0/movie.mp4", "/");
+ * console.log("File index:", parsed?.fileIndex);
+ * ```
+ */
 export function parseStreamURL(
   url: string,
   scope: string,
@@ -9613,17 +10580,452 @@ export function parseStreamURL(
   return { infoHash: infoHash.toLowerCase(), fileIndex, name, };
 }
 
-```
+````
+
+---
+
+## File: `packages/core/src/service-worker/bridge.ts`
+
+````ts
+// packages/core/src/service-worker/bridge.ts
+import { parseStreamURL, streamManager, } from "../server/stream-manager.ts";
+
+/**
+ * Guesses the MIME `Content-Type` header from a file name extension.
+ *
+ * Supports common video, audio, image, and text formats suitable for in-browser streaming.
+ *
+ * @param name - File name or path (e.g., `"movie.mp4"`, `"track.mp3"`).
+ * @returns The matched MIME type string, or `"application/octet-stream"` if unrecognized.
+ *
+ * @example
+ * ```ts
+ * import { guessContentType } from "jsr:@vanaware/browsertorrent/service-worker";
+ *
+ * const mime = guessContentType("video.mp4"); // "video/mp4"
+ * ```
+ */
+export function guessContentType(name: string,): string {
+  const ext = name.split(".",).pop()?.toLowerCase();
+  const types: Record<string, string> = {
+    mp4: "video/mp4",
+    webm: "video/webm",
+    mkv: "video/x-matroska",
+    avi: "video/x-msvideo",
+    mov: "video/quicktime",
+    mp3: "audio/mpeg",
+    m4a: "audio/mp4",
+    ogg: "audio/ogg",
+    wav: "audio/wav",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    gif: "image/gif",
+    webp: "image/webp",
+    html: "text/html",
+    txt: "text/plain",
+    json: "application/json",
+    pdf: "application/pdf",
+  };
+  return types[ext ?? ""] ?? "application/octet-stream";
+}
+
+/**
+ * Parses an HTTP `Range` request header (e.g., `"bytes=0-1048575"`) into inclusive start and end byte indices.
+ *
+ * @param header - Raw `Range` header string received from an HTTP request.
+ * @param fileLength - Total length of the requested file in bytes.
+ * @returns An object containing `{ start, end }` byte offsets, or `null` if the header is missing, malformed, or out of bounds.
+ *
+ * @example
+ * ```ts
+ * import { parseRange } from "jsr:@vanaware/browsertorrent/service-worker";
+ *
+ * const range = parseRange("bytes=0-499", 1000);
+ * // { start: 0, end: 499 }
+ * ```
+ */
+export function parseRange(
+  header: string | undefined,
+  fileLength: number,
+): { start: number; end: number } | null {
+  if (!header) return null;
+  const match = header.match(/^bytes=(\d+)-(\d*)$/,);
+  if (!match) return null;
+  const start = Number(match[1],);
+  const endStr = match[2];
+  const end = endStr ? Number(endStr,) : fileLength - 1;
+  if (!Number.isFinite(start,) || start < 0 || start >= fileLength) return null;
+  if (!Number.isFinite(end,) || end < start || end >= fileLength) return null;
+  return { start, end, };
+}
+
+/**
+ * Waits for a Service Worker instance in `installing` or `waiting` state to become `activated`.
+ *
+ * @param worker - The target {@link ServiceWorker} instance.
+ * @returns A promise that resolves when the worker enters the `"activated"` state.
+ *
+ * @example
+ * ```ts
+ * import { waitForServiceWorkerActivation } from "jsr:@vanaware/browsertorrent/service-worker";
+ *
+ * const reg = await navigator.serviceWorker.register("./sw.js");
+ * if (reg.installing) {
+ *   await waitForServiceWorkerActivation(reg.installing);
+ * }
+ * ```
+ */
+export function waitForServiceWorkerActivation(
+  worker: ServiceWorker,
+): Promise<void> {
+  return new Promise((resolve,) => {
+    if (worker.state === "activated") {
+      resolve();
+      return;
+    }
+    const onChange = () => {
+      if (worker.state === "activated") {
+        worker.removeEventListener("statechange", onChange,);
+        resolve();
+      }
+    };
+    worker.addEventListener("statechange", onChange,);
+  },);
+}
+
+/**
+ * Backward-compatibility alias for {@link waitForServiceWorkerActivation}.
+ */
+export const waitForActivation: (worker: ServiceWorker,) => Promise<void> =
+  waitForServiceWorkerActivation;
+
+/**
+ * Options for configuring the low-level Service Worker streaming bridge.
+ */
+export interface ServiceWorkerBridgeOptions {
+  /** Target active ServiceWorker. If omitted, awaits navigator.serviceWorker.ready. */
+  worker?: ServiceWorker;
+  /** Application scope prefix for stream URL parsing (default: "/"). */
+  scope?: string;
+}
+
+/**
+ * Low-level bridge that connects an active Service Worker to the {@link streamManager} for BitTorrent streaming.
+ *
+ * Transfers a `MessageChannel` port to the Service Worker (`{ type: "PORT" }`) and sets up a duplex
+ * streaming protocol for serving file chunks with backpressure and range requests.
+ *
+ * @param workerOrOptions - An active {@link ServiceWorker} instance or a {@link ServiceWorkerBridgeOptions} object.
+ * @param optionsOrScope - Scope URL string or configuration options when passing a worker instance.
+ * @returns The established {@link MessageChannel}, or `null` if Service Workers are unsupported or no active worker is found.
+ *
+ * @example
+ * ```ts
+ * import { connectServiceWorkerBridge, waitForServiceWorkerActivation } from "jsr:@vanaware/browsertorrent/service-worker";
+ *
+ * const reg = await navigator.serviceWorker.register("./sw.js");
+ * if (reg.installing) await waitForServiceWorkerActivation(reg.installing);
+ * const channel = await connectServiceWorkerBridge(reg.active!, { scope: "./" });
+ * ```
+ */
+export async function connectServiceWorkerBridge(
+  workerOrOptions?: ServiceWorker | ServiceWorkerBridgeOptions,
+  optionsOrScope?: { scope?: string } | string,
+): Promise<MessageChannel | null> {
+  if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) {
+    return null;
+  }
+
+  let sw: ServiceWorker | undefined;
+  let scope: string | undefined;
+
+  if (
+    workerOrOptions && typeof workerOrOptions === "object" &&
+    "postMessage" in workerOrOptions
+  ) {
+    sw = workerOrOptions as ServiceWorker;
+    if (typeof optionsOrScope === "string") {
+      scope = optionsOrScope;
+    } else if (optionsOrScope && typeof optionsOrScope === "object") {
+      scope = optionsOrScope.scope;
+    }
+  } else if (workerOrOptions && typeof workerOrOptions === "object") {
+    const opts = workerOrOptions as ServiceWorkerBridgeOptions;
+    sw = opts.worker;
+    scope = opts.scope;
+  }
+
+  if (!sw) {
+    const reg = await navigator.serviceWorker.ready;
+    sw = reg.active ?? undefined;
+  }
+  if (!sw) return null;
+
+  const channel = new MessageChannel();
+  const { port1, port2, } = channel;
+
+  // Send port1 to SW for streaming
+  sw.postMessage({ type: "PORT", }, [port1,],);
+
+  // port2 listens for streaming requests from SW
+  port2.onmessage = (e: MessageEvent,) => {
+    const msg = e.data;
+    if (msg?.type !== "webtorrent-request") return;
+
+    const { url, method, headers, scope, } = msg;
+    const chunkPort = e.ports[0];
+    const requestPort = e.ports[1];
+
+    if (!chunkPort || !requestPort) return;
+
+    try {
+      const parsed = parseStreamURL(url, scope || "/",);
+      if (!parsed) {
+        chunkPort.postMessage({ status: 404, body: "Not Found", },);
+        chunkPort.postMessage(null,);
+        chunkPort.close();
+        return;
+      }
+
+      const entry = streamManager.get(parsed.infoHash, parsed.fileIndex,);
+      if (!entry) {
+        chunkPort.postMessage({ status: 404, body: "File not registered", },);
+        chunkPort.postMessage(null,);
+        chunkPort.close();
+        return;
+      }
+
+      // deno-lint-ignore no-explicit-any
+      const file = entry.file as any;
+      const range = parseRange(headers?.["range"], file.length,);
+      const status = range ? 206 : 200;
+      const statusText = range ? "Partial Content" : "OK";
+      const contentType = guessContentType(file.name,);
+
+      const respHeaders: Record<string, string> = {
+        "Content-Type": contentType,
+        "Accept-Ranges": "bytes",
+        "Cache-Control": "no-store",
+      };
+
+      if (range) {
+        respHeaders["Content-Range"] =
+          `bytes ${range.start}-${range.end}/${file.length}`;
+        respHeaders["Content-Length"] = String(range.end - range.start + 1,);
+      } else {
+        respHeaders["Content-Length"] = String(file.length,);
+      }
+
+      const rangeStart = range?.start ?? 0;
+      const rangeEnd = range?.end ?? (file.length - 1);
+      let currentOffset = rangeStart;
+
+      let fileStream: ReadableStream<Uint8Array> | null = null;
+      let fileIterator: ReadableStreamDefaultReader<Uint8Array> | null = null;
+
+      const ensureStream = () => {
+        if (!fileStream) {
+          if (typeof file.createReadStream === "function") {
+            fileStream = file.createReadStream({
+              start: rangeStart,
+              end: rangeEnd,
+            },);
+          } else {
+            fileStream = new ReadableStream<Uint8Array>({
+              async start(controller,) {
+                if (file[Symbol.asyncIterator]) {
+                  for await (const chunk of file) {
+                    controller.enqueue(chunk,);
+                  }
+                }
+                controller.close();
+              },
+            },);
+          }
+          fileIterator = fileStream!.getReader();
+        }
+      };
+
+      let closed = false;
+      const cleanup = () => {
+        closed = true;
+        fileIterator = null;
+        fileStream = null;
+        chunkPort.close();
+      };
+
+      chunkPort.onmessage = async (ev: MessageEvent,) => {
+        if (closed) return;
+        const data = ev.data;
+
+        if (data === null || data === false) {
+          cleanup();
+          return;
+        }
+
+        if (data === true) {
+          if (currentOffset > rangeEnd) {
+            chunkPort.postMessage(null,);
+            cleanup();
+            return;
+          }
+
+          ensureStream();
+          const { value, done, } = await fileIterator!.read();
+          if (closed) return;
+
+          if (done || !value || value.byteLength === 0) {
+            chunkPort.postMessage(null,);
+            cleanup();
+            return;
+          }
+
+          currentOffset += value.byteLength;
+          chunkPort.postMessage(value,);
+        }
+      };
+
+      chunkPort.start?.();
+
+      requestPort.postMessage({
+        status,
+        statusText,
+        headers: respHeaders,
+        body: "STREAM",
+      },);
+    } catch (err) {
+      chunkPort.postMessage({ status: 500, body: String(err,), },);
+      chunkPort.postMessage(null,);
+      chunkPort.close();
+    }
+  };
+
+  return channel;
+}
+
+/**
+ * Backward-compatibility alias for {@link connectServiceWorkerBridge}.
+ */
+export const establishSWConnection: typeof connectServiceWorkerBridge =
+  connectServiceWorkerBridge;
+
+/**
+ * High-level helper that registers the Service Worker, awaits its activation,
+ * and automatically establishes the duplex streaming MessageChannel bridge.
+ *
+ * This provides an out-of-the-box solution for progressive web apps to support
+ * video and audio streaming from BitTorrent swarms.
+ *
+ * @param options - Registration and script options:
+ *   - `scriptUrl`: Custom path to the Service Worker file (defaults to `${scope}sw.js`).
+ *   - `scope`: Application URL scope for the Service Worker (defaults to base pathname).
+ *   - `version`: Version cache-busting query parameter.
+ * @returns A promise resolving to the registration and established {@link MessageChannel}, or `null` if unsupported.
+ *
+ * @example
+ * ```ts
+ * import { registerAndConnectServiceWorker } from "jsr:@vanaware/browsertorrent/service-worker";
+ *
+ * const res = await registerAndConnectServiceWorker({
+ *   scriptUrl: "./sw.js",
+ *   scope: "./",
+ * });
+ * console.log("Service Worker connected:", res?.registration.scope);
+ * ```
+ */
+export async function registerAndConnectServiceWorker(
+  options: { scriptUrl?: string; scope?: string; version?: string } = {},
+): Promise<
+  | { registration: ServiceWorkerRegistration; channel: MessageChannel | null }
+  | null
+> {
+  if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) {
+    return null;
+  }
+
+  const { registerServiceWorker, } = await import("./register.ts");
+  const reg = await registerServiceWorker(options,);
+  if (!reg) return null;
+
+  const activeWorker = reg.active ?? reg.installing ?? reg.waiting;
+  if (activeWorker) {
+    if (activeWorker.state !== "activated") {
+      await waitForServiceWorkerActivation(activeWorker,);
+    }
+    const channel = await connectServiceWorkerBridge({
+      worker: reg.active ?? activeWorker,
+      scope: options.scope,
+    },);
+    return { registration: reg, channel, };
+  }
+
+  return { registration: reg, channel: null, };
+}
+
+````
 
 ---
 
 ## File: `packages/core/src/service-worker/mod.ts`
 
-```ts
-// packages/core/src/service-worker/mod.ts
+````ts
 /**
- * BrowserTorrent Service Worker module.
- * Provides streaming fetch interception and client registration utilities for BitTorrent web seeding and playback.
+ * @module service-worker
+ *
+ * # @vanaware/browsertorrent/service-worker
+ *
+ * Provides in-browser Service Worker streaming fetch interception, backpressure message channels,
+ * and registration utilities for high-throughput media playback.
+ *
+ * Enables HTML5 `<video>` and `<audio>` elements to stream directly from live BitTorrent swarms
+ * using standard HTTP 206 Partial Content range requests.
+ *
+ * ## Usage Example
+ *
+ * ### In Main Page (`main.ts`):
+ * ```ts
+ * import { registerAndConnectServiceWorker } from "jsr:@vanaware/browsertorrent/service-worker";
+ * import { Client } from "jsr:@vanaware/browsertorrent";
+ *
+ * // 1. Register SW and connect dual MessageChannel bridge
+ * await registerAndConnectServiceWorker({
+ *   scriptUrl: "./sw.js",
+ *   scope: "./",
+ * });
+ *
+ * // 2. Initialize client and streaming server bridge
+ * const client = new Client();
+ * client.createServer({ scope: "/" });
+ *
+ * // 3. Download and stream
+ * const torrent = await client.add("magnet:?xt=urn:btih:...");
+ * torrent.on("ready", () => {
+ *   const file = torrent.files[0];
+ *   const video = document.querySelector("video")!;
+ *   video.src = file.streamURL;
+ * });
+ * ```
+ *
+ * ### In Service Worker (`sw.ts`):
+ * ```ts
+ * import { createWebTorrentFetchHandler } from "jsr:@vanaware/browsertorrent/service-worker";
+ *
+ * const torrentHandler = createWebTorrentFetchHandler();
+ *
+ * self.addEventListener("message", (event) => {
+ *   if (event.data?.type === "PORT") {
+ *     torrentHandler.setPagePort(event.ports[0]);
+ *   }
+ * });
+ *
+ * self.addEventListener("fetch", (event) => {
+ *   if (torrentHandler.isStreamRequest(event.request)) {
+ *     const responsePromise = torrentHandler.handleFetch(event);
+ *     if (responsePromise) event.respondWith(responsePromise);
+ *   }
+ * });
+ * ```
  */
 
 export {
@@ -9642,31 +11044,63 @@ export {
   type ServiceWorkerRegisterOptions,
 } from "./register.ts";
 
-```
+export {
+  connectServiceWorkerBridge,
+  establishSWConnection,
+  guessContentType,
+  parseRange,
+  registerAndConnectServiceWorker,
+  type ServiceWorkerBridgeOptions,
+  waitForActivation,
+  waitForServiceWorkerActivation,
+} from "./bridge.ts";
+
+````
 
 ---
 
 ## File: `packages/core/src/service-worker/register.ts`
 
-```ts
+````ts
 // packages/core/src/service-worker/register.ts
 import { VERSION, } from "../version.ts";
 
+/**
+ * Options for registering the streaming Service Worker.
+ */
 export interface ServiceWorkerRegisterOptions {
+  /** Target URL of the service worker script (defaults to `${scope}sw.js`). */
   scriptUrl?: string;
+  /** Registration scope URL prefix (defaults to base pathname). */
   scope?: string;
+  /** Cache-busting version query string attached to the script URL. */
   version?: string;
 }
 
 /**
  * Checks whether the current browser environment supports Service Workers.
+ *
+ * @returns `true` if `navigator.serviceWorker` is available.
  */
 export function isServiceWorkerSupported(): boolean {
   return typeof navigator !== "undefined" && "serviceWorker" in navigator;
 }
 
 /**
- * Registers the BrowserTorrent Service Worker with scope detection and versioning.
+ * Registers the BrowserTorrent Service Worker with automatic scope detection and cache-busting versioning.
+ *
+ * @param options - Registration and script path configuration.
+ * @returns The active {@link ServiceWorkerRegistration}, or `null` if unsupported.
+ *
+ * @example
+ * ```ts
+ * import { registerServiceWorker } from "jsr:@vanaware/browsertorrent/service-worker";
+ *
+ * const reg = await registerServiceWorker({
+ *   scriptUrl: "./sw.js",
+ *   scope: "./",
+ * });
+ * ```
  */
 export async function registerServiceWorker(
   options: ServiceWorkerRegisterOptions = {},
@@ -9714,28 +11148,54 @@ export async function registerServiceWorker(
   }
 }
 
-```
+````
 
 ---
 
 ## File: `packages/core/src/service-worker/stream-handler.ts`
 
-```ts
+````ts
 // packages/core/src/service-worker/stream-handler.ts
 declare const self: {
   registration?: { scope?: string };
   location?: { origin?: string };
 };
 
+/**
+ * Configuration options for creating a WebTorrent Service Worker stream handler.
+ */
 export interface StreamHandlerOptions {
+  /** Optional custom URL path prefix to intercept (defaults to `"/webtorrent/"`). */
   prefix?: string;
 }
 
+/**
+ * Service Worker fetch handler interface providing interception and streaming bridge logic.
+ */
 export interface WebTorrentFetchHandler {
+  /**
+   * Sets or updates the active MessagePort connected to the client window.
+   */
   setPagePort: (port: MessagePort,) => void;
+
+  /**
+   * Returns the current active MessagePort, or `null` if disconnected.
+   */
   getPagePort: () => MessagePort | null;
+
+  /**
+   * Tests whether an incoming URL or Request targets the streaming interceptor prefix.
+   */
   isStreamRequest: (urlOrRequest: URL | Request | string,) => boolean;
+
+  /**
+   * Intercepts a Service Worker FetchEvent and streams data from the main thread torrent engine.
+   */
   handleFetch: (event: FetchEvent,) => Promise<Response> | null;
+
+  /**
+   * Handles low-level stream reading with HTTP 206 Partial Content range requests and backpressure.
+   */
   handleStream: (
     req: Request,
     url: URL,
@@ -9745,7 +11205,18 @@ export interface WebTorrentFetchHandler {
 }
 
 /**
- * Guesses media destination type from URL pathname.
+ * Guesses the HTML5 media category (`"video"`, `"audio"`, `"image"`, or `"document"`)
+ * based on the file extension of the requested URL.
+ *
+ * @param pathname - URL path string.
+ * @returns `"video" | "audio" | "image" | "document"`.
+ *
+ * @example
+ * ```ts
+ * import { guessDestination } from "jsr:@vanaware/browsertorrent/service-worker";
+ *
+ * guessDestination("/webtorrent/abc/video.mp4"); // "video"
+ * ```
  */
 export function guessDestination(pathname: string,): string {
   if (/\.(mp4|webm|mkv|avi|mov)$/i.test(pathname,)) return "video";
@@ -9755,7 +11226,18 @@ export function guessDestination(pathname: string,): string {
 }
 
 /**
- * Computes the /webtorrent/ URL prefix for stream request interception.
+ * Computes the normalized `/webtorrent/` URL prefix used by the streaming interceptor
+ * for a given Service Worker registration scope.
+ *
+ * @param scope - Base URL scope of the Service Worker.
+ * @returns Prefix string ending with `/webtorrent/`.
+ *
+ * @example
+ * ```ts
+ * import { getWebTorrentPrefix } from "jsr:@vanaware/browsertorrent/service-worker";
+ *
+ * getWebTorrentPrefix("/"); // "/webtorrent/"
+ * ```
  */
 export function getWebTorrentPrefix(scope?: string,): string {
   const baseScope = scope ||
@@ -9772,7 +11254,20 @@ export function getWebTorrentPrefix(scope?: string,): string {
 }
 
 /**
- * Determines whether an incoming URL or Request matches the WebTorrent streaming pattern.
+ * Determines whether an incoming URL or HTTP Request targets the WebTorrent streaming interceptor.
+ *
+ * @param urlOrRequest - URL string, {@link URL} object, or {@link Request} object to check.
+ * @param scope - Optional custom Service Worker scope.
+ * @returns `true` if the request matches the streaming prefix.
+ *
+ * @example
+ * ```ts
+ * import { isWebTorrentStreamRequest } from "jsr:@vanaware/browsertorrent/service-worker";
+ *
+ * if (isWebTorrentStreamRequest(event.request)) {
+ *   // Intercept streaming fetch
+ * }
+ * ```
  */
 export function isWebTorrentStreamRequest(
   urlOrRequest: URL | Request | string,
@@ -9794,7 +11289,16 @@ export function isWebTorrentStreamRequest(
 }
 
 /**
- * Handles WebTorrent streaming fetch interception using dual MessageChannels.
+ * Handles WebTorrent streaming fetch interception using dual `MessageChannel`s with backpressure.
+ *
+ * Exchanges messages between the Service Worker and the client window page to fulfill
+ * HTTP 206 Partial Content range requests and standard full downloads.
+ *
+ * @param req - The incoming fetch {@link Request}.
+ * @param url - The parsed {@link URL}.
+ * @param pagePort - The {@link MessagePort} connected to the main thread.
+ * @param scope - Service Worker registration scope URL.
+ * @returns A promise resolving to an HTTP {@link Response} stream.
  */
 export function handleStream(
   req: Request,
@@ -9994,8 +11498,34 @@ export function handleStream(
 }
 
 /**
- * Creates a stream fetch handler factory for any Service Worker.
- * Allows decoupling streaming from static caching and lifecycle events.
+ * Creates a complete WebTorrent streaming fetch interceptor handler for any Service Worker.
+ *
+ * Decouples BitTorrent streaming logic from static caching, lifecycle events, and offline PWA assets.
+ * Handles incoming `FetchEvent` requests matching `/webtorrent/` and queries the main thread
+ * via {@link MessagePort} for chunk data.
+ *
+ * @param options - Interceptor options, including optional custom prefix.
+ * @returns A {@link WebTorrentFetchHandler} instance with methods `setPagePort`, `isStreamRequest`, and `handleFetch`.
+ *
+ * @example
+ * ```ts
+ * import { createWebTorrentFetchHandler } from "jsr:@vanaware/browsertorrent/service-worker";
+ *
+ * const handler = createWebTorrentFetchHandler();
+ *
+ * self.addEventListener("message", (event) => {
+ *   if (event.data?.type === "PORT") {
+ *     handler.setPagePort(event.ports[0]);
+ *   }
+ * });
+ *
+ * self.addEventListener("fetch", (event) => {
+ *   if (handler.isStreamRequest(event.request)) {
+ *     const responsePromise = handler.handleFetch(event);
+ *     if (responsePromise) event.respondWith(responsePromise);
+ *   }
+ * });
+ * ```
  */
 export function createWebTorrentFetchHandler(
   options: StreamHandlerOptions = {},
@@ -10065,7 +11595,7 @@ export function createWebTorrentFetchHandler(
   };
 }
 
-```
+````
 
 ---
 
@@ -10716,10 +12246,37 @@ function inferRootName(entries: OPFSFileEntry[],): string {
 
 ## File: `packages/core/src/torrent-generator/mod.ts`
 
-```ts
-// /browsertorrent/monorepo/webtorrent/src/torrent-generator/mod.ts
+````ts
 /**
- * Public surface of the OPFS-backed torrent generator.
+ * @module torrent-generator
+ *
+ * # @vanaware/browsertorrent/torrent-generator
+ *
+ * High-speed OPFS-based `.torrent` metainfo generator for the browser.
+ * Reads files directly from the Origin Private File System (`FileSystemFileHandle` or `FileSystemDirectoryHandle`),
+ * calculates SHA-1 piece hashes incrementally with low memory overhead, and encodes bencoded `.torrent` metainfo.
+ *
+ * @example
+ * ```ts
+ * import { generateTorrent, PieceSizeEnum } from "jsr:@vanaware/browsertorrent/torrent-generator";
+ *
+ * const rootDir = await navigator.storage.getDirectory();
+ * const chunks: Uint8Array[] = [];
+ * const writer = {
+ *   async write(chunk: Uint8Array) {
+ *     chunks.push(chunk);
+ *     return chunk.length;
+ *   }
+ * };
+ *
+ * const torrent = await generateTorrent({
+ *   writer,
+ *   entry: rootDir,
+ *   pieceSize: PieceSizeEnum.SIZE_AUTO,
+ *   trackers: ["wss://tracker.webtorrent.dev"],
+ * });
+ * console.log("Generated torrent:", torrent.info.name);
+ * ```
  */
 
 export { decode, encode, } from "../utils/bencode.ts";
@@ -10736,7 +12293,12 @@ export {
 } from "./util.ts";
 export { PieceSizeEnum, } from "./types.ts";
 export type {
+  BencodeDict,
+  BencodeKey,
+  BencodeList,
+  BencodeMap,
   BencodeValue,
+  DecodeOptions,
   GeneratorOptions,
   OPFSFileEntry,
   PieceFile,
@@ -10744,7 +12306,7 @@ export type {
   Writer,
 } from "./types.ts";
 
-```
+````
 
 ---
 
@@ -10794,6 +12356,8 @@ export class OPFSMultiFileReader {
   #closed = false;
 
   /**
+   * Constructs an OPFSMultiFileReader instance from an ordered list of entries.
+   *
    * @param entries - Ordered list of OPFS file entries to read sequentially.
    *   Each entry must have either a `handle` set, or a `size` matching a
    *   pre-fetched `File` (see {@link withFile}).
@@ -11024,34 +12588,58 @@ export async function walkOPFSDir(
 ```ts
 // /browsertorrent/monorepo/webtorrent/src/torrent-generator/types.ts
 /**
- * Types for the OPFS-backed torrent generator.
- *
- * Adapted from `deno-torrent/torrent-generator/types.ts`, replacing
- * the Deno filesystem surface (`Deno.FsFile`, path strings) with
- * browser-native OPFS handles (`FileSystemFileHandle`,
- * `FileSystemDirectoryHandle`).
+ * @file types.ts
+ * @description Types for the OPFS-backed torrent generator.
+ * Adapted for browser-native OPFS handles (FileSystemFileHandle, FileSystemDirectoryHandle).
  */
 
-import type { BencodeValue, } from "../utils/bencode.ts";
+import type {
+  BencodeDict,
+  BencodeKey,
+  BencodeList,
+  BencodeMap,
+  BencodeValue,
+  DecodeOptions,
+} from "../utils/bencode.ts";
 
-/** A simple sink for the bencoded `.torrent` file. */
+/**
+ * A simple sink interface for writing out the generated bencoded `.torrent` file.
+ */
 export interface Writer {
+  /**
+   * Writes the provided chunk of bytes to the underlying sink.
+   *
+   * @param p - Bytes to write.
+   * @returns The number of bytes written.
+   */
   write(p: Uint8Array,): Promise<number>;
 }
 
-/** Standard piece-size presets (BEP-3).  `SIZE_AUTO` defers to `calcPieceSize`. */
+/** Standard piece-size presets (BEP 3). `SIZE_AUTO` defers to automatic calculation. */
 export enum PieceSizeEnum {
+  /** Automatically calculate optimal piece size based on total content length. */
   SIZE_AUTO = 0,
+  /** 16 KiB piece size. */
   SIZE_16KB = 16 * 1024,
+  /** 32 KiB piece size. */
   SIZE_32KB = 32 * 1024,
+  /** 64 KiB piece size. */
   SIZE_64KB = 64 * 1024,
+  /** 128 KiB piece size. */
   SIZE_128KB = 128 * 1024,
+  /** 256 KiB piece size. */
   SIZE_256KB = 256 * 1024,
+  /** 512 KiB piece size. */
   SIZE_512KB = 512 * 1024,
+  /** 1 MiB piece size. */
   SIZE_1MB = 1024 * 1024,
+  /** 2 MiB piece size. */
   SIZE_2MB = 2 * 1024 * 1024,
+  /** 4 MiB piece size. */
   SIZE_4MB = 4 * 1024 * 1024,
+  /** 8 MiB piece size. */
   SIZE_8MB = 8 * 1024 * 1024,
+  /** 16 MiB piece size. */
   SIZE_16MB = 16 * 1024 * 1024,
 }
 
@@ -11113,25 +12701,46 @@ export interface PieceFile {
 
 /** Logical shape of a generated torrent. */
 export interface Torrent {
+  /** Software name that created the torrent metainfo. */
   "created by": string;
+  /** Unix timestamp in seconds when the torrent was created. */
   "creation date": number;
+  /** Primary tracker announce URL. */
   announce?: string;
+  /** Tiered announce list for multiple backup trackers (BEP 12). */
   "announce-list"?: string[][];
+  /** Web seed URLs for HTTP direct streaming (BEP 19). */
   "url-list"?: string | string[];
+  /** Torrent info dictionary containing file layout and SHA-1 piece hashes. */
   info: {
+    /** Root name of the torrent or single file. */
     name: string;
+    /** Byte length of each piece. */
     "piece length": number;
+    /** Concatenated 20-byte SHA-1 hashes of all pieces. */
     pieces?: Uint8Array;
+    /** Total byte length for single-file torrents. */
     length?: number;
+    /** File manifest for multi-file torrents. */
     files?: Array<{ path: string[]; length: number }>;
+    /** Private flag disabling DHT and PEX peer discovery (BEP 27). */
     private?: number;
   };
+  /** Free-form comment describing the contents. */
   comment?: string;
+  /** Content source identifier. */
   source?: string;
 }
 
-/** Bencode re-export. */
-export type { BencodeValue, };
+/** Bencode re-exports. */
+export type {
+  BencodeDict,
+  BencodeKey,
+  BencodeList,
+  BencodeMap,
+  BencodeValue,
+  DecodeOptions,
+};
 
 ```
 
@@ -11379,7 +12988,7 @@ export function getDefaultCreatedBy(): string {
 
 ## File: `packages/core/src/utils/bencode.ts`
 
-```ts
+````ts
 // /browsertorrent/monorepo/webtorrent/src/utils/bencode.ts
 /**
  * Bencode codec with resource limits, typed errors, and optional Map support.
@@ -11409,6 +13018,7 @@ export type BencodeList = BencodeValue[];
  * Keys are always strings; binary keys are lossily decoded to UTF-8.
  */
 export interface BencodeDict {
+  /** Dictionary entries mapped by string keys. */
   [key: string]: BencodeValue;
 }
 
@@ -11482,6 +13092,23 @@ const _te = new TextEncoder();
 const _defaultMaxBytes = 64 * 1024 * 1024;
 const _defaultMaxDepth = 1000;
 
+/**
+ * Decodes a bencoded byte array into its JavaScript/TypeScript value representation.
+ *
+ * @param data - Raw bencoded bytes to parse.
+ * @param options - Resource limits and parser configuration options.
+ * @returns Parsed bencode data structure (string, number, Uint8Array, list, or dict).
+ * @throws {BencodeDecodeError} When bytes violate bencode formatting or exceed resource limits.
+ *
+ * @example
+ * ```ts
+ * import { decode } from "jsr:@vanaware/browsertorrent";
+ *
+ * const bytes = new TextEncoder().encode("d4:spami42ee");
+ * const dict = decode(bytes) as Record<string, number>;
+ * console.log(dict.spam); // 42
+ * ```
+ */
 export function decode(
   data: Uint8Array,
   options: DecodeOptions = {},
@@ -11776,6 +13403,22 @@ function _decodeByteString(
 // ENCODE
 // ============================================================================
 
+/**
+ * Encodes a JavaScript/TypeScript data structure into canonical bencoded byte format.
+ *
+ * @param value - Value to serialize (number, string, Uint8Array, Array, Map, or Record).
+ * @returns Serialized Uint8Array bytes adhering to the BitTorrent BEP 3 specification.
+ * @throws {BencodeEncodeError} When encountering circular structures or unsupported data types.
+ *
+ * @example
+ * ```ts
+ * import { encode } from "jsr:@vanaware/browsertorrent";
+ *
+ * const data = { announce: "wss://tracker.example.com", info: { length: 1024 } };
+ * const bytes = encode(data);
+ * console.log("Encoded byte length:", bytes.length);
+ * ```
+ */
 export function encode(value: BencodeValue,): Uint8Array {
   const writer = new _ByteWriter();
   _encodeValue(value, writer, new WeakSet<object>(),);
@@ -11962,7 +13605,7 @@ class _ByteWriter {
   }
 }
 
-```
+````
 
 ---
 
@@ -15305,19 +16948,29 @@ function toHex(bytes: Uint8Array,): string {
 
 ## File: `packages/core/src/utils/peerid.ts`
 
-```ts
+````ts
 // /browsertorrent/monorepo/webtorrent/src/utils/peerid.ts
 
 import { generateRandomString, } from "../crypto/random.ts";
 
+/**
+ * Decoded BitTorrent client identification information.
+ */
 export interface ClientInfo {
+  /** Two-character client code identifier (e.g. "BT" for BrowserTorrent, "UT" for µTorrent). */
   code: string;
+  /** Human-readable application name. */
   name?: string;
+  /** Parsed client semver or version string. */
   version?: string;
+  /** Encoding convention ("azureus", "shadow", or "unknown"). */
   style: "azureus" | "shadow" | "unknown";
 }
 
-export const BT_PEER_ID_PREFIX = "-BT0100-";
+/**
+ * Standard 8-byte Azureus-style prefix used for BrowserTorrent client peer IDs (`-BT0100-`).
+ */
+export const BT_PEER_ID_PREFIX: string = "-BT0100-";
 
 const AZUREUS_CLIENTS: Record<string, string> = {
   "AG": "Ares",
@@ -15576,6 +17229,20 @@ export function encodeGeneric(
   }
 }
 
+/**
+ * Decodes and parses a 20-byte BitTorrent peer ID to extract client branding and version.
+ *
+ * @param peerId - 20-byte string or Uint8Array.
+ * @returns Parsed {@link ClientInfo} or `null` if the format is unrecognized.
+ *
+ * @example
+ * ```ts
+ * import { decodePeerId } from "jsr:@vanaware/browsertorrent";
+ *
+ * const client = decodePeerId("-BT0100-abcdef123456");
+ * console.log(client?.name); // "BrowserTorrent"
+ * ```
+ */
 export function decodePeerId(peerId: string | Uint8Array,): ClientInfo | null {
   const peeridStr = typeof peerId === "string"
     ? peerId
@@ -15594,7 +17261,7 @@ export function decodePeerId(peerId: string | Uint8Array,): ClientInfo | null {
   }
 
   if (isShadowStyle(id,)) {
-    const code = id[0]!; // 🔥 Ajuste TS: non-null assertion
+    const code = id[0]!;
     const versionRaw = id.slice(1, 6,);
     const name = SHADOW_CLIENTS[code] || `Unknown (${code})`;
     const version = parseShadowVersion(versionRaw,);
@@ -15602,15 +17269,33 @@ export function decodePeerId(peerId: string | Uint8Array,): ClientInfo | null {
     return { code, name, version, style: "shadow", };
   }
 
-  // 🔥 CORREÇÃO: Retornar null para peers desconhecidos, conforme esperado pelos testes
   return null;
 }
 
+/**
+ * Convenience helper that extracts only the client's human-readable name from a peer ID.
+ *
+ * @param peerId - 20-byte string or Uint8Array.
+ * @returns Human-readable client name, or `"Unknown Client"`.
+ */
 export function getPeerIdClientName(peerId: string | Uint8Array,): string {
   const info = decodePeerId(peerId,);
   return info?.name || "Unknown Client";
 }
 
+/**
+ * Generates a standard 20-byte BrowserTorrent peer ID byte array prefixed with `-BT0100-`.
+ *
+ * @returns A freshly generated 20-byte Uint8Array peer ID.
+ *
+ * @example
+ * ```ts
+ * import { generateBrowserTorrentPeerId } from "jsr:@vanaware/browsertorrent";
+ *
+ * const peerId = generateBrowserTorrentPeerId();
+ * console.log("Peer ID length:", peerId.byteLength); // 20
+ * ```
+ */
 export function generateBrowserTorrentPeerId(): Uint8Array {
   const prefix = BT_PEER_ID_PREFIX;
   const randomPart = generateRandomString(20 - prefix.length,);
@@ -15619,7 +17304,7 @@ export function generateBrowserTorrentPeerId(): Uint8Array {
   return new TextEncoder().encode(peerIdStr,);
 }
 
-```
+````
 
 ---
 
@@ -16021,10 +17706,20 @@ export function validateTorrentFilePaths(
 ## File: `packages/core/src/version.ts`
 
 ```ts
-// packages/core/src/version.ts
-// Auto-generated during build
-export const VERSION = "1.0.3-h3";
-export const CORE_VERSION = VERSION;
+/**
+ * @file version.ts
+ * @description Version constants for the `@vanaware/browsertorrent` core package.
+ */
+
+/**
+ * The current semver version of the BrowserTorrent package.
+ */
+export const VERSION: string = "1.0.3-h3";
+
+/**
+ * The core engine version identifier (synced with {@link VERSION}).
+ */
+export const CORE_VERSION: string = VERSION;
 
 ```
 
@@ -22158,6 +23853,99 @@ Deno.test("parseRangeHeader: returns null when end < start", () => {
 
 Deno.test("parseRangeHeader: returns null for negative start", () => {
   assertEquals(parseRangeHeader("bytes=-10-99", 1000,), null,);
+});
+
+```
+
+---
+
+## File: `packages/core/tests/service-worker-bridge_test.ts`
+
+```ts
+// packages/core/tests/service-worker-bridge_test.ts
+import { describe, it, } from "@std/testing/bdd";
+import { assert, assertEquals, } from "@std/assert";
+import {
+  connectServiceWorkerBridge,
+  guessContentType,
+  parseRange,
+  registerAndConnectServiceWorker,
+  registerServiceWorker,
+  waitForServiceWorkerActivation,
+} from "../src/service-worker/mod.ts";
+
+describe("Service Worker Bridge Utilities", () => {
+  describe("guessContentType", () => {
+    it("identifica tipos de vídeo comuns", () => {
+      assertEquals(guessContentType("movie.mp4",), "video/mp4",);
+      assertEquals(guessContentType("clip.webm",), "video/webm",);
+      assertEquals(guessContentType("film.mkv",), "video/x-matroska",);
+      assertEquals(guessContentType("video.avi",), "video/x-msvideo",);
+      assertEquals(guessContentType("raw.mov",), "video/quicktime",);
+    });
+
+    it("identifica tipos de áudio comuns", () => {
+      assertEquals(guessContentType("song.mp3",), "audio/mpeg",);
+      assertEquals(guessContentType("audio.m4a",), "audio/mp4",);
+      assertEquals(guessContentType("track.ogg",), "audio/ogg",);
+      assertEquals(guessContentType("sound.wav",), "audio/wav",);
+    });
+
+    it("identifica imagens e documentos", () => {
+      assertEquals(guessContentType("photo.jpg",), "image/jpeg",);
+      assertEquals(guessContentType("photo.jpeg",), "image/jpeg",);
+      assertEquals(guessContentType("icon.png",), "image/png",);
+      assertEquals(guessContentType("graphic.webp",), "image/webp",);
+      assertEquals(guessContentType("index.html",), "text/html",);
+      assertEquals(guessContentType("data.json",), "application/json",);
+      assertEquals(guessContentType("doc.pdf",), "application/pdf",);
+    });
+
+    it("retorna fallback para extensão desconhecida", () => {
+      assertEquals(
+        guessContentType("archive.bin",),
+        "application/octet-stream",
+      );
+      assertEquals(guessContentType("nofileext",), "application/octet-stream",);
+    });
+  });
+
+  describe("parseRange", () => {
+    it("parseia range fechado com sucesso", () => {
+      const range = parseRange("bytes=0-499", 1000,);
+      assertEquals(range, { start: 0, end: 499, },);
+    });
+
+    it("parseia range aberto até o fim do arquivo", () => {
+      const range = parseRange("bytes=500-", 1000,);
+      assertEquals(range, { start: 500, end: 999, },);
+    });
+
+    it("retorna null para headers ausentes ou inválidos", () => {
+      assertEquals(parseRange(undefined, 1000,), null,);
+      assertEquals(parseRange("", 1000,), null,);
+      assertEquals(parseRange("invalid", 1000,), null,);
+      assertEquals(parseRange("characters=0-10", 1000,), null,);
+    });
+
+    it("retorna null para offsets fora do limite", () => {
+      assertEquals(parseRange("bytes=1500-", 1000,), null,);
+      assertEquals(parseRange("bytes=800-400", 1000,), null,);
+      assertEquals(parseRange("bytes=-10-20", 1000,), null,);
+    });
+  });
+
+  describe("API Availability: Low-Level vs Intermediate", () => {
+    it("exporta opções de baixo nível (controle manual)", () => {
+      assert(typeof connectServiceWorkerBridge === "function",);
+      assert(typeof waitForServiceWorkerActivation === "function",);
+    });
+
+    it("exporta opções intermediárias (caso de uso comum)", () => {
+      assert(typeof registerServiceWorker === "function",);
+      assert(typeof registerAndConnectServiceWorker === "function",);
+    });
+  });
 });
 
 ```

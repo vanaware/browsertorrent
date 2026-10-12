@@ -5,9 +5,9 @@
 
 ---
 
-# Exported Context from Project BrowserTorrent [v0.0.124#mv5i7hjb] - Mode: SERVER
+# Exported Context from Project BrowserTorrent [v0.1.2#mv5nijrw] - Mode: SERVER
 
-Automatically generated at: 2026-10-12T17:06:19.972Z
+Automatically generated at: 2026-10-12T19:34:55.478Z
 
 ---
 
@@ -17,9 +17,6 @@ Automatically generated at: 2026-10-12T17:06:19.972Z
 name: Continuous Integration
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
@@ -58,20 +55,26 @@ jobs:
 ## File: `.github/workflows/gh-pages.yml`
 
 ```yaml
-name: Build and Deploy to GitHub Pages
+name: Deploy Example to GitHub Pages
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - "v*.*"
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -79,19 +82,43 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version-file: .tool-versions
+          cache: true
 
-      - name: Build
+      - name: Install dependencies
+        run: deno ci
+
+      - name: Verify code integrity
+        run: deno task tests
+
+      - name: Build Application
+        run: deno task esbuild noversion
+
+      - name: Prepare static assets for GitHub Pages
         run: |
-          bash ./install-script.sh
-          deno task esbuild
+          # Disable Jekyll processing on GitHub Pages
+          touch ./packages/server/build/dist/.nojekyll
+          # Copy index.html to 404.html for SPA subfolder route fallback
+          cp ./packages/server/build/dist/index.html ./packages/server/build/dist/404.html
 
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          folder: packages/server/build/dist
-          branch: gh-pages
-          clean: true
+          path: "./packages/server/build/dist"
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
 ```
 
@@ -123,7 +150,8 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version-file: .tool-versions
+          cache: true
 
       - name: Verify Types and Dry Run
         run: deno publish --dry-run
@@ -143,7 +171,8 @@ jobs:
       - name: Setup Deno
         uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version-file: .tool-versions
+          cache: true
 
       - name: Verify Types and Dry Run
         run: deno publish --dry-run
@@ -176,13 +205,10 @@ jobs:
     "noUncheckedIndexedAccess": true
   },
   "imports": {
-    "@negrel/webpush": "jsr:@negrel/webpush@^0.5.0",
     "@std/assert": "jsr:@std/assert",
     "@std/fs": "jsr:@std/fs",
     "@std/http": "jsr:@std/http",
-    "@std/path": "jsr:@std/path",
-    "@cloudflare/workers-types": "npm:@cloudflare/workers-types",
-    "wrangler": "npm:wrangler"
+    "@std/path": "jsr:@std/path"
   },
   "tasks": {
     "test": "deno test --allow-env --allow-net --allow-read --unstable-bundle tests/",
@@ -190,8 +216,7 @@ jobs:
     "tests": "deno task check && deno task test",
     "start": "deno run --allow-read --allow-write --allow-env --allow-net --env-file ./src/main.ts",
     "dev": "deno run --allow-read --allow-write --allow-env --allow-net --env-file --watch ./src/main.ts",
-    "clean": "deno clean && rm -rf ./build && mkdir -p ./build/dist",
-    "deploy": "deno task init && ./deploy.sh"
+    "clean": "deno clean && rm -rf ./build && mkdir -p ./build/dist"
   },
   "exports": "./src/main.ts",
   "exclude": ["./build/"]

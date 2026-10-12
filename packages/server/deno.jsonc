@@ -14,13 +14,10 @@
     "noUncheckedIndexedAccess": true
   },
   "imports": {
-    "@negrel/webpush": "jsr:@negrel/webpush@^0.5.0",
     "@std/assert": "jsr:@std/assert",
     "@std/fs": "jsr:@std/fs",
     "@std/http": "jsr:@std/http",
-    "@std/path": "jsr:@std/path",
-    "@cloudflare/workers-types": "npm:@cloudflare/workers-types",
-    "wrangler": "npm:wrangler"
+    "@std/path": "jsr:@std/path"
   },
   "tasks": {
     "test": "deno test --allow-env --allow-net --allow-read --unstable-bundle tests/",
@@ -28,8 +25,7 @@
     "tests": "deno task check && deno task test",
     "start": "deno run --allow-read --allow-write --allow-env --allow-net --env-file ./src/main.ts",
     "dev": "deno run --allow-read --allow-write --allow-env --allow-net --env-file --watch ./src/main.ts",
-    "clean": "deno clean && rm -rf ./build && mkdir -p ./build/dist",
-    "deploy": "deno task init && ./deploy.sh"
+    "clean": "deno clean && rm -rf ./build && mkdir -p ./build/dist"
   },
   "exports": "./src/main.ts",
   "exclude": ["./build/"]

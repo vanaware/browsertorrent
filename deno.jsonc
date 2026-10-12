@@ -1,6 +1,6 @@
 {
    "name": "@vanaware/browsertorrent-workspace",
-   "version": "0.0.139#mv5n8dwg",
+   "version": "0.1.2#mv5nijrw",
    "repository": "https://github.com/vanaware/browsertorrent",
    "exports": "./scripts/esbuild.ts",
    "description": "A pure browser-based BitTorrent client implementation using WebRTC for peer-to-peer file sharing.",
