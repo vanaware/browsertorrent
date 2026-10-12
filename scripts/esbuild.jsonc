@@ -1,0 +1,80 @@
+{
+  "$schema": "https://vanaware.github.io/buildit/schema/esbuild.json",
+  "versionPaths": [
+    "packages/utils/src/config/version.ts"
+  ],
+  "forcepackagesversion": true,
+  "targets": {
+    "example": {
+      "default": true,
+      "srcdir": "packages/example/src",
+      "distdir": "packages/server/build/dist",
+      "copyFiles": [
+        {
+          "basedir": "packages/example/public"
+        },
+        {
+          "basedir": "packages/example/src",
+          "includes": [
+            "index.html"
+          ]
+        }
+      ],
+      "clean": {
+        "includes": [
+          "*"
+        ]
+      },
+      "entryPoints": [
+        "main.tsx"
+      ],
+      "platform": "browser",
+      "format": "esm",
+      "bundle": true,
+      "minify": false,
+      "sourcemap": "linked",
+      "conditions": [
+        "browser"
+      ],
+      "drop": [
+        "debugger"
+      ],
+      "jsx": "automatic",
+      "jsxImportSource": "preact",
+      "metafile": true,
+      "write": true,
+      "legalComments": "eof",
+      "keepNames": true,
+      "splitting": false,
+      "banner": {
+        "js": "/*!\n * BrowserTorrent v__APP_VERSION__\n * (c) 2026 Vanaware - MIT License\n */\n"
+      }
+    },
+    "sw": {
+      "default": true,
+      "defineAssetsString": "__GENERATED_ASSETS__",
+      "srcdir": "packages/service-worker/src",
+      "distdir": "packages/server/build/dist",
+      "clean": {
+        "includes": ["sw.js", "sw.js.map"]
+      },
+      "entryPoints": ["sw.ts"],
+      "platform": "browser",
+      "format": "esm",
+      "bundle": true,
+      "minify": false,
+      "sourcemap": "linked",
+      "drop": ["debugger"],
+      "conditions": ["worker"],
+      "metafile": true,
+      "write": true,
+      "legalComments": "eof",
+      "keepNames": true,
+      "splitting": false,
+      "banner": {
+        "js": "/*!\n * BrowserTorrent v__APP_VERSION__\n * (c) 2026 Vanaware - MIT License\n */\n"
+      }
+    }
+  }
+}
+

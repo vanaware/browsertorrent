@@ -1,0 +1,102 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "deno",
+      "command": "fmt",
+      "problemMatcher": ["$deno"],
+      "label": "Deno: Format"
+    },
+    {
+      "type": "deno",
+      "command": "lint",
+      "problemMatcher": ["$deno-lint"],
+      "label": "Deno: Lint"
+    },
+    {
+      "type": "deno",
+      "command": "test",
+      "args": ["-P"],
+      "problemMatcher": ["$deno"],
+      "label": "Deno: Test",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+        }
+    },
+    {
+      "label": "Deno: Check All",
+      "dependsOrder": "sequence",   // executa em ordem (padrão: paralelo)
+      "dependsOn": [
+        "Deno: Format",
+        "Deno: Lint",
+        "Deno: Test"
+      ],
+      "problemMatcher": []
+    },
+    {
+    "type": "deno",
+    "command": "run",
+    "args": ["--allow-env","--allow-read", "--allow-write", "--allow-run","--allow-net", "scripts/esbuild.ts"],
+    "problemMatcher": ["$deno"],
+    "label": "Deno: EsBuild",
+    "group": {
+        "kind": "build",
+        "isDefault": true
+        }
+    },
+  {
+    "type": "deno",
+    "command": "run",
+    "args": ["--allow-env","--allow-read", "--allow-write", "--allow-run","--allow-net", "scripts/esbuild.ts", "--no-version"],
+    "problemMatcher": ["$deno"],
+    "label": "Deno: Build noversion",
+    "group": {
+        "kind": "build",
+        "isDefault": false
+        }
+    },
+    {
+    "type": "deno",
+    "command": "run",
+    "args": ["--allow-env","--allow-read", "--allow-write","--allow-net", "scripts/denobuild.ts"],
+    "problemMatcher": ["$deno"],
+    "label": "Deno: DenoBuild",
+    "group": {
+        "kind": "build",
+        "isDefault": false
+        }
+    },
+    {
+    "type": "deno",
+    "command": "run",
+    "args": ["--allow-env","--allow-read", "--allow-write", "scripts/export.ts"],
+    "problemMatcher": ["$deno"],
+    "label": "Deno: Export"
+    },
+    {
+    "type": "deno",
+    "command": "run",
+    "args": ["--allow-env","--allow-read", "--allow-write", "--allow-run", "--allow-net", "scripts/watch.ts"],
+    "problemMatcher": ["$deno"],
+    "label": "Deno: Watch"
+    },
+    {
+    "type": "deno",
+    "command": "run",
+    "args": ["--allow-env","--allow-read", "--allow-write", "--allow-run", "--allow-net", "scripts/tag-version.ts"],
+    "problemMatcher": ["$deno"],
+    "label": "Deno: Tag Version"
+    },
+    {
+      "label": "Deno: Bump",
+      "dependsOrder": "sequence",   // executa em ordem (padrão: paralelo)
+      "dependsOn": [
+        "Deno: Check All",
+        "Deno: Build noversion",
+        "Deno: Tag Version"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}

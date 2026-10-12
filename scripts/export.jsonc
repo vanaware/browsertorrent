@@ -1,0 +1,92 @@
+{
+  "$schema": "https://vanaware.github.io/buildit/schema/export.json",
+  "project": "BrowserTorrent",
+  "modes": {
+    "ui": {
+      "outputFile": "snapshots/ui.md",
+      "includes": [
+        "packages/example/{src,public,tests,docs}/**/*.{tsx,jsx,js,ts,css,html,manifest,json,jsonc,md}",
+        "packages/example/{deno.json,deno.jsonc,README.md}"
+      ],
+      "excludes": [
+        "**/node_modules/**",
+        "**/.git/**"
+      ],
+      "includeVersion": true,
+      "customInstruction": "O texto abaixo contém os arquivos de CÓDIGO FONTE principais da aplicação exemplo (UI).",
+      "default": true
+    },
+    "docs": {
+      "outputFile": "snapshots/docs.md",
+      "includes": [
+        "docs/browsertorrent/**/*.{md,txt}",
+        "{README.md,LICENSE,.tool-versions}"
+      ],
+      "excludes": [
+        "**/node_modules/**",
+        "**/.git/**"
+      ],
+      "includeVersion": false,
+      "customInstruction": "O texto abaixo contém a DOCUMENTAÇÃO e diretrizes arquiteturais do projeto.",
+      "default": true
+    },
+    "server": {
+      "outputFile": "snapshots/server.md",
+      "includes": [
+        "packages/server/{src,tests,docs}/**/*.{tsx,jsx,js,ts,css,html,json,jsonc,yaml,yml,md}",
+        "packages/server/{deno.json,deno.jsonc,README.md,.env.example}",
+        ".github/workflows/**/*.{yaml,yml}"
+      ],
+      "excludes": [
+        "**/node_modules/**",
+        "**/.git/**"
+      ],
+      "includeVersion": true,
+      "customInstruction": "O texto abaixo contém os arquivos de configuração e execução do SERVIDOR @workerdb/server e CI/CD.",
+      "default": true
+    },
+    "sw":{
+      "outputFile": "snapshots/sw.md",
+      "includes": [
+        "packages/service-worker/{src,tests,docs}/**/*.{tsx,jsx,js,ts,json,jsonc,md}",
+        "packages/service-worker/{deno.json,deno.jsonc,README.md}"
+      ],
+      "excludes": [
+        "**/node_modules/**",
+        "**/.git/**"
+      ],
+      "includeVersion": true,
+      "customInstruction": "O texto abaixo contém experimentos e código da área de @workerDB/service-worker",
+      "default": true
+    },
+  "source": {
+    "outputFile": "snapshots/source.md",
+      "includes": [
+        "docs/webtorrent/**/*.{js,map,md}"
+      ],
+      "excludes": [
+        "**/node_modules/**",
+        "**/.git/**"
+      ],
+    "includeVersion": false,
+    "customInstruction":
+      "O texto abaixo contém um snapshot do código fonte do projeto taskjuggler, em ruby.",
+    "default": false, // ✅ Roda por padrão
+  },
+  "core": {
+    "outputFile": "snapshots/core.md",
+    "includes": [
+        "packages/core/{src,tests,docs}/**/*.{tsx,jsx,js,ts,json,jsonc,md,rb}",
+        "packages/core/{deno.json,deno.jsonc,README.md}"
+      ],
+      "excludes": [
+        "**/node_modules/**",
+        "**/.git/**"
+      ],
+    "includeVersion": false,
+    "customInstruction":
+      "O texto abaixo contém experimentos e código da área de @syntaxmesh/core",
+    "default": true, // ✅ Roda por padrão
+  }
+  }
+}

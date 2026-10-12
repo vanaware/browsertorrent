@@ -1,0 +1,40 @@
+{
+  "$schema": "https://vanaware.github.io/buildit/schema/watch.json",
+  "targets": {
+    "example": {
+      "default": true,
+      "srcdir": "packages/example/src",
+      "distdir": "packages/server/build/dist",
+      "copyFiles": [
+        {
+          "basedir": "packages/example/public"
+        },
+        {
+          "basedir": "packages/example/src",
+          "includes": [
+            "index.html"
+          ]
+        }
+      ],
+      "entryPoints": [
+        "main.tsx"
+      ],
+      "platform": "browser",
+      "format": "esm",
+      "bundle": true,
+      "minify": false,
+      "sourcemap": "inline",
+      "conditions": [
+        "browser"
+      ],
+      "jsx": "automatic",
+      "jsxImportSource": "preact",
+      "write": true,
+      "legalComments": "eof",
+      "outfile": "main.js",
+      "banner": {
+        "js": "/*!\n * BrowserTorrent v__APP_VERSION__ [DEV WATCH]\n * (c) 2026 Vanaware - MIT License\n */\n"
+      }
+    }
+  }
+}

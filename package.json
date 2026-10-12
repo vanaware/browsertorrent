@@ -4,10 +4,10 @@
   "private": false,
   "type": "module",
   "scripts": {
-    "dev": "bash ./install-script.sh && deno task build && deno task dev",
-    "build": "bash ./install-script.sh && deno task build",
+    "dev": "bash ./install-script.sh && deno task esbuild && deno task dev",
+    "build": "bash ./install-script.sh && deno task esbuild",
     "lint": "bash ./install-script.sh && deno task lint",
-    "test": "bash ./install-script.sh && deno task check-all"
+    "test": "bash ./install-script.sh && deno task tests"
   },
   "dependencies": {
     "@playwright/test": "^1.63.0",

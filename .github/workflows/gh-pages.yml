@@ -24,7 +24,7 @@ jobs:
       - name: Build
         run: |
           bash ./install-script.sh
-          deno task build
+          deno task esbuild
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
