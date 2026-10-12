@@ -2,14 +2,24 @@
 
 import { generateRandomString, } from "../crypto/random.ts";
 
+/**
+ * Decoded BitTorrent client identification information.
+ */
 export interface ClientInfo {
+  /** Two-character client code identifier (e.g. "BT" for BrowserTorrent, "UT" for µTorrent). */
   code: string;
+  /** Human-readable application name. */
   name?: string;
+  /** Parsed client semver or version string. */
   version?: string;
+  /** Encoding convention ("azureus", "shadow", or "unknown"). */
   style: "azureus" | "shadow" | "unknown";
 }
 
-export const BT_PEER_ID_PREFIX = "-BT0100-";
+/**
+ * Standard 8-byte Azureus-style prefix used for BrowserTorrent client peer IDs (`-BT0100-`).
+ */
+export const BT_PEER_ID_PREFIX: string = "-BT0100-";
 
 const AZUREUS_CLIENTS: Record<string, string> = {
   "AG": "Ares",
@@ -268,45 +278,77 @@ export function encodeGeneric(
   }
 }
 
-export function decodePeerId(peerId: string | Uint8Array,): ClientInfo | null {
+/**
+ * Decodes and parses a 20-byte BitTorrent peer ID to extract client branding and version.
+ *
+ * @param peerId - 20-byte string or Uint8Array.
+ * @returns Parsed {@link ClientInfo} or `null` if the format is unrecognized.
+ *
+ * @example
+ * ```ts
+ * import { decodePeerId } from "jsr:@vanaware/browsertorrent";
+ *
+ * const client = decodePeerId("-BT0100-abcdef123456");
+ * console.log(client?.name); // "BrowserTorrent"
+ * ```
+ */
+export function decodePeerId(peerId: string | Uint8Array): ClientInfo | null {
   const peeridStr = typeof peerId === "string"
     ? peerId
-    : new TextDecoder("utf-8", { fatal: false, },).decode(peerId,);
+    : new TextDecoder("utf-8", { fatal: false }).decode(peerId);
 
   if (peeridStr.length < 20) return null;
-  const id = peeridStr.slice(0, 20,);
+  const id = peeridStr.slice(0, 20);
 
-  if (isAzStyle(id,)) {
-    const code = id.slice(1, 3,);
-    const versionRaw = id.slice(3, 7,);
+  if (isAzStyle(id)) {
+    const code = id.slice(1, 3);
+    const versionRaw = id.slice(3, 7);
     const name = AZUREUS_CLIENTS[code] || `Unknown (${code})`;
-    const version = parseAzVersion(versionRaw,);
+    const version = parseAzVersion(versionRaw);
 
-    return { code, name, version, style: "azureus", };
+    return { code, name, version, style: "azureus" };
   }
 
-  if (isShadowStyle(id,)) {
-    const code = id[0]!; // 🔥 Ajuste TS: non-null assertion
-    const versionRaw = id.slice(1, 6,);
+  if (isShadowStyle(id)) {
+    const code = id[0]!;
+    const versionRaw = id.slice(1, 6);
     const name = SHADOW_CLIENTS[code] || `Unknown (${code})`;
-    const version = parseShadowVersion(versionRaw,);
+    const version = parseShadowVersion(versionRaw);
 
-    return { code, name, version, style: "shadow", };
+    return { code, name, version, style: "shadow" };
   }
 
-  // 🔥 CORREÇÃO: Retornar null para peers desconhecidos, conforme esperado pelos testes
   return null;
 }
 
-export function getPeerIdClientName(peerId: string | Uint8Array,): string {
-  const info = decodePeerId(peerId,);
+/**
+ * Convenience helper that extracts only the client's human-readable name from a peer ID.
+ *
+ * @param peerId - 20-byte string or Uint8Array.
+ * @returns Human-readable client name, or `"Unknown Client"`.
+ */
+export function getPeerIdClientName(peerId: string | Uint8Array): string {
+  const info = decodePeerId(peerId);
   return info?.name || "Unknown Client";
 }
 
+/**
+ * Generates a standard 20-byte BrowserTorrent peer ID byte array prefixed with `-BT0100-`.
+ *
+ * @returns A freshly generated 20-byte Uint8Array peer ID.
+ *
+ * @example
+ * ```ts
+ * import { generateBrowserTorrentPeerId } from "jsr:@vanaware/browsertorrent";
+ *
+ * const peerId = generateBrowserTorrentPeerId();
+ * console.log("Peer ID length:", peerId.byteLength); // 20
+ * ```
+ */
 export function generateBrowserTorrentPeerId(): Uint8Array {
   const prefix = BT_PEER_ID_PREFIX;
-  const randomPart = generateRandomString(20 - prefix.length,);
+  const randomPart = generateRandomString(20 - prefix.length);
   const peerIdStr = prefix + randomPart;
 
-  return new TextEncoder().encode(peerIdStr,);
+  return new TextEncoder().encode(peerIdStr);
 }

@@ -1,32 +1,61 @@
 // /browsertorrent/monorepo/webtorrent/src/extensions/ut-metadata.ts
+/**
+ * @file ut-metadata.ts
+ * @description BEP 9 (ut_metadata) extension implementation for exchanging torrent metainfo pieces.
+ */
 
 import { Extension, } from "../core/extension.ts";
 import {
-  BencodeDict,
+  type BencodeDict,
+  type BencodeValue,
   decode,
   decodePrefix,
   encode,
 } from "../utils/bencode.ts";
 import { Bitfield, } from "../core/bitfield.ts";
-import { sha1, sha256, } from "../crypto/hasher.ts";
 import type { Wire, } from "../core/wire.ts";
+import type { ExtensionHost } from "../core/extension-host.ts";
 
 const MAX_METADATA_SIZE = 10_000_000;
 const PIECE_LENGTH = 16384;
 const DEFAULT_TIMEOUT_MS = 15000; // 15 segundos por peça
 
+/**
+ * Options for configuring the BEP 9 `ut_metadata` extension.
+ */
 export interface UtMetadataOptions {
+  /** Optional preloaded metadata bytes to seed to peers. */
   metadata?: Uint8Array;
+  /** Timeout in milliseconds for requesting pieces (default 15,000 ms). */
   timeoutMs?: number;
 }
 
+/**
+ * Information regarding an active metadata piece request.
+ */
 export interface PieceRequest {
+  /** Zero-based metadata piece index. */
   piece: number;
+  /** Number of request attempts made. */
   attempts: number;
-  timer: number; // ID do timeout
+  /** Browser or Deno timeout identifier. */
+  timer: number;
 }
 
+/**
+ * BEP 9 `ut_metadata` extension implementation.
+ * Allows peers to discover and transfer `.torrent` metadata pieces over BEP 10 extension protocol.
+ *
+ * @example
+ * ```ts
+ * import { UtMetadata } from "jsr:@vanaware/browsertorrent";
+ *
+ * const utMetadata = new UtMetadata(wire, { timeoutMs: 10000 });
+ * utMetadata.fetch();
+ * ```
+ */
 export class UtMetadata extends Extension {
+  /** BEP 10 extension identifier name. */
   public readonly name = "ut_metadata";
 
   private _fetching = false;
@@ -35,11 +64,18 @@ export class UtMetadata extends Extension {
   private _numPieces = 0;
   private _remainingRejects = 0;
   private _bitfield: Bitfield;
+  /** Fully reassembled torrent metadata bytes once transfer completes. */
   public metadata: Uint8Array | null = null;
   private _requestedPieces: Map<number, PieceRequest> = new Map();
   private _timeoutMs: number;
   private _extensionId: number | null = null;
 
+  /**
+   * Initializes the ut_metadata extension on a wire.
+   *
+   * @param wire - Owning peer wire connection.
+   * @param opts - Configuration options.
+   */
   constructor(wire: Wire, opts?: UtMetadataOptions,) {
     super(wire,);
     this._bitfield = new Bitfield({ length: 0, grow: 1000, },);
@@ -49,38 +85,54 @@ export class UtMetadata extends Extension {
     }
   }
 
+  /**
+   * Handles local registration with the wire's extension host.
+   *
+   * @param context - Registration context containing host and transport sender.
+   */
   public onRegister(
     context: {
-      host: import("../core/extension-host.ts").ExtensionHost;
+      host: ExtensionHost;
       send: (payload: Uint8Array,) => Promise<void>;
     },
   ): void {
     this._extensionId = context.host.localExtensions.get(this.name,) ?? null;
   }
 
-  public handshakeFields(): ReadonlyMap<
-    string,
-    import("../utils/bencode.ts").BencodeValue
-  > {
-    const fields = new Map<
-      string,
-      import("../utils/bencode.ts").BencodeValue
-    >();
+  /**
+   * Returns metadata dictionary fields to announce during extended handshake.
+   *
+   * @returns Map of handshake parameters including `metadata_size`.
+   */
+  public handshakeFields(): ReadonlyMap<string, BencodeValue> {
+    const fields = new Map<string, BencodeValue>();
     if (this._metadataSize !== null) {
       fields.set("metadata_size", this._metadataSize,);
     }
     return fields;
   }
 
+  /**
+   * Handles standard BitTorrent wire handshake.
+   *
+   * @param _infoHash - Torrent info hash.
+   * @param _peerId - Remote peer ID.
+   * @param _extensions - Negotiated handshake extensions.
+   */
   public onHandshake(
     _infoHash: string,
     _peerId: string,
     _extensions: Record<string, unknown>,
-  ) {
-    // Opcional
+  ): void {
+    // Optional hook
   }
 
-  public onExtendedHandshake(handshake: any,) {
+  /**
+   * Handles incoming BEP 10 extended handshake from remote peer.
+   *
+   * @param handshake - Decoded extended handshake record or Map.
+   */
+  public onExtendedHandshake(handshake: Record<string, unknown> | any): void {
     console.log(
       `[UtMetadata] onExtendedHandshake: m=${
         JSON.stringify(handshake.m,)
@@ -135,19 +187,26 @@ export class UtMetadata extends Extension {
         },);
 
         this._fetching = true;
-        this._requestPieces();
+        this.#requestPieces();
       }
     } else {
       this.emit(
         "warning",
         new CustomEvent("warning", {
-          detail: { error: new Error("Peer does not support ut_metadata",), },
+          detail: {
+            error: new Error("Peer does not support ut_metadata extension",),
+          },
         },),
       );
     }
   }
 
-  public onMessage(buf: Uint8Array,) {
+  /**
+   * Handles incoming binary messages directed to this extension ID.
+   *
+   * @param buf - Raw payload bytes.
+   */
+  public onMessage(buf: Uint8Array): void {
     let dict: BencodeDict;
     let trailer: Uint8Array;
     try {
@@ -167,39 +226,50 @@ export class UtMetadata extends Extension {
 
     switch (dict.msg_type) {
       case 0:
-        this._onRequest(dict.piece as number,);
+        this.#onRequest(dict.piece as number,);
         break;
       case 1:
-        this._onData(
+        this.#onData(
           dict.piece as number,
           trailer,
           dict.total_size as number | undefined,
         );
         break;
       case 2:
-        this._onReject(dict.piece as number,);
+        this.#onReject(dict.piece as number,);
         break;
     }
   }
 
-  public fetch() {
+  /**
+   * Starts requesting metadata pieces from the remote peer.
+   */
+  public fetch(): void {
     if (!this._metadataComplete) {
       this._fetching = true;
       if (this._metadataSize) {
-        this._requestPieces();
+        this.#requestPieces();
       }
     }
   }
 
-  public cancel() {
+  /**
+   * Cancels any active metadata piece requests and timers.
+   */
+  public cancel(): void {
     this._fetching = false;
-    // Cancelar todos os timeouts pendentes
     for (const request of this._requestedPieces.values()) {
       clearTimeout(request.timer,);
     }
     this._requestedPieces.clear();
   }
 
+  /**
+   * Sets known metadata bytes (for seeding or after successful reassembly).
+   *
+   * @param newMetadata - Raw metadata buffer.
+   * @returns `true` if metadata was set.
+   */
   public setMetadata(newMetadata: Uint8Array,): boolean {
     if (this._metadataComplete) return true;
 
@@ -210,13 +280,14 @@ export class UtMetadata extends Extension {
         validMetadata = encode(info.info,);
       }
     } catch (err) {
-      // Ignora erros de decode, usa o buffer cru
+      console.warn("Invalid metadata buffer:", err,);
+      return false;
     }
 
-    this.cancel();
     this.metadata = validMetadata;
+    this._metadataSize = validMetadata.length;
     this._metadataComplete = true;
-    this._metadataSize = this._metadataSize ?? this.metadata.length;
+    this._fetching = false;
 
     if (this.wire.extensionHost.peerExtensions.has("ut_metadata",)) {
       this.wire.extensionHost.setHandshakeField(
@@ -232,7 +303,7 @@ export class UtMetadata extends Extension {
     return true;
   }
 
-  private _send(dict: BencodeDict, trailer?: Uint8Array,) {
+  #send(dict: BencodeDict, trailer?: Uint8Array): void {
     console.log(
       `[UtMetadata] _send: dict=${JSON.stringify(dict,)}, trailerLength=${
         trailer ? trailer.length : 0
@@ -254,27 +325,23 @@ export class UtMetadata extends Extension {
     }
   }
 
-  private _request(piece: number,) {
-    // Cancelar timeout anterior para esta peça, se houver
+  #request(piece: number): void {
     const existingRequest = this._requestedPieces.get(piece,);
     if (existingRequest) {
       clearTimeout(existingRequest.timer,);
     }
 
-    // Enviar solicitação
-    this._send({ msg_type: 0, piece, },);
+    this.#send({ msg_type: 0, piece, },);
 
-    // Configurar novo timeout para esta peça
     const timer = setTimeout(() => {
-      this._handleTimeout(piece,);
+      this.#handleTimeout(piece,);
     }, this._timeoutMs,) as unknown as number;
 
-    // Registrar solicitação com tentativas
     const attempts = existingRequest ? existingRequest.attempts + 1 : 1;
     this._requestedPieces.set(piece, { piece, attempts, timer, },);
   }
 
-  private _data(piece: number, buf: Uint8Array, totalSize?: number,) {
+  #data(piece: number, buf: Uint8Array, totalSize?: number): void {
     const request = this._requestedPieces.get(piece,);
     if (request) {
       clearTimeout(request.timer,);
@@ -285,22 +352,22 @@ export class UtMetadata extends Extension {
     if (typeof totalSize === "number") {
       (msg as unknown as { total_size?: number }).total_size = totalSize;
     }
-    this._send(msg, buf,);
+    this.#send(msg, buf,);
   }
 
-  private _reject(piece: number,) {
-    this._send({
+  #reject(piece: number): void {
+    this.#send({
       msg_type: 2,
       piece,
     },);
   }
 
-  private _onRequest(piece: number,) {
+  #onRequest(piece: number): void {
     console.log(
       `[UtMetadata] _onRequest piece: ${piece}, metadataComplete: ${this._metadataComplete}, size: ${this._metadataSize}`,
     );
     if (!this._metadataComplete || !this._metadataSize) {
-      return this._reject(piece,);
+      return this.#reject(piece,);
     }
     const start = piece * PIECE_LENGTH;
     let end = start + PIECE_LENGTH;
@@ -308,10 +375,10 @@ export class UtMetadata extends Extension {
       end = this._metadataSize!;
     }
     const buf = this.metadata!.slice(start, end,);
-    this._data(piece, buf, this._metadataSize,);
+    this.#data(piece, buf, this._metadataSize,);
   }
 
-  private _onData(piece: number, buf: Uint8Array, totalSize?: number,) {
+  #onData(piece: number, buf: Uint8Array, totalSize?: number): void {
     console.log(
       `[UtMetadata] _onData piece: ${piece}, buf.length: ${buf.length}, totalSize: ${totalSize}, fetching: ${this._fetching}, metaSize: ${this._metadataSize}`,
     );
@@ -319,9 +386,7 @@ export class UtMetadata extends Extension {
       return;
     }
 
-    // Verificar se já recebemos esta peça
     if (this._bitfield.get(piece,)) {
-      // Peça duplicada, ignorar
       return;
     }
 
@@ -331,17 +396,16 @@ export class UtMetadata extends Extension {
     this.metadata.set(buf, piece * PIECE_LENGTH,);
     this._bitfield.set(piece,);
 
-    // Limpar o registro de solicitação para esta peça
     const request = this._requestedPieces.get(piece,);
     if (request) {
       clearTimeout(request.timer,);
       this._requestedPieces.delete(piece,);
     }
 
-    this._checkDone();
+    this.#checkDone();
   }
 
-  private _onReject(piece: number,) {
+  #onReject(piece: number): void {
     const request = this._requestedPieces.get(piece,);
     if (request) {
       clearTimeout(request.timer,);
@@ -349,7 +413,7 @@ export class UtMetadata extends Extension {
     }
 
     if (this._remainingRejects > 0 && this._fetching) {
-      this._request(piece,);
+      this.#request(piece,);
       this._remainingRejects -= 1;
     } else {
       this.emit(
@@ -361,21 +425,18 @@ export class UtMetadata extends Extension {
     }
   }
 
-  private _handleTimeout(piece: number,) {
-    // Remover do mapa de solicitações
+  #handleTimeout(piece: number): void {
     this._requestedPieces.delete(piece,);
 
     if (!this._fetching) return;
 
-    // Tentar novamente se ainda houver tentativas restantes
     const maxAttempts = 3;
     const currentRequest = this._requestedPieces.get(piece,);
     const attempts = currentRequest ? currentRequest.attempts + 1 : 1;
 
     if (attempts < maxAttempts) {
-      this._request(piece,);
+      this.#request(piece,);
     } else {
-      // Muitas tentativas falhas, emitir aviso
       this.emit(
         "warning",
         new CustomEvent("warning", {
@@ -386,22 +447,20 @@ export class UtMetadata extends Extension {
           },
         },),
       );
-
-      // Tentar continuar com outras peças
-      this._checkDone();
+      this.#checkDone();
     }
   }
 
-  private _requestPieces() {
+  #requestPieces(): void {
     if (this._fetching && this._metadataSize) {
       this.metadata = new Uint8Array(this._metadataSize,);
       for (let piece = 0; piece < this._numPieces; piece++) {
-        this._request(piece,);
+        this.#request(piece,);
       }
     }
   }
 
-  private _checkDone() {
+  #checkDone(): void {
     let done = true;
     for (let piece = 0; piece < this._numPieces; piece++) {
       if (!this._bitfield.get(piece,)) {
@@ -410,17 +469,16 @@ export class UtMetadata extends Extension {
       }
     }
     if (done && this.metadata) {
-      // Verificar a integridade dos dados recebidos calculando o hash
-      const success = this._verifyMetadataIntegrity();
+      const success = this.#verifyMetadataIntegrity();
       if (success) {
         this.setMetadata(this.metadata,);
       } else {
-        this._failedMetadata();
+        this.#failedMetadata();
       }
     }
   }
 
-  private _verifyMetadataIntegrity(): boolean {
+  #verifyMetadataIntegrity(): boolean {
     if (!this.metadata) return false;
 
     console.log(
@@ -428,13 +486,7 @@ export class UtMetadata extends Extension {
       Array.from(this.metadata.slice(0, 20,),),
     );
     try {
-      // Verificar se os dados são válidos bencode
       decode(this.metadata,);
-
-      // Para BEP 52, também verificaríamos o hash SHA-256, mas isso
-      // geralmente não é feito durante a transferência via ut_metadata,
-      // pois o hash é verificado quando o torrent é carregado
-
       return true;
     } catch (err) {
       console.warn("Metadata integrity check failed:", err,);
@@ -442,12 +494,12 @@ export class UtMetadata extends Extension {
     }
   }
 
-  private _failedMetadata() {
+  #failedMetadata(): void {
     if (!this._metadataSize) return;
     this._bitfield = new Bitfield({ length: this._numPieces, grow: 1000, },);
     this._remainingRejects -= this._numPieces;
     if (this._remainingRejects > 0) {
-      this._requestPieces();
+      this.#requestPieces();
     } else {
       this.emit(
         "warning",

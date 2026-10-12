@@ -884,33 +884,57 @@ export { Swarm, } from "./network/swarm.ts";
 export { Peer, } from "./network/peer.ts";
 export { HttpTracker, WsTracker, } from "./network/tracker.ts";
 export type { Tracker, } from "./network/tracker.ts";
-export { Wire, } from "./core/wire.ts";
-export { File, } from "./core/file.ts";
-export { Piece, } from "./core/piece.ts";
-export { parseTorrent, } from "./utils/parse-torrent.ts";
+export { Wire } from "./core/wire.ts";
+export { File } from "./core/file.ts";
+export { Piece } from "./core/piece.ts";
+export { Bitfield } from "./core/bitfield.ts";
+export { ExtensionHost } from "./core/extension-host.ts";
+export { Extension } from "./core/extension.ts";
+export type { ExtensionEvents } from "./core/extension.ts";
+export { decodeHandshake, encodeHandshake } from "./core/handshake.ts";
+export type { EncodeHandshakeOptions, PeerHandshake } from "./core/handshake.ts";
+export { decodeMessage, encodeMessage } from "./core/message.ts";
+export type { PeerMessage } from "./core/message.ts";
+export { OPFSChunkStore } from "./storage/opfs-chunk-store.ts";
+export type { ChunkStore } from "./storage/opfs-chunk-store.ts";
+export { decode, encode } from "./utils/bencode.ts";
+export type {
+  BencodeDict,
+  BencodeKey,
+  BencodeList,
+  BencodeMap,
+  BencodeValue,
+  DecodeOptions,
+} from "./utils/bencode.ts";
+export { parseTorrent } from "./utils/parse-torrent.ts";
 export {
   BT_PEER_ID_PREFIX,
   decodePeerId,
   generateBrowserTorrentPeerId,
 } from "./utils/peerid.ts";
-export { UtMetadata, } from "./extensions/ut-metadata.ts";
+export { UtMetadata } from "./extensions/ut-metadata.ts";
 export {
   decodePexUpdate,
   encodePexUpdate,
   PexPeerFlag,
   UtPexExtension,
 } from "./extensions/ut-pex.ts";
-export type { ParsedTorrent, } from "./utils/parse-torrent.ts";
-export type { ClientInfo, } from "./utils/peerid.ts";
-export type { PexPeer, PexUpdate, UtPexOptions, } from "./extensions/ut-pex.ts";
+export type { ParsedTorrent } from "./utils/parse-torrent.ts";
+export type { ClientInfo } from "./utils/peerid.ts";
+export type { PexPeer, PexUpdate, UtPexOptions } from "./extensions/ut-pex.ts";
 export {
   createServer,
+  type CreateServerOptions,
   type StreamRequestMessage,
+  type StreamResponseMetadata,
   WebTorrentServer,
 } from "./server/server.ts";
 export {
   buildStreamURL,
+  type ParsedStreamURL,
   parseStreamURL,
+  type StreamEntry,
+  StreamManager,
   streamManager,
 } from "./server/stream-manager.ts";
 // Phase 5.3: OPFS-based torrent generator

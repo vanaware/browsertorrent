@@ -41,11 +41,13 @@ export class OPFSMultiFileReader {
   #closed = false;
 
   /**
+   * Constructs an OPFSMultiFileReader instance from an ordered list of entries.
+   *
    * @param entries - Ordered list of OPFS file entries to read sequentially.
    *   Each entry must have either a `handle` set, or a `size` matching a
    *   pre-fetched `File` (see {@link withFile}).
    */
-  constructor(entries: OPFSFileEntry[],) {
+  constructor(entries: OPFSFileEntry[]) {
     this.#entries = [...entries,];
   }
 

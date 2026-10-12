@@ -1,6 +1,18 @@
-// /browsertorrent/monorepo/webtorrent/src/server/stream-manager.ts
-
-import type { File, } from "../core/file.ts";
+/**
+ * Minimal file interface required for streaming via the Service Worker bridge.
+ */
+export interface StreamableFile {
+  /** File display name. */
+  name: string;
+  /** Total byte size of the file. */
+  length: number;
+  /** Optional async iterator yielding binary chunks. */
+  [Symbol.asyncIterator]?: () => AsyncIterator<Uint8Array>;
+  /** Optional readable stream factory. */
+  createReadStream?: (opts?: { start?: number; end?: number }) => ReadableStream<Uint8Array>;
+  /** Allow any additional properties. */
+  [key: string]: unknown;
+}
 
 /**
  * Internal record stored in the {@link StreamManager} for each registered file.
@@ -11,9 +23,12 @@ import type { File, } from "../core/file.ts";
  * service-worker bridge can look them up by URL.
  */
 export interface StreamEntry {
+  /** 40-character hex torrent info hash. */
   infoHash: string;
+  /** Zero-based file index inside the torrent. */
   fileIndex: number;
-  file: File;
+  /** Live streamable file instance. */
+  file: StreamableFile;
 }
 
 /**
@@ -44,9 +59,9 @@ export class StreamManager {
    *
    * @param infoHash - 40-char hex info hash identifying the torrent.
    * @param fileIndex - Zero-based file index inside the torrent.
-   * @param file - The {@link File} instance to serve.
+   * @param file - The file instance to serve.
    */
-  register(infoHash: string, fileIndex: number, file: File,): void {
+  register(infoHash: string, fileIndex: number, file: StreamableFile,): void {
     const key = this._key(infoHash, fileIndex,);
     this.entries.set(key, { infoHash, fileIndex, file, },);
   }
@@ -104,6 +119,9 @@ export class StreamManager {
     this.entries.clear();
   }
 
+  /**
+   * Generates internal cache key for (infoHash, fileIndex).
+   */
   private _key(infoHash: string, fileIndex: number,): string {
     return `${infoHash}:${fileIndex}`;
   }
@@ -147,12 +165,33 @@ export function buildStreamURL(
  * shape.  The `infoHash` is validated to be 40 hex characters and
  * `fileIndex` must be a non-negative safe integer.
  */
+/**
+ * Parsed components of a virtual WebTorrent stream URL.
+ */
 export interface ParsedStreamURL {
+  /** 40-character hex torrent info hash. */
   infoHash: string;
+  /** Zero-based file index inside the torrent. */
   fileIndex: number;
+  /** Original unescaped file name. */
   name: string;
 }
 
+/**
+ * Parses a virtual stream URL back into its component infoHash, fileIndex, and file name.
+ *
+ * @param url - The stream URL string to parse.
+ * @param scope - The base Service Worker registration scope.
+ * @returns Parsed stream components, or `null` if the URL format does not match.
+ *
+ * @example
+ * ```ts
+ * import { parseStreamURL } from "jsr:@vanaware/browsertorrent";
+ *
+ * const parsed = parseStreamURL("/webtorrent/0123456789012345678901234567890123456789/0/movie.mp4", "/");
+ * console.log("File index:", parsed?.fileIndex);
+ * ```
+ */
 export function parseStreamURL(
   url: string,
   scope: string,

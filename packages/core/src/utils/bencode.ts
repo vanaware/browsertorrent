@@ -27,6 +27,7 @@ export type BencodeList = BencodeValue[];
  * Keys are always strings; binary keys are lossily decoded to UTF-8.
  */
 export interface BencodeDict {
+  /** Dictionary entries mapped by string keys. */
   [key: string]: BencodeValue;
 }
 
@@ -100,6 +101,23 @@ const _te = new TextEncoder();
 const _defaultMaxBytes = 64 * 1024 * 1024;
 const _defaultMaxDepth = 1000;
 
+/**
+ * Decodes a bencoded byte array into its JavaScript/TypeScript value representation.
+ *
+ * @param data - Raw bencoded bytes to parse.
+ * @param options - Resource limits and parser configuration options.
+ * @returns Parsed bencode data structure (string, number, Uint8Array, list, or dict).
+ * @throws {BencodeDecodeError} When bytes violate bencode formatting or exceed resource limits.
+ *
+ * @example
+ * ```ts
+ * import { decode } from "jsr:@vanaware/browsertorrent";
+ *
+ * const bytes = new TextEncoder().encode("d4:spami42ee");
+ * const dict = decode(bytes) as Record<string, number>;
+ * console.log(dict.spam); // 42
+ * ```
+ */
 export function decode(
   data: Uint8Array,
   options: DecodeOptions = {},
@@ -394,7 +412,23 @@ function _decodeByteString(
 // ENCODE
 // ============================================================================
 
-export function encode(value: BencodeValue,): Uint8Array {
+/**
+ * Encodes a JavaScript/TypeScript data structure into canonical bencoded byte format.
+ *
+ * @param value - Value to serialize (number, string, Uint8Array, Array, Map, or Record).
+ * @returns Serialized Uint8Array bytes adhering to the BitTorrent BEP 3 specification.
+ * @throws {BencodeEncodeError} When encountering circular structures or unsupported data types.
+ *
+ * @example
+ * ```ts
+ * import { encode } from "jsr:@vanaware/browsertorrent";
+ *
+ * const data = { announce: "wss://tracker.example.com", info: { length: 1024 } };
+ * const bytes = encode(data);
+ * console.log("Encoded byte length:", bytes.length);
+ * ```
+ */
+export function encode(value: BencodeValue): Uint8Array {
   const writer = new _ByteWriter();
   _encodeValue(value, writer, new WeakSet<object>(),);
   return writer.finish();

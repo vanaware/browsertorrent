@@ -4,15 +4,41 @@ declare const self: {
   location?: { origin?: string };
 };
 
+/**
+ * Configuration options for creating a WebTorrent Service Worker stream handler.
+ */
 export interface StreamHandlerOptions {
+  /** Optional custom URL path prefix to intercept (defaults to `"/webtorrent/"`). */
   prefix?: string;
 }
 
+/**
+ * Service Worker fetch handler interface providing interception and streaming bridge logic.
+ */
 export interface WebTorrentFetchHandler {
-  setPagePort: (port: MessagePort,) => void;
+  /**
+   * Sets or updates the active MessagePort connected to the client window.
+   */
+  setPagePort: (port: MessagePort) => void;
+
+  /**
+   * Returns the current active MessagePort, or `null` if disconnected.
+   */
   getPagePort: () => MessagePort | null;
-  isStreamRequest: (urlOrRequest: URL | Request | string,) => boolean;
-  handleFetch: (event: FetchEvent,) => Promise<Response> | null;
+
+  /**
+   * Tests whether an incoming URL or Request targets the streaming interceptor prefix.
+   */
+  isStreamRequest: (urlOrRequest: URL | Request | string) => boolean;
+
+  /**
+   * Intercepts a Service Worker FetchEvent and streams data from the main thread torrent engine.
+   */
+  handleFetch: (event: FetchEvent) => Promise<Response> | null;
+
+  /**
+   * Handles low-level stream reading with HTTP 206 Partial Content range requests and backpressure.
+   */
   handleStream: (
     req: Request,
     url: URL,

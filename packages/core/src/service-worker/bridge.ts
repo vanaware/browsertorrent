@@ -68,9 +68,15 @@ export function waitForServiceWorkerActivation(
   });
 }
 
-// Backward-compatibility alias
-export const waitForActivation = waitForServiceWorkerActivation;
+/**
+ * Backward-compatibility alias for {@link waitForServiceWorkerActivation}.
+ */
+export const waitForActivation: (worker: ServiceWorker) => Promise<void> =
+  waitForServiceWorkerActivation;
 
+/**
+ * Options for configuring the low-level Service Worker streaming bridge.
+ */
 export interface ServiceWorkerBridgeOptions {
   /** Target active ServiceWorker. If omitted, awaits navigator.serviceWorker.ready. */
   worker?: ServiceWorker;
@@ -263,8 +269,11 @@ export async function connectServiceWorkerBridge(
   return channel;
 }
 
-// Backward-compatibility alias
-export const establishSWConnection = connectServiceWorkerBridge;
+/**
+ * Backward-compatibility alias for {@link connectServiceWorkerBridge}.
+ */
+export const establishSWConnection: typeof connectServiceWorkerBridge =
+  connectServiceWorkerBridge;
 
 /**
  * Complete helper that registers the Service Worker, waits for activation,

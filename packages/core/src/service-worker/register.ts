@@ -1,21 +1,42 @@
 // packages/core/src/service-worker/register.ts
 import { VERSION, } from "../version.ts";
 
+/**
+ * Options for registering the streaming Service Worker.
+ */
 export interface ServiceWorkerRegisterOptions {
+  /** Target URL of the service worker script (defaults to `${scope}sw.js`). */
   scriptUrl?: string;
+  /** Registration scope URL prefix (defaults to base pathname). */
   scope?: string;
+  /** Cache-busting version query string attached to the script URL. */
   version?: string;
 }
 
 /**
  * Checks whether the current browser environment supports Service Workers.
+ *
+ * @returns `true` if `navigator.serviceWorker` is available.
  */
 export function isServiceWorkerSupported(): boolean {
   return typeof navigator !== "undefined" && "serviceWorker" in navigator;
 }
 
 /**
- * Registers the BrowserTorrent Service Worker with scope detection and versioning.
+ * Registers the BrowserTorrent Service Worker with automatic scope detection and cache-busting versioning.
+ *
+ * @param options - Registration and script path configuration.
+ * @returns The active {@link ServiceWorkerRegistration}, or `null` if unsupported.
+ *
+ * @example
+ * ```ts
+ * import { registerServiceWorker } from "jsr:@vanaware/browsertorrent/service-worker";
+ *
+ * const reg = await registerServiceWorker({
+ *   scriptUrl: "./sw.js",
+ *   scope: "./",
+ * });
+ * ```
  */
 export async function registerServiceWorker(
   options: ServiceWorkerRegisterOptions = {},

@@ -1,10 +1,10 @@
 // /browsertorrent/monorepo/webtorrent/src/server/server.ts
 
-import type { File, } from "../core/file.ts";
 import type { Torrent, } from "../core/torrent.ts";
 import {
   buildStreamURL,
   parseStreamURL,
+  type StreamableFile,
   type StreamEntry,
   streamManager,
 } from "./stream-manager.ts";
@@ -20,23 +20,33 @@ import {
  * next chunk, `false` (or closing the port) ends the stream.
  */
 export interface StreamRequestMessage {
+  /** Literal message type identifying streaming requests. */
   type: "webtorrent-request";
+  /** Full URL requested by the browser client. */
   url: string;
+  /** HTTP request method (usually "GET"). */
   method: string;
+  /** Request HTTP headers (e.g., Range header). */
   headers: Record<string, string>;
+  /** Application scope prefix. */
   scope: string;
+  /** Fetch destination category ("video", "audio", "document", etc.). */
   destination: RequestDestination | string;
 }
 
 /**
- * First reply on the streaming channel.  When `body === "STREAM"` the
+ * First reply on the streaming channel. When `body === "STREAM"` the
  * caller must continue pulling chunks by sending `true` on the port.
  * A non-stream body is returned verbatim and ends the exchange.
  */
 export interface StreamResponseMetadata {
+  /** Response payload indicator or literal body. */
   body: "STREAM" | ArrayBuffer | string | Uint8Array | null;
+  /** HTTP status code (e.g. 200 or 206 Partial Content). */
   status?: number;
+  /** HTTP status status text explanation. */
   statusText?: string;
+  /** Outgoing HTTP headers (Content-Type, Content-Range, Accept-Ranges, etc.). */
   headers?: Record<string, string>;
 }
 
@@ -45,6 +55,7 @@ export interface StreamResponseMetadata {
  * is ready to serve `/webtorrent/*` requests.
  */
 export interface WebTorrentReadyMessage {
+  /** Literal action identifier. */
   type: "WEBTORRENT_READY";
 }
 
@@ -53,6 +64,7 @@ export interface WebTorrentReadyMessage {
  * port once the main thread is ready to receive streaming requests.
  */
 export interface WebTorrentAckMessage {
+  /** Literal acknowledgement action identifier. */
   type: "WEBTORRENT_ACK";
 }
 
@@ -105,23 +117,23 @@ export interface Transport {
   close(): void;
 }
 
+export type { StreamEntry };
+
 /**
- * Minimal controller surface used by the default transport.  Matches
- * the relevant subset of `ServiceWorkerContainer`/`ServiceWorker`
- * behavior, so we can mock it in tests without standing up a real SW.
+ * Minimal controller surface used by the default transport. Matches
+ * the relevant subset of ServiceWorkerContainer/ServiceWorker behavior.
  */
 export interface ServiceWorkerControllerLike {
+  /** Scope prefix registered with the Service Worker. */
   scope: string;
+  /** Active Service Worker worker handle or null. */
   active:
-    | { postMessage?: (data: unknown, transfer?: Transferable[],) => void }
+    | { postMessage?: (data: unknown, transfer?: Transferable[]) => void }
     | null;
   /**
-   * Returns a promise that resolves when a `message` event matches the
-   * supplied `sourceId`.  In the real SW this is replaced by a
-   * `navigator.serviceWorker.addEventListener('message', ...)` handler
-   * that filters by the `MessageEvent.source.id`.
+   * Returns a promise that resolves when a message event matches the supplied sourceId.
    */
-  waitForMessage(sourceId: string,): Promise<unknown>;
+  waitForMessage(sourceId: string): Promise<unknown>;
 }
 
 /**
@@ -206,13 +218,14 @@ export function createServiceWorkerTransport(
  * assert the protocol was honored.
  */
 export class InProcessTransport implements Transport {
+  /** Array of sent messages recorded by the in-process test transport. */
   readonly sent: unknown[] = [];
-  private responseResolver?: (data: StreamResponseMetadata,) => void;
+  private responseResolver?: (data: StreamResponseMetadata) => void;
   /** @internal — exposed for tests. */
   public activePort?: MessagePort;
 
-  postMessage(message: unknown,): void {
-    this.sent.push(message,);
+  postMessage(message: unknown): void {
+    this.sent.push(message);
   }
 
   requestStream(
@@ -220,19 +233,19 @@ export class InProcessTransport implements Transport {
     port: MessagePort,
   ): Promise<StreamResponseMetadata> {
     this.activePort = port;
-    return new Promise<StreamResponseMetadata>((resolve,) => {
+    return new Promise<StreamResponseMetadata>((resolve) => {
       this.responseResolver = resolve;
-    },);
+    });
   }
 
   /** Test helper: deliver the metadata reply for the current request. */
-  deliverResponse(data: StreamResponseMetadata,): void {
-    this.responseResolver?.(data,);
+  deliverResponse(data: StreamResponseMetadata): void {
+    this.responseResolver?.(data);
   }
 
   /** Test helper: send a pull signal (`true` for more, `false` to end). */
-  sendPull(signal: PullSignal,): void {
-    this.activePort?.postMessage(signal,);
+  sendPull(signal: PullSignal): void {
+    this.activePort?.postMessage(signal);
   }
 
   close(): void {
@@ -254,19 +267,27 @@ export class InProcessTransport implements Transport {
  *    {@link ReadableStream} of bytes.
  *
  * The server is transport-agnostic: production code passes the SW
- * transport, while tests pass an {@link InProcessTransport}.  This
+ * transport, while tests pass an {@link InProcessTransport}. This
  * keeps the streaming protocol exercised even in environments without a
  * real Service Worker (Node, Deno, CI).
  */
 export class WebTorrentServer {
+  /** Base scope URL prefix of the Service Worker. */
   public readonly scope: string;
+  /** `true` when the handshake with the Service Worker is fully established. */
   public isReady: boolean = false;
+  /** `true` after `destroy()` has been called to tear down the server. */
   public isDestroyed: boolean = false;
 
   private readonly transport: Transport;
-  private readonly pendingAcks: Set<(ok: boolean,) => void> = new Set();
+  private readonly pendingAcks: Set<(ok: boolean) => void> = new Set();
 
-  constructor(opts: { transport: Transport; scope: string },) {
+  /**
+   * Initializes a WebTorrentServer instance.
+   *
+   * @param opts - Transport and scope options.
+   */
+  constructor(opts: { transport: Transport; scope: string }) {
     this.transport = opts.transport;
     this.scope = opts.scope;
   }
@@ -496,7 +517,9 @@ export function buildFileStream(
 
 /** Parsed byte-range result. */
 export interface ParsedRange {
+  /** Inclusive starting byte offset. */
   start: number;
+  /** Inclusive ending byte offset. */
   end: number;
 }
 
@@ -513,42 +536,50 @@ export function parseRangeHeader(
   if (!header) return null;
 
   // "bytes=start-end" or "bytes=start-"
-  const match = header.match(/^bytes=(\d+)-(\d*)$/,);
+  const match = header.match(/^bytes=(\d+)-(\d*)$/);
   if (!match) return null;
 
-  const start = Number(match[1],);
+  const start = Number(match[1]);
   const endStr = match[2];
 
-  if (!Number.isFinite(start,) || start < 0 || start >= fileLength) {
+  if (!Number.isFinite(start) || start < 0 || start >= fileLength) {
     return null;
   }
 
   const end = endStr !== ""
-    ? Math.min(Number(endStr,), fileLength - 1,)
+    ? Math.min(Number(endStr), fileLength - 1)
     : fileLength - 1;
 
-  if (!Number.isFinite(end,) || end < start || end >= fileLength) {
+  if (!Number.isFinite(end) || end < start || end >= fileLength) {
     return null;
   }
 
-  return { start, end, };
+  return { start, end };
 }
 
 /**
- * Reads the next chunk of `file` starting at `offset`.  This is a
- * separate function (rather than an inline `for await` loop) so the
- * `File` class can grow a smarter implementation later (e.g. adaptive
- * block size based on `RTT` and `BT_RREQ_RATE`) without changing the
- * streaming protocol.
- *
- * The default block size is 16 KiB — small enough to keep latency
- * snappy for video seeks, large enough to amortize `MessageChannel`
- * overhead.
+ * Default chunk block size used when streaming media files (16 KiB).
  */
 export const STREAM_BLOCK_SIZE = 16 * 1024;
 
+/**
+ * Reads the next contiguous chunk of a torrent file starting at the specified byte offset.
+ *
+ * @param file - Torrent file instance to read from.
+ * @param offset - Absolute starting byte offset within the file.
+ * @param length - Maximum number of bytes to read (defaults to STREAM_BLOCK_SIZE).
+ * @returns A Uint8Array slice of file data.
+ *
+ * @example
+ * ```ts
+ * import { readNextChunk } from "jsr:@vanaware/browsertorrent/server";
+ *
+ * const chunk = await readNextChunk(file, 0, 16384);
+ * console.log("Chunk bytes:", chunk.byteLength);
+ * ```
+ */
 export async function readNextChunk(
-  file: File,
+  file: StreamableFile,
   offset: number,
   length: number = STREAM_BLOCK_SIZE,
 ): Promise<Uint8Array> {
@@ -682,12 +713,32 @@ export function guessContentType(name: string,): string {
  * Callers wanting a self-test can call {@link WebTorrentServer.sendReadyAck}
  * and then drive the protocol through the test transport.
  */
+/**
+ * Configuration options for creating a streaming WebTorrentServer.
+ */
 export interface CreateServerOptions {
+  /** Target active ServiceWorker controller instance. */
   controller?: ServiceWorker;
+  /** Base URL scope prefix to intercept (defaults to "/"). */
   scope?: string;
+  /** Pluggable transport instance (used for custom communication or tests). */
   transport?: Transport;
 }
 
+/**
+ * Creates an in-browser streaming HTTP server bridge connected to a Service Worker.
+ *
+ * @param opts - Configuration specifying controller, transport, or scope prefix.
+ * @returns Initialized {@link WebTorrentServer} instance.
+ *
+ * @example
+ * ```ts
+ * import { createServer } from "jsr:@vanaware/browsertorrent/server";
+ *
+ * const server = createServer({ scope: "/" });
+ * console.log("Server scope:", server.scope);
+ * ```
+ */
 export function createServer(
   opts: CreateServerOptions = {},
 ): WebTorrentServer {
@@ -718,8 +769,8 @@ export function createServer(
  *   use this to assert cleanup behaviour.
  */
 export function registerTorrentFiles(
-  torrent: Torrent,
-  files: File[],
+  torrent: { infoHash: string },
+  files: StreamableFile[],
 ): StreamEntry[] {
   const infoHash = torrent.infoHash;
   const registered: StreamEntry[] = [];

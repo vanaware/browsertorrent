@@ -1,66 +1,131 @@
 /**
- * WebSocket Tracker - Simple tracker for BrowserTorrent
- * Optimized for small servers with minimal dependencies
+ * @file mod.ts
+ * @description Primary entry point for `@vanaware/browsertorrent-tracker`.
+ * A lightweight, high-performance WebSocket & HTTP BitTorrent tracker in pure Deno TypeScript
+ * designed for WebTorrent & BrowserTorrent WebRTC peer swarms.
+ *
+ * @example
+ * ```ts
+ * import { createServer, WebSocketTracker } from "jsr:@vanaware/browsertorrent-tracker";
+ *
+ * const tracker = createServer(8000, {
+ *   hostname: "0.0.0.0",
+ *   maxTorrents: 500,
+ * });
+ *
+ * await tracker.start();
+ * ```
  */
 
-import { WebSocketTracker, } from "./server.ts";
-import { TrackerRouter, } from "./router.ts";
-import { PeerConnectionManager, } from "./peer.ts";
-import { SwarmManager, } from "./swarm.ts";
-import { LRUCache, } from "./lru.ts";
-import { StatsManager, } from "./stats.ts";
-import { parseWebSocketMessage, } from "./parse-websocket.ts";
+import {
+  defaultOptions,
+  type Peer,
+  type TorrentInfo,
+  type TrackerMessage as ServerTrackerMessage,
+  WebSocketTracker,
+  type WebSocketTrackerOptions,
+} from "./server.ts";
+import { type ITracker, TrackerRouter } from "./router.ts";
+import {
+  type PeerConnection,
+  PeerConnectionManager,
+  type PeerInfo,
+} from "./peer.ts";
+import { type PeerAnnounce, type SwarmInfo, SwarmManager } from "./swarm.ts";
+import { LRUCache } from "./lru.ts";
+import { type ServerHealth, StatsManager, type TrackerStats } from "./stats.ts";
+import {
+  formatAnnounceResponse,
+  formatErrorResponse,
+  formatScrapeResponse,
+  parseWebSocketMessage,
+  type TrackerAnnounceRequest,
+  type TrackerAnnounceResponse,
+  type TrackerErrorResponse,
+  type TrackerMessage,
+  type TrackerResponse,
+  type TrackerScrapeRequest,
+  type TrackerScrapeResponse,
+  validateTrackerMessage,
+} from "./parse-websocket.ts";
 
-export { WebSocketTracker, };
-export { TrackerRouter, };
-export { PeerConnectionManager, };
-export { SwarmManager, };
-export { LRUCache, };
-export { StatsManager, };
-export { parseWebSocketMessage, };
+export {
+  defaultOptions,
+  formatAnnounceResponse,
+  formatErrorResponse,
+  formatScrapeResponse,
+  LRUCache,
+  parseWebSocketMessage,
+  PeerConnectionManager,
+  StatsManager,
+  SwarmManager,
+  TrackerRouter,
+  validateTrackerMessage,
+  WebSocketTracker,
+};
+
+export type {
+  ITracker,
+  Peer,
+  PeerAnnounce,
+  PeerConnection,
+  PeerInfo,
+  ServerHealth,
+  ServerTrackerMessage,
+  SwarmInfo,
+  TorrentInfo,
+  TrackerAnnounceRequest,
+  TrackerAnnounceResponse,
+  TrackerErrorResponse,
+  TrackerMessage,
+  TrackerResponse,
+  TrackerScrapeRequest,
+  TrackerScrapeResponse,
+  TrackerStats,
+  WebSocketTrackerOptions,
+};
 
 /**
- * Create a new WebSocket tracker instance.
- * @param port - Port to listen on (default: 8000)
- * @param options - Tracker configuration options
- * @returns WebSocketTracker instance
+ * Creates a new instance of {@link WebSocketTracker}.
+ *
+ * @param port - Port to listen on (defaults to 8000).
+ * @param options - Tracker configuration options.
+ * @returns Initialized {@link WebSocketTracker} ready to call `start()`.
+ *
+ * @example
+ * ```ts
+ * import { createServer } from "jsr:@vanaware/browsertorrent-tracker";
+ *
+ * const tracker = createServer(8000, {
+ *   hostname: "0.0.0.0",
+ *   maxPeers: 1000,
+ *   intervalMs: 60000,
+ * });
+ *
+ * await tracker.start();
+ * ```
  */
 export function createServer(
   port: number = 8000,
   options?: Partial<WebSocketTrackerOptions>,
 ): WebSocketTracker {
-  return new WebSocketTracker(port, options,);
+  return new WebSocketTracker(port, options);
 }
 
 /**
- * Default tracker options.
+ * Executes the command-line tracker daemon reading options from CLI arguments and environment variables.
+ * Gracefully terminates on `SIGINT` and `SIGTERM`.
+ *
+ * @returns Promise that resolves when the daemon stops.
+ *
+ * @example
+ * ```bash
+ * deno run -A jsr:@vanaware/browsertorrent-tracker
+ * ```
  */
-export interface WebSocketTrackerOptions {
-  hostname?: string;
-  idleTimeout?: number;
-  maxPeers?: number;
-  maxPeersPerTorrent?: number;
-  maxTorrents?: number;
-  intervalMs?: number;
-}
-
-const defaultOptions: WebSocketTrackerOptions = {
-  hostname: "0.0.0.0",
-  idleTimeout: 300000, // 5 minutes
-  maxPeers: 1000,
-  maxPeersPerTorrent: 50,
-  maxTorrents: 100,
-  intervalMs: 120000,
-};
-
-export { defaultOptions, };
-
-/**
- * Simple CLI for running the WebSocket tracker.
- */
-export async function runCLI() {
-  const port = Number(Deno.env.get("PORT",) || "8000",);
-  const hostname = Deno.env.get("HOSTNAME",) || "0.0.0.0";
+export async function runCLI(): Promise<void> {
+  const port = Number(Deno.env.get("PORT") || "8000");
+  const hostname = Deno.env.get("HOSTNAME") || "0.0.0.0";
 
   console.log(
     "[TRACKER] Starting WebSocket tracker on",
@@ -71,21 +136,21 @@ export async function runCLI() {
 
   const tracker = createServer(port, {
     hostname,
-    maxPeers: Number(Deno.env.get("MAX_PEERS",) || "1000",),
-    maxPeersPerTorrent: Number(Deno.env.get("MAX_PEERS_PER_TORRENT",) || "50",),
-    maxTorrents: Number(Deno.env.get("MAX_TORRENTS",) || "100",),
-    intervalMs: Number(Deno.env.get("INTERVAL_MS",) || "120000",),
-  },);
+    maxPeers: Number(Deno.env.get("MAX_PEERS") || "1000"),
+    maxPeersPerTorrent: Number(Deno.env.get("MAX_PEERS_PER_TORRENT") || "50"),
+    maxTorrents: Number(Deno.env.get("MAX_TORRENTS") || "100"),
+    intervalMs: Number(Deno.env.get("INTERVAL_MS") || "120000"),
+  });
 
   // Handle graceful shutdown
   const shutdown = () => {
-    console.log("[TRACKER] Shutting down...",);
+    console.log("[TRACKER] Shutting down...");
     tracker.close();
-    Deno.exit(0,);
+    Deno.exit(0);
   };
 
-  Deno.addSignalListener("SIGINT", shutdown,);
-  Deno.addSignalListener("SIGTERM", shutdown,);
+  Deno.addSignalListener("SIGINT", shutdown);
+  Deno.addSignalListener("SIGTERM", shutdown);
 
   // Start listening (runs indefinitely until close() is called)
   await tracker.start();

@@ -1,50 +1,133 @@
 /**
- * WebSocket server for BrowserTorrent tracker.
- * Parity with original bittorrent-tracker for browser-compatible features.
+ * @file server.ts
+ * @description WebSocket & HTTP BitTorrent tracker server implemented in pure Deno.
+ * Provides 100% protocol parity with WebTorrent's bittorrent-tracker for WebRTC swarms.
  */
 
-import { LRUCache, } from "./lru.ts";
-import { parseWebSocketMessage, } from "./parse-websocket.ts";
-import { StatsManager, type TrackerStats, } from "./stats.ts";
-import { TrackerRouter, } from "./router.ts";
+import { LRUCache } from "./lru.ts";
+import { StatsManager, type TrackerStats } from "./stats.ts";
+import { TrackerRouter } from "./router.ts";
 
-interface Peer {
+/**
+ * Representation of an active peer registered on the tracker server.
+ */
+export interface Peer {
+  /** Internal session identifier (UUID). */
   id: string;
+  /** Live WebSocket connection handle. */
   ws: WebSocket;
+  /** Primary torrent info hash. */
   infoHash: string;
+  /** 20-byte BitTorrent peer ID string. */
   peerId: string;
+  /** Listening port number (0 for WebRTC peers). */
   port: number;
+  /** Cumulative bytes uploaded. */
   uploaded: number;
+  /** Cumulative bytes downloaded. */
   downloaded: number;
+  /** Bytes remaining until download completion. */
   left: number;
+  /** Latest event string reported by the peer. */
   event?: string;
+  /** Milliseconds epoch timestamp when the peer connected. */
   connectedAt: number;
+  /** Array of info hashes this peer is participating in. */
   infoHashes: string[];
 }
 
-interface TrackerMessage {
+/**
+ * Raw JSON message received from a WebSocket tracker client.
+ */
+export interface TrackerMessage {
+  /** Message action name ("announce", "scrape", "offer", "answer"). */
   action: string;
+  /** Torrent info hash. */
   info_hash: string;
+  /** Announcing peer ID. */
   peer_id: string;
+  /** Listening port. */
   port: number;
+  /** Total bytes uploaded. */
   uploaded?: number;
+  /** Total bytes downloaded. */
   downloaded?: number;
+  /** Bytes remaining. */
   left?: number;
+  /** Announce event status. */
   event?: string;
+  /** Number of peers requested. */
   numwant?: number;
+  /** Compact format flag. */
   compact?: number;
+  /** Omit peer ID flag. */
   no_peer_id?: number;
-  answer?: any;
+  /** WebRTC answer SDP payload. */
+  answer?: unknown;
+  /** Destination peer ID for targeted signaling. */
   to_peer_id?: string;
+  /** Identifier for an SDP offer. */
   offer_id?: string;
-  offers?: Array<{ offer: any; offer_id: string }>;
+  /** Array of WebRTC SDP offers with unique IDs. */
+  offers?: Array<{ offer: unknown; offer_id: string }>;
 }
 
-interface TorrentInfo {
+/**
+ * Basic seeder and leecher counters for a torrent swarm.
+ */
+export interface TorrentInfo {
+  /** Number of seeders with complete copies. */
   complete: number;
+  /** Number of leechers currently downloading. */
   incomplete: number;
 }
 
+/**
+ * Configuration options for {@link WebSocketTracker}.
+ */
+export interface WebSocketTrackerOptions {
+  /** Maximum number of peers across all swarms before oldest eviction (defaults to 1000). */
+  maxPeers?: number;
+  /** Maximum peers returned per swarm announcement (defaults to 50). */
+  maxPeersPerTorrent?: number;
+  /** Maximum number of distinct info hashes tracked in LRU memory (defaults to 100). */
+  maxTorrents?: number;
+  /** Hostname or IP address to bind to (defaults to "0.0.0.0"). */
+  hostname?: string;
+  /** Milliseconds before inactive connections are timed out (defaults to 300,000). */
+  idleTimeout?: number;
+  /** Re-announce interval recommended to clients in milliseconds (defaults to 120,000). */
+  intervalMs?: number;
+}
+
+/**
+ * Default tracker configuration parameters.
+ */
+export const defaultOptions: WebSocketTrackerOptions = {
+  maxPeers: 1000,
+  maxPeersPerTorrent: 50,
+  maxTorrents: 100,
+  hostname: "0.0.0.0",
+  idleTimeout: 300000,
+  intervalMs: 120000,
+};
+
+/**
+ * Full-featured WebSocket and HTTP BitTorrent tracker server.
+ * Handles WebRTC offer/answer exchange, standard announces, and scrapes.
+ *
+ * @example
+ * ```ts
+ * import { WebSocketTracker } from "jsr:@vanaware/browsertorrent-tracker";
+ *
+ * const tracker = new WebSocketTracker(8000, {
+ *   hostname: "0.0.0.0",
+ *   maxTorrents: 500,
+ * });
+ *
+ * await tracker.start();
+ * ```
+ */
 export class WebSocketTracker {
   private server: Deno.HttpServer | undefined;
   private peers: Map<string, Peer>; // peerId -> Peer
@@ -59,11 +142,17 @@ export class WebSocketTracker {
   private readonly intervalMs: number;
   private readonly router: TrackerRouter;
 
+  /**
+   * Initializes a new WebSocketTracker server instance.
+   *
+   * @param port - Port number to bind (defaults to 8000).
+   * @param options - Optional configuration settings.
+   */
   constructor(
     port: number = 8000,
     options: Partial<WebSocketTrackerOptions> = {},
   ) {
-    const config = { ...defaultOptions, ...options, };
+    const config = { ...defaultOptions, ...options };
     this.maxPeers = config.maxPeers ?? 1000;
     this.maxPeersPerTorrent = config.maxPeersPerTorrent ?? 50;
     this.hostname = config.hostname ?? "0.0.0.0";
@@ -77,41 +166,62 @@ export class WebSocketTracker {
     );
     this.torrents = new Map<string, TorrentInfo>();
     this.stats = new StatsManager();
-    this.router = new TrackerRouter(this,);
+    this.router = new TrackerRouter(this);
   }
 
+  /**
+   * Starts listening for HTTP and WebSocket connections on the configured host and port.
+   * Resolves when the server is cleanly shut down via {@link close}.
+   *
+   * @returns A promise that resolves when the server stops.
+   *
+   * @example
+   * ```ts
+   * import { createServer } from "jsr:@vanaware/browsertorrent-tracker";
+   *
+   * const tracker = createServer(8000);
+   * tracker.start().then(() => console.log("Tracker shut down"));
+   * ```
+   */
   async start(): Promise<void> {
     this.server = Deno.serve(
       {
         port: this.port,
         hostname: this.hostname,
         onListen: (
-          { hostname, port, }: { hostname: string; port: number },
+          { hostname, port }: { hostname: string; port: number },
         ) => {
           console.log(
             `[TRACKER] WebSocket server listening on ws://${hostname}:${port}`,
           );
         },
       },
-      (req: Request,): Response | Promise<Response> =>
-        this.router.handleRequest(req,),
+      (req: Request): Response | Promise<Response> =>
+        this.router.handleRequest(req),
     );
 
     await this.server.finished;
   }
 
-  handleHttpAnnounce(url: URL, req: Request,): Response {
+  /**
+   * Handles an HTTP GET announce query (`/announce?info_hash=...&peer_id=...`).
+   *
+   * @param url - Parsed request URL containing search parameters.
+   * @param req - Raw HTTP request object.
+   * @returns HTTP Response containing JSON announce response or error.
+   */
+  handleHttpAnnounce(url: URL, req: Request): Response {
     const params = url.searchParams;
-    const infoHash = params.get("info_hash",) || "";
-    const peerId = params.get("peer_id",) || "";
-    const port = Number(params.get("port",),) || 0;
-    const uploaded = Number(params.get("uploaded",),) || 0;
-    const downloaded = Number(params.get("downloaded",),) || 0;
-    const left = Number(params.get("left",),) || 0;
-    const event = params.get("event",) || undefined;
-    const numwant = params.has("numwant",)
+    const infoHash = params.get("info_hash") || "";
+    const peerId = params.get("peer_id") || "";
+    const port = Number(params.get("port")) || 0;
+    const uploaded = Number(params.get("uploaded")) || 0;
+    const downloaded = Number(params.get("downloaded")) || 0;
+    const left = Number(params.get("left")) || 0;
+    const event = params.get("event") || undefined;
+    const numwant = params.has("numwant")
       ? Math.min(
-        Number(params.get("numwant",),) ?? 50,
+        Number(params.get("numwant")) ?? 50,
         this.maxPeersPerTorrent,
       )
       : undefined;
@@ -122,13 +232,13 @@ export class WebSocketTracker {
           action: "error",
           error: "Missing required parameters: info_hash and peer_id",
           failure_reason: "Missing required parameters: info_hash and peer_id",
-        },),
-        { status: 400, headers: { "Content-Type": "application/json", }, },
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
       );
     }
 
     // Find or create HTTP peer
-    let peer = this.peers.get(peerId,);
+    let peer = this.peers.get(peerId);
     if (!peer) {
       peer = {
         id: peerId,
@@ -142,7 +252,7 @@ export class WebSocketTracker {
         connectedAt: Date.now(),
         infoHashes: [],
       };
-      this.peers.set(peerId, peer,);
+      this.peers.set(peerId, peer);
       this.stats.incrementConnections();
     }
 
@@ -154,42 +264,49 @@ export class WebSocketTracker {
     peer.downloaded = downloaded;
     peer.left = left;
 
-    if (!peer.infoHashes.includes(infoHash,)) {
-      peer.infoHashes.push(infoHash,);
+    if (!peer.infoHashes.includes(infoHash)) {
+      peer.infoHashes.push(infoHash);
     }
 
     switch (event) {
       case "started":
-        this.addPeerToTorrent(infoHash, peer,);
+        this.addPeerToTorrent(infoHash, peer);
         break;
       case "completed":
-        this.addPeerToTorrent(infoHash, peer,);
-        this.incrementComplete(infoHash,);
+        this.addPeerToTorrent(infoHash, peer);
+        this.incrementComplete(infoHash);
         break;
       case "stopped":
-        this.removePeerFromTorrent(infoHash, peer,);
+        this.removePeerFromTorrent(infoHash, peer);
         break;
       case "update":
-        this.addPeerToTorrent(infoHash, peer,);
+        this.addPeerToTorrent(infoHash, peer);
         break;
       default:
-        this.addPeerToTorrent(infoHash, peer,);
+        this.addPeerToTorrent(infoHash, peer);
         break;
     }
 
-    this.peers.set(peerId, peer,);
+    this.peers.set(peerId, peer);
 
     // Build response
-    const response = this.buildAnnounceResponse(infoHash, peer, numwant,);
+    const response = this.buildAnnounceResponse(infoHash, peer, numwant);
 
-    return new Response(JSON.stringify(response,), {
-      headers: { "Content-Type": "application/json", },
-    },);
+    return new Response(JSON.stringify(response), {
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
-  handleHttpScrape(url: URL, req: Request,): Response {
+  /**
+   * Handles an HTTP GET scrape query (`/scrape?info_hash=...`).
+   *
+   * @param url - Parsed request URL with query parameters.
+   * @param req - Raw HTTP request object.
+   * @returns HTTP Response containing swarm statistics JSON.
+   */
+  handleHttpScrape(url: URL, req: Request): Response {
     const params = url.searchParams;
-    const infoHash = params.get("info_hash",) || "";
+    const infoHash = params.get("info_hash") || "";
 
     if (!infoHash) {
       return new Response(
@@ -197,15 +314,14 @@ export class WebSocketTracker {
           action: "error",
           error: "Missing required parameter: info_hash",
           failure_reason: "Missing required parameter: info_hash",
-        },),
-        { status: 400, headers: { "Content-Type": "application/json", }, },
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
       );
     }
 
-    const peerIds = this.peersByInfoHash.get(infoHash,);
-    const peerCount = peerIds ? peerIds.size : 0;
-    const torrentInfo = this.torrents.get(infoHash,) ||
-      { complete: 0, incomplete: 0, };
+    const peerIds = this.peersByInfoHash.get(infoHash);
+    const torrentInfo = this.torrents.get(infoHash) ||
+      { complete: 0, incomplete: 0 };
 
     const response = {
       action: "scrape",
@@ -215,55 +331,71 @@ export class WebSocketTracker {
       downloaded: this.stats.getDownloaded(),
     };
 
-    return new Response(JSON.stringify(response,), {
-      headers: { "Content-Type": "application/json", },
-    },);
+    return new Response(JSON.stringify(response), {
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
-  buildAnnounceResponse(infoHash: string, peer: Peer, numwant?: number,): {
+  /**
+   * Constructs a standard announce response payload for a requesting peer.
+   *
+   * @param infoHash - Torrent info hash.
+   * @param peer - Requesting peer instance.
+   * @param numwant - Maximum number of peers requested.
+   * @returns Announce response payload object.
+   */
+  buildAnnounceResponse(infoHash: string, peer: Peer, numwant?: number): {
     action: string;
     interval: number;
     complete: number;
     incomplete: number;
     peers: Array<{ peer_id: string; ip: string; port: number }>;
   } {
-    const peerIds = this.peersByInfoHash.get(infoHash,);
+    const peerIds = this.peersByInfoHash.get(infoHash);
     const peers: Array<{ peer_id: string; ip: string; port: number }> = [];
 
     if (peerIds) {
-      const limit = numwant ?? Math.min(peerIds.size, this.maxPeersPerTorrent,);
+      const limit = numwant ?? Math.min(peerIds.size, this.maxPeersPerTorrent);
       for (const pid of peerIds) {
         if (peers.length >= limit) break;
         if (pid === peer.id) continue;
-        const p = this.peers.get(pid,);
+        const p = this.peers.get(pid);
         if (p && p.port > 0) {
-          peers.push({ peer_id: p.peerId, ip: "127.0.0.1", port: p.port, },);
+          peers.push({ peer_id: p.peerId, ip: "127.0.0.1", port: p.port });
         }
       }
     }
 
-    const torrentInfo = this.torrents.get(infoHash,) ||
-      { complete: 0, incomplete: 0, };
+    const torrentInfo = this.torrents.get(infoHash) ||
+      { complete: 0, incomplete: 0 };
 
     return {
       action: "announce",
-      interval: Math.ceil(this.intervalMs / 1000,),
+      interval: Math.ceil(this.intervalMs / 1000),
       complete: torrentInfo.complete,
       incomplete: torrentInfo.incomplete,
       peers,
     };
   }
 
-  private handleDisconnection(peer: Peer,): void {
+  /**
+   * Internal disconnect cleanup for a peer.
+   */
+  private handleDisconnection(peer: Peer): void {
     // Send stopped announce for all active swarms
     for (const infoHash of peer.infoHashes) {
-      this.removePeerFromTorrent(infoHash, peer,);
+      this.removePeerFromTorrent(infoHash, peer);
     }
     this.stats.decrementConnections();
-    console.log("[TRACKER] Peer disconnected:", peer.id,);
+    console.log("[TRACKER] Peer disconnected:", peer.id);
   }
 
-  handleConnection(ws: WebSocket,): void {
+  /**
+   * Registers and handles an active WebSocket connection from an upgraded HTTP request.
+   *
+   * @param ws - The open WebSocket connection handle.
+   */
+  handleConnection(ws: WebSocket): void {
     const peerId = crypto.randomUUID();
     const peer: Peer = {
       id: peerId,
@@ -278,41 +410,44 @@ export class WebSocketTracker {
       infoHashes: [],
     };
 
-    this.peers.set(peerId, peer,);
+    this.peers.set(peerId, peer);
     this.stats.incrementConnections();
 
-    console.log("[TRACKER] New peer connected:", peerId,);
+    console.log("[TRACKER] New peer connected:", peerId);
 
-    ws.addEventListener("message", (event,) => {
-      this.handleMessage(peer, event.data as string,);
-    },);
+    ws.addEventListener("message", (event) => {
+      this.handleMessage(peer, event.data as string);
+    });
 
     ws.addEventListener("close", () => {
-      this.handleDisconnection(peer,);
-    },);
+      this.handleDisconnection(peer);
+    });
 
-    ws.addEventListener("error", (event,) => {
-      console.error("[TRACKER] Peer error:", peerId, event,);
-    },);
+    ws.addEventListener("error", (event) => {
+      console.error("[TRACKER] Peer error:", peerId, event);
+    });
   }
 
-  private handleMessage(peer: Peer, data: string,): void {
+  /**
+   * Dispatches incoming text frame from peer socket to specific action handlers.
+   */
+  private handleMessage(peer: Peer, data: string): void {
     try {
-      const message = JSON.parse(data,) as TrackerMessage;
+      const message = JSON.parse(data) as TrackerMessage;
       this.stats.incrementMessages();
 
       switch (message.action) {
         case "announce":
-          this.handleAnnounce(peer, message,);
+          this.handleAnnounce(peer, message);
           break;
         case "scrape":
-          this.handleScrape(peer, message,);
+          this.handleScrape(peer, message);
           break;
         case "offer":
-          this.handleWebSocketSignaling(peer, message,);
+          this.handleWebSocketSignaling(peer, message);
           break;
         case "answer":
-          this.handleWebSocketSignaling(peer, message,);
+          this.handleWebSocketSignaling(peer, message);
           break;
         default:
           this.sendError(
@@ -330,7 +465,10 @@ export class WebSocketTracker {
     }
   }
 
-  private handleAnnounce(peer: Peer, message: TrackerMessage,): void {
+  /**
+   * Handles an announce message received over WebSocket.
+   */
+  private handleAnnounce(peer: Peer, message: TrackerMessage): void {
     const {
       info_hash,
       peer_id,
@@ -348,35 +486,35 @@ export class WebSocketTracker {
     peer.downloaded = downloaded;
     peer.left = left;
 
-    if (!peer.infoHashes.includes(info_hash,)) {
-      peer.infoHashes.push(info_hash,);
+    if (!peer.infoHashes.includes(info_hash)) {
+      peer.infoHashes.push(info_hash);
     }
 
     switch (event) {
       case "started":
-        this.addPeerToTorrent(info_hash, peer,);
+        this.addPeerToTorrent(info_hash, peer);
         break;
       case "completed":
-        this.addPeerToTorrent(info_hash, peer,);
-        this.incrementComplete(info_hash,);
+        this.addPeerToTorrent(info_hash, peer);
+        this.incrementComplete(info_hash);
         break;
       case "stopped":
-        this.removePeerFromTorrent(info_hash, peer,);
+        this.removePeerFromTorrent(info_hash, peer);
         break;
       case "update":
-        this.addPeerToTorrent(info_hash, peer,);
+        this.addPeerToTorrent(info_hash, peer);
         break;
       default:
-        this.addPeerToTorrent(info_hash, peer,);
+        this.addPeerToTorrent(info_hash, peer);
         break;
     }
 
-    this.peers.set(peer.id, peer,);
-    this.sendPeersToPeer(peer, info_hash,);
+    this.peers.set(peer.id, peer);
+    this.sendPeersToPeer(peer, info_hash);
 
-    // FASE 7: Handle signaling embedded in announce (offers/answer)
+    // Handle signaling embedded in announce (offers/answer)
     if (message.offers || message.answer) {
-      this.handleWebSocketSignaling(peer, message,);
+      this.handleWebSocketSignaling(peer, message);
     }
 
     console.log(
@@ -386,12 +524,15 @@ export class WebSocketTracker {
     );
   }
 
-  private handleScrape(peer: Peer, message: TrackerMessage,): void {
-    const { info_hash, } = message;
-    const peerIds = this.peersByInfoHash.get(info_hash,);
+  /**
+   * Handles a scrape query over WebSocket.
+   */
+  private handleScrape(peer: Peer, message: TrackerMessage): void {
+    const { info_hash } = message;
+    const peerIds = this.peersByInfoHash.get(info_hash);
     const peerCount = peerIds ? peerIds.size : 0;
-    const torrentInfo = this.torrents.get(info_hash,) ||
-      { complete: 0, incomplete: 0, };
+    const torrentInfo = this.torrents.get(info_hash) ||
+      { complete: 0, incomplete: 0 };
 
     const response = {
       action: "scrape",
@@ -401,7 +542,7 @@ export class WebSocketTracker {
       downloaded: this.stats.getDownloaded(),
     };
 
-    peer.ws.send(JSON.stringify(response,),);
+    peer.ws.send(JSON.stringify(response));
     console.log(
       "[TRACKER] Scrape for",
       info_hash,
@@ -411,7 +552,10 @@ export class WebSocketTracker {
     );
   }
 
-  private handleWebSocketSignaling(peer: Peer, message: TrackerMessage,): void {
+  /**
+   * Handles WebRTC signaling (offers and answers forwarding) across peers.
+   */
+  private handleWebSocketSignaling(peer: Peer, message: TrackerMessage): void {
     if (message.action === "offer" || message.offers) {
       if (!message.offers) return;
 
@@ -421,7 +565,7 @@ export class WebSocketTracker {
           `[TRACKER] Targeted offer from ${peer.peerId} to ${message.to_peer_id}`,
         );
         for (const offer of message.offers) {
-          const targetPeer = Array.from(this.peers.values(),).find((p,) =>
+          const targetPeer = Array.from(this.peers.values()).find((p) =>
             p.peerId === message.to_peer_id
           );
           if (targetPeer && targetPeer.ws.readyState === WebSocket.OPEN) {
@@ -432,7 +576,7 @@ export class WebSocketTracker {
               offer: offer.offer,
               peer_id: peer.peerId,
               from_peer_id: peer.peerId,
-            },),);
+            }));
           }
         }
       } else {
@@ -440,56 +584,55 @@ export class WebSocketTracker {
         const infoHash = message.info_hash || peer.infoHash;
         if (!infoHash) return;
 
-        const peerIds = this.peersByInfoHash.get(infoHash,);
+        const peerIds = this.peersByInfoHash.get(infoHash);
         if (!peerIds) return;
 
-        const availablePeers = Array.from(peerIds,)
-          .filter((id,) => id !== peer.id)
-          .map((id,) => this.peers.get(id,))
-          .filter((p,) =>
-            p && p.ws.readyState === WebSocket.OPEN && p.peerId !== peer.peerId
-          ) as Peer[];
+        const availablePeers = Array.from(peerIds)
+          .filter((id) => id !== peer.id)
+          .map((id) => this.peers.get(id))
+          .filter((p): p is Peer =>
+            p !== undefined && p.ws.readyState === WebSocket.OPEN &&
+            p.peerId !== peer.peerId
+          );
 
         console.log(
-          `[TRACKER] Distributing ${message.offers.length} offers from ${peer.peerId} to ${availablePeers.length} peers in ${infoHash}`,
+          `[TRACKER] Distributing ${message.offers.length} offers from ${peer.peerId} to ${availablePeers.length} peers`,
         );
 
-        // Distribute one offer per peer
-        for (
-          let i = 0;
-          i < Math.min(message.offers.length, availablePeers.length,);
-          i++
-        ) {
-          const targetPeer = availablePeers[i]!;
-          const offer = message.offers[i]!;
-          targetPeer.ws.send(JSON.stringify({
-            action: "announce",
-            info_hash: infoHash,
-            offer_id: offer.offer_id,
-            offer: offer.offer,
-            peer_id: peer.peerId,
-            from_peer_id: peer.peerId,
-          },),);
+        let offerIndex = 0;
+        for (const targetPeer of availablePeers) {
+          if (offerIndex >= message.offers.length) break;
+
+          const offer = message.offers[offerIndex];
+          if (offer) {
+            targetPeer.ws.send(JSON.stringify({
+              action: "announce",
+              info_hash: infoHash,
+              offer_id: offer.offer_id,
+              offer: offer.offer,
+              peer_id: peer.peerId,
+              from_peer_id: peer.peerId,
+            }));
+            offerIndex++;
+          }
         }
       }
     } else if (message.action === "answer" || message.answer) {
-      if (!message.answer || !message.to_peer_id) {
-        if (message.action === "answer") {
-          this.sendError(
-            peer,
-            "invalid_answer",
-            "Answer requires answer and to_peer_id",
-          );
-        }
+      // Forward answer to the target peer
+      const toPeerId = message.to_peer_id;
+      if (!toPeerId) {
+        console.warn("[TRACKER] Answer message missing to_peer_id");
         return;
       }
 
       console.log(
-        `[TRACKER] Routing answer from ${peer.peerId} to ${message.to_peer_id}`,
+        `[TRACKER] Routing answer from ${peer.peerId} to ${toPeerId}`,
       );
-      const targetPeer = Array.from(this.peers.values(),).find((p,) =>
-        p.peerId === message.to_peer_id
+
+      const targetPeer = Array.from(this.peers.values()).find((p) =>
+        p.peerId === toPeerId
       );
+
       if (targetPeer && targetPeer.ws.readyState === WebSocket.OPEN) {
         targetPeer.ws.send(JSON.stringify({
           action: "announce",
@@ -498,116 +641,136 @@ export class WebSocketTracker {
           answer: message.answer,
           peer_id: peer.peerId,
           from_peer_id: peer.peerId,
-          to_peer_id: message.to_peer_id,
-        },),);
+        }));
+      } else {
+        console.warn(
+          `[TRACKER] Target peer ${toPeerId} not found or socket closed`,
+        );
       }
     }
   }
 
-  private addPeerToTorrent(infoHash: string, peer: Peer,): void {
-    if (!this.torrents.has(infoHash,)) {
-      this.torrents.set(infoHash, { complete: 0, incomplete: 0, },);
-    }
-
-    let peerIds = this.peersByInfoHash.get(infoHash,);
+  /**
+   * Adds a peer to the set of participants for a given torrent info hash.
+   */
+  private addPeerToTorrent(infoHash: string, peer: Peer): void {
+    let peerIds = this.peersByInfoHash.get(infoHash);
     if (!peerIds) {
       peerIds = new Set();
-      this.peersByInfoHash.put(infoHash, peerIds,);
+      this.peersByInfoHash.put(infoHash, peerIds);
+      this.torrents.set(infoHash, { complete: 0, incomplete: 0 });
     }
 
     if (peerIds.size >= this.maxPeersPerTorrent) {
-      this.evictLeastActivePeer(infoHash,);
+      this.evictLeastActivePeer(infoHash);
     }
 
-    peerIds.add(peer.id,);
-    this.peers.set(peer.id, peer,);
+    peerIds.add(peer.id);
   }
 
-  private removePeerFromTorrent(infoHash: string, peer: Peer,): void {
-    const peerIds = this.peersByInfoHash.get(infoHash,);
+  /**
+   * Removes a peer from a torrent swarm.
+   */
+  private removePeerFromTorrent(infoHash: string, peer: Peer): void {
+    const peerIds = this.peersByInfoHash.get(infoHash);
     if (peerIds) {
-      peerIds.delete(peer.id,);
+      peerIds.delete(peer.id);
+      if (peerIds.size === 0) {
+        this.peersByInfoHash.remove(infoHash);
+        this.torrents.delete(infoHash);
+      }
     }
-
-    const index = peer.infoHashes.indexOf(infoHash,);
-    if (index !== -1) {
-      peer.infoHashes.splice(index, 1,);
-    }
-
-    this.peers.set(peer.id, peer,);
   }
 
-  private sendPeersToPeer(peer: Peer, infoHash: string,): void {
-    const peerIds = this.peersByInfoHash.get(infoHash,);
+  /**
+   * Sends announce response containing available peer addresses to a connected peer.
+   */
+  private sendPeersToPeer(peer: Peer, infoHash: string): void {
+    const peerIds = this.peersByInfoHash.get(infoHash);
     if (!peerIds) {
-      this.sendPeersResponse(peer, infoHash, [],);
+      this.sendPeersResponse(peer, infoHash, []);
       return;
     }
 
-    const numwant = Math.min(peerIds.size, this.maxPeersPerTorrent,);
     const peers: Array<{ peer_id: string; ip: string; port: number }> = [];
+    const numwant = Math.min(peerIds.size, this.maxPeersPerTorrent);
 
     for (const pid of peerIds) {
       if (peers.length >= numwant) break;
       if (pid === peer.id) continue;
-      const p = this.peers.get(pid,);
+      const p = this.peers.get(pid);
       if (p && p.ws.readyState === WebSocket.OPEN) {
-        peers.push({ peer_id: p.peerId, ip: "127.0.0.1", port: p.port, },);
+        peers.push({ peer_id: p.peerId, ip: "127.0.0.1", port: p.port });
       }
     }
 
-    this.sendPeersResponse(peer, infoHash, peers,);
+    this.sendPeersResponse(peer, infoHash, peers);
   }
 
+  /**
+   * Formats and transmits an announce response JSON frame.
+   */
   private sendPeersResponse(
     peer: Peer,
     infoHash: string,
     peers: Array<{ peer_id: string; ip: string; port: number }>,
   ): void {
-    const torrentInfo = this.torrents.get(infoHash,) ||
-      { complete: 0, incomplete: 0, };
+    const torrentInfo = this.torrents.get(infoHash) ||
+      { complete: 0, incomplete: 0 };
     const response = {
       action: "announce",
-      interval: Math.ceil(this.intervalMs / 1000,),
+      interval: Math.ceil(this.intervalMs / 1000),
       info_hash: infoHash,
       complete: torrentInfo.complete,
       incomplete: torrentInfo.incomplete,
       peers,
     };
-    peer.ws.send(JSON.stringify(response,),);
+    peer.ws.send(JSON.stringify(response));
   }
 
-  private sendError(peer: Peer, errorCode: string, message: string,): void {
+  /**
+   * Transmits a standardized error frame to a peer socket.
+   */
+  private sendError(peer: Peer, errorCode: string, message: string): void {
     peer.ws.send(JSON.stringify({
       action: "error",
       error: message,
       failure_reason: message,
-    },),);
+    }));
   }
 
-  private incrementComplete(infoHash: string,): void {
-    const info = this.torrents.get(infoHash,);
+  /**
+   * Increments seeder counter for a swarm.
+   */
+  private incrementComplete(infoHash: string): void {
+    const info = this.torrents.get(infoHash);
     if (info) {
       info.complete++;
     }
   }
 
-  private decrementComplete(infoHash: string,): void {
-    const info = this.torrents.get(infoHash,);
+  /**
+   * Decrements seeder counter for a swarm.
+   */
+  private decrementComplete(infoHash: string): void {
+    const info = this.torrents.get(infoHash);
     if (info) {
-      info.complete = Math.max(0, info.complete - 1,);
+      info.complete = Math.max(0, info.complete - 1);
     }
   }
 
-  private evictLeastActivePeer(infoHash: string,): void {
-    const peerIds = this.peersByInfoHash.get(infoHash,);
+  /**
+   * Evicts the peer with the earliest connection time from a swarm.
+   */
+  private evictLeastActivePeer(infoHash: string): void {
+    const peerIds = this.peersByInfoHash.get(infoHash);
     if (!peerIds || peerIds.size === 0) return;
 
     let oldestPeerId: string | undefined;
     let oldestTime = Infinity;
 
     for (const pid of peerIds) {
-      const p = this.peers.get(pid,);
+      const p = this.peers.get(pid);
       if (p && p.connectedAt < oldestTime) {
         oldestTime = p.connectedAt;
         oldestPeerId = pid;
@@ -615,21 +778,43 @@ export class WebSocketTracker {
     }
 
     if (oldestPeerId) {
-      peerIds.delete(oldestPeerId,);
-      const p = this.peers.get(oldestPeerId,);
+      peerIds.delete(oldestPeerId);
+      const p = this.peers.get(oldestPeerId);
       if (p) {
-        const index = p.infoHashes.indexOf(infoHash,);
+        const index = p.infoHashes.indexOf(infoHash);
         if (index !== -1) {
-          p.infoHashes.splice(index, 1,);
+          p.infoHashes.splice(index, 1);
         }
       }
     }
   }
 
+  /**
+   * Retrieves server-wide metrics and counters.
+   *
+   * @returns Current {@link TrackerStats} object.
+   *
+   * @example
+   * ```ts
+   * import { WebSocketTracker } from "jsr:@vanaware/browsertorrent-tracker";
+   *
+   * const tracker = new WebSocketTracker(8000);
+   * const stats = tracker.getStats();
+   * console.log("Current connections:", stats.connections);
+   * ```
+   */
   getStats(): TrackerStats {
     return this.stats.getStats();
   }
 
+  /**
+   * Closes all active client WebSocket connections and terminates the HTTP listener.
+   *
+   * @example
+   * ```ts
+   * tracker.close();
+   * ```
+   */
   close(): void {
     if (this.server) {
       this.server.shutdown();
@@ -643,21 +828,3 @@ export class WebSocketTracker {
     this.torrents.clear();
   }
 }
-
-interface WebSocketTrackerOptions {
-  maxPeers?: number;
-  maxPeersPerTorrent?: number;
-  maxTorrents?: number;
-  hostname?: string;
-  idleTimeout?: number;
-  intervalMs?: number;
-}
-
-const defaultOptions: WebSocketTrackerOptions = {
-  maxPeers: 1000,
-  maxPeersPerTorrent: 50,
-  maxTorrents: 100,
-  hostname: "0.0.0.0",
-  idleTimeout: 300000,
-  intervalMs: 120000,
-};

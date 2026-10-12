@@ -100,7 +100,13 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
   /** File objects registrados pelo cliente (para forward de eventos). */
   private _registeredFiles: File[] = [];
 
-  constructor(parsedTorrent: ParsedTorrent, opts: TorrentOptions,) {
+  /**
+   * Initializes a Torrent instance from parsed metainfo and runtime options.
+   *
+   * @param parsedTorrent - Metainfo structure parsed from a `.torrent` or magnet URI.
+   * @param opts - Storage backend, swarm coordinator, and verification options.
+   */
+  constructor(parsedTorrent: ParsedTorrent, opts: TorrentOptions) {
     super();
     this.parsedTorrent = parsedTorrent;
     this._store = opts.store;
@@ -113,28 +119,28 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     this._rawFiles = parsedTorrent.files;
 
     const numPieces = parsedTorrent.pieces.length;
-    this.bitfield = new Bitfield(numPieces,);
+    this.bitfield = new Bitfield(numPieces);
 
     this.expectedPieces = parsedTorrent.pieces;
-    this._selected = new Bitfield(numPieces,);
-    this._critical = new Bitfield(numPieces,);
-    this._webSeeds = [...(parsedTorrent.urlList || []),];
-    this._pieces = parsedTorrent.pieces.map((hash, index,) => {
+    this._selected = new Bitfield(numPieces);
+    this._critical = new Bitfield(numPieces);
+    this._webSeeds = [...(parsedTorrent.urlList || [])];
+    this._pieces = parsedTorrent.pieces.map((_hash, index) => {
       const pieceLen = index === numPieces - 1
         ? this.lastPieceLength
         : this.pieceLength;
-      return new Piece(index, pieceLen, index * this.pieceLength,);
-    },);
+      return new Piece(index, pieceLen, index * this.pieceLength);
+    });
 
     queueMicrotask(() => {
-      this._init(opts.skipVerify || false,).catch((err,) => {
-        this._onError(err instanceof Error ? err : new Error(String(err,),),);
-      },);
-    },);
+      this._init(opts.skipVerify || false).catch((err) => {
+        this._onError(err instanceof Error ? err : new Error(String(err)));
+      });
+    });
 
     this.emit(
       "infoHash",
-      new CustomEvent("infoHash", { detail: { infoHash: this.infoHash, }, },),
+      new CustomEvent("infoHash", { detail: { infoHash: this.infoHash } }),
     );
   }
 
@@ -142,15 +148,19 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
   // GETTERS COMPUTADOS
   // ==========================================================================
 
+  /** Returns `true` if the torrent has completed piece verification and is active. */
   get ready(): boolean {
     return this._ready;
   }
+  /** Returns `true` if `destroy()` was called. */
   get destroyed(): boolean {
     return this._destroyed;
   }
+  /** Total verified downloaded bytes. */
   get downloaded(): number {
     return this._downloaded;
   }
+  /** Total uploaded bytes. */
   get uploaded(): number {
     return this._uploaded;
   }
@@ -159,19 +169,23 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     return this._store;
   }
 
+  /** Whether the torrent is currently paused. */
   get paused(): boolean {
     return this._paused;
   }
 
+  /** Fractional progress between `0.0` (0%) and `1.0` (100%). */
   get progress(): number {
     if (this.length === 0) return 0;
     return this._downloaded / this.length;
   }
 
+  /** Total number of pieces in the torrent. */
   get numPieces(): number {
     return this.expectedPieces.length;
   }
 
+  /** Byte length of the final piece. */
   get lastPieceLength(): number {
     return this.length % this.pieceLength || this.pieceLength;
   }
@@ -365,15 +379,17 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     if (!cb) return task;
   }
 
-  // ==========================================================================
-  // PAUSE / RESUME
-  // ==========================================================================
-
+  /**
+   * Pauses all downloading and uploading on this torrent.
+   */
   pause(): void {
     this._paused = true;
     this._swarm?.pause();
   }
 
+  /**
+   * Resumes downloading and uploading on this torrent.
+   */
   resume(): void {
     this._paused = false;
     this._swarm?.resume();
@@ -383,30 +399,53 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
   // PEERS E WEB SEEDS
   // ==========================================================================
 
-  addPeer(addr: string,): boolean {
-    return this._swarm?.addPeer(addr,) ?? false;
+  /**
+   * Manually adds a peer to the torrent's swarm.
+   *
+   * @param addr - Peer address or WebRTC connection string.
+   * @returns `true` if the peer was queued for connection, `false` otherwise.
+   */
+  addPeer(addr: string): boolean {
+    return this._swarm?.addPeer(addr) ?? false;
   }
 
-  removePeer(addr: string,): void {
-    this._swarm?.removePeer(addr,);
+  /**
+   * Removes a peer from the torrent swarm.
+   *
+   * @param addr - Peer address.
+   */
+  removePeer(addr: string): void {
+    this._swarm?.removePeer(addr);
   }
 
-  addWebSeed(url: string,): void {
-    if (!this._webSeeds.includes(url,)) {
-      this._webSeeds.push(url,);
+  /**
+   * Adds a BEP 19 web seed URL.
+   *
+   * @param url - Web seed HTTP URL.
+   */
+  addWebSeed(url: string): void {
+    if (!this._webSeeds.includes(url)) {
+      this._webSeeds.push(url);
     }
   }
 
-  removeWebSeed(url: string,): void {
-    const idx = this._webSeeds.indexOf(url,);
-    if (idx !== -1) this._webSeeds.splice(idx, 1,);
+  /**
+   * Removes a BEP 19 web seed URL.
+   *
+   * @param url - Web seed HTTP URL.
+   */
+  removeWebSeed(url: string): void {
+    const idx = this._webSeeds.indexOf(url);
+    if (idx !== -1) this._webSeeds.splice(idx, 1);
   }
 
-  // ==========================================================================
-  // REGISTRO DE WIRES (chamado pelo Swarm)
-  // ==========================================================================
-
-  _registerWire(wire: Wire, addr: string,): void {
+  /**
+   * Registers an active peer wire with the torrent, wiring event listeners and rate tracking.
+   *
+   * @param wire - Connected peer wire instance.
+   * @param addr - Remote peer address or identifier.
+   */
+  _registerWire(wire: Wire, addr: string): void {
     this.emit("wire", new CustomEvent("wire", { detail: { wire, addr, }, },),);
 
     let lastDownloaded = 0;
@@ -685,11 +724,13 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     attachInitialState();
   }
 
-  // ==========================================================================
-  // INJEÇÃO TARDIA DE METADADOS (Magnet URIs)
-  // ==========================================================================
-
-  async setMetadata(infoBuffer: Uint8Array,): Promise<boolean> {
+  /**
+   * Supplies the bencoded info dictionary bytes received from the swarm (e.g. via BEP 9 ut_metadata).
+   *
+   * @param infoBuffer - Raw bencoded info dictionary buffer.
+   * @returns A promise resolving to `true` if metadata was accepted, `false` if already set.
+   */
+  async setMetadata(infoBuffer: Uint8Array): Promise<boolean> {
     console.log(
       `[Torrent] setMetadata start, infoBuffer length: ${infoBuffer?.length}`,
     );
@@ -806,22 +847,30 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
   // CICLO DE VIDA
   // ==========================================================================
 
-  private async _init(skipVerify: boolean,): Promise<void> {
+  /**
+   * Internal asynchronous initializer that validates existing pieces and marks the torrent as ready.
+   *
+   * @param skipVerify - Whether to bypass piece hashing during startup.
+   */
+  private async _init(skipVerify: boolean): Promise<void> {
     try {
       if (!skipVerify && this.numPieces > 0) {
         await this._verifyExistingPieces();
       }
       this._ready = true;
       this._lastSpeedSample = Date.now();
-      this.emit("ready",);
+      this.emit("ready");
     } catch (err) {
-      this._onError(err instanceof Error ? err : new Error(String(err,),),);
+      this._onError(err instanceof Error ? err : new Error(String(err)));
     }
   }
 
+  /**
+   * Verifies existing pieces already present in chunk storage upon initialization.
+   */
   private async _verifyExistingPieces(): Promise<void> {
     this._downloaded = 0;
-    this.bitfield = new Bitfield(this.numPieces,);
+    this.bitfield = new Bitfield(this.numPieces);
     for (let i = 0; i < this._pieces.length; i++) {
       const piece = this._pieces[i];
       if (piece) piece.hash = undefined;
@@ -830,11 +879,11 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     for (let i = 0; i < this.numPieces; i++) {
       try {
         const opts = i === this.numPieces - 1
-          ? { length: this.lastPieceLength, }
+          ? { length: this.lastPieceLength }
           : undefined;
-        const buf = await this._store.get(i, opts,);
-        await this._verifyPiece(i, buf,);
-        this.bitfield.set(i,);
+        const buf = await this._store.get(i, opts);
+        await this._verifyPiece(i, buf);
+        this.bitfield.set(i);
         const pieceLen = i === this.numPieces - 1
           ? this.lastPieceLength
           : this.pieceLength;
@@ -846,17 +895,17 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
             piece.hash = this.expectedPieces[i];
           }
         }
-        this._swarm?.broadcastHave(i,);
+        this._swarm?.broadcastHave(i);
       } catch (err: unknown) {
         if (
           err && typeof err === "object" && "notFound" in err && !err.notFound
         ) {
-          console.warn(`[Torrent] Erro ao verificar peça ${i}:`, err,);
+          console.warn(`[Torrent] Erro ao verificar peça ${i}:`, err);
         }
       }
     }
     if (this.progress >= 1) {
-      this.emit("done",);
+      this.emit("done");
     }
   }
 
@@ -864,15 +913,22 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
   // RECEBIMENTO DE DADOS
   // ==========================================================================
 
-  async receivePiece(index: number, buf: Uint8Array,): Promise<boolean> {
+  /**
+   * Receives, verifies SHA-1 hash, and persists a completed piece of data.
+   *
+   * @param index - Zero-based piece index.
+   * @param buf - Raw piece byte buffer.
+   * @returns `true` if verified and saved, `false` otherwise.
+   */
+  async receivePiece(index: number, buf: Uint8Array): Promise<boolean> {
     if (this._destroyed) return false;
-    if (this.bitfield.get(index,)) return true;
+    if (this.bitfield.get(index)) return true;
     if (!this._metadataReceived && this.numPieces === 0) return false;
 
     try {
-      await this._verifyPiece(index, buf,);
-      await this._store.put(index, buf,);
-      this.bitfield.set(index,);
+      await this._verifyPiece(index, buf);
+      await this._store.put(index, buf);
+      this.bitfield.set(index);
       const pieceLen = index === this.numPieces - 1
         ? this.lastPieceLength
         : this.pieceLength;
@@ -890,34 +946,35 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
 
       this.emit(
         "verified",
-        new CustomEvent("verified", { detail: { index, }, },),
+        new CustomEvent("verified", { detail: { index } }),
       );
       this.emit(
         "download",
-        new CustomEvent("download", { detail: { bytes: pieceLen, }, },),
+        new CustomEvent("download", { detail: { bytes: pieceLen } }),
       );
-      this._forwardToFiles("download", index, pieceLen,);
+      this._forwardToFiles("download", index, pieceLen);
 
       if (this.progress >= 1) {
-        this.emit("done",);
+        this.emit("done");
       }
       return true;
     } catch (err) {
-      console.error("[Torrent] Error in receivePiece:", err,);
+      console.error("[Torrent] Error in receivePiece:", err);
       return false;
     }
   }
 
   /**
-   * Registra `File` instances para receberem os eventos `download`/`upload`.
-   * Chamado pelo {@link WebTorrent} após criar os `File`s.
+   * Registers `File` instances to receive `download` and `upload` events.
+   *
+   * @param files - Array of File instances in this torrent.
    */
-  _registerFiles(files: File[],): void {
+  _registerFiles(files: File[]): void {
     this._registeredFiles = files;
   }
 
   /**
-   * Emite um evento de download/upload nos Files cujo `pieceRange` contém `index`.
+   * Forwards download or upload byte notifications to the corresponding File instances.
    */
   private _forwardToFiles(
     type: "download" | "upload",
@@ -927,35 +984,46 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
     for (const f of this._registeredFiles) {
       const file = f as {
         pieceRange: { first: number; last: number };
-        emit: (type: string, ev: Event,) => void;
+        emit: (type: string, ev: Event) => void;
       };
       if (index >= file.pieceRange.first && index <= file.pieceRange.last) {
-        file.emit(type, new CustomEvent(type, { detail: { bytes, }, },),);
+        file.emit(type, new CustomEvent(type, { detail: { bytes } }));
       }
     }
   }
 
-  async getPiece(index: number,): Promise<Uint8Array | null> {
-    if (!this.bitfield.get(index,)) return null;
+  /**
+   * Retrieves piece bytes from chunk storage if verified as available.
+   *
+   * @param index - Zero-based piece index.
+   * @returns Piece byte buffer or `null` if not available.
+   */
+  async getPiece(index: number): Promise<Uint8Array | null> {
+    if (!this.bitfield.get(index)) return null;
     try {
       const opts = index === this.numPieces - 1
-        ? { length: this.lastPieceLength, }
+        ? { length: this.lastPieceLength }
         : undefined;
-      return await this._store.get(index, opts,);
+      return await this._store.get(index, opts);
     } catch {
       return null;
     }
   }
 
-  async destroy(destroyStore = false,): Promise<void> {
+  /**
+   * Destroys the torrent session, cancels active timers, and closes storage.
+   *
+   * @param destroyStore - If `true`, permanently deletes the underlying stored files.
+   */
+  async destroy(destroyStore = false): Promise<void> {
     if (this._destroyed) return;
     this._destroyed = true;
 
-    for (const interval of this._speedIntervals) clearInterval(interval,);
+    for (const interval of this._speedIntervals) clearInterval(interval);
     this._speedIntervals.clear();
 
     if (this._idleTimer !== null) {
-      clearTimeout(this._idleTimer,);
+      clearTimeout(this._idleTimer);
       this._idleTimer = null;
     }
 
@@ -966,7 +1034,7 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
         await this.store.close();
       }
     } catch (err) {
-      console.warn("[Torrent] Erro ao fechar store:", err,);
+      console.warn("[Torrent] Erro ao fechar store:", err);
     }
   }
 
@@ -974,31 +1042,40 @@ export class Torrent extends TypedEventTarget<TorrentEvents> {
   // PRIVADOS
   // ==========================================================================
 
-  private async _verifyPiece(index: number, buf: Uint8Array,): Promise<void> {
+  /**
+   * Verifies the SHA-1 hash of a piece buffer against its expected piece hash.
+   */
+  private async _verifyPiece(index: number, buf: Uint8Array): Promise<void> {
     const expected = this.expectedPieces[index];
-    if (!expected) throw new Error(`Índice de peça ${index} fora do limite.`,);
+    if (!expected) throw new Error(`Índice de peça ${index} fora do limite.`);
 
-    const actual = await sha1(buf,);
-    const expectedHex = Array.from(expected,)
-      .map((b,) => b.toString(16,).padStart(2, "0",))
-      .join("",);
+    const actual = await sha1(buf);
+    const expectedHex = Array.from(expected)
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
 
     if (actual !== expectedHex) {
-      throw new Error(`Hash mismatch na peça ${index}.`,);
+      throw new Error(`Hash mismatch na peça ${index}.`);
     }
   }
 
+  /**
+   * Resets the inactivity timer that emits the "idle" event.
+   */
   private _resetIdleTimer(): void {
-    if (this._idleTimer !== null) clearTimeout(this._idleTimer,);
+    if (this._idleTimer !== null) clearTimeout(this._idleTimer);
     this._idleTimer = setTimeout(() => {
-      this.emit("idle",);
-    }, this._IDLE_TIMEOUT_MS,) as unknown as ReturnType<typeof setTimeout>;
+      this.emit("idle");
+    }, this._IDLE_TIMEOUT_MS) as unknown as ReturnType<typeof setTimeout>;
   }
 
-  private _onError(err: Error,): void {
+  /**
+   * Internal error dispatcher emitting the "error" event.
+   */
+  private _onError(err: Error): void {
     this.emit(
       "error",
-      new CustomEvent("error", { detail: { error: err, }, },),
+      new CustomEvent("error", { detail: { error: err } }),
     );
   }
 }

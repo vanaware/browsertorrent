@@ -17,7 +17,14 @@ export class Piece {
   /** Whether the piece hash has been verified (optional, set by consumer). */
   hash?: Uint8Array;
 
-  constructor(index: number, length: number, offset: number,) {
+  /**
+   * Initializes a Piece descriptor.
+   *
+   * @param index - Zero-based piece index in the torrent.
+   * @param length - Byte length of the piece.
+   * @param offset - Absolute byte offset of this piece inside the torrent stream.
+   */
+  constructor(index: number, length: number, offset: number) {
     this.index = index;
     this.length = length;
     this.offset = offset;

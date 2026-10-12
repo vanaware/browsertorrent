@@ -8,6 +8,7 @@
 
 import { Extension, } from "../core/extension.ts";
 import type { Wire, } from "../core/wire.ts";
+import type { ExtensionHost } from "../core/extension-host.ts";
 import {
   BencodeDict,
   BencodeValue,
@@ -63,7 +64,7 @@ export interface UtPexOptions {
 /** Built-in BEP 11 peer exchange codec and transport extension. */
 export class UtPexExtension extends Extension {
   /** BEP 10 registration name. */
-  public readonly name = UT_PEX_NAME;
+  public readonly name: string = UT_PEX_NAME;
 
   /** Minimum duration enforced between outgoing updates. */
   public readonly minSendIntervalMs: number;
@@ -186,14 +187,19 @@ export class UtPexExtension extends Extension {
     return Promise.resolve();
   }
 
+  /**
+   * Called when the extension is registered with the peer wire.
+   *
+   * @param context - Registration context containing host and transmitter.
+   */
   public onRegister(
     context: {
-      host: import("../core/extension-host.ts").ExtensionHost;
-      send: (payload: Uint8Array,) => Promise<void>;
+      host: ExtensionHost;
+      send: (payload: Uint8Array) => Promise<void>;
     },
   ): void {
     // When this extension is registered with the wire, capture the extension ID
-    const id = context.host.localExtensions.get(this.name,);
+    const id = context.host.localExtensions.get(this.name);
     if (id !== undefined) {
       this._extensionId = id;
     }
